@@ -30,7 +30,7 @@ In the identity's page:
 3. Fill in:
    - **Issuer:** `https://token.actions.githubusercontent.com`
    - **Type:** Explicit subject identifier
-   - **Subject identifier:** `repo:SureForgeTech@343994947/filemaker-data-api-for-vs-code@1171265957:environment:marketplace`
+   - **Subject identifier:** `repo:SureForgeTech@343994947/sureforge-fm-data-api@1171265957:environment:marketplace`
    - **Name:** `github-marketplace`
    - **Audience:** `api://AzureADTokenExchange`
 4. Click **Add**.
@@ -42,14 +42,14 @@ If the first publish fails at sign-in, the run log shows the subject GitHub sent
 ## Part 3: tell GitHub which identity to use (3 minutes)
 
 1. In Azure, on the identity's **Overview** page, copy the **Client ID**. Open **Properties** and copy the **Tenant ID**. (These are identifiers, not secrets.)
-2. Open <https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/settings/environments> and click **marketplace**.
+2. Open <https://github.com/SureForgeTech/sureforge-fm-data-api/settings/environments> and click **marketplace**.
 3. Under **Environment variables** click **Add variable**. Add `AZURE_CLIENT_ID` (the Client ID) and `AZURE_TENANT_ID` (the Tenant ID).
 
 Terminal alternative:
 
 ```bash
-gh variable set AZURE_CLIENT_ID --env marketplace --repo SureForgeTech/filemaker-data-api-for-vs-code --body "<client id>"
-gh variable set AZURE_TENANT_ID --env marketplace --repo SureForgeTech/filemaker-data-api-for-vs-code --body "<tenant id>"
+gh variable set AZURE_CLIENT_ID --env marketplace --repo SureForgeTech/sureforge-fm-data-api --body "<client id>"
+gh variable set AZURE_TENANT_ID --env marketplace --repo SureForgeTech/sureforge-fm-data-api --body "<tenant id>"
 ```
 
 ## Part 4: get the identity's Azure DevOps id (10 minutes)
@@ -58,15 +58,15 @@ The Marketplace identifies the identity by an id that only the identity itself c
 
 1. Add a temporary branch rule to the environment:
    ```bash
-   gh api -X POST repos/SureForgeTech/filemaker-data-api-for-vs-code/environments/marketplace/deployment-branch-policies -f name=main -f type=branch
+   gh api -X POST repos/SureForgeTech/sureforge-fm-data-api/environments/marketplace/deployment-branch-policies -f name=main -f type=branch
    ```
    The response includes an `id`. Write it down.
-2. Start the helper from `main`: `gh workflow run entra-identity-id.yml --repo SureForgeTech/filemaker-data-api-for-vs-code --ref main`.
+2. Start the helper from `main`: `gh workflow run entra-identity-id.yml --repo SureForgeTech/sureforge-fm-data-api --ref main`.
 3. Open the run (`gh run list --workflow entra-identity-id.yml`), click **Review deployments**, tick **marketplace**, then **Approve and deploy**.
 4. When the run finishes, open the log of the step **Print the Azure DevOps id** and copy the value. It is an identifier, not a secret.
-5. Remove the temporary rule so the environment is tags-only again, using the `id` from step 1 (or list them with `gh api repos/SureForgeTech/filemaker-data-api-for-vs-code/environments/marketplace/deployment-branch-policies`):
+5. Remove the temporary rule so the environment is tags-only again, using the `id` from step 1 (or list them with `gh api repos/SureForgeTech/sureforge-fm-data-api/environments/marketplace/deployment-branch-policies`):
    ```bash
-   gh api -X DELETE repos/SureForgeTech/filemaker-data-api-for-vs-code/environments/marketplace/deployment-branch-policies/<id>
+   gh api -X DELETE repos/SureForgeTech/sureforge-fm-data-api/environments/marketplace/deployment-branch-policies/<id>
    ```
 
 ## Part 5: allow that identity to publish (3 minutes)
@@ -79,7 +79,7 @@ Microsoft's description of this step: <https://code.visualstudio.com/api/working
 
 ## Part 6: publish
 
-Push the `v*` tag. In the run, approve the **marketplace** deployment. The `publish` job signs in with the identity and publishes. If it fails at the publish step with an access error, open an issue with the (redacted) message. This flow is documented by Microsoft only for Azure Pipelines, and reported working on GitHub Actions by one third-party write-up, not by Microsoft, so a failure here may need a change to the workflow. After **publish**, the run asks for a second **marketplace** approval for **publish-ovsx** (Open VS X): it needs the `OVSX_PAT` secret, which does not exist yet ([#265](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/issues/265)), so the run stops at "OVSX_PAT is not set" and **release** is skipped — that is expected until the token is stored, and the GitHub release is then created by hand ([JOB_AID_MANUAL_RELEASE.md](./JOB_AID_MANUAL_RELEASE.md)). See [RELEASE.md](./RELEASE.md#how-publishing-works).
+Push the `v*` tag. In the run, approve the **marketplace** deployment. The `publish` job signs in with the identity and publishes. If it fails at the publish step with an access error, open an issue with the (redacted) message. This flow is documented by Microsoft only for Azure Pipelines, and reported working on GitHub Actions by one third-party write-up, not by Microsoft, so a failure here may need a change to the workflow. After **publish**, the run asks for a second **marketplace** approval for **publish-ovsx** (Open VS X): it needs the `OVSX_PAT` secret, which does not exist yet ([#265](https://github.com/SureForgeTech/sureforge-fm-data-api/issues/265)), so the run stops at "OVSX_PAT is not set" and **release** is skipped — that is expected until the token is stored, and the GitHub release is then created by hand ([JOB_AID_MANUAL_RELEASE.md](./JOB_AID_MANUAL_RELEASE.md)). See [RELEASE.md](./RELEASE.md#how-publishing-works).
 
 ## Afterwards
 

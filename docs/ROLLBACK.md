@@ -13,7 +13,7 @@ The Marketplace has no "yank one version" that `vsce` can do: `vsce unpublish` r
 
 1. Reproduce it. Record the version, VS Code version, operating system and steps.
 2. Open a pinned GitHub issue titled `Known issue: vX.Y.Z` with the impact, affected versions, a workaround and an owner.
-3. Tell users how to go back. In VS Code a user can open the extension in the Extensions view, choose the gear menu and **Install Specific Version...**, then pick the previous version. They can also install an earlier `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases) (only versions that were tagged have one). Put the steps in the known-issue text and add: turn off automatic updates for this extension if needed.
+3. Tell users how to go back. In VS Code a user can open the extension in the Extensions view, choose the gear menu and **Install Specific Version...**, then pick the previous version. They can also install an earlier `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) (only versions that were tagged have one). Put the steps in the known-issue text and add: turn off automatic updates for this extension if needed.
 4. Check whether data or credentials are at risk. If so, follow the [security policy](../SECURITY.md) and treat it as a security incident.
 
 ## Ship a patch release

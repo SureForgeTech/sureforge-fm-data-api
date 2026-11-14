@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+## 1.9.1
+
+_Release notes prepared 2026-11-14._
+
+**Changes you may notice**
+
+- The repository moved to SureForgeTech/sureforge-fm-data-api, and documentation links point to the new site.
+
 **Security**
 
 - Changing a connection address clears old certificate exceptions and custom CA files. Saved credentials must be entered again when the gateway path, API path or database changes. Server addresses with query strings or fragments are refused, CA files are limited to 1 MB and cannot contain private keys, and pinned certificates with unreadable validity dates are refused unless explicitly accepted.

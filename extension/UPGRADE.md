@@ -2,6 +2,17 @@
 
 What to do, and what will look different, when you move from one version to the next. Each section lists only changes you can notice. For everything else, see the [Changelog](./CHANGELOG.md).
 
+## Upgrading from 1.9.0 to 1.9.1
+
+Your profiles, saved queries and settings carry over. No command or setting was removed or renamed. This patch release mostly tightens safety:
+
+- The repository moved to SureForgeTech/sureforge-fm-data-api, and documentation links point to the new site (<https://sureforgetech.github.io/sureforge-fm-data-api/>). Old GitHub links redirect; old website links do not.
+- Changing a connection's server address clears its old certificate exceptions and custom CA file. If you change the gateway path, API path or database, enter the saved credentials again.
+- Server addresses with a query string or fragment are refused. Custom CA files are limited to 1 MB and cannot contain private keys.
+- A project's workspace settings can no longer select performance mode or raise your connection retry limit.
+
+To roll back, use **Install Specific Version...** in the Extensions view and pick 1.9.0.
+
 ## Upgrading from 1.8.0 to 1.9.0
 
 Your profiles, saved queries and settings carry over; nothing stored needs converting. No command or setting was removed or renamed. This minor release adds related portal rows to Create Record and mostly improves safety. AI tools and enterprise mode remain off by default.
@@ -74,7 +85,7 @@ On Windows, the preview searches absolute PATH entries for `node.exe` and `node_
 
 ### Rolling back
 
-Use **Install Specific Version...** in the Extensions view to install 1.8.0 from the Marketplace, or install its VSIX from the [GitHub release](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases/tag/v1.8.0). Profile data is unchanged. Passwords already moved to secure storage stay there under the same key; the offline cache gains only a `hashAlgorithm` field and a `.gitignore`. Installing an older version does not undo changes sent to FileMaker.
+Use **Install Specific Version...** in the Extensions view to install 1.8.0 from the Marketplace, or install its VSIX from the [GitHub release](https://github.com/SureForgeTech/sureforge-fm-data-api/releases/tag/v1.8.0). Profile data is unchanged. Passwords already moved to secure storage stay there under the same key; the offline cache gains only a `hashAlgorithm` field and a `.gitignore`. Installing an older version does not undo changes sent to FileMaker.
 
 After rolling back, delete `.fmweb/generated/runtime-next` and generate it again with 1.8.0: 1.9.0 writes template version 10 (`proxy.ts`, `lib/preview-security.ts` and `/api/bridge`), while 1.8.0 expects its older template and a token in `.env.local` that 1.9.0 no longer writes.
 
@@ -164,7 +175,7 @@ One real server was exercised on **2026-10-21**, but its FileMaker Server versio
 - Opening Edit Record by ID loads the record. Repeated clicks do not start duplicate requests, and failed queries or scripts clear stale results. Repeated field choices and counts are shown once, with notes in the editor and Layout Inspector.
 - Long script parameters use a stored text field for the necessary find. An empty layout, no match or missing script status cannot claim a successful script run. Generated clients explain empty searches and server errors; timeout and paging messages give clearer next steps.
 - Cancelling one request does not cancel another request's sign-in. Renewed sessions resume requests while closing the previous session in the background.
-- Errors hide more passwords, API keys and tokens. Malformed AI hidden-field settings are reported consistently; which fields are hidden has not changed. A new [support page](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/SUPPORT.md) explains how to ask for help safely.
+- Errors hide more passwords, API keys and tokens. Malformed AI hidden-field settings are reported consistently; which fields are hidden has not changed. A new [support page](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/SUPPORT.md) explains how to ask for help safely.
 
 ### Rolling back
 
@@ -204,7 +215,7 @@ In 1.7.0 this setting change is no longer needed for direct connections; see the
 
 ### Rolling back
 
-Install the previous version from the Extensions view (**Install Specific Version...**) or from a [release](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases) (only tagged versions have one). Your data is not migrated, so nothing needs to be undone.
+Install the previous version from the Extensions view (**Install Specific Version...**) or from a [release](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) (only tagged versions have one). Your data is not migrated, so nothing needs to be undone.
 
 ## Upgrading from 1.4.0 to 1.5.0
 
@@ -244,7 +255,7 @@ VS Code's Chat view now lists a read-only `@filemaker` participant (`/layouts`, 
 
 ### Rolling back
 
-Install the previous version from the Extensions view (**Install Specific Version...**) or from a [release](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases) (only tagged versions have one). Your data is not migrated, so nothing needs to be undone.
+Install the previous version from the Extensions view (**Install Specific Version...**) or from a [release](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) (only tagged versions have one). Your data is not migrated, so nothing needs to be undone.
 
 ## Upgrading from 1.3.0 to 1.4.0
 
@@ -322,7 +333,7 @@ The Marketplace package does not include the preview app template, so **Start FM
 
 ### Rolling back
 
-Install the previous version from the Extensions view (**Install Specific Version...**) or from a [release](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases) (only tagged versions have one). Your data is not migrated, so nothing needs to be undone, except the renamed generated files (regenerate them) and the `aiAccess` field (older versions ignore it).
+Install the previous version from the Extensions view (**Install Specific Version...**) or from a [release](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) (only tagged versions have one). Your data is not migrated, so nothing needs to be undone, except the renamed generated files (regenerate them) and the `aiAccess` field (older versions ignore it).
 
 ## v1.2.0 to v1.3.0
 

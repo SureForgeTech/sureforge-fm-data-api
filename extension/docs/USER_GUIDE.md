@@ -2,7 +2,7 @@
 
 This is the manual for operators and developers who use the extension to work with a FileMaker database from VS Code. It covers version 1.9, including what changed since 1.8 (listed under [New in 1.9](#new-in-19)). Earlier changes remain under [New in 1.8](#new-in-18), [New in 1.7](#new-in-17), [New in 1.6](#new-in-16) and [New in 1.5](#new-in-15). The screenshots use made-up data. You can open it from VS Code with **FileMaker: Open User Guide**.
 
-You can also read the [User Guide on the website](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/guide/), the [upgrade notes](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/upgrade/) and the [changelog by version](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/changelog/). The website follows the guide in this repository and is rebuilt when changes reach the main branch. The [privacy policy](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/PRIVACY.md) says what the extension stores and never sends.
+You can also read the [User Guide on the website](https://sureforgetech.github.io/sureforge-fm-data-api/guide/), the [upgrade notes](https://sureforgetech.github.io/sureforge-fm-data-api/upgrade/) and the [changelog by version](https://sureforgetech.github.io/sureforge-fm-data-api/changelog/). The website follows the guide in this repository and is rebuilt when changes reach the main branch. The [privacy policy](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/PRIVACY.md) says what the extension stores and never sends.
 
 Command names below are the titles you see in the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows and Linux). Every command starts with `FileMaker:`.
 
@@ -317,7 +317,7 @@ These changes came after 1.4.0 (details in the [upgrade notes](../UPGRADE.md)):
 
 From a terminal: `code --install-extension SureForgeTech.filemaker-data-api-tools`.
 
-To install a specific version from a file, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases), then run **Extensions: Install from VSIX...** in VS Code. A VSIX does not update itself. Check the version number on the release page: the Marketplace always has the newest build.
+To install a specific version from a file, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/sureforge-fm-data-api/releases), then run **Extensions: Install from VSIX...** in VS Code. A VSIX does not update itself. Check the version number on the release page: the Marketplace always has the newest build.
 
 To check the install, open the Command Palette and type `FileMaker:`. Run **FileMaker: Open Getting Started Walkthrough** for a short guided tour.
 
@@ -808,7 +808,7 @@ FM Web is an experimental workflow for designing web layouts that sit on top of 
 2. **FileMaker: Select Active Profile** and **FileMaker: Sync FM Web Project Metadata** copy layout, field and script metadata into `.fmweb/metadata`.
 3. **FileMaker: Open FM Web Layout Mode** opens the designer. Layouts are saved in `.fmweb/layouts`.
 4. **FileMaker: Generate FM Web Next.js App** and **FileMaker: Generate FM Web Layout Page** write the app to `.fmweb/generated`.
-5. **FileMaker: Start FM Web Preview Server** starts a local bridge (bound to `127.0.0.1`) and runs the app. **The preview needs the source repository.** The Marketplace extension does not include the preview app template, so in a Marketplace installation **Generate FM Web Next.js App** and **Start FM Web Preview Server** are hidden from the Command Palette (the commands that need the template are only listed when it is installed); invoking one another way, for example from a keybinding, still stops with "The FM Web preview is not available in this installation". Layout Mode and metadata sync work everywhere. To use the preview, work from a clone of the repository (see [CONTRIBUTING.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/CONTRIBUTING.md)).
+5. **FileMaker: Start FM Web Preview Server** starts a local bridge (bound to `127.0.0.1`) and runs the app. **The preview needs the source repository.** The Marketplace extension does not include the preview app template, so in a Marketplace installation **Generate FM Web Next.js App** and **Start FM Web Preview Server** are hidden from the Command Palette (the commands that need the template are only listed when it is installed); invoking one another way, for example from a keybinding, still stops with "The FM Web preview is not available in this installation". Layout Mode and metadata sync work everywhere. To use the preview, work from a clone of the repository (see [CONTRIBUTING.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/CONTRIBUTING.md)).
 
 New field chips (click to add, or drag onto the canvas) use an 8 px grid, labels on top and standard sizes. Existing layouts load as saved; moving and resizing existing objects still works as before. The page margin is 24 px, rows have at least 16 px between them (plus room for the top label), and columns have a 24 px gap.
 
@@ -1207,13 +1207,13 @@ Error messages hide plain-text `api_key` values and `X-FM-Data-Access-Token` hea
 - **No telemetry.** The extension sends nothing to its authors. It talks only to your FileMaker server (or your proxy).
 - **Local files that hold schema.** Snapshots, the offline cache, generated types and the AI context file contain layout and field names. Do not commit them to a public repository.
 
-For the full picture, see [docs/security.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/security.md) and [docs/DATA_HANDLING.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/DATA_HANDLING.md).
+For the full picture, see [docs/security.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/security.md) and [docs/DATA_HANDLING.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/DATA_HANDLING.md).
 
 ---
 
 ## Troubleshooting
 
-Connection errors name the step that failed and what to do. The most common first-run failure is a **certificate error**. Each error, with its symptom, its likely cause and its fix steps, is in the [Troubleshooting page](./TROUBLESHOOTING.md). A fuller catalogue of what can go wrong between VS Code and FileMaker, with what to ask your administrator, is in the [FileMaker failure-mode catalogue](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/FILEMAKER_FAILURE_MODES.md) (section 8 is "Troubleshooting by symptom").
+Connection errors name the step that failed and what to do. The most common first-run failure is a **certificate error**. Each error, with its symptom, its likely cause and its fix steps, is in the [Troubleshooting page](./TROUBLESHOOTING.md). A fuller catalogue of what can go wrong between VS Code and FileMaker, with what to ask your administrator, is in the [FileMaker failure-mode catalogue](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/FILEMAKER_FAILURE_MODES.md) (section 8 is "Troubleshooting by symptom").
 
 ### Where to look first
 
@@ -1259,7 +1259,7 @@ The About message has three buttons: **Copy for bug report** (a short block of e
 
 ### Reporting a problem
 
-Open an issue at <https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/issues> and include: the extension and VS Code versions (run **About / Show Version** and choose **Copy for bug report**), your operating system, the server type and version, direct or proxy mode, the steps, and the redacted log or the **Show Diagnostics** report. Do not open a public issue for a security problem: see [SECURITY.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/SECURITY.md).
+Open an issue at <https://github.com/SureForgeTech/sureforge-fm-data-api/issues> and include: the extension and VS Code versions (run **About / Show Version** and choose **Copy for bug report**), your operating system, the server type and version, direct or proxy mode, the steps, and the redacted log or the **Show Diagnostics** report. Do not open a public issue for a security problem: see [SECURITY.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/SECURITY.md).
 
 ---
 
@@ -1271,7 +1271,7 @@ Open an issue at <https://github.com/SureForgeTech/filemaker-data-api-for-vs-cod
 
 **Does it support OAuth or single sign-on?** No. Direct mode uses an account name and password. If you need another identity flow, put a proxy in front.
 
-**Where are my profiles and queries stored?** Profiles in VS Code user data (secrets in the keychain). Saved queries in the workspace by default. Snapshots, the offline cache and generated files in the workspace. See [DATA_HANDLING.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/DATA_HANDLING.md).
+**Where are my profiles and queries stored?** Profiles in VS Code user data (secrets in the keychain). Saved queries in the workspace by default. Snapshots, the offline cache and generated files in the workspace. See [DATA_HANDLING.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/DATA_HANDLING.md).
 
 **Can I share connections with my team?** Share a [profile template](#profile-templates-for-a-team) (no secrets) and saved queries (export and import). Everyone enters their own password.
 
@@ -1283,6 +1283,6 @@ Open an issue at <https://github.com/SureForgeTech/filemaker-data-api-for-vs-cod
 
 **Can the extension edit scripts or layouts in the database?** No. It uses the Data API, which reads and writes records, runs scripts and reads metadata. It does not change the database design.
 
-**Can I try it without a server?** The repository includes a mock Data API for development. See [CONTRIBUTING.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/CONTRIBUTING.md).
+**Can I try it without a server?** The repository includes a mock Data API for development. See [CONTRIBUTING.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/CONTRIBUTING.md).
 
-**Where do I get help or report a bug?** [GitHub issues](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/issues).
+**Where do I get help or report a bug?** [GitHub issues](https://github.com/SureForgeTech/sureforge-fm-data-api/issues).

@@ -5,9 +5,9 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import MarkdownIt from 'markdown-it';
 
-const repository = 'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code';
+const repository = 'https://github.com/SureForgeTech/sureforge-fm-data-api';
 const marketplace = 'https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools';
-const website = 'https://sureforgetech.github.io/filemaker-data-api-for-vs-code/';
+const website = 'https://sureforgetech.github.io/sureforge-fm-data-api/';
 const markdown = new MarkdownIt({ html: false });
 const escape = markdown.utils.escapeHtml;
 const posix = (value) => value.split(path.sep).join('/');

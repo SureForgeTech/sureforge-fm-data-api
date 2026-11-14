@@ -26,9 +26,9 @@ execFileSync(
     '--no-dependencies',
     '--allow-missing-repository',
     '--baseContentUrl',
-    'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension',
+    'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension',
     '--baseImagesUrl',
-    'https://raw.githubusercontent.com/SureForgeTech/filemaker-data-api-for-vs-code/main/extension',
+    'https://raw.githubusercontent.com/SureForgeTech/sureforge-fm-data-api/main/extension',
     '--out',
     vsixPath
   ],

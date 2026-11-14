@@ -181,7 +181,7 @@ describe('issue URL', () => {
   it('is https, targets the bug form and encodes the block', () => {
     const url = new URL(buildIssueUrl(facts, block));
     expect(url.protocol).toBe('https:');
-    expect(url.origin + url.pathname).toBe('https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/issues/new');
+    expect(url.origin + url.pathname).toBe('https://github.com/SureForgeTech/sureforge-fm-data-api/issues/new');
     expect(url.searchParams.get('template')).toBe('bug_report.yml');
     expect(url.searchParams.get('extension-version')).toBe('1.4.0');
     expect(url.searchParams.get('version-details')).toBe(block);

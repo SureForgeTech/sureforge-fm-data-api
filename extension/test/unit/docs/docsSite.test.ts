@@ -8,7 +8,7 @@ import { JSDOM } from '../../helpers/jsdomPage';
 const root = path.resolve(__dirname, '../../../..');
 const scratch = mkdtempSync(path.join(os.tmpdir(), 'docs-site-test-'));
 const output = path.join(scratch, 'pages');
-const repo = 'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code';
+const repo = 'https://github.com/SureForgeTech/sureforge-fm-data-api';
 const marketplace = 'https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools';
 const document = (html: string) => new JSDOM!(html, { runScripts: 'outside-only', url: 'https://docs.invalid/' }).window.document;
 const html = (file: string) => readFileSync(path.join(output, file), 'utf8');
@@ -91,7 +91,7 @@ describe('documentation website from the real repository', () => {
       for (const element of page.querySelectorAll('[href], [src]')) {
         const url = element.getAttribute('href') ?? element.getAttribute('src')!;
         if (/^https:/.test(url)) {
-          expect(url === repo || url.startsWith(`${repo}/`) || url === marketplace || url.startsWith('https://sureforgetech.github.io/filemaker-data-api-for-vs-code/'), url).toBe(true);
+          expect(url === repo || url.startsWith(`${repo}/`) || url === marketplace || url.startsWith('https://sureforgetech.github.io/sureforge-fm-data-api/'), url).toBe(true);
           continue;
         }
         expect(url, file).not.toMatch(/^(?:[a-z][\w+.-]*:|\/\/)/i);
@@ -138,7 +138,7 @@ it.each([
   ['missing page', '[broken](./absent.md)', /broken internal link.*absent\.md/i],
   ['missing anchor', '[broken](#absent)', /broken internal link.*#absent/i],
   ['external link outside the allowlist', '[outside](https://example.com/guide)', /unsupported external link.*example\.com/i],
-  ['repository lookalike', '[outside](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code.evil/guide)', /unsupported external link/i],
+  ['repository lookalike', '[outside](https://github.com/SureForgeTech/sureforge-fm-data-api.evil/guide)', /unsupported external link/i],
   ['missing image', '![broken](./absent.png)', /missing image.*absent\.png/i]
 ])('fails clearly on a %s', (_name, markdown, error) => {
   const source = fixture(`# Guide\n\n${markdown}`);

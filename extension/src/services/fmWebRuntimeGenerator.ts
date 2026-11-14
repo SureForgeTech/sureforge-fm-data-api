@@ -190,7 +190,7 @@ export function decideManagedRefresh(
 export class RuntimeTemplateUnavailableError extends Error {
   public constructor() {
     super(
-      'The FM Web preview is not available in this installation. It needs the runtime-next and shared packages from the filemaker-data-api-for-vs-code repository, which the Marketplace extension does not include. Open that repository (or run the extension from source) to use the preview.'
+      'The FM Web preview is not available in this installation. It needs the runtime-next and shared packages from the sureforge-fm-data-api repository, which the Marketplace extension does not include. Open that repository (or run the extension from source) to use the preview.'
     );
     this.name = 'RuntimeTemplateUnavailableError';
   }

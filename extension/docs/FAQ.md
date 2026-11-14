@@ -6,7 +6,7 @@ Plain answers to the questions people ask most. The [User Guide](./USER_GUIDE.md
 
 Open the Extensions view in VS Code (`Cmd+Shift+X` on macOS, `Ctrl+Shift+X` on Windows and Linux), search for **FileMaker Data API Tools** (publisher **SureForgeTech**) and select **Install**. From a terminal you can run `code --install-extension SureForgeTech.filemaker-data-api-tools`. You need VS Code 1.96 or newer.
 
-To install one particular version, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases) and run **Extensions: Install from VSIX...** in VS Code. A VSIX does not update itself; the Marketplace always has the newest build.
+To install one particular version, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) and run **Extensions: Install from VSIX...** in VS Code. A VSIX does not update itself; the Marketplace always has the newest build.
 
 Before you connect, you need a FileMaker Server with the Data API enabled, an HTTPS address your computer can reach, and an account whose privilege set has the `fmrest` extended privilege ("Access via FileMaker Data API"). The FM Web preview is not part of the Marketplace build; use the repository if you want that preview. See [Before you start](./USER_GUIDE.md#before-you-start).
 

@@ -6,7 +6,7 @@ This extension talks to FileMaker through the FileMaker Data API. A server is co
 
 One real FileMaker server was exercised on **2026-10-21**, but its FileMaker Server version was **not recorded**. The recorded checks included a no-match find (HTTP 200, FileMaker code 401, empty data), text and field behavior, and Diagnose Connection with a valid Let's Encrypt certificate and TLS 1.2. These findings apply to that server only; they do not complete a smoke test for any named version. The Data API engine name and API path do not identify the installed FileMaker Server release. Ask the administrator for the version before recording a version-specific result.
 
-FileMaker Server **19, 20, 21 and 22** all still need a completed smoke test with the installed version recorded. FileMaker Cloud is untested, and **Claris ID sign-in is not supported**. The mock and automated tests do not prove compatibility with a real server version. See the [recorded findings and remaining checks](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/FILEMAKER_FAILURE_MODES.md).
+FileMaker Server **19, 20, 21 and 22** all still need a completed smoke test with the installed version recorded. FileMaker Cloud is untested, and **Claris ID sign-in is not supported**. The mock and automated tests do not prove compatibility with a real server version. See the [recorded findings and remaining checks](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/FILEMAKER_FAILURE_MODES.md).
 
 ## Server Matrix
 
@@ -57,14 +57,14 @@ Known platform limits:
 - **Reserved Windows names.** Generated file names avoid `CON`, `NUL`, `COM1` and similar names, and configured paths containing them, drive-relative paths (`C:x`), alternate data streams (`file:stream`), short names (`GIT~1`) or a trailing dot or space are refused.
 - **Line endings.** Generated files are written with LF. A repository checkout on Windows keeps LF (`.gitattributes` sets `eol=lf`), and checks that compare generated files with committed ones ignore CRLF.
 
-To check your own machine, run the same commands as CI (see [CI.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/CI.md#cross-platform-job)).
+To check your own machine, run the same commands as CI (see [CI.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/CI.md#cross-platform-job)).
 
 ## Version Selection Guidance
 
 - Leave **API Base Path** set to `/fmi/data` unless your proxy or server deployment requires a custom route.
 - Leave **API Version** set to `vLatest` unless you need to pin behavior for a specific server version.
 - Test each saved profile after changing server version, credentials, proxy settings, SSL certificates, or firewall rules.
-- Run the [smoke test](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/QA/SMOKE_TEST.md) against at least one representative server before rolling the extension out to a team.
+- Run the [smoke test](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/QA/SMOKE_TEST.md) against at least one representative server before rolling the extension out to a team.
 
 ## Reporting Gaps
 
