@@ -209,7 +209,7 @@ describe('showErrorWithDetails', () => {
     vi.mocked(vscode.window.showErrorMessage).mockResolvedValue('Open Troubleshooting' as never);
 
     const docsUrl =
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-403-the-request-was-refused';
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-403-the-request-was-refused';
     await showErrorWithDetails({
       kind: 'auth',
       message: 'The server refused the request.',

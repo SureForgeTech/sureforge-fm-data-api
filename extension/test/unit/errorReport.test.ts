@@ -147,7 +147,7 @@ describe('renderErrorReport (#42)', () => {
 
   it('includes the troubleshooting link when the error carries one', () => {
     const docsUrl =
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request';
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request';
     const out = renderErrorReport({
       ...baseError(),
       docsUrl

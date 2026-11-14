@@ -7,14 +7,14 @@ Written for version `1.9.0` (release branch `codex/release-1.9.0`, date 2026-11-
 ## Before you start
 
 - The release pull request (`[minor] Release 1.9.0`) must be **merged** before these steps. Review scope with `git log v1.8.0..origin/main --oneline`. The release commit for 1.9.0 is the merge commit of that pull request (the commands below find it; write it down in the release pull request once merged). Later merges to `main` do not matter, because the steps below pin that commit; a build from any later commit would be a different VSIX.
-- You are signed in to `gh` (`gh auth status`) as an admin of `SureForgeTech/filemaker-data-api-for-vs-code`, and you can sign in at <https://marketplace.visualstudio.com/manage> as an owner of the publisher.
+- You are signed in to `gh` (`gh auth status`) as an admin of `SureForgeTech/sureforge-fm-data-api`, and you can sign in at <https://marketplace.visualstudio.com/manage> as an owner of the publisher.
 - Node.js 22 or newer and `git`.
 - **The release date.** The notes say `_Release notes prepared 2026-11-13._`: that is the day the release was prepared, not necessarily the day you publish. The Marketplace and GitHub show the real publish date. If you publish on a later day, leave the text as it is (changing it after the merge would mean another change on `main` and a different VSIX); if you want the date to match, merge a one-line change to that date in `extension/CHANGELOG.md` and `CHANGELOG.md` first and use that merge commit.
 
 ## 1. Build the VSIX from the merged commit
 
 ```bash
-git clone https://github.com/SureForgeTech/filemaker-data-api-for-vs-code.git release-1.9.0   # or use a clean checkout
+git clone https://github.com/SureForgeTech/sureforge-fm-data-api.git release-1.9.0   # or use a clean checkout
 cd release-1.9.0
 git fetch origin
 # RELEASE_SHA is the merge commit of the release PR ("[minor] Release 1.9.0"). Confirm it matches the
@@ -86,7 +86,7 @@ Checked 2026-10-19 (<https://cli.github.com/manual/gh_release_create>): without 
    wc -l < artifacts/RELEASE_NOTES_v1.9.0.md                                   # more than 15 lines, never 0
    grep -c 'Upgrading from 1.8.0 to 1.9.0' artifacts/RELEASE_NOTES_v1.9.0.md   # must print 1
    gh release create v1.9.0 \
-     --repo SureForgeTech/filemaker-data-api-for-vs-code \
+     --repo SureForgeTech/sureforge-fm-data-api \
      --verify-tag \
      --title v1.9.0 \
      --notes-file artifacts/RELEASE_NOTES_v1.9.0.md \
@@ -103,7 +103,7 @@ There is no supported way to avoid that red run with the current workflow (the r
 
 ## 4. After publishing
 
-- The docs site rebuilds on every push to main; open the [changelog page](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/changelog/) and confirm the new version appears.
+- The docs site rebuilds on every push to main; open the [changelog page](https://sureforgetech.github.io/sureforge-fm-data-api/changelog/) and confirm the new version appears.
 
 - <https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools> shows **1.9.0** (it can take several minutes) and its **Changelog** tab shows the 1.9.0 section. Or run `npx @vscode/vsce show SureForgeTech.filemaker-data-api-tools` (checked: `vsce show <extensionid>` exists in vsce 4.0.0).
 - In a clean VS Code profile, install it from the Marketplace and run **FileMaker: About / Show Version**: it must say 1.9.0 and a build. (`code --user-data-dir /tmp/fm-user --extensions-dir /tmp/fm-ext --install-extension SureForgeTech.filemaker-data-api-tools`.)
@@ -131,7 +131,7 @@ grep -c 'Upgrading from 1.3.0 to 1.4.0' artifacts/RELEASE_NOTES_v1.4.0.md  # mus
 # ---- Version A: with the VSIX you uploaded (if you do not have it, stop here and use version B below) ----
 VSIX_140=/full/path/to/the-vsix-you-uploaded/filemaker-data-api-tools-1.4.0.vsix   # the exact file you uploaded
 shasum -a 256 "$VSIX_140"                                                           # note the hash
-gh release create v1.4.0 --repo SureForgeTech/filemaker-data-api-for-vs-code --verify-tag \
+gh release create v1.4.0 --repo SureForgeTech/sureforge-fm-data-api --verify-tag \
   --title v1.4.0 --notes-file artifacts/RELEASE_NOTES_v1.4.0.md --latest=false \
   "$VSIX_140"
 ```
@@ -139,7 +139,7 @@ gh release create v1.4.0 --repo SureForgeTech/filemaker-data-api-for-vs-code --v
 **Version B: without the VSIX** (you no longer have the uploaded file; run this instead of version A, not as well):
 
 ```bash
-gh release create v1.4.0 --repo SureForgeTech/filemaker-data-api-for-vs-code --verify-tag \
+gh release create v1.4.0 --repo SureForgeTech/sureforge-fm-data-api --verify-tag \
   --title v1.4.0 --notes-file artifacts/RELEASE_NOTES_v1.4.0.md --latest=false
 ```
 

@@ -71,7 +71,7 @@ describe('About / Show Version command', () => {
     vi.mocked(vscode.window.showInformationMessage).mockResolvedValueOnce('Open Changelog' as never);
     vi.mocked(vscode.commands.executeCommand).mockRejectedValueOnce(new Error('no preview'));
     await handler()();
-    expect(vscode.Uri.parse).toHaveBeenCalledWith('https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases');
+    expect(vscode.Uri.parse).toHaveBeenCalledWith('https://github.com/SureForgeTech/sureforge-fm-data-api/releases');
     expect(vscode.env.openExternal).toHaveBeenCalledTimes(1);
   });
 
@@ -81,7 +81,7 @@ describe('About / Show Version command', () => {
     const url = vi.mocked(vscode.Uri.parse).mock.calls.at(-1)?.[0] as string;
     const parsed = new URL(url);
     expect(parsed.protocol).toBe('https:');
-    expect(parsed.pathname).toBe('/SureForgeTech/filemaker-data-api-for-vs-code/issues/new');
+    expect(parsed.pathname).toBe('/SureForgeTech/sureforge-fm-data-api/issues/new');
     expect(parsed.searchParams.get('extension-version')).toBe('2.3.4');
     expect(parsed.searchParams.get('version-details')).toContain('version details');
     expect(vscode.env.openExternal).toHaveBeenCalledTimes(1);
