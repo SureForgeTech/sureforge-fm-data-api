@@ -36,7 +36,7 @@ PR title prefix matches the highest-tier label added:
 
 ### [SECURITY]
 
-- None.
+- Close four small gaps left from the security review: an edited server address now replaces a saved address that still carried a password (the old password is dropped, not kept on the old server); addresses in error notifications are shown as plain text that cannot be clicked; the FM Web preview checks the private session before Next's own development endpoints, hot reload included; and the preview installs with `npm ci` when the shipped template carries a lockfile.
 
 ## 1.9.1 (2026-11-14)
 

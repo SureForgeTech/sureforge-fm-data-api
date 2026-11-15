@@ -11,8 +11,8 @@ const processStart = vi.hoisted(() => vi.fn(async () => undefined));
 const processDispose = vi.hoisted(() => vi.fn(async () => undefined));
 vi.mock('../../src/services/fmWebPreviewProcess', () => ({
   FmWebPreviewProcess: class { start = processStart; dispose = processDispose; },
-  PREVIEW_INSTALL_DESCRIPTION: 'npm install --ignore-scripts',
-  PREVIEW_DEV_DESCRIPTION: 'npm run dev --ignore-scripts -- --hostname 127.0.0.1 --port 3000'
+  previewInstallDescription: (files: Map<string, Buffer>) => files.has('package-lock.json') ? 'npm ci --ignore-scripts' : 'npm install --ignore-scripts',
+  PREVIEW_DEV_DESCRIPTION: 'node preview-server.mjs (Next.js development server on 127.0.0.1:3000)'
 }));
 
 /** The preview asks before running npm in a private template copy. */
@@ -89,7 +89,7 @@ describe('FM Web preview', () => {
 
     const prompt = vi.mocked(vscode.window.showWarningMessage).mock.calls[0]?.[0] as string;
     expect(prompt).toContain('npm install');
-    expect(prompt).toContain('npm run dev');
+    expect(prompt).toContain('node preview-server.mjs');
     expect(prompt).toContain('/workspace/.fmweb/generated/runtime-next');
     expect(prompt).toContain('package.json');
     expect(vscode.window.createTerminal).not.toHaveBeenCalled();

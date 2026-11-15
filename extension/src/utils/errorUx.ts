@@ -369,7 +369,14 @@ function extractStack(raw: unknown): string | undefined {
 
 function displayErrorMessage(value: string): string {
   // Notifications are plain text; break link syntax without adding visible escape characters.
-  return errorMessageText(errorMessageText(value).replace(/\]\(/g, '] ('));
+  // A bare address from a server must not become a clickable link either: a space after the
+  // scheme ("https: //host") keeps it readable but stops it being recognised as a link.
+  return errorMessageText(
+    errorMessageText(value)
+      .replace(/\]\(/g, '] (')
+      .replace(/\b([a-z][a-z0-9+.-]*):(?=\/\/)/gi, '$1: ')
+      .replace(/\bwww\.(?=\S)/gi, 'www. ')
+  );
 }
 
 function markdownErrorMessage(value: string): string {

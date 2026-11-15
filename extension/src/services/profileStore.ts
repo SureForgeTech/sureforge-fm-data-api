@@ -102,6 +102,9 @@ export class ProfileStore {
             const password = decodeURIComponent(url.password);
             // A wizard save may have completed while the first read was pending.
             if (await withSecretStorageTimeout(() => secrets.getPassword(normalized.id)) === undefined) {
+              // The profile may have been edited (new address) or removed meanwhile: its old
+              // password must not be saved for whatever the profile points at now.
+              if (!this.isStored(snapshot)) continue;
               await withSecretStorageTimeout(() => secrets.setPassword(normalized.id, password));
               // Disabled persistence can resolve a write without storing anything.
               if (await withSecretStorageTimeout(() => secrets.getPassword(normalized.id)) === undefined) continue;
@@ -130,6 +133,11 @@ export class ProfileStore {
     }
   }
 
+  private isStored(snapshot: string): boolean {
+    const raw = this.globalState.get<unknown>(PROFILES_KEY, []);
+    return Array.isArray(raw) && raw.some((value) => JSON.stringify(value) === snapshot);
+  }
+
   /** The stored profiles without waiting; a webview needs them before its first paint. */
   public listProfilesSync(): ConnectionProfile[] {
     const rawProfiles = this.globalState.get<unknown>(PROFILES_KEY, []);
@@ -153,18 +161,22 @@ export class ProfileStore {
     const rawProfiles = this.globalState.get<unknown>(PROFILES_KEY, []);
     const profiles = Array.isArray(rawProfiles) ? [...rawProfiles] : [];
     const existing = profiles.filter((item) => normalizeProfile(item)?.id === normalizedProfile.id);
-    // Migration is the only path allowed to strip persisted credentials. If it failed
-    // (or the raw entry changed while it waited), apply edits without losing that URL.
-    const preserveCredentials = existing.some((item) => {
-      const url = new URL((item as ConnectionProfile).serverUrl);
-      return Boolean(url.username || url.password);
-    });
+    // Compare addresses in the same form normalizeProfile() gives the stored ones.
+    const newAddress = normalizeProfile(normalizedProfile)?.serverUrl ?? normalizedProfile.serverUrl;
     let replaced = false;
     const updated = profiles.flatMap((item) => {
-      if (normalizeProfile(item)?.id !== normalizedProfile.id) return [item];
-      if (preserveCredentials) {
-        // Keep every duplicate until migration succeeds; each may hold credentials.
-        return [{ ...normalizedProfile, serverUrl: (item as ConnectionProfile).serverUrl }];
+      const stored = normalizeProfile(item);
+      if (stored?.id !== normalizedProfile.id) return [item];
+      const rawUrl = (item as ConnectionProfile).serverUrl;
+      const url = new URL(rawUrl);
+      // Migration is the only path allowed to strip persisted credentials. If it failed
+      // (or the raw entry changed while it waited), apply edits without losing that URL,
+      // and keep every duplicate until migration succeeds; each may hold credentials.
+      // That holds only while the address is unchanged: a credential saved for one server
+      // must never follow (or pin the profile to) another, so an edited address replaces
+      // the entry and the old credential is dropped. The wizard asks for it again.
+      if ((url.username || url.password) && stored.serverUrl === newAddress) {
+        return [{ ...normalizedProfile, serverUrl: rawUrl }];
       }
       if (replaced) return [];
       replaced = true;

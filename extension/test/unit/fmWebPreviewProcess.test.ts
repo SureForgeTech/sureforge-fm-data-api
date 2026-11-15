@@ -14,7 +14,7 @@ vi.mock('fs/promises', async (importOriginal) => {
 });
 
 import { FmWebRuntimeGenerator } from '../../src/services/fmWebRuntimeGenerator';
-import { FmWebPreviewProcess, previewProcessEnv, stopFmWebPreviews } from '../../src/services/fmWebPreviewProcess';
+import { FmWebPreviewProcess, previewInstallDescription, previewProcessEnv, stopFmWebPreviews } from '../../src/services/fmWebPreviewProcess';
 
 type MockChild = ChildProcess & { stdout: EventEmitter; stderr: EventEmitter };
 const calls: Array<{ command: string; args: string[]; options: Record<string, unknown>; child: MockChild }> = [];
@@ -35,7 +35,7 @@ function exit(child: MockChild, code = 0) {
 function preview(platform: NodeJS.Platform = 'linux', sourceEnv: NodeJS.ProcessEnv = {}) {
   return new FmWebPreviewProcess({ platform, spawn, kill, tempRoot: directory, sourceEnv });
 }
-const start = (preview: FmWebPreviewProcess) => preview.start(new Map([['package.json', Buffer.from('{}')]]), new Map(), 'http://127.0.0.1:1234/fm', 'dummy-secret', 'https://user:private@example.test:8443/path?session=private');
+const start = (preview: FmWebPreviewProcess, extra: Array<[string, Buffer]> = []) => preview.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')], ...extra]), new Map(), 'http://127.0.0.1:1234/fm', 'dummy-secret', 'https://user:private@example.test:8443/path?session=private');
 
 beforeEach(async () => {
   directory = await mkdtemp(path.join(tmpdir(), 'fmweb-process-test-'));
@@ -54,7 +54,7 @@ beforeEach(async () => {
         const target = calls.find((call) => call.child.pid === Number(args[1]))?.child;
         if (target && taskkillExit === 0) exit(target);
         exit(child, taskkillExit);
-      } else if (args.includes('install')) exit(child, installExit);
+      } else if (args.includes('install') || args.includes('ci')) exit(child, installExit);
       else child.stdout.emit('data', Buffer.from('✓ Ready in 100ms'));
     });
     return child;
@@ -81,13 +81,16 @@ describe('private preview process', () => {
     const install = calls[0]!;
     const dev = calls[1]!;
     expect(install.command).toBe('npm');
-    expect(dev.command).toBe('npm');
+    // The gated server, not `next dev` through npm: Next's own endpoints sit behind the cookie.
+    expect(dev.command).toBe('node');
+    expect(dev.args).toEqual(['preview-server.mjs']);
+    expect((dev.options.env as NodeJS.ProcessEnv).NODE_ENV).toBe('development');
     expect(install.args).toEqual(expect.arrayContaining(['install', '--ignore-scripts', '--registry=https://registry.npmjs.org', '--workspaces=false']));
-    expect(dev.args).toEqual(expect.arrayContaining(['run', 'dev', '--ignore-scripts', '--hostname', '127.0.0.1', '--port', '3000']));
+    expect(install.args).not.toContain('ci');
     for (const call of calls) {
       expect(call.options.shell).toBe(false);
       expect(call.options.detached).toBe(true);
-      for (const config of ['--userconfig=', '--globalconfig=']) {
+      for (const config of call === install ? ['--userconfig=', '--globalconfig='] : []) {
         const file = call.args.find((arg) => arg.startsWith(config))!.slice(config.length);
         expect(await readFile(file, 'utf8')).toBe('');
       }
@@ -106,10 +109,26 @@ describe('private preview process', () => {
     expect(devEnv.FMWEB_LAUNCH_CODE).not.toBe(devEnv.FMWEB_PREVIEW_SESSION);
     const root = install.options.cwd as string;
     if (globalThis.process.platform !== 'win32') expect((await lstat(path.dirname(root))).mode & 0o777).toBe(0o700);
-    expect(await readdir(root)).toEqual(['package.json']);
+    expect(await readdir(root)).toEqual(['package.json', 'preview-server.mjs']);
     expect(vi.mocked(vscode.env.openExternal).mock.calls[0]?.[0].toString()).toBe(`http://127.0.0.1:3000/?launch=${devEnv.FMWEB_LAUNCH_CODE}`);
     await process.dispose();
     await expect(lstat(path.dirname(root))).rejects.toHaveProperty('code', 'ENOENT');
+  });
+
+  it('installs exactly the shipped lockfile when the template carries one', async () => {
+    const process = preview();
+    await start(process, [['package-lock.json', Buffer.from('{}')]]);
+    const install = calls[0]!;
+    expect(install.args).toEqual(expect.arrayContaining(['ci', '--ignore-scripts', '--registry=https://registry.npmjs.org', '--workspaces=false']));
+    expect(install.args).not.toContain('install');
+    expect(previewInstallDescription(new Map([['package-lock.json', Buffer.from('{}')]]))).toMatch(/^npm ci /);
+    expect(previewInstallDescription(new Map())).toMatch(/^npm install /);
+  });
+
+  it('refuses to start a template without the gated preview server', async () => {
+    const process = preview();
+    await expect(process.start(new Map([['package.json', Buffer.from('{}')]]), new Map(), 'http://127.0.0.1:1234/fm', 'dummy-secret')).rejects.toThrow('does not carry the private preview server');
+    expect(calls.map((call) => call.args.includes('install'))).toEqual([true]);
   });
 
   it('starts from a clean temp copy while workspace npm config and user runtime files survive', async () => {
@@ -151,9 +170,10 @@ describe('private preview process', () => {
     await start(process);
     for (const call of calls) {
       expect(call.command).toBe(path.join(bin, 'node.exe'));
-      expect(call.args[0]).toBe(cli);
       expect(call.options).toMatchObject({ shell: false, detached: false, windowsHide: true });
     }
+    expect(calls[0]!.args[0]).toBe(cli);
+    expect(calls[1]!.args).toEqual(['preview-server.mjs']);
     const root = path.dirname(calls[0]!.options.cwd as string);
     await process.dispose();
     expect(calls[2]).toMatchObject({ command: 'taskkill', args: ['/PID', String(calls[1]!.child.pid), '/T', '/F'], options: { shell: false } });
