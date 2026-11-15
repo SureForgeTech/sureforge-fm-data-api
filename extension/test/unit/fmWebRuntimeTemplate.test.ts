@@ -241,8 +241,9 @@ describe('FM Web runtime template', () => {
       expect(MANAGED_TEMPLATE_FILES['package.json']).toContain(normalizedHash(await readFile(file)));
     };
     await assertScripts();
-    // The last shipped manifest, before loopback binding was added.
+    // The last shipped manifest, before loopback binding was added. It carried Next.js 16.4.2.
     const previous = JSON.parse(await readFile(file, 'utf8'));
+    previous.dependencies.next = '16.4.2';
     previous.scripts.dev = 'next dev';
     delete previous.scripts.start;
     await writeFile(file, `${JSON.stringify(previous, null, 2)}\n`);

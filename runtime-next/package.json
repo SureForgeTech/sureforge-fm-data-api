@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@fmweb/shared": "file:../shared",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
   },
@@ -24,7 +24,7 @@
     "@types/react-dom": "^19.3.0",
     "@typescript-eslint/eslint-plugin": "^8.72.2",
     "@typescript-eslint/parser": "^8.72.0",
-    "eslint": "^10.14.0",
+    "eslint": "^10.15.0",
     "eslint-config-prettier": "^10.1.2",
     "globals": "^17.14.0",
     "jsdom": "^31.0.1",
