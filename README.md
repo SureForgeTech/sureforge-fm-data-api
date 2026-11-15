@@ -1,20 +1,20 @@
 # FileMaker Data API Tools for VS Code
 
-[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Marketplace installs](https://vsmarketplacebadges.dev/installs/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/filemaker-data-api-for-vs-code)](LICENSE)
+[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Marketplace installs](https://vsmarketplacebadges.dev/installs/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](LICENSE)
 
 A free, open-source VS Code extension for the FileMaker Data API: connect, query, edit records, compare schemas, export and update in batches, generate TypeScript types, and (optionally, off by default) give AI tools safe access, including a read-only `@filemaker` chat participant. MIT licensed, no telemetry.
 
 Install it from the Marketplace: search for **FileMaker Data API Tools** (publisher SureForgeTech), or run `code --install-extension SureForgeTech.filemaker-data-api-tools`.
 
-Version **1.8.0** adds a **Browse** button in the connection wizard for a custom CA certificate, clearer sign-in errors that explain the two common causes and link to the fix, and the field-order and panel fixes listed in the changelog. See the [upgrade notes](extension/UPGRADE.md) before importing a file.
+Version **1.9.0** adds new related portal rows to Create Record on direct connections. It mostly improves safety: batch updates follow write rules, old saved addresses lose embedded credentials safely, and server responses and the source-checkout FM Web preview have tighter limits. Read the [upgrade notes](extension/UPGRADE.md) for the new prompts and settings rules.
 
-One real FileMaker server was exercised on **2026-10-21**, but its version was not recorded. No server version has a completed recorded smoke test; see [Compatibility](extension/docs/COMPATIBILITY.md). FileMaker Cloud sign-in with a Claris ID is **not supported**.
+We have used it against one of our own FileMaker Servers and a built-in mock of the Data API. We would love more people to try it on other server versions and setups and tell us what they find: see [Compatibility](extension/docs/COMPATIBILITY.md) and [open an issue](https://github.com/SureForgeTech/sureforge-fm-data-api/issues) with anything you notice. FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 
 ## Documentation
 
 | I want to... | Read |
 | --- | --- |
-| Browse the website | [Documentation home](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/), [User Guide](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/guide/) and [Changelog by version](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/changelog/) |
+| Browse the website | [Documentation home](https://sureforgetech.github.io/sureforge-fm-data-api/), [User Guide](https://sureforgetech.github.io/sureforge-fm-data-api/guide/) and [Changelog by version](https://sureforgetech.github.io/sureforge-fm-data-api/changelog/) |
 | Use the extension | [User Guide](extension/docs/USER_GUIDE.md) |
 | Common questions | [FAQ](extension/docs/FAQ.md) |
 | Fix a connection problem | [Troubleshooting](extension/docs/TROUBLESHOOTING.md) |
@@ -23,7 +23,7 @@ One real FileMaker server was exercised on **2026-10-21**, but its version was n
 | Upgrade between versions | [Upgrade notes](extension/UPGRADE.md) and the [Changelog](extension/CHANGELOG.md) |
 | Understand security and data handling | [Security overview](docs/security.md), [Data handling](docs/DATA_HANDLING.md), [Privacy policy](PRIVACY.md) |
 | Report a vulnerability | [Security policy](SECURITY.md) |
-| Contribute code or docs | [Contributing](extension/CONTRIBUTING.md), [Architecture](extension/ARCHITECTURE.md), [API reference](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/api/) |
+| Contribute code or docs | [Contributing](extension/CONTRIBUTING.md), [Architecture](extension/ARCHITECTURE.md), [API reference](https://sureforgetech.github.io/sureforge-fm-data-api/api/) |
 | Cut a release | [Release process](docs/RELEASE.md), [cadence](docs/RELEASE_CADENCE.md), [rollback](docs/ROLLBACK.md) |
 | Understand a design decision | [Architecture decision records](docs/ADR/README.md) |
 

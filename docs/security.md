@@ -30,6 +30,17 @@ falls back to an AES-256-GCM envelope in workspace state when SecretStorage is
 unavailable. That fallback is obfuscated, not protection against anyone with
 local access to VS Code state: its key derives from the machine ID.
 
+Old saved server addresses containing a user name or password are cleaned only
+after any password has been saved securely; an existing saved password is kept.
+A warning asks the user to re-enter or confirm the credential in Edit Connection
+Profile. If storage is unavailable, the original entry remains for a later attempt.
+A user name with no password is also removed. A URL password moves only for direct-auth profiles; a proxy-mode entry with a URL password is left as it was. The warning appears whenever an address contains credentials, even if the stored value is kept.
+New credential-bearing addresses are refused. Test Connection keeps the temporary
+password or proxy API key and session token in memory only, closes its throwaway
+session and never changes the saved profile's secrets. Removing a profile attempts to close
+its server session before deleting local credentials. Connect warns once per
+profile per session before using a remote plain `http://` address.
+
 ## Direct mode
 
 In direct mode the extension talks straight to the FileMaker Data API
@@ -141,24 +152,94 @@ request with:
 2. **Localhost socket check**: non-loopback peers are rejected.
 3. **Per-session bridge token**: a 256-bit random token must be sent
    in the `X-FM-Bridge-Token` header. The token is generated on each
-   `ensureStarted()` and discarded on `stop()`.
-4. **Origin allow-list**: cross-origin requests must come from
-   explicitly allowed origins.
+   bridge start and discarded on `stop()`.
+4. **Origin allow-list**: every request must carry exactly
+   `http://localhost:3000` or `http://127.0.0.1:3000` as its Origin.
+   Missing origins, HTTPS and other ports are refused. The preview dev/start
+   scripts and extension launch bind to `127.0.0.1:3000`; if that port is busy,
+   stop its existing service before starting the preview.
 5. **Rate limit and request budget** (see `filemaker.fmWeb.bridge.*`
    settings): token-bucket rate limiter + hard per-token-lifetime
    request cap. Throttled requests receive `HTTP 429` with
    `Retry-After`; budget-exhausted clients must restart the bridge.
 
-The trust boundary is **the bridge token + localhost binding**. Any
-local process that obtains the token can call the bridge as if it
-were the trusted runtime. The token lives in the extension host's
-memory and, so the preview app can send it, in the generated runtime's
-`.env.local` (`.fmweb/generated/runtime-next/.env.local`, owner-only,
-with a `.gitignore` beside it) as `NEXT_PUBLIC_FMWEB_BRIDGE_TOKEN`. That
-name means Next.js also puts it in the preview app's browser bundle, so
-treat the preview page like any other local client of the bridge. A new
-token is generated each time the bridge starts; rate limiting bounds the
-blast radius if it is exfiltrated.
+The bridge token is held only in the extension host and the private Next server's
+`FMWEB_BRIDGE_TOKEN` environment variable. It is never a `NEXT_PUBLIC_` value,
+written into `.env.local`, or passed to browser JavaScript. Browser calls go to
+`/api/bridge/<route>`; that server route validates the session, Host and exact
+Origin before adding the token to a fixed, allowlisted bridge request. It does
+not forward client credentials or upstream headers. Origin alone cannot
+authenticate a local process; possession of the private session cookie is required.
+
+At each start the extension generates independent random 256-bit launch and
+session credentials and passes both only through the server process environment.
+Once Next reports ready, the extension opens `http://127.0.0.1:3000/?launch=...`
+in the user's browser. Proxy exchanges the launch code once, within two minutes
+of server start, for an HttpOnly, SameSite=Strict, Path=/ session cookie and
+redirects to `/` without the code. An exclusively created file in the private
+temporary directory makes redemption single-use across workers and recompiles.
+Pages and assets without the cookie receive 401 (Next.js development endpoints,
+such as live reload, are outside the cookie check); the bridge-proxy route also
+checks the cookie independently and returns 401 without it. Wrong Host values
+are refused: only `127.0.0.1:3000` and `localhost:3000` are accepted. This prevents
+DNS rebinding. Preview responses use no-store and launch responses suppress the
+Referer. Server request output is not displayed because it could include the
+launch code. Restarting stops the old preview and bridge and changes all credentials.
+A busy port is an error; the extension never opens an existing service as its preview.
+
+This protects against another local OS user who can connect to loopback but
+cannot read the victim's private files, browser cookies or process environment.
+That user gets 401 without a cookie and cannot obtain the bridge token from
+served HTML or browser bundles. Root, processes able to read the victim's process
+environment, malicious software running as the victim, a compromised browser or
+extension, stolen/shared launch links or cookies, and malicious downloaded
+packages are outside this boundary. Cookies are scoped to a host, not a port;
+use the launched 127.0.0.1 URL and do not send the preview cookie to other local
+services. A local attacker can still occupy port 3000 to deny startup.
+
+Before running, the extension compares generated runtime files with the shipped
+template and shared sources. The start modal lists ignored edited or added files:
+configuration such as `.npmrc` and `.env*`, custom runtime files and lockfiles.
+Workspace dependencies and build output are also ignored. These are left alone. A layout whose generated file
+is edited or linked is skipped with a warning. Starting never deletes user files.
+Only **Generate FM Web Next.js App** offers **Regenerate from template**: a modal
+names exactly which files or folders (including their contents) it will delete,
+and cancellation leaves them alone. No repository marker establishes dependency
+provenance.
+
+Execution uses a fresh private temporary copy of the shipped files and generated
+layout JSON, with a fresh dependency tree and private npm cache. Temporary folders
+use the `fmweb-preview-` prefix and a `.fmweb-preview-owner` marker naming the owning
+extension-host process. Cleanup stops the process tree and removes the private
+folder; stale marked folders older than a day are removed only after the owning
+process no longer exists. Active windows' folders are left alone. On Windows, the preview searches absolute PATH entries for `node.exe` and `node_modules\npm\bin\npm-cli.js` (the standard Node.js installer layout); these can be in separate entries. A version manager such as nvm-windows works only if its PATH entries expose both files in those locations; a non-standard npm location may produce **Could not find Node.js and npm on PATH**. On macOS and Linux, the preview runs `npm` from PATH. No command shell or console window opens,
+and cancellation stops the process tree too.
+
+`npm install --ignore-scripts` uses the public npm registry, empty pinned user
+and global config files, an explicit prefix and a limited process environment.
+No project npm configuration or `.env` override is used or changed. Proxy variables
+and `NODE_EXTRA_CA_CERTS` pass through. The template dev script runs with npm
+pre/post scripts disabled and binds Next to 127.0.0.1:3000. The Run modal describes
+both commands. Each start resolves package versions with `npm install`; no
+workspace lockfile is reused. Fresh downloads and startup on every platform
+remain unverified in this offline documentation preparation. Failed installs
+stop rather than retrying with scripts. The system Node/npm and PATH must be
+trusted. The generated `.env.local` holds only a non-secret notice; cancelling
+also removes legacy saved bridge entries while preserving unrelated env lines.
+
+There are no new network destinations in 1.9.0. Preview dependencies still come
+from `registry.npmjs.org`; preview traffic uses loopback and the configured
+FileMaker server or proxy. AI providers are reached only through opted-in AI use.
+
+Every preview `/runScript` request asks in a VS Code modal naming the exact
+script, layout, parameter and connection host, and says it came from a layout
+file. All Unicode category C and default-ignorable characters are visibly
+escaped, and the parameter length is shown. Layout Mode uses the same escaping
+and displays the layout execution will actually use. Values that exceed the
+confirmation display bounds are refused in full, never shortened for approval.
+Only one prompt may be pending, with a five-second cooldown after it closes;
+other bridge routes keep their existing behavior. Layout URL actions accept
+only HTTP and HTTPS; runtime tabs use `noopener,noreferrer`.
 
 ## Workspace trust and restrict-only policy
 
@@ -168,23 +249,41 @@ blast radius if it is exfiltrated.
   files, plugins, the FM Web commands and preview, and AI tools need a trusted
   workspace. Trust is evaluated at each use, and an open record editor or
   Script Runner refuses changes if trust is lost. `capabilities.untrustedWorkspaces` in `package.json` lists the
-  settings that are ignored in an untrusted workspace.
+  settings that are ignored in an untrusted workspace. The workspace enterprise
+  file is ignored, offline schema caches are not used, and environment and layout
+  comparison are unavailable until trust is granted. Trusted offline caches are
+  checksum-checked before use; altered content is refused.
 - Enterprise mode, the enterprise role, offline mode and the
   `filemaker.features.*.enabled` switches are **restrict-only** for workspace
   settings and `.vscode/filemaker.config.json`: a repository may turn
   enterprise mode on, lower the role, turn offline mode on or a feature off,
   and may never do the reverse. The baseline is the user's own setting.
 - The `filemaker.ai.*` settings that widen access are read from user settings
-  only, including in dev containers and Codespaces.
+  only, including in dev containers and Codespaces. In 1.9.0,
+  `filemaker.snippets.includeAuthByDefault`, `filemaker.schema.hashAlgorithm`,
+  `filemaker.fmWeb.bridge.rateLimitPerSecond`, `filemaker.fmWeb.bridge.rateLimitBurst`
+  and `filemaker.fmWeb.bridge.requestBudget` are also User-only; workspace values
+  are ignored.
+- Executing batch updates needs record editing enabled and enterprise permission
+  for batch, record and write operations; policy and offline mode are checked
+  again before each row. Dry runs still write nothing and work with writes
+  disabled or offline mode on; an offline dry run does not contact the server. Dry runs still require `filemaker.features.batch.enabled` and a trusted folder.
+  Trust Server Certificate and Set AI Access follow locked-profile and write
+  rules and are unavailable offline.
+- Offline metadata cache folders ignore their own contents in Git using `*` and `!.gitignore`;
+  the `.gitignore` itself stays visible and can be committed. Schema snapshots are not ignored and remain available to commit.
 
 ## Confirmations
 
 The extension asks before it: saves a record (listing the changed fields),
 deletes a record, executes a batch update (and asks whether to check each record for newer changes or overwrite them, or whether to continue when the file has no modId column), warns before saving text that contains a NUL character, asks before overwriting generated files that the extension did not write, asks twice before Test My Server's write test (create, edit, delete a scratch record) and before it runs a script, runs workspace plugins, starts the
-FM Web preview (`npm install`, `npm run dev`), runs a Layout Mode `runScript`
+FM Web preview (`npm install`, `npm run dev`), runs a Layout Mode or FM Web preview `runScript`
 behavior, sends credentials to an address that came from a workspace profile
 template or to a remote `http://` address, switches AI tools back on, and for
-every AI write, delete or script run.
+every AI write, delete or script run. AI, plugin and layout/preview script
+confirmations show hidden characters as visible escapes and refuse values too
+long to show in full. Cancelling a script prompt runs no script; cancelling preview startup clears
+saved bridge credentials.
 
 ## Plugins
 
@@ -202,7 +301,14 @@ one redaction function. It hides authorization headers, session tokens
 (including in request paths such as `DELETE /sessions/<token>`), token-like
 query parameters, JSON keys whose names contain `token`, `secret`, `password`,
 `session` or `apiKey`, and user names and passwords inside URLs. Request
-history keeps metadata, not record bodies.
+history keeps metadata, not record bodies. Error notifications use shortened,
+one-line text and break injected links while keeping bracketed codes and file
+paths readable. Copied reports keep server text inside code blocks. Record Editor
+and Record Viewer open container links only on the selected connection's own
+server. Suggested save names keep case and extension while unsafe characters
+are removed; layout and query names in exported data stay exact. Comparison
+reports and generated client README files display names without letting them
+add links, images or table rows.
 
 ## AI features
 
@@ -225,6 +331,8 @@ model are in [ADR-0004](./ADR/ADR-0004-ai-integration.md).
   outside the workspace without field values.
 - The **Write AI Context** file contains structure only (names), is filtered to
   an allowlist of characters, and is written outside the repository by default.
+  It does not need `filemaker.ai.enabled`, but still follows
+  `filemaker.features.ai.enabled`, enterprise AI policy and offline mode.
 
 What it cannot do: once data is in a model's context it can leave through the
 model provider and through any shell, web or git tool the same agent has.
@@ -248,3 +356,44 @@ model or on the user. See also the [AI section of DATA_HANDLING.md](./DATA_HANDL
 ## Reporting security issues
 
 Do not open a public issue. Follow the [security policy](../SECURITY.md).
+
+## FileMaker request and batch budgets
+
+Every direct and proxy HTTP exchange is time-limited, and the limit depends on
+the kind of request. The base value is `filemaker.requestTimeoutMs` (15 seconds
+by default, maximum 120000 ms (2 minutes)); the 30 minute ceiling cannot be raised
+from settings.
+
+- **Other requests: scripts, writes, layout metadata, sign-in, sign-out and discovery** have a
+  wall-clock deadline. Receiving headers or dripping body bytes does not extend
+  it.
+- Only record GET and find reads (including proxy `getRecord`/`findRecords`) renew the deadline after each 64 KiB of body arrives, so a healthy slow transfer finishes and a stalled or dripping one
+  stops.
+- **Uploads** have a wall-clock deadline for the whole exchange, including the
+  response wait. It grows with the body size at 32 KiB per second (including
+  multipart or proxy base64 overhead), lasts at least the request timeout, and
+  has a 30 minute ceiling. Stalled uploads stop at that deadline; socket activity
+  does not renew it. Connection setup, including DNS and proxy lookup, still
+  uses the base timeout.
+- **Every transfer** also has a 30 minute ceiling.
+
+Caller cancellation still stops any request. Session retirement uses at most
+three seconds.
+
+Responses are limited to 64 MiB after decompression per HTTP request. Smaller
+explicit limits used by AI tools still apply. Large exports can use smaller
+pages; a page or schema response over the limit must be reduced at the source.
+Uploads retain the existing `filemaker.containerUploadMaxBytes` limit (100 MiB
+by default, configurable up to 2 GiB); the transport allows up to 3 GiB outbound
+to accommodate multipart and proxy base64 overhead. The response limit does not
+reduce the container upload allowance. These are per-request budgets, not a
+total export-size limit.
+
+`filemaker.batch.maxRecords` (10,000 by default) caps both exports and update-file
+rows, including dry runs. Oversized update files are refused before any records
+are changed; split the file or deliberately raise the setting before retrying.
+
+Timeouts say “request timed out (after N s)” after the action and name `filemaker.requestTimeoutMs`; uploads omit the seconds. After a
+change, they warn that it may have been applied. For an oversized response, the notice names the failed action (for example, “Failed to run find query.”); **maxContentLength size of 67108864 exceeded** is in **Details**, under **Stack trace (redacted)**, with no HTTP status. Reduce page size or the response
+at the source; a larger timeout does not raise the cap. HTTP 413 is the server or gateway's
+request-size limit, separate from this response cap.

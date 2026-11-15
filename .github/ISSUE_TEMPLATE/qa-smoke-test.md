@@ -6,7 +6,7 @@ labels: ["qa", "smoke-test"]
 assignees: []
 ---
 
-> Run the checks in [extension/docs/QA/SMOKE_TEST.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/QA/SMOKE_TEST.md). Tick boxes here as you go.
+> Run the checks in [extension/docs/QA/SMOKE_TEST.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/QA/SMOKE_TEST.md). Tick boxes here as you go.
 >
 > Replace the placeholders in the title with the version, your initials and the date (e.g. `v1.4.0 QA: smoke test — AD 2026-10-20`).
 

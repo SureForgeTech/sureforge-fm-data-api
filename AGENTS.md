@@ -1,4 +1,4 @@
-# Agent instructions: filemaker-data-api-for-vs-code
+# Agent instructions: sureforge-fm-data-api
 
 <!-- fleet-core:begin (generated: edit the fleet source, not this block) -->
 ## Fleet core

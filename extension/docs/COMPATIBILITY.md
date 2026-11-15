@@ -6,7 +6,7 @@ This extension talks to FileMaker through the FileMaker Data API. A server is co
 
 One real FileMaker server was exercised on **2026-10-21**, but its FileMaker Server version was **not recorded**. The recorded checks included a no-match find (HTTP 200, FileMaker code 401, empty data), text and field behavior, and Diagnose Connection with a valid Let's Encrypt certificate and TLS 1.2. These findings apply to that server only; they do not complete a smoke test for any named version. The Data API engine name and API path do not identify the installed FileMaker Server release. Ask the administrator for the version before recording a version-specific result.
 
-FileMaker Server **19, 20, 21 and 22** all still need a completed smoke test with the installed version recorded. FileMaker Cloud is untested, and **Claris ID sign-in is not supported**. The mock and automated tests do not prove compatibility with a real server version. See the [recorded findings and remaining checks](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/FILEMAKER_FAILURE_MODES.md).
+FileMaker Server **19, 20, 21 and 22** all still need a completed smoke test with the installed version recorded. FileMaker Cloud is untested, and **Claris ID sign-in is not supported**. The mock and automated tests do not prove compatibility with a real server version. See the [recorded findings and remaining checks](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/FILEMAKER_FAILURE_MODES.md).
 
 ## Server Matrix
 
@@ -26,7 +26,8 @@ No supported version is currently documented as known-broken. If you find a vers
 | Feature | Compatibility note |
 | --- | --- |
 | Direct Data API sessions | Requires HTTPS reachability and an account with `fmrest`. The default API base path is `/fmi/data`. |
-| Container fields | Container metadata and URLs are supported. Actual download behavior depends on server networking, SSL configuration, and whether returned container URLs are reachable from VS Code. |
+| Container fields | Container metadata and URLs are supported. Record Editor and Record Viewer open links only on the selected connection's own server. Reachability still depends on networking and certificates. |
+| Create Record portal rows | 1.9.0 can create new related rows with the parent on direct connections. Existing related rows are not edited; proxy connections do not support it. Mock-tested only; real-server compatibility is unverified. |
 | Value lists | Value list discovery depends on FileMaker layout metadata returned by the Data API. Layout-specific or privilege-filtered value lists may differ by account. |
 | Scripts | Script listing and execution depend on the account's privileges and the script being available to the selected layout/database context. |
 | OAuth / SSO | Direct mode currently uses FileMaker username/password credentials stored in VS Code SecretStorage. OAuth or SSO-specific flows are not implemented; use a compatible proxy if your organization requires custom identity handling. |
@@ -43,7 +44,7 @@ The extension runs on macOS, Windows and Linux desktops (VS Code 1.96 or newer).
 | Linux (x64) | The same, on `ubuntu-latest` (the required `build-test` check also runs there). | Not tested: other distributions, Linux on ARM, `XDG_RUNTIME_DIR` setups other than the runner's. |
 | macOS | Not in CI. It is the platform the extension is developed on, so the tests are run there by hand; the Unix-socket tests also run on Linux in CI. | Intel and Apple silicon are both expected to work. |
 
-What no platform's automated run covers: the real VS Code user interface (the Playwright journeys in `extension/e2e-ui` are run by hand, on macOS), and a real FileMaker Server (the tests use the mock Data API).
+The first-run VS Code smoke journey now runs in GitHub CI on Linux against the mock (test the connection, save the profile, connect, run the first query). The wider UI journeys also have a Linux CI job. No automated run proves compatibility with a real FileMaker Server; the tests use the mock Data API.
 
 Known platform limits:
 
@@ -52,18 +53,18 @@ Known platform limits:
 - **Remote windows are not supported** for the AI server (SSH, WSL, Dev Containers, Codespaces): the extension host runs on the remote machine while the MCP client runs on yours, so the local pipe or socket cannot be reached. The command says so and does not start.
 - **Links.** Writes that go through a symbolic link or a directory junction are refused on every platform. On Windows, creating a directory symbolic link needs administrator rights or Developer Mode, a junction does not; both are refused the same way.
 - **Read-only files.** A file marked read-only is updated in place of the old one and stays read-only on every platform (on Windows a rename over a read-only file needs the attribute cleared first, which the extension does for the moment of the replacement).
-- **Case-insensitive file systems.** Windows and default macOS volumes treat `Layout.ts` and `layout.ts` as one file. Names that differ only in letter case can therefore share a generated file; names that differ in any other way get a hash suffix.
+- **Case-insensitive file systems.** Windows and default macOS volumes treat `Layout.ts` and `layout.ts` as one file. Layout names that differ only in letter case now get separate generated type files with short hash suffixes, so their output does not overwrite each other.
 - **Reserved Windows names.** Generated file names avoid `CON`, `NUL`, `COM1` and similar names, and configured paths containing them, drive-relative paths (`C:x`), alternate data streams (`file:stream`), short names (`GIT~1`) or a trailing dot or space are refused.
 - **Line endings.** Generated files are written with LF. A repository checkout on Windows keeps LF (`.gitattributes` sets `eol=lf`), and checks that compare generated files with committed ones ignore CRLF.
 
-To check your own machine, run the same commands as CI (see [CI.md](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/CI.md#cross-platform-job)).
+To check your own machine, run the same commands as CI (see [CI.md](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/CI.md#cross-platform-job)).
 
 ## Version Selection Guidance
 
 - Leave **API Base Path** set to `/fmi/data` unless your proxy or server deployment requires a custom route.
 - Leave **API Version** set to `vLatest` unless you need to pin behavior for a specific server version.
 - Test each saved profile after changing server version, credentials, proxy settings, SSL certificates, or firewall rules.
-- Run the [smoke test](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/QA/SMOKE_TEST.md) against at least one representative server before rolling the extension out to a team.
+- Run the [smoke test](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/QA/SMOKE_TEST.md) against at least one representative server before rolling the extension out to a team.
 
 ## Reporting Gaps
 

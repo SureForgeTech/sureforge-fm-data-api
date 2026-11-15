@@ -1,8 +1,8 @@
 # FileMaker Data API Tools
 
-[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Last commit](https://img.shields.io/github/last-commit/SureForgeTech/filemaker-data-api-for-vs-code)](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/commits/main) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/filemaker-data-api-for-vs-code)](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/LICENSE)
+[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Last commit](https://img.shields.io/github/last-commit/SureForgeTech/sureforge-fm-data-api)](https://github.com/SureForgeTech/sureforge-fm-data-api/commits/main) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/LICENSE)
 
-For Claris FileMaker Server (Data API). FileMaker Cloud sign-in with a Claris ID is not supported yet; Cloud is untested.
+For Claris FileMaker Server (Data API). FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 
 Connect to any FileMaker Data API server and run queries, browse schema, edit records, and export results — without leaving VS Code.
 
@@ -10,9 +10,9 @@ Connect to any FileMaker Data API server and run queries, browse schema, edit re
 
 **Built by [ABD Enterprises](https://abdenterprises.com).** Free, open source (MIT), no telemetry, no cloud account.
 
-Version **1.8.0** adds a **Browse** button in the connection wizard for a custom CA certificate, clearer sign-in errors that explain the two common causes and link to the fix, and the field-order and panel fixes listed in the changelog. See the [upgrade notes](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/UPGRADE.md) before importing a file.
+Version **1.9.0** adds new related portal rows to Create Record on direct connections. It mostly improves safety: batch updates follow write rules, old saved addresses lose embedded credentials safely, and server responses and the source-checkout FM Web preview have tighter limits. Read the [upgrade notes](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/UPGRADE.md) for the new prompts and settings rules.
 
-One real FileMaker server was exercised on **2026-10-21**, but its version was not recorded. No server version has a completed recorded smoke test; see [Compatibility](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/COMPATIBILITY.md). FileMaker Cloud sign-in with a Claris ID is **not supported**.
+We have used it against one of our own FileMaker Servers and a built-in mock of the Data API, and we would love more people to try it on other server versions and setups and tell us what they find. See [Compatibility](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/COMPATIBILITY.md), and [open an issue](https://github.com/SureForgeTech/sureforge-fm-data-api/issues) with anything you notice. FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 
 ## What it does
 
@@ -23,14 +23,14 @@ One real FileMaker server was exercised on **2026-10-21**, but its version was n
 - **Copy any request as code**: curl, fetch(), a `.http` file, a Postman collection or TypeScript, from the Query Builder, Script Runner, record panels or the Command Palette. Passwords and tokens are never copied.
 - **Track schema**: capture snapshots, diff them, compare environments, and generate TypeScript types, a typed client and editor snippets.
 - **Batch**: export to JSONL or CSV, or update many records from a CSV or JSON file, with a dry run first.
-- **Control**: workspace trust (Restricted Mode keeps editing, scripts and batch jobs off), an enterprise mode with roles, an offline metadata mode, and confirmation before risky actions.
+- **Control**: workspace trust (Restricted Mode keeps editing, scripts and batch jobs off), an enterprise mode with roles (off by default), an offline metadata mode (off by default), and confirmation before risky actions.
 - **Trust a private server on purpose**: for FileMaker Server's default certificate or a company certificate, review the certificate in the connection wizard and trust exactly that one by its fingerprint. A different certificate later is refused before credentials are sent, including with VS Code's default proxy setting. This needs a direct route; a required proxy is refused with advice. See the User Guide's Certificates section.
 - **AI, off by default**: give AI coding tools your real layout names, let an agent in VS Code or an MCP client (Claude Code, Cursor) read records and, with your approval, change one record at a time, or ask `@filemaker` in the Chat view (read only).
 - **Windows, Linux and macOS**: build, lint, type check and the unit tests run on Windows and Linux in CI.
 
 ## Product tour
 
-The screenshots show a mock FileMaker Data API with made-up data (names and `example.com` addresses), not a real server. The first screenshot is from the current version; the rest were taken in an older one, so version labels and some field styling differ and panels now follow the editor theme.
+The screenshots use made-up data (names and `example.com` addresses).
 
 ![The query builder on the Contacts layout: field pickers, a populated find request and a preview of the matching rows](docs/marketplace/query-builder-hero.png)
 
@@ -70,19 +70,19 @@ Capture schema snapshots and compare them to see which fields were added, remove
 
 ## Security & Trust
 
-- **Credentials stay in your keychain**: passwords, API keys and session tokens live in the OS keychain through VS Code's SecretStorage API, not in settings or logs.
+- **Credentials stay in your keychain by default**: passwords, API keys and session tokens use VS Code SecretStorage. The optional workspace-state fallback is obfuscation only. Old saved addresses with embedded passwords are cleaned only after secure storage succeeds; Test Connection keeps temporary credentials in memory.
 - **No telemetry, no cloud account**: no telemetry is collected and nothing is sent to the extension's authors — there is no account to sign in to; it talks only to your FileMaker server or your proxy (and an AI provider you switch on yourself, off by default).
-- **Read only in an untrusted folder**: in Restricted Mode an untrusted workspace stays read only — you can browse, read metadata and run finds; editing, writing and plugins need a trusted workspace.
-- **Report a vulnerability**: follow the [security policy](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/SECURITY.md) for how to report one.
+- **Read only in an untrusted folder**: you can browse, read server metadata and run finds. Workspace enterprise configuration and offline schema caches are ignored; comparison, editing, writing and plugins need trust.
+- **Report a vulnerability**: follow the [security policy](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/SECURITY.md) for how to report one.
 
 ## Requirements
 
-- FileMaker Server with the **Data API** enabled, reachable over HTTPS. FileMaker Cloud is untested: the extension has no Claris ID login, and whether a tenant accepts an account name and password is not confirmed.
+- FileMaker Server with the **Data API** enabled, reachable over HTTPS. FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 - A FileMaker account whose privilege set has the **`fmrest`** extended privilege.
 - A server certificate your computer trusts. For FileMaker Server's default certificate, a private authority or a self-signed certificate, the connection wizard lets you review the certificate and trust exactly that one (or set a CA file). Trusting a fingerprint works on direct connections with VS Code's default proxy setting too. A required proxy is refused for a pinned connection; custom CA profiles keep their existing routing (see the User Guide, Certificates).
 - VS Code 1.96 or newer on a macOS, Windows or Linux desktop, with a folder open (virtual workspaces such as github.dev are not supported). The AI server for MCP clients does not run in remote windows (SSH, WSL, Dev Containers, Codespaces).
 
-See [Compatibility](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/COMPATIBILITY.md) for server versions, operating systems and what has and has not been tested. The automated tests run against a mock of the Data API built from Claris's documentation.
+See [Compatibility](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/COMPATIBILITY.md) for server versions, operating systems and what we have tested so far. We use our own FileMaker Server and a mock of the Data API built from Claris's documentation, and reports from other server versions and setups are very welcome: [open an issue](https://github.com/SureForgeTech/sureforge-fm-data-api/issues) with what you find.
 
 ## Install
 
@@ -90,7 +90,7 @@ See [Compatibility](https://github.com/SureForgeTech/filemaker-data-api-for-vs-c
 2. Search for `FileMaker Data API Tools` (publisher SureForgeTech).
 3. Select **Install**.
 
-To install a specific version, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/releases) and run **Extensions: Install from VSIX...**.
+To install a specific version, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) and run **Extensions: Install from VSIX...**.
 
 ## Quick start
 
@@ -98,11 +98,11 @@ To install a specific version, download the `.vsix` from the [GitHub releases](h
 2. Select **Test Connection**, then **Save Profile**, then **Connect Now**.
 3. Run **FileMaker: Open Query Builder**, pick a layout, add a condition and select **Run**.
 
-For guided steps, run **FileMaker: Open Getting Started Walkthrough**. The full manual is the [User Guide](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/USER_GUIDE.md) (also in VS Code: **FileMaker: Open User Guide**).
+For guided steps, run **FileMaker: Open Getting Started Walkthrough**. The full manual is the [User Guide](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/USER_GUIDE.md) (also in VS Code: **FileMaker: Open User Guide**).
 
 ## AI tools
 
-Off by default. Turn on `filemaker.ai.enabled` in your **user** settings (a workspace setting cannot), pick a connection with **FileMaker: Set AI Access for Connection**, and AI tools in VS Code (for example Copilot agent mode) can list layouts and scripts, describe a layout, find and read records, and explain error codes. With `filemaker.ai.allowWrites` they can also create, edit and delete one record at a time, and with `filemaker.ai.allowScripts` run scripts you put on `filemaker.ai.scriptAllowlist`. **FileMaker: Write AI Context** writes a short file of layout, field and script names that AI coding tools can load.
+Off by default. Turn on `filemaker.ai.enabled` in your **user** settings (a workspace setting cannot), pick a connection with **FileMaker: Set AI Access for Connection**, and AI tools in VS Code (for example Copilot agent mode) can list layouts and scripts, describe a layout, find and read records, and explain error codes. With `filemaker.ai.allowWrites` they can also create, edit and delete one record at a time, and with `filemaker.ai.allowScripts` run scripts you put on `filemaker.ai.scriptAllowlist`. **FileMaker: Write AI Context** writes a short local file of layout, field and script names without needing to turn AI tools on; offline mode and the feature and enterprise AI rules still apply.
 
 **Chat with `@filemaker`.** In VS Code's Chat view, `@filemaker /layouts`, `/describe`, `/find` and `/explain` read the database through the same tools and rules, read only, with everything from the database shown as plain text. See the User Guide, "Chat with @filemaker".
 
@@ -131,7 +131,7 @@ Notes: with several VS Code windows running the server, the config names the fol
 
 See `docs/DATA_HANDLING.md` and ADR-0004 for the full list.
 
-Details: [Using AI with FileMaker](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/USER_GUIDE.md#using-ai-with-filemaker) and [Data handling](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/DATA_HANDLING.md).
+Details: [Using AI with FileMaker](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/USER_GUIDE.md#using-ai-with-filemaker) and [Data handling](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/DATA_HANDLING.md).
 
 ## Common commands
 
@@ -164,18 +164,18 @@ Details: [Using AI with FileMaker](https://github.com/SureForgeTech/filemaker-da
 - In Restricted Mode (an untrusted folder) you can browse, read metadata and run finds. The connection wizard says so and offers **Manage Workspace Trust**.
 - The extension collects no telemetry. It talks only to your FileMaker server or your proxy.
 
-Read the [security overview](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/security.md), the [data handling notes](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/docs/DATA_HANDLING.md), and the [security policy](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/SECURITY.md) for how to report a vulnerability. What the extension stores and never sends is written down in the [privacy policy](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/PRIVACY.md).
+Read the [security overview](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/security.md), the [data handling notes](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/docs/DATA_HANDLING.md), and the [security policy](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/SECURITY.md) for how to report a vulnerability. What the extension stores and never sends is written down in the [privacy policy](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/PRIVACY.md).
 
 ## Documentation
 
 | I want to... | Read |
 | --- | --- |
-| Browse the website | [Documentation home](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/) |
-| Use the extension | [User Guide](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/guide/) |
-| See version changes | [Changelog by version](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/changelog/) and [upgrade notes](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/upgrade/) |
-| Check supported versions | [Compatibility](https://sureforgetech.github.io/filemaker-data-api-for-vs-code/guide/compatibility/) |
-| Report a problem | [Report a bug or request a feature](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/issues) |
-| Help with the project | [Contributing](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/CONTRIBUTING.md) and [architecture](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/ARCHITECTURE.md) |
+| Browse the website | [Documentation home](https://sureforgetech.github.io/sureforge-fm-data-api/) |
+| Use the extension | [User Guide](https://sureforgetech.github.io/sureforge-fm-data-api/guide/) |
+| See version changes | [Changelog by version](https://sureforgetech.github.io/sureforge-fm-data-api/changelog/) and [upgrade notes](https://sureforgetech.github.io/sureforge-fm-data-api/upgrade/) |
+| Check supported versions | [Compatibility](https://sureforgetech.github.io/sureforge-fm-data-api/guide/compatibility/) |
+| Report a problem | [Report a bug or request a feature](https://github.com/SureForgeTech/sureforge-fm-data-api/issues) |
+| Help with the project | [Contributing](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/CONTRIBUTING.md) and [architecture](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/ARCHITECTURE.md) |
 
 ## Need help with FileMaker integration?
 
@@ -195,7 +195,7 @@ If you need a hand with the work behind the tool:
 
 ## License
 
-MIT. The licences of the third-party packages bundled into the extension are in [THIRD_PARTY_NOTICES.txt](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/THIRD_PARTY_NOTICES.txt).
+MIT. The licences of the third-party packages bundled into the extension are in [THIRD_PARTY_NOTICES.txt](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/THIRD_PARTY_NOTICES.txt).
 
 ## Trademarks
 

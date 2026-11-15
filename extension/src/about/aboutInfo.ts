@@ -1,6 +1,6 @@
 import { redactString } from '../utils/redact';
 
-export const REPO_URL = 'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code';
+export const REPO_URL = 'https://github.com/SureForgeTech/sureforge-fm-data-api';
 export const UNKNOWN = 'unknown';
 
 /** Keeps the whole new-issue URL well under what browsers and GitHub accept. */

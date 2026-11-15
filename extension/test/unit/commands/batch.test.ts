@@ -1,7 +1,14 @@
 import { join } from 'path';
+import { lstat } from 'fs/promises';
+import type * as FsPromises from 'fs/promises';
+
+vi.mock('fs/promises', async (importOriginal) => ({
+  ...await importOriginal<typeof FsPromises>(), lstat: vi.fn()
+}));
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import * as vscode from 'vscode';
 
+import { displayText } from '../../../src/ai/aiText';
 import { registerBatchCommands } from '../../../src/commands/batch';
 import { command, expectSafeError, layout, logger, profile, profileStore, resetCommandMocks, serviceError } from '../../helpers/commandHarness';
 
@@ -41,7 +48,10 @@ function updateInputs(dryRun = true, path = join('/tmp', 'input.json')) {
 }
 
 describe('batch commands', () => {
-  beforeEach(resetCommandMocks);
+  beforeEach(() => {
+    resetCommandMocks();
+    vi.mocked(lstat).mockReset().mockRejectedValue(Object.assign(new Error('missing'), { code: 'ENOENT' }));
+  });
 
   it.each(['batchExportFind', 'batchUpdateFromFile'])('%s opens only one set of dialogs during rapid repeated commands', async (name) => {
     setup();
@@ -144,6 +154,20 @@ describe('batch commands', () => {
     expect(vscode.window.showInformationMessage).toHaveBeenCalledWith('Started job 12345678 for batch export.');
   });
 
+  it.each([
+    ['../ Layout/Name\\x\0', 'Layout-Name-x'], ['..', 'export'], ['CON', '_CON'], ['LPT1', '_LPT1']
+  ])('uses a safe default export filename for %j while keeping the exact layout', async (name, safe) => {
+    const { tasks, batchService } = setup();
+    exportInputs();
+    vi.mocked(vscode.window.showQuickPick).mockResolvedValue('Standard CSV' as never);
+    await command('batchExportFind')({ ...arg, layout: name });
+    expect(vscode.window.showSaveDialog).toHaveBeenCalledWith(expect.objectContaining({
+      defaultUri: expect.objectContaining({ fsPath: `${safe}.jsonl` })
+    }));
+    await tasks[0]!({ log: vi.fn() } as never);
+    expect(batchService.batchExportFind).toHaveBeenCalledWith(profile, name, expect.anything(), expect.anything(), expect.anything());
+  });
+
   it('offers standard CSV first and forwards the optional Excel format', async () => {
     const { tasks, batchService } = setup();
     exportInputs();
@@ -183,6 +207,29 @@ describe('batch commands', () => {
     await tasks[0]!({ log: vi.fn() } as never);
     expect(batchService.batchExportFind).toHaveBeenCalledWith(profile, layout, { query: [{ Name: '*' }], sort: undefined },
       { outputPath: join('/tmp', 'results.jsonl'), format: 'jsonl', excelCompatible: false, maxRecords: 250 }, expect.anything());
+  });
+
+  it.each([undefined, 'Overwrite'])('requires explicit consent for an existing rewritten JSONL destination (%s)', async (answer) => {
+    const { roleGuard, jobRunner } = setup();
+    roleGuard.resolvePerformanceMode.mockReturnValue('high-scale');
+    exportInputs();
+    vi.mocked(lstat).mockResolvedValue({} as never);
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue(answer as never);
+    await command('batchExportFind')(arg);
+    expect(lstat).toHaveBeenCalledWith(join('/tmp', 'results.jsonl'));
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      expect.stringContaining('This file already exists. Replace it?'), { modal: true }, 'Overwrite');
+    expect(jobRunner.startJob).toHaveBeenCalledTimes(answer === 'Overwrite' ? 1 : 0);
+  });
+
+  it('aborts if the rewritten export destination cannot be checked', async () => {
+    const { roleGuard, jobRunner } = setup();
+    roleGuard.resolvePerformanceMode.mockReturnValue('high-scale');
+    exportInputs();
+    vi.mocked(lstat).mockRejectedValue(Object.assign(new Error('denied'), { code: 'EACCES' }));
+    await command('batchExportFind')(arg);
+    expect(jobRunner.startJob).not.toHaveBeenCalled();
+    expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('Export cancelled'));
   });
 
   it('does not schedule an export when find input is cancelled', async () => {
@@ -263,12 +310,25 @@ describe('batch commands', () => {
     expect(context.log).toHaveBeenCalledWith('warn', expect.stringMatching(/preview.*could not be opened/i));
   });
 
+  it('executes a confirmed batch with an unparsable profile URL', async () => {
+    const { profiles, tasks, batchService } = setup();
+    const target = { ...profile, serverUrl: 'bare-hostname' };
+    profiles.getProfile.mockResolvedValue(target);
+    updateInputs(false);
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValueOnce('Execute' as never).mockResolvedValueOnce('Continue' as never);
+    await command('batchUpdateFromFile')(arg);
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining(`server ${displayText(target.serverUrl)}.`), { modal: true }, 'Execute');
+    expect(tasks).toHaveLength(1);
+    await tasks[0]!({ log: vi.fn() } as never);
+    expect(batchService.batchUpdate).toHaveBeenCalledWith(target, layout, entries, { dryRun: false, concurrency: 3 }, expect.anything());
+  });
+
   it.each([undefined, 'Cancel', 'Execute'])('requires a destructive modal before executing updates (%s)', async (choice) => {
     const { tasks, jobRunner, batchService } = setup();
     updateInputs(false);
     vi.mocked(vscode.window.showWarningMessage).mockResolvedValueOnce(choice as never).mockResolvedValueOnce('Continue' as never);
     await command('batchUpdateFromFile')(arg);
-    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining(`Execute batch update for 1 records on ${layout}?`), { modal: true }, 'Execute');
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining(`Execute batch update for 1 records on ${displayText(layout)}?`), { modal: true }, 'Execute');
     if (choice === 'Execute') {
       const context = { log: vi.fn() };
       await tasks[0]!(context as never);
@@ -351,6 +411,33 @@ describe('batch commands', () => {
     expect(vscode.window.showWarningMessage).toHaveBeenCalledWith('No valid update rows found.');
     expect(vscode.window.showQuickPick).not.toHaveBeenCalled();
     expect(jobRunner.startJob).not.toHaveBeenCalled();
+  });
+
+  it('B4 escapes hostile confirmation names on one line and identifies the target without changing it', async () => {
+    const { profiles, tasks, batchService } = setup();
+    const target = { ...profile, name: 'Profile\n![x](https://host/beacon)', serverUrl: 'https://user:password@example.invalid:8443' };
+    profiles.getProfile.mockResolvedValue(target);
+    const targetLayout = ' Layout\nExecute anyway?\u202e ';
+    updateInputs(false);
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValueOnce('Execute' as never).mockResolvedValueOnce('Continue' as never);
+    await command('batchUpdateFromFile')({ ...arg, layout: targetLayout });
+    const message = vi.mocked(vscode.window.showWarningMessage).mock.calls[0]![0];
+    expect(message.split('\n')[0]).toBe(`Execute batch update for 1 records on ${displayText(targetLayout)}? Profile ${displayText(target.name)}, server "example.invalid:8443".`);
+    expect(message).not.toContain('password');
+    await tasks[0]!({ log: vi.fn() } as never);
+    expect(batchService.batchUpdate).toHaveBeenCalledWith(target, targetLayout, entries, expect.anything(), expect.anything());
+  });
+
+  it('B4 refuses files above the row cap before confirmation or scheduling', async () => {
+    const { settings, jobRunner, batchService } = setup();
+    settings.getBatchMaxRecords.mockReturnValue(1);
+    updateInputs(false);
+    vi.mocked(vscode.workspace.fs.readFile).mockResolvedValue(Buffer.from(JSON.stringify([...entries, ...entries])));
+    await command('batchUpdateFromFile')(arg);
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringMatching(/2 rows exceed filemaker.batch.maxRecords \(1\)/));
+    expect(vscode.window.showQuickPick).not.toHaveBeenCalled();
+    expect(jobRunner.startJob).not.toHaveBeenCalled();
+    expect(batchService.batchUpdate).not.toHaveBeenCalled();
   });
 
   it.each(['read', 'defaults', 'schedule'])('reports a %s failure safely without crashing', async (failure) => {

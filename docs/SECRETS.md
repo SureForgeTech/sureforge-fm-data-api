@@ -1,12 +1,12 @@
 # Secrets and credentials
 
-This repository holds **no repository secrets** today. Check with `gh secret list --repo SureForgeTech/filemaker-data-api-for-vs-code`; the list should be empty. One secret is planned and named below (`OVSX_PAT`) but not set yet.
+This repository holds **no repository secrets** today. Check with `gh secret list --repo SureForgeTech/sureforge-fm-data-api`; the list should be empty. One secret is planned and named below (`OVSX_PAT`) but not set yet.
 
 ## Inventory
 
 | Name | Where | What it is | Secret? |
 | --- | --- | --- | --- |
-| `OVSX_PAT` | Secret on the `marketplace` environment (not set yet) | Eclipse Foundation publisher access token for publishing to open-vsx.org. Read by the **publish-ovsx** job in CI ([RELEASE.md](./RELEASE.md#how-publishing-works)), which runs in that environment so the token can sit behind the same required reviewer as the Azure path; the job fails closed without it. Setup tracked in [#265](https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/issues/265). | Yes, once set |
+| `OVSX_PAT` | Secret on the `marketplace` environment (not set yet) | Eclipse Foundation publisher access token for publishing to open-vsx.org. Read by the **publish-ovsx** job in CI ([RELEASE.md](./RELEASE.md#how-publishing-works)), which runs in that environment so the token can sit behind the same required reviewer as the Azure path; the job fails closed without it. Setup tracked in [#265](https://github.com/SureForgeTech/sureforge-fm-data-api/issues/265). | Yes, once set |
 | `AZURE_CLIENT_ID`, `AZURE_TENANT_ID` | Variables on the `marketplace` environment | Identifiers of the Microsoft Entra managed identity that publishes to the Marketplace. Setup: [JOB_AID_ENTRA_PUBLISHING.md](./JOB_AID_ENTRA_PUBLISHING.md). Not set yet, so publishing is manual until the setup is done ([RELEASE.md](./RELEASE.md#manual-publish-fallback)). | No |
 | `LINUX_RUNNER_LABELS` | Repository variable | Runner labels for CI jobs | No |
 | `GITHUB_TOKEN` | Provided by GitHub Actions per run | Used by the release job and workflows with explicit permissions | Managed by GitHub |

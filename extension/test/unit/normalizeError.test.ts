@@ -26,6 +26,16 @@ describe('normalizeError', () => {
     expect(error.safeHeaders?.authorization).toBe('***');
   });
 
+  it('bounds server error messages and removes line breaks and control characters', () => {
+    const result = normalizeError({ isAxiosError: true, message: 'failed', response: {
+      status: 500, data: { messages: [{ code: '9999', message: 'first\r\nsecond\u2028third\0' + 'x'.repeat(5000) }] }
+    } });
+    expect(result.message).toContain('first second third ');
+    expect(result.message).not.toMatch(/[\r\n\u2028\0]/);
+    expect(result.message.length).toBeLessThanOrEqual(1025);
+    expect(result.message.endsWith('…')).toBe(true);
+  });
+
   it('maps timeout to timeout kind with retryable true', () => {
     const error = normalizeError({
       isAxiosError: true,
@@ -84,7 +94,7 @@ describe('normalizeError', () => {
 
   it('names both sign-in causes for FileMaker 212 and links the HTTP 401 section', () => {
     const docsUrl =
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request';
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request';
     const error = normalizeError({
       isAxiosError: true,
       message: 'Unauthorized',
@@ -117,7 +127,7 @@ describe('normalizeError', () => {
       'Ask your FileMaker administrator to change the privilege set for your account'
     );
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#the-account-lacks-a-privilege'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#the-account-lacks-a-privilege'
     );
   });
 
@@ -135,7 +145,7 @@ describe('normalizeError', () => {
 
     expect(error.message).toMatch(/^FileMaker API error \(HTTP 401\) \[100\]: File is missing/);
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request'
     );
   });
 
@@ -151,7 +161,7 @@ describe('normalizeError', () => {
 
     expect(error.code).toBeUndefined();
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-403-the-request-was-refused'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-403-the-request-was-refused'
     );
   });
 
@@ -166,7 +176,7 @@ describe('normalizeError', () => {
     });
 
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#error-956-no-free-data-api-sessions'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#error-956-no-free-data-api-sessions'
     );
   });
 
@@ -180,7 +190,7 @@ describe('normalizeError', () => {
 
     expect(error.kind).toBe('certificate');
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#certificate-errors-the-server-certificate-is-not-trusted'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#certificate-errors-the-server-certificate-is-not-trusted'
     );
   });
 
@@ -194,7 +204,7 @@ describe('normalizeError', () => {
 
     expect(error.kind).toBe('certificate');
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#the-certificate-was-revoked-expired-or-replaced'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#the-certificate-was-revoked-expired-or-replaced'
     );
   });
 
@@ -208,7 +218,7 @@ describe('normalizeError', () => {
 
     expect(error.kind).toBe('network');
     expect(error.docsUrl).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#the-server-cannot-be-reached-or-times-out'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#the-server-cannot-be-reached-or-times-out'
     );
   });
 });
@@ -216,10 +226,10 @@ describe('normalizeError', () => {
 describe('docsUrlForCode', () => {
   it('gives the troubleshooting link for the codes that have a section', () => {
     expect(docsUrlForCode('212')).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request'
     );
     expect(docsUrlForCode('9')).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#the-account-lacks-a-privilege'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#the-account-lacks-a-privilege'
     );
   });
 
@@ -229,7 +239,7 @@ describe('docsUrlForCode', () => {
     ['1703', 'error-1703-or-a-filemaker-cloud-sign-in']
   ])('gives the troubleshooting link for FileMaker %s', (code, anchor) => {
     expect(docsUrlForCode(code)).toBe(
-      `https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#${anchor}`
+      `https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#${anchor}`
     );
   });
 
@@ -241,13 +251,13 @@ describe('docsUrlForCode', () => {
 describe('docsUrlForStatus', () => {
   it('gives the troubleshooting link for the HTTP statuses that have a section', () => {
     expect(docsUrlForStatus(401)).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-401-the-server-refused-the-request'
     );
     expect(docsUrlForStatus(403)).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-403-the-request-was-refused'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-403-the-request-was-refused'
     );
     expect(docsUrlForStatus(404)).toBe(
-      'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md#http-404-nothing-answered-at-that-address'
+      'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md#http-404-nothing-answered-at-that-address'
     );
   });
 

@@ -207,7 +207,7 @@ export function getFileMakerErrorInfo(code: number | string | undefined): FileMa
  * map cannot drift apart.
  */
 export const TROUBLESHOOTING_BASE_URL =
-  'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code/blob/main/extension/docs/TROUBLESHOOTING.md';
+  'https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/docs/TROUBLESHOOTING.md';
 
 /**
  * The troubleshooting page section for the FileMaker codes that have one. The link points at the

@@ -1,3 +1,6 @@
+import { lstat } from 'fs/promises';
+import { safeFileName } from '../utils/safeText';
+import { displayText } from '../ai/aiText';
 import * as vscode from 'vscode';
 import { singleFlight } from '../utils/singleFlight';
 
@@ -65,7 +68,7 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
 
       const outputUri = await vscode.window.showSaveDialog({
         title: 'Export batch find results',
-        defaultUri: vscode.Uri.file(`${layout}.jsonl`),
+        defaultUri: vscode.Uri.file(`${safeFileName(layout)}.jsonl`),
         filters: {
           JSONL: ['jsonl'],
           CSV: ['csv']
@@ -103,6 +106,22 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
         performanceMode === 'high-scale' && selectedFormat !== 'jsonl'
           ? replaceExtension(outputUri.fsPath, '.jsonl')
           : outputUri.fsPath;
+
+      if (outputPath !== outputUri.fsPath) {
+        try {
+          await lstat(outputPath);
+          const answer = await vscode.window.showWarningMessage(
+            `High-scale export uses ${displayText(outputPath)}. This file already exists. Replace it?`,
+            { modal: true }, 'Overwrite'
+          );
+          if (answer !== 'Overwrite') return;
+        } catch (error) {
+          if ((error as NodeJS.ErrnoException).code !== 'ENOENT') {
+            vscode.window.showErrorMessage('Could not check the JSONL export destination. Export cancelled.');
+            return;
+          }
+        }
+      }
 
       const csvChoice = format === 'csv'
         ? await vscode.window.showQuickPick(['Standard CSV', 'Excel-compatible CSV (UTF-8 BOM)'], { title: 'CSV format' })
@@ -185,6 +204,12 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
             return;
           }
 
+          const maxRecords = settingsService.getBatchMaxRecords();
+          if (entries.length > maxRecords) {
+            vscode.window.showWarningMessage(`Batch update refused: ${entries.length} rows exceed filemaker.batch.maxRecords (${maxRecords}). Split the file or raise the setting before retrying.`);
+            return;
+          }
+
           const defaults = await batchService.getDefaultBatchUpdateOptions();
           const dryRunSelection = await vscode.window.showQuickPick(
             [
@@ -215,8 +240,10 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
             ) {
               return;
             }
+            let server = profile.serverUrl;
+            try { server = new URL(server).host; } catch { /* Keep the supplied address when it is not a URL. */ }
             const confirmation = await vscode.window.showWarningMessage(
-              `Execute batch update for ${entries.length} records on ${layout}?\nRollback guidance: keep a pre-update export and rerun updates with previous values to revert.`,
+              `Execute batch update for ${entries.length} records on ${displayText(layout)}? Profile ${displayText(profile.name)}, server ${displayText(server)}.\nRollback guidance: keep a pre-update export and rerun updates with previous values to revert.`,
               { modal: true },
               'Execute'
             );

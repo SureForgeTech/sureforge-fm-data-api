@@ -5,9 +5,12 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import MarkdownIt from 'markdown-it';
 
-const repository = 'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code';
+const repository = 'https://github.com/SureForgeTech/sureforge-fm-data-api';
+// Older changelog entries keep the repository's previous name. GitHub redirects it, and the site
+// rewrites it to the current address so those links are checked like any other.
+const previousRepository = 'https://github.com/SureForgeTech/filemaker-data-api-for-vs-code';
 const marketplace = 'https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools';
-const website = 'https://sureforgetech.github.io/filemaker-data-api-for-vs-code/';
+const website = 'https://sureforgetech.github.io/sureforge-fm-data-api/';
 const markdown = new MarkdownIt({ html: false });
 const escape = markdown.utils.escapeHtml;
 const posix = (value) => value.split(path.sep).join('/');
@@ -103,6 +106,9 @@ export function buildDocsSite({ root = fileURLToPath(new URL('../', import.meta.
   function rewrite(url, page, image = false) {
     if (/^(?:[a-z][\w+.-]*:|\/\/)/i.test(url)) {
       if (image) throw new Error(`Images must be local: ${page.file}: ${url}`);
+      if (url === previousRepository || url.startsWith(`${previousRepository}/`)) {
+        url = repository + url.slice(previousRepository.length);
+      }
       const prefix = `${repository}/blob/main/`;
       if (url.startsWith(prefix)) {
         const local = /^([^?#]*)(.*)$/.exec(url.slice(prefix.length));
