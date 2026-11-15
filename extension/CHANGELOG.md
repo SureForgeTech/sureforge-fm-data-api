@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Routine small updates to the libraries the extension builds on (axios 1.21.1; the web page generator now uses Next.js 16.4.6). No behavior change is intended.
+
 ## 1.9.1
 
 _Release notes prepared 2026-11-14._
