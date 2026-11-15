@@ -144,4 +144,51 @@ describe('ProfileStore', () => {
     expect(profile?.allowSelfSigned).toBe(true);
     expect(profile?.caBundlePath).toBe('/workspace/certs/dev-ca.pem');
   });
+
+  it('lets an edited address replace a stuck credential migration, and drops the old credential', async () => {
+    const globalState = new InMemoryMemento();
+    // Secret storage is broken, so the address credential can never be moved out.
+    const secrets = {
+      getPassword: async () => { throw new Error('unavailable'); },
+      setPassword: async () => { throw new Error('unavailable'); }
+    };
+    const store = new ProfileStore(globalState as never, new InMemoryMemento() as never, secrets);
+    const legacy = { ...createProfile('legacy'), serverUrl: 'https://admin:old-pw@old.example.com' };
+    await globalState.update('filemakerDataApiTools.profiles', [legacy, { ...legacy }]);
+    const raw = () => JSON.stringify(globalState.get('filemakerDataApiTools.profiles'));
+
+    // An edit that keeps the address keeps the credential recoverable for a later retry.
+    await store.upsertProfile({ ...createProfile('legacy'), name: 'Renamed', serverUrl: 'https://old.example.com/' });
+    expect(raw()).toContain('old-pw@old.example.com');
+    expect((await store.getProfile('legacy'))?.name).toBe('Renamed');
+
+    // An edited address wins: nothing keeps the profile on the old server, and the old
+    // credential does not travel to the new one.
+    await store.upsertProfile({ ...createProfile('legacy'), serverUrl: 'https://new.example.com' });
+    expect((await store.listProfiles()).map((profile) => profile.serverUrl)).toEqual(['https://new.example.com']);
+    expect(raw()).not.toContain('old.example.com');
+    expect(raw()).not.toContain('old-pw');
+  });
+
+  it('does not save an address password for a profile edited while the migration waited', async () => {
+    const globalState = new InMemoryMemento();
+    let release!: () => void;
+    const waiting = new Promise<void>((resolve) => { release = resolve; });
+    const saved: string[] = [];
+    const secrets = {
+      getPassword: async () => { await waiting; return undefined; },
+      setPassword: async (_id: string, password: string) => { saved.push(password); }
+    };
+    const store = new ProfileStore(globalState as never, new InMemoryMemento() as never, secrets);
+    const legacy = { ...createProfile('legacy'), serverUrl: 'https://admin:old-pw@old.example.com' };
+    await globalState.update('filemakerDataApiTools.profiles', [legacy]);
+
+    const listing = store.listProfiles();
+    // Another window (or a save that did not wait) points the profile somewhere else.
+    await globalState.update('filemakerDataApiTools.profiles', [{ ...createProfile('legacy'), serverUrl: 'https://new.example.com' }]);
+    release();
+
+    expect((await listing).map((profile) => profile.serverUrl)).toEqual(['https://new.example.com']);
+    expect(saved).toEqual([]);
+  });
 });

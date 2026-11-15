@@ -53,7 +53,8 @@ describe('showErrorWithDetails', () => {
     vi.mocked(vscode.window.showErrorMessage).mockResolvedValue(undefined);
     await showErrorWithDetails(error);
     const toast = vi.mocked(vscode.window.showErrorMessage).mock.calls[0]![0];
-    expect(toast).toBe(expected);
+    // Addresses stay readable in the toast but are broken so they cannot be clicked.
+    expect(toast).toBe(expected.replace('https://', 'https: //'));
     expect(normalizeError(error).message).toBe(expected);
     expect(toUserErrorMessage(error, '')).toBe(toast);
     for (const secret of secrets) expect(toast).not.toContain(secret);
@@ -68,8 +69,8 @@ describe('showErrorWithDetails', () => {
     await showErrorWithDetails(error);
     const toast = vi.mocked(vscode.window.showErrorMessage).mock.calls[0]![0];
     expect(toast).not.toMatch(/[\r\n]/);
-    expect(toast).toContain('[Re-enter your password] (https://evil)');
-    expect(toast).not.toContain('](https://evil)');
+    expect(toast).toContain('[Re-enter your password] (https: //evil)');
+    expect(toast).not.toContain('](');
     expect(toast).toContain('```');
     expect(toast).toContain('<img>');
     expect(toUserErrorMessage(error)).toBe(toast);
@@ -84,7 +85,13 @@ describe('showErrorWithDetails', () => {
   it('keeps bracketed codes, Windows paths and angle brackets readable in plain text', () => {
     const message = String.raw`[212] C:\Invoices\Report.jsonl <field>`;
     expect(toUserErrorMessage(new Error(message))).toBe(message);
-    expect(toUserErrorMessage(new Error('[click](https://evil)'))).toBe('[click] (https://evil)');
+    expect(toUserErrorMessage(new Error('[click](https://evil)'))).toBe('[click] (https: //evil)');
+  });
+
+  it('shows addresses from a server as plain text that cannot be clicked', () => {
+    const toast = toUserErrorMessage(new Error('Sign in again at https://evil.example/login or HTTP://EVIL.example, www.evil.example, command://x'));
+    expect(toast).toBe('Sign in again at https: //evil.example/login or HTTP: //EVIL.example, www. evil.example, command: //x');
+    expect(toast).not.toMatch(/[a-z]:\/\/|www\.\S/i);
   });
 
   it('keeps plain error text bounded after breaking many injected links', () => {

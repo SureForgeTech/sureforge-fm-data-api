@@ -17,7 +17,17 @@ export function previewProcessEnv(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv 
 }
 
 export const PREVIEW_INSTALL_DESCRIPTION = 'npm install --ignore-scripts --no-audit --no-fund --registry=https://registry.npmjs.org --workspaces=false --include=optional';
-export const PREVIEW_DEV_DESCRIPTION = 'npm run dev --ignore-scripts -- --hostname 127.0.0.1 --port 3000';
+/** Used instead when the shipped template carries a lockfile: exact versions, nothing resolved afresh. */
+export const PREVIEW_LOCKED_INSTALL_DESCRIPTION = PREVIEW_INSTALL_DESCRIPTION.replace('npm install', 'npm ci');
+/** The template's own server: the session cookie gate sits in front of Next's dev endpoints too. */
+export const PREVIEW_SERVER_FILE = 'preview-server.mjs';
+export const PREVIEW_DEV_DESCRIPTION = `node ${PREVIEW_SERVER_FILE} (Next.js development server on 127.0.0.1:3000)`;
+const LOCK_FILE = 'package-lock.json';
+
+/** `files` are bytes shipped with the extension, so a lockfile among them is trusted. */
+export function previewInstallDescription(files: ReadonlyMap<string, Buffer>): string {
+  return files.has(LOCK_FILE) ? PREVIEW_LOCKED_INSTALL_DESCRIPTION : PREVIEW_INSTALL_DESCRIPTION;
+}
 
 const OWNER_FILE = '.fmweb-preview-owner';
 const OWNER_MARKER = 'filemaker-data-api-for-vs-code preview v1\n';
@@ -85,8 +95,8 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     }
   }
 
-  private async npmCommand(env: NodeJS.ProcessEnv): Promise<{ command: string; prefix: string[] }> {
-    if (this.options.platform !== 'win32') return { command: 'npm', prefix: [] };
+  private async npmCommand(env: NodeJS.ProcessEnv): Promise<{ command: string; prefix: string[]; node: string }> {
+    if (this.options.platform !== 'win32') return { command: 'npm', prefix: [], node: 'node' };
     // Electron's executable directory does not contain npm. Resolve both tools from PATH,
     // then execute npm's JS entrypoint directly, without a command shell.
     const directories = (env.PATH ?? env.Path ?? '').split(';').filter((dir) => path.isAbsolute(dir));
@@ -100,7 +110,7 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     const node = await find('node.exe');
     const cli = await find(path.join('node_modules', 'npm', 'bin', 'npm-cli.js'));
     if (!node || !cli) throw new Error('Could not find Node.js and npm on PATH. Install Node.js with npm to start the preview.');
-    return { command: node, prefix: [cli] };
+    return { command: node, prefix: [cli], node };
   }
 
   private async launch(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string): Promise<void> {
@@ -128,15 +138,19 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     await writeFile(globalconfig, '', { mode: 0o600, flag: 'wx' });
     const flags = [`--userconfig=${userconfig}`, `--globalconfig=${globalconfig}`, `--prefix=${root}`, `--cache=${path.join(directory, 'cache')}`];
     const env = previewProcessEnv(this.options.sourceEnv);
-    const { command: npm, prefix } = await this.npmCommand(env);
+    const { command: npm, prefix, node } = await this.npmCommand(env);
     if (this.cancelled) throw new Error('Preview was cancelled.');
-    await this.install(npm, [...prefix, ...flags, 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--registry=https://registry.npmjs.org', '--workspaces=false', '--include=optional'], root, env);
+    // With a shipped lockfile `npm ci` installs exactly the recorded versions and fails rather
+    // than resolve new ones. Without one (the first-run case today) fall back to `npm install`.
+    await this.install(npm, [...prefix, ...flags, files.has(LOCK_FILE) ? 'ci' : 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--registry=https://registry.npmjs.org', '--workspaces=false', '--include=optional'], root, env);
     if (this.cancelled) throw new Error('Preview was cancelled.');
     const launch = randomBytes(32).toString('hex');
     const session = randomBytes(32).toString('hex');
-    const child = this.options.spawn(npm, [...prefix, ...flags, 'run', 'dev', '--ignore-scripts', '--', '--hostname', '127.0.0.1', '--port', '3000'], {
+    if (!files.has(PREVIEW_SERVER_FILE)) throw new Error('This installation does not carry the private preview server.');
+    // Not `next dev`: its hot-reload and /_next, /__nextjs endpoints answer before the cookie gate.
+    const child = this.options.spawn(node, [PREVIEW_SERVER_FILE], {
       cwd: root, shell: false, windowsHide: true, detached: this.options.platform !== 'win32',
-      env: { ...env, FMWEB_BRIDGE_URL: bridgeUrl, FMWEB_BRIDGE_TOKEN: token, FMWEB_SERVER_ORIGIN: serverOrigin(serverUrl),
+      env: { ...env, NODE_ENV: 'development', FMWEB_BRIDGE_URL: bridgeUrl, FMWEB_BRIDGE_TOKEN: token, FMWEB_SERVER_ORIGIN: serverOrigin(serverUrl),
         FMWEB_LAUNCH_CODE: launch, FMWEB_PREVIEW_SESSION: session,
         FMWEB_LAUNCH_EXPIRES: String(Date.now() + 120_000), FMWEB_LAUNCH_STATE: path.join(directory, 'launch-used') },
       stdio: ['ignore', 'pipe', 'pipe']
@@ -152,7 +166,7 @@ export class FmWebPreviewProcess implements vscode.Disposable {
       };
       child.stdout?.on('data', ready);
       child.stderr?.on('data', ready);
-      child.once('error', () => { clearTimeout(timer); reject(new Error('Could not start npm. Check that Node.js and npm are installed.')); });
+      child.once('error', () => { clearTimeout(timer); reject(new Error('Could not start Node.js. Check that Node.js and npm are installed.')); });
       child.once('exit', () => { clearTimeout(timer); reject(new Error('Preview stopped before it was ready. Port 3000 must be free.')); });
     });
     if (this.cancelled) throw new Error('Preview was cancelled.');

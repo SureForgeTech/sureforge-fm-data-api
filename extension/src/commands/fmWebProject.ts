@@ -1,7 +1,7 @@
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { displayText } from '../ai/aiText';
-import { FmWebPreviewProcess, PREVIEW_INSTALL_DESCRIPTION, PREVIEW_DEV_DESCRIPTION } from '../services/fmWebPreviewProcess';
+import { FmWebPreviewProcess, previewInstallDescription, PREVIEW_DEV_DESCRIPTION } from '../services/fmWebPreviewProcess';
 import * as vscode from 'vscode';
 
 import type { FMClient } from '../services/fmClient';
@@ -265,8 +265,9 @@ export function registerFmWebProjectCommands(
         }
         if (skippedLayouts.length) void vscode.window.showWarningMessage(`These layouts were skipped in the preview because their generated files were edited or are symbolic links: ${skippedLayouts.join(', ')}. Your files were left untouched.`);
         const runtimeRoot = fmWebRuntimeGenerator.getGeneratedRuntimeRoot();
+        const templateFiles = await fmWebRuntimeGenerator.previewTemplateFiles();
         const answer = await vscode.window.showWarningMessage(
-          `Start the FM Web preview?\n\nA fresh private temporary copy of the shipped template will run these commands:\n${PREVIEW_INSTALL_DESCRIPTION}\n${PREVIEW_DEV_DESCRIPTION}\n\nBoth npm commands use pinned empty --userconfig and --globalconfig files, an explicit --prefix and private cache, and a cleared configuration environment. The dev script in the template package.json runs Next on 127.0.0.1:3000; pre/post scripts are disabled. Dependencies are downloaded from registry.npmjs.org. No install scripts run.\n\nThe runtime checked was:\n${displayText(runtimeRoot, Infinity)}\n\nWorkspace npm configuration and .env overrides are ignored. Your runtime files are left untouched.${ignored.length ? `\nThese edited or added files are ignored in the private preview:\n${listing}` : ''}\n\nThe extension opens your browser with a one-time private launch link.`,
+          `Start the FM Web preview?\n\nA fresh private temporary copy of the shipped template will run these commands:\n${previewInstallDescription(templateFiles)}\n${PREVIEW_DEV_DESCRIPTION}\n\nThe npm command uses pinned empty --userconfig and --globalconfig files, an explicit --prefix and private cache, and a cleared configuration environment. The template's preview server runs Next on 127.0.0.1:3000 and checks the private session before every request, hot reload included. Dependencies named in the template package.json are downloaded from registry.npmjs.org. No install scripts run.\n\nThe runtime checked was:\n${displayText(runtimeRoot, Infinity)}\n\nWorkspace npm configuration and .env overrides are ignored. Your runtime files are left untouched.${ignored.length ? `\nThese edited or added files are ignored in the private preview:\n${listing}` : ''}\n\nThe extension opens your browser with a one-time private launch link.`,
           { modal: true }, 'Run'
         );
         if (answer !== 'Run') { await fmWebRuntimeGenerator.clearBridgeEnv(); return; }
@@ -277,7 +278,7 @@ export function registerFmWebProjectCommands(
         const profileId = project?.activeProfileId ?? profileStore.getActiveProfileId();
         const profile = profileId ? await profileStore.getProfile(profileId) : undefined;
         preview = new FmWebPreviewProcess();
-        await preview.start(await fmWebRuntimeGenerator.previewTemplateFiles(), layouts, bridge.baseUrl, token, profile?.serverUrl);
+        await preview.start(templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl);
         vscode.window.showInformationMessage('FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.');
       } catch (error) {
         await preview?.dispose().catch(() => logger.warn('Could not stop the private preview or finish its temporary-file cleanup.'));

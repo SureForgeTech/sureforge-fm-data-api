@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+**Security**
+
+- If a saved server address still carried a password that could not be moved to secure storage, editing the address used to leave the connection on the old server. The new address now takes effect and the old password is dropped; you are asked to enter the password again, as for any changed address.
+- Web addresses in error notifications are shown as plain text (for example `https: //example.com`) so text sent by a server cannot become a link you might click.
+- The FM Web preview now checks its private session before every request, including the hot-reload connection and other development endpoints that were previously reachable without it.
+- The FM Web preview installs exactly the versions in the template's lockfile when the template ships one. The template does not ship a lockfile yet, so for now the preview still resolves versions at start.
+
 ## 1.9.1
 
 _Release notes prepared 2026-11-14._
