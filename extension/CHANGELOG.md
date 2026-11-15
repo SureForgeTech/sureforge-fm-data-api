@@ -9,6 +9,10 @@
 - The FM Web preview now checks its private session before every request, including the hot-reload connection and other development endpoints that were previously reachable without it.
 - The FM Web preview installs exactly the versions in the template's lockfile when the template ships one. The template does not ship a lockfile yet, so for now the preview still resolves versions at start.
 
+**Maintenance**
+
+- Routine small updates to the libraries the extension builds on (axios 1.21.1; the web page generator now uses Next.js 16.4.6). No behavior change is intended.
+
 ## 1.9.1
 
 _Release notes prepared 2026-11-14._
