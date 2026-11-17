@@ -23,7 +23,13 @@ export class FmWebIntakeService {
     if (!this.project.isWorkspaceTrusted()) throw new Error('Workspace trust is required to build a portal.');
     const root = this.project.getWorkspaceRoot();
     if (!root) throw new Error('Open a workspace folder to build a portal.');
-    return (await resolveConfinedFile(file, root, [root, await realpath(root)])).path;
+    const canonicalRoot = await realpath(root);
+    // The selected workspace root is trusted, including an OS short-name or symlink alias.
+    // Validate only the relative candidate; aliases below that root remain forbidden.
+    const relative = [root, canonicalRoot].map((base) => path.relative(path.resolve(base), path.resolve(file)))
+      .find((candidate) => candidate !== '' && candidate !== '..' && !candidate.startsWith(`..${path.sep}`) && !path.isAbsolute(candidate));
+    if (!relative) throw new Error('Portal path is outside the workspace.');
+    return (await resolveConfinedFile(relative, canonicalRoot, [canonicalRoot])).path;
   }
 
   private async read(file: string): Promise<unknown> {
