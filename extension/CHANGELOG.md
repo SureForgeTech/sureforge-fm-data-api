@@ -4,6 +4,8 @@
 
 **FM Web app creation**
 
+- Save to FileMaker opens a private registration form after confirming the connection, database and layout. Submitting creates a real record with the mapped fields; credentials stay in the extension. Persistent submission tracking prevents the same submission from being dispatched again after a restart or uncertain result. Sample preview remains available.
+
 - Create FM Web App guides connection, layout and field selection, then opens a form editor for labels, rules, order and branding without JSON editing. Save and preview uses sample submissions; reopen the command to continue editing. Existing advanced commands are preserved.
 
 **Local portal sample**
