@@ -32,6 +32,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- Added shared intake-form contracts, exact FileMaker field mapping and browser/server validation for the upcoming local registration workflow.
+
 - Routine small updates to the libraries the project builds on: axios 1.21.1, ESLint 10.15.0, playwright-core 1.65.1, and Next.js 16.4.6 for the web page generator. No behavior change is intended.
 
 ### [SECURITY]
