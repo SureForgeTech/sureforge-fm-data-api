@@ -85,3 +85,11 @@ npm run lint
 ```
 
 Press `F5` to open an Extension Development Host and run the FM Web commands from the Command Palette: **Initialize FM Web Project**, **Select Active Profile**, **Sync FM Web Project Metadata**, **Open FM Web Layout Mode**, **Generate FM Web Next.js App**, **Generate FM Web Layout Page**, **Start FM Web Preview Server**.
+
+## Event registration sample
+
+In a source installation, start the private FM Web preview and choose **Try the event registration sample** on its home page. The form reuses the shared field renderer and validates its input before sending and on the server. Use invented information: this sample acknowledges a synthetic submission and does not contact FileMaker or save a real registration.
+
+The server accepts only the known sample form and its mapped fields, checks the preview session and exact Origin, and bounds the request to 32 KiB. A submission identifier prevents a repeated click from creating a second attempt in the same preview process. Accepted attempts replay their original receipt; an identifier reused with different values is refused. An uncertain result locks further submission and is never retried automatically. This is process-local preview behavior, not persistent or distributed duplicate protection; restarting the preview clears it.
+
+The sample intake files are editable scaffolding in a generated app. Generation preserves existing copies; it does not overwrite your custom intake pages or handlers. Private preview startup continues to use a fresh copy of the shipped template. This sample is not a public deployment or an independent FileMaker backend.
