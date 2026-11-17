@@ -6,6 +6,7 @@ import * as vscode from 'vscode';
 
 import type { FMClient } from '../services/fmClient';
 import type { FmBridgeServer } from '../services/fmBridgeServer';
+import { FmWebIntakeService } from '../services/fmWebIntakeService';
 import type { FmWebProjectService } from '../services/fmWebProjectService';
 import type { FmWebRuntimeGenerator } from '../services/fmWebRuntimeGenerator';
 import { GenerationSkippedError } from '../services/generatedFileWriter';
@@ -45,11 +46,63 @@ export function registerFmWebProjectCommands(
     refreshExplorer
   } = deps;
 
+  const intakes = new FmWebIntakeService(fmWebProjectService);
   let preview: FmWebPreviewProcess | undefined;
   let previewStarting = false;
   context.subscriptions?.push({ dispose: () => { void preview?.dispose().catch(() => undefined); } });
 
   return [
+    vscode.commands.registerCommand('filemakerDataApiTools.buildPortal', async () => {
+      if (!vscode.workspace.isTrusted) {
+        void vscode.window.showWarningMessage('Workspace trust is required to build a portal.'); return;
+      }
+      try {
+        const action = await vscode.window.showQuickPick([
+          { label: 'Create or resume event registration', action: 'create', description: 'Sample data; no connection needed' },
+          { label: 'Edit form and exact field mappings', action: 'edit', description: 'Title, labels, help, required fields and branding' },
+          { label: 'Preview saved portal', action: 'preview', description: 'Validate definitions, then start the private sample preview' },
+          { label: 'Open source layout', action: 'layout', description: 'Continue in the existing Layout Mode designer' }
+        ], { title: 'Build a Portal', placeHolder: 'Create → edit → preview → submit with invented details' });
+        if (!action) return;
+        const openDefinition = async (): Promise<void> => {
+          const file = await intakes.definitionPathForEdit('event-registration');
+          await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(file)));
+        };
+        if (action.action === 'edit') {
+          await openDefinition();
+          try { await intakes.load('event-registration'); }
+          catch { void vscode.window.showWarningMessage('The saved portal definition is open for repair. Its schema, sample environment or source mappings are invalid; preview remains unavailable until they are valid.'); }
+          return;
+        }
+        if (action.action === 'layout') {
+          const source = await intakes.layoutForEdit('event-registration');
+          if (source.valid) await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: source.id });
+          else {
+            await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(source.filePath)));
+            void vscode.window.showWarningMessage('The source layout is open for repair or migration. Your file was preserved. Layout Mode needs current schema JSON with the same layout ID.');
+          }
+          return;
+        }
+        let saved;
+        if (action.action === 'create') {
+          try { saved = await intakes.ensureEventStarter(); }
+          catch (error) {
+            // A typo must not lock the user out of the very file they need to repair.
+            try { await openDefinition(); } catch { throw error; }
+            void vscode.window.showWarningMessage('Your existing portal definition was preserved and opened for repair. Check its schema, sample environment and source layout mappings, then resume the starter.');
+            return;
+          }
+        } else saved = await intakes.load('event-registration');
+        if (action.action === 'preview') {
+          await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer');
+        } else {
+          await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(saved.definitionPath)));
+          void vscode.window.showInformationMessage('Portal saved in .fmweb/intakes. Edit its title, fields or branding, save, then use Build a Portal → Preview saved portal. Existing files are preserved. Only the sample environment is supported.');
+        }
+      } catch (error) {
+        await showCommandError(error, { fallbackMessage: 'Could not build the portal. Create the starter first or repair the saved definition and source layout.', logger, logMessage: 'Build a Portal command failed.' });
+      }
+    }),
     vscode.commands.registerCommand('filemakerDataApiTools.initializeFmWebProject', async () => {
       if (!vscode.workspace.isTrusted) {
         vscode.window.showWarningMessage(
@@ -252,6 +305,7 @@ export function registerFmWebProjectCommands(
         const ignored = await fmWebRuntimeGenerator.inspectPreviewFiles();
         const listing = ignored.map((file) => displayText(file, Infinity)).join('\n');
         if (listing.length > 12000) throw new Error('Too many ignored runtime files to show safely in the preview confirmation.');
+        const portalFiles = await intakes.previewFiles();
         const layouts = new Map<string, Buffer>();
         const skippedLayouts: string[] = [];
         for (const layout of await fmWebRuntimeGenerator.listLayoutDefinitions()) {
@@ -278,7 +332,7 @@ export function registerFmWebProjectCommands(
         const profileId = project?.activeProfileId ?? profileStore.getActiveProfileId();
         const profile = profileId ? await profileStore.getProfile(profileId) : undefined;
         preview = new FmWebPreviewProcess();
-        await preview.start(templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl);
+        await preview.start(templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl, portalFiles.intakes, portalFiles.layouts);
         vscode.window.showInformationMessage('FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.');
       } catch (error) {
         await preview?.dispose().catch(() => logger.warn('Could not stop the private preview or finish its temporary-file cleanup.'));

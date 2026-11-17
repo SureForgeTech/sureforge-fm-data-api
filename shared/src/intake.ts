@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { FIELD_LAYOUT } from './field-standards';
-import { layoutDefinitionSchema, type LayoutDefinition } from './layout-schema';
-import { numericText, runtimeFieldKind } from './record-edit';
+import { migrateLayoutDefinition, layoutDefinitionSchema, type LayoutDefinition } from './layout-schema';
+import { layoutFieldKind, numericText, runtimeFieldKind } from './record-edit';
 
 export const INTAKE_SCHEMA_VERSION = 1;
 const inputId = z.string().regex(/^[a-z][a-z0-9_-]{0,63}$/);
@@ -34,6 +34,10 @@ export const intakeDefinitionSchema = z.strictObject({
   description: z.string().max(2000).default(''),
   submitLabel: z.string().min(1).max(80).default('Submit'),
   successMessage: z.string().min(1).max(1000).default('Your submission was received.'),
+  branding: z.strictObject({
+    organizationName: z.string().max(120).default(''),
+    accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#215EA6')
+  }).optional(),
   fields: z.array(intakeFieldSchema).min(1).max(100)
 }).superRefine((definition, context) => {
   const ids = new Set<string>();
@@ -57,6 +61,36 @@ export interface IntakeValidationError {
 export type IntakeValidationResult =
   | { valid: true; fieldData: Record<string, string | number> }
   | { valid: false; errors: IntakeValidationError[] };
+
+/** Migrate an authored source while keeping its referenced identity and legacy access hints. */
+export function migrateIntakeSource(definition: IntakeDefinition, input: unknown): LayoutDefinition {
+  const form = intakeDefinitionSchema.parse(definition);
+  const layout = migrateLayoutDefinition(input);
+  const raw = input && typeof input === 'object' && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  if (raw.schemaVersion === undefined || raw.schemaVersion === 0) {
+    if (raw.id !== undefined && raw.id !== form.layoutId) throw new Error('The legacy source belongs to a different layout.');
+    // The legacy migration creates an id; the confined source filename already supplies the stable reference here.
+    layout.id = form.layoutId;
+    const fields = Array.isArray(raw.objects) ? raw.objects : [];
+    const access = new Map<string, ReturnType<typeof runtimeFieldKind>>();
+    const text = (value: unknown): string | undefined => typeof value === 'string' ? value : undefined;
+    for (const entry of fields) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+      const original = entry as Record<string, unknown>;
+      if (typeof original.fmFieldName !== 'string') continue;
+      const metadata = original.metadata && typeof original.metadata === 'object' ? original.metadata as Record<string, unknown> : {};
+      const hinted = runtimeFieldKind({ fmFieldName: original.fmFieldName, kind: text(original.kind), result: text(original.result),
+        metadata: { type: text(metadata.type), result: text(metadata.result) } });
+      const global = layoutFieldKind({ name: original.fmFieldName, global: original.global ?? metadata.global, type: text(metadata.type) });
+      const kind = hinted === 'normal' ? global : hinted;
+      // Any read-only hint wins when legacy data repeats a field. Normal entries never erase it.
+      if (kind !== 'normal' || !access.has(original.fmFieldName)) access.set(original.fmFieldName, kind);
+    }
+    layout.objects = layout.objects.map((object) => object.type === 'field'
+      ? { ...object, kind: access.get(object.fmFieldName) ?? runtimeFieldKind(object) } : object);
+  }
+  return layout;
+}
 
 /** The same pure validation runs before browser submission and again at the trusted server adapter. */
 export function validateIntakeSubmission(definition: IntakeDefinition, input: unknown): IntakeValidationResult {

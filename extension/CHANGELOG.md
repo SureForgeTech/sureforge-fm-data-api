@@ -4,6 +4,8 @@
 
 **Local portal sample**
 
+- Build a Portal creates or resumes editable event-registration forms with exact mappings, labels, help, required fields and basic branding, then previews saved definitions privately with sample data.
+
 - VSIX builds now include the runtime template needed to generate and preview FM Web apps without cloning this repository. Existing edited generated files are preserved.
 
 - The source-installed FM Web preview now includes a responsive event-registration sample with shared validation and duplicate-submission protection. It uses synthetic data and creates no FileMaker record.

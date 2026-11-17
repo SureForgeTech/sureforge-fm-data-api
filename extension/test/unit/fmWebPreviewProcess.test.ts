@@ -68,6 +68,26 @@ afterEach(async () => {
 });
 
 describe('private preview process', () => {
+  it('keeps saved intake source layouts separate from normal record views with owner-only files', async () => {
+    const process = preview();
+    await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),
+      new Map([['source.layout.json', Buffer.from('{"id":"source"}')]]), 'http://127.0.0.1:1234', 'synthetic', undefined,
+      new Map([['event-registration.intake.json', Buffer.from('{"id":"event-registration"}')]]),
+      new Map([['a1111111-1111-4111-8111-111111111111.layout.json', Buffer.from('{"name":"portal source"}')]]));
+    const root = path.dirname(calls[1]!.options.cwd as string);
+    expect(JSON.parse(await readFile(path.join(root, 'intakes', 'event-registration.intake.json'), 'utf8')).id).toBe('event-registration');
+    expect(JSON.parse(await readFile(path.join(root, 'intake-layouts', 'a1111111-1111-4111-8111-111111111111.layout.json'), 'utf8')).name).toBe('portal source');
+    expect(JSON.parse(await readFile(path.join(root, 'layouts', 'source.layout.json'), 'utf8')).id).toBe('source');
+    if (globalThis.process.platform !== 'win32') expect((await lstat(path.join(root, 'intakes', 'event-registration.intake.json'))).mode & 0o777).toBe(0o600);
+  });
+
+  it.each(['../escape.intake.json', 'Upper.intake.json', 'bad.json'])('rejects unsafe intake filename %s before spawning', async (name) => {
+    const process = preview();
+    await expect(process.start(new Map(), new Map(), 'http://127.0.0.1:1234', 'synthetic', undefined,
+      new Map([[name, Buffer.from('{}')]]))).rejects.toThrow('intake');
+    expect(calls).toHaveLength(0);
+  });
+
   it('excludes npm, Node and Next overrides while preserving only the declared OS and network settings', () => {
     const network = Object.fromEntries(['HTTP_PROXY', 'HTTPS_PROXY', 'NO_PROXY', 'http_proxy', 'https_proxy', 'no_proxy', 'NODE_EXTRA_CA_CERTS'].map((key) => [key, `test-${key}`]));
     const result = previewProcessEnv({ ...network, PATH: '/trusted/bin', HOME: '/home/user', npm_config_script_shell: './evil', NPM_CONFIG_REGISTRY: 'https://evil', NODE_OPTIONS: '--require=evil', NODE_PATH: './evil', NEXT_PUBLIC_FMWEB_BRIDGE_TOKEN: 'evil', FMWEB_BRIDGE_TOKEN: 'evil', SECRET: 'evil', ALL_PROXY: 'evil' });

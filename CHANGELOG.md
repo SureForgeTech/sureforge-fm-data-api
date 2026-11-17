@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- Build a Portal creates or resumes editable event-registration forms with exact mappings, labels, help, required fields and basic branding, then previews saved definitions privately with sample data.
+
 - VSIX builds include the FM Web runtime and shared templates, enabling local app generation and preview without a repository checkout.
 
 - Added a private event-registration sample that reuses FM Web fields, validates submissions on both sides and reports duplicate or uncertain outcomes without automatic write retries. It uses a synthetic adapter, not a FileMaker server.

@@ -25,3 +25,4 @@ export type { StandardFieldMetadata, StandardControlKind } from './field-standar
 export * from './record-edit';
 
 export * from './intake';
+export { eventRegistrationExample } from './intake-starters';
