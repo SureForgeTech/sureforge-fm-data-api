@@ -101,11 +101,24 @@ describe('record draft patches and validation', () => {
 });
 
 describe('record scalar safety', () => {
+  it('preserves extended decimal text with interior zeros as well as trailing zeros', () => {
+    const value = `1.${'0'.repeat(10000)}1`;
+    expect(numericText(value)).toBe(value);
+    expect(numericText(`-${value}`)).toBe(`-${value}`);
+    expect(numericText(`12.5${'0'.repeat(10000)}`)).toBe(12.5);
+  });
   it.each([
     ['0012', 12],
     ['+12.5', 12.5],
     ['.5', 0.5],
     ['1e3', 1000],
+    ['1e-7', 1e-7],
+    ['0.000', 0],
+    ['12.5000', 12.5],
+    ['12345678901234.567', '12345678901234.567'],
+    ['0.12345678901234567890', '0.12345678901234567890'],
+    ['-9007199254740990.5', '-9007199254740990.5'],
+    ['1e20', '1e20'],
     ['9007199254740991', Number.MAX_SAFE_INTEGER],
     ['9007199254740992', '9007199254740992'],
     ['9999999999999999', '9999999999999999'],

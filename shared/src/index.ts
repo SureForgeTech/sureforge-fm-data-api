@@ -23,3 +23,5 @@ export { FIELD_LAYOUT, standardFieldSize, standardFieldsCss, applyStandardField,
 export type { StandardFieldMetadata, StandardControlKind } from './field-standards';
 
 export * from './record-edit';
+
+export * from './intake';

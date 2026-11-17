@@ -197,7 +197,7 @@ export function recordFieldRequired(field: RecordFieldMetadata): boolean {
   return false;
 }
 
-/** Convert only finite decimal text whose exact magnitude is in the safe integer range. */
+/** Convert finite decimal text only when JSON preserves its decimal value and its magnitude is safe. */
 export function numericText(value: string): number | string {
   const match = /^[-+]?(\d+(?:\.\d*)?|\.\d+)(?:[eE]([-+]?\d+))?$/.exec(value);
   if (!match) return value;
@@ -207,6 +207,7 @@ export function numericText(value: string): number | string {
   const digits = mantissa.replace('.', '').replace(/^0+/, '');
   if (!digits) return number;
   if (number === 0) return value; // A nonzero decimal underflowed.
+  if (decimalIdentity(mantissa, Number(match[2] ?? 0)) !== decimalIdentityOfNumber(number)) return value;
   const places = digits.length + Number(match[2] ?? 0) - (mantissa.split('.')[1]?.length ?? 0);
   if (places < 16) return number;
   if (places > 16) return value;
@@ -214,6 +215,20 @@ export function numericText(value: string): number | string {
   if (integer < '9007199254740991') return number;
   if (integer === '9007199254740991' && /^0*$/.test(digits.slice(places))) return number;
   return value;
+}
+
+function decimalIdentity(mantissa: string, exponent: number): string {
+  const fractionLength = mantissa.split('.')[1]?.length ?? 0;
+  const digits = mantissa.replace('.', '').replace(/^0+/, '');
+  let end = digits.length;
+  while (end > 0 && digits.charCodeAt(end - 1) === 48) end--;
+  const significant = digits.slice(0, end);
+  return `${significant}:${exponent - fractionLength + digits.length - significant.length}`;
+}
+
+function decimalIdentityOfNumber(value: number): string {
+  const [mantissa, exponent = '0'] = String(Math.abs(value)).split('e');
+  return decimalIdentity(mantissa, Number(exponent));
 }
 
 /** Observed on the FileMaker server we tested; refuse NUL to prevent possible data loss. */

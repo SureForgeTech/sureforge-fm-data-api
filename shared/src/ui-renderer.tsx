@@ -10,6 +10,8 @@ export interface RuntimeLayoutData {
   serverOrigin?: string;
   fieldValues?: Record<string, unknown>;
   editing?: boolean;
+  /** Validation errors keyed by exact FileMaker field name; never persisted in layout files. */
+  fieldErrors?: Record<string, string>;
   /** A new record has no values yet, so every field of the layout stays on the form. */
   creating?: boolean;
   onFieldChange?: (name: string, value: unknown) => void;
@@ -70,18 +72,18 @@ export function LayoutContainer({
       .forEach((object) => {
         positions.set(object.id, { ...object, x: FIELD_LAYOUT.pageMargin, y: flowY,
           width: Math.min(object.width, Math.max(1, containerWidth - FIELD_LAYOUT.pageMargin * 2)) });
-        flowY += object.height + (object.type === 'field' && object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) + runtimeFieldNoteSpace(positions.get(object.id) ?? object, runtimeData?.editing) + FIELD_LAYOUT.rowGap;
+        flowY += object.height + (object.type === 'field' && object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) + runtimeFieldNoteSpace(positions.get(object.id) ?? object, runtimeData?.editing, runtimeData?.fieldErrors) + FIELD_LAYOUT.rowGap;
       });
   }
   const noteRows = mode === 'runtime' && !narrow ? layout.objects.reduce((rows, object) => {
-    rows.set(object.y, Math.max(rows.get(object.y) ?? 0, runtimeFieldNoteSpace(object, runtimeData?.editing)));
+    rows.set(object.y, Math.max(rows.get(object.y) ?? 0, runtimeFieldNoteSpace(object, runtimeData?.editing, runtimeData?.fieldErrors)));
     return rows;
   }, new Map<number, number>()) : new Map<number, number>();
   const visibleObjects = renderedObjects.map((object) => positions.get(object.id) ?? (noteRows.size
     ? { ...object, y: object.y + [...noteRows].reduce((shift, [row, space]) => shift + (row < object.y ? space : 0), 0) }
     : object));
   const contentHeight = Math.max(containerHeight, ...visibleObjects.map((object) => object.y + object.height +
-    (object.type === 'field' && object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) + runtimeFieldNoteSpace(object, runtimeData?.editing) + FIELD_LAYOUT.pageMargin));
+    (object.type === 'field' && object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) + runtimeFieldNoteSpace(object, runtimeData?.editing, runtimeData?.fieldErrors) + FIELD_LAYOUT.pageMargin));
 
   return (
     <div
@@ -114,12 +116,20 @@ export function LayoutContainer({
 
 function runtimeFieldNote(object: LayoutObject, editing = false): string | undefined {
   if (object.type !== 'field') return undefined;
-  return [fieldKindNote(runtimeFieldKind(object)), editing && object.format === 'date' ? "Use the server's date format, keeping the same order and separators." : undefined].filter(Boolean).join(' ') || undefined;
+  return [fieldKindNote(runtimeFieldKind(object)), editing && object.format === 'date'
+    ? object.dateFormat === 'iso' ? 'Use YYYY-MM-DD (for example 2026-11-16).'
+      : "Use the server's date format, keeping the same order and separators." : undefined, object.helpText].filter(Boolean).join(' ') || undefined;
 }
 
-function runtimeFieldNoteSpace(object: LayoutObject, editing = false): number {
-  const note = runtimeFieldNote(object, editing);
-  return note ? Math.ceil(note.length / Math.max(1, Math.floor(object.width / 7))) * 16 + 4 : 0;
+function runtimeFieldError(object: LayoutObject, errors?: Record<string, string>): string | undefined {
+  if (object.type !== 'field' || !errors) return undefined;
+  const error: unknown = Object.getOwnPropertyDescriptor(errors, object.fmFieldName)?.value;
+  return typeof error === 'string' && error.length ? error : undefined;
+}
+
+function runtimeFieldNoteSpace(object: LayoutObject, editing = false, errors?: Record<string, string>): number {
+  const notes = [runtimeFieldNote(object, editing), runtimeFieldError(object, errors)].filter(Boolean) as string[];
+  return notes.reduce((height, note) => height + Math.ceil(note.length / Math.max(1, Math.floor(object.width / 7))) * 16 + 4, 0);
 }
 
 interface LayoutObjectRendererProps {
@@ -256,6 +266,7 @@ function FieldControl(props: {
   const previewOptions = getPreviewOptions(object, runtimeValue, props.mode);
   const value = runtimeValue === undefined || runtimeValue === null ? '' : String(runtimeValue);
   const note = props.mode === 'runtime' ? runtimeFieldNote(object, props.runtimeData?.editing) : undefined;
+  const error = props.mode === 'runtime' ? runtimeFieldError(object, props.runtimeData?.fieldErrors) : undefined;
   const readOnly = props.mode !== 'runtime' || !props.runtimeData?.editing || ['calculation', 'summary', 'container'].includes(runtimeFieldKind(object));
   // A container image that cannot be shown leaves its address behind.
   const [failedImage, setFailedImage] = React.useState<string | undefined>(undefined);
@@ -307,6 +318,8 @@ function FieldControl(props: {
     object,
     mode: props.mode,
     inputId,
+    description: [note ? `${inputId}-note` : '', error ? `${inputId}-error` : ''].filter(Boolean).join(' ') || undefined,
+    error,
     serverOrigin: props.runtimeData?.serverOrigin,
     options: previewOptions,
     value: props.mode === 'designer' ? previewOptions[0] : value,
@@ -324,7 +337,10 @@ function FieldControl(props: {
     <div
       style={{
         ...style,
-        height: object.height + (object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0),
+        // Preserve legacy control geometry; intake presentation reserves space for its extra messages.
+        height: object.height + (object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) +
+          (props.mode === 'runtime' && (object.accessibleLabel !== undefined || object.helpText !== undefined || error)
+            ? runtimeFieldNoteSpace(object, props.runtimeData?.editing, props.runtimeData?.fieldErrors) : 0),
         display: 'flex',
         flexDirection: horizontalLabel ? 'row' : 'column',
         justifyContent: horizontalLabel ? 'space-between' : undefined,
@@ -339,7 +355,8 @@ function FieldControl(props: {
       data-fm-field-kind={runtimeFieldKind(object)}
       data-fm-label-position={object.labelPosition}
     >
-      {note ? <span id={`${inputId}-note`} role="note">{note}</span> : null}
+      {note ? <span id={`${inputId}-note`} role="note" style={{ overflowWrap: 'anywhere', lineHeight: '16px', paddingBottom: 4, flexShrink: 0 }}>{note}</span> : null}
+      {error ? <span id={`${inputId}-error`} style={{ color: '#b21e3b', overflowWrap: 'anywhere', lineHeight: '16px', paddingBottom: 4, flexShrink: 0 }}>{error}</span> : null}
       {object.labelPosition === 'right' ? (
         <>
           <div style={inlineControlStyle}>{fieldControl}</div>
@@ -359,6 +376,8 @@ function renderFieldDisplayControl(props: {
   object: FieldLayoutObject;
   mode: 'designer' | 'runtime';
   inputId: string;
+  description?: string;
+  error?: string;
   serverOrigin?: string;
   options: string[];
   value: string;
@@ -386,8 +405,10 @@ function renderFieldDisplayControl(props: {
     color: '#20364f'
   };
 
-  const description = props.mode === 'runtime' && runtimeFieldNote(props.object, !props.readOnly) ? `${props.inputId}-note` : undefined;
-  const common = { id: props.inputId, 'aria-label': props.object.fmFieldName,
+  const description = props.description;
+  const common = { id: props.inputId, 'aria-label': props.object.accessibleLabel ?? props.object.fmFieldName,
+    'aria-required': props.object.required || undefined, 'aria-invalid': props.error ? true : undefined,
+    'aria-errormessage': props.error ? `${props.inputId}-error` : undefined,
     'aria-describedby': description, className: disabled ? 'fm-field-control fm-readonly' : 'fm-field-control', style: baseControlStyle };
 
   if (standard.kind === 'container') {
@@ -419,7 +440,9 @@ function renderFieldDisplayControl(props: {
     const original = checkbox ? props.originalValue.split(/\r\n|\r|\n/).filter(Boolean) : [props.originalValue];
     const options = props.mode === 'designer' && !checkbox ? props.options.slice(0, 2)
       : Array.from(new Set([...props.options, ...original, ...(checkbox ? selected.filter(Boolean) : selected)]));
-    return <div className={common.className} role={checkbox ? 'group' : 'radiogroup'} aria-label={props.object.fmFieldName} aria-describedby={description}
+    return <div className={common.className} role={checkbox ? 'group' : 'radiogroup'} aria-label={common['aria-label']} aria-describedby={description}
+      aria-invalid={common['aria-invalid']} aria-errormessage={common['aria-errormessage']}
+      aria-required={checkbox ? undefined : common['aria-required']}
       style={{ ...baseControlStyle, display: 'flex', flexDirection: 'column', gap: 4 }}>
       {options.map((option, index) => <label key={option} style={{ display: 'inline-flex', alignItems: 'center', gap: 8 }}>
         <input id={index === 0 ? props.inputId : `${props.inputId}-${index}`} type={checkbox ? 'checkbox' : 'radio'}
