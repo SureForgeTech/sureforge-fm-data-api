@@ -569,6 +569,16 @@ describe('FM Web runtime template', () => {
     }
   });
 
+  it('refreshes a prior generated decimal helper instead of treating it as a user edit', async () => {
+    const previous = await readFile(path.join(extensionDir, 'test/fixtures/prior-generated-record-edit.ts.txt'));
+    expect(normalizedHash(previous)).toBe('65bf659996a5cfd1778f6011a102c8c149e3f25a7a3f6201b79fdc37bc351c1e');
+    const target = path.join(dir, 'runtime-next/shared/src/record-edit.ts');
+    await mkdir(path.dirname(target), { recursive: true });await writeFile(target, previous);
+    const gen = generator();
+    expect((await gen.generateRuntimeAppTemplate()).updated).toContain('shared/src/record-edit.ts');
+    expect(await readFile(target, 'utf8')).toBe(await readFile(path.resolve(extensionDir, '../shared/src/record-edit.ts'), 'utf8'));
+  });
+
   it('never writes through a symbolic link: a managed file that is a link is left alone and reported', async () => {
     const outside = path.join(dir, 'outside.ts');
     await writeFile(outside, 'untouched');
