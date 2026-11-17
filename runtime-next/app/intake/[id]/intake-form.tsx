@@ -100,7 +100,7 @@ export function IntakeForm({ definition, layout }: { definition: IntakeDefinitio
     </form>
     <div role="status" aria-live="polite">
       {status === 'accepted' ? <p>{definition.successMessage} Reference: {receipt}</p> : null}
-      {status === 'uncertain' ? <p>The submission outcome is uncertain. Keep this page open and check the outcome before submitting again. Nothing was retried automatically.</p> : null}
+      {status === 'uncertain' ? <p>The submission outcome is uncertain. Keep this page open. This sample has no outcome lookup; reloading or restarting the preview loses duplicate protection and resubmitting could create another registration. Nothing was retried automatically.</p> : null}
     </div>
   </section>;
 }
