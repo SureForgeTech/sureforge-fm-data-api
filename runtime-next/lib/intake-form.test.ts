@@ -79,6 +79,17 @@ describe('registration form workflow', () => {
     await submit();expect(fetch).toHaveBeenCalledTimes(1);
   });
   it.each([
+    [401, 'reopen the private preview'], [403, 'reopen the private preview'],
+    [400, 'did not accept'], [404, 'did not accept'], [413, 'too large'], [415, 'did not accept']
+  ])('keeps a definite pre-submission refusal editable (%i)', async (status, message) => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response('Request refused before a write', { status })).mockResolvedValueOnce(accepted());
+    mount();fill();await submit();
+    expect(host.textContent).toContain(message);expect(host.textContent).not.toContain('outcome is uncertain');
+    expect(host.querySelector<HTMLInputElement>('[aria-label="Your name"]')?.value).toBe('  Sample Attendee  ');
+    expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
+    await submit();expect(fetch).toHaveBeenCalledTimes(2);expect(host.textContent).toContain('sample-success');
+  });
+  it.each([
     [{ status: 'invalid' }, 422, 'not accepted'], [{ status: 'rejected' }, 422, 'not accepted'],
     [{ status: 'capacity' }, 503, 'reached its limit']
   ])('keeps values editable after a definite refusal and preserves the identifier on retry', async (body, status, message) => {
