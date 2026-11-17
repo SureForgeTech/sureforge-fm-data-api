@@ -58,6 +58,36 @@ describe('prompt form suggestions', () => {
     expect(result.fields.map(({ field }) => field.name)).toEqual(['Company']);
   });
 
+  it('updates an earlier suggestion with a later explicit requirement', () => {
+    const result = suggestPromptFields('Include email. Email is required. Include email.', [{ name: 'Email' }]);
+    expect(result.fields).toEqual([{ field: { name: 'Email' }, required: true }]);
+  });
+
+  it('scopes exclusions to their own fields and respects a later positive instruction', () => {
+    const result = suggestPromptFields(
+      "Include email but exclude phone and company, and add notes. Don't require session.",
+      [{ name: 'Email' }, { name: 'Phone' }, { name: 'Company' }, { name: 'Notes' }, { name: 'Session' }]
+    );
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['Email', 'Notes']);
+    expect(result.unmatched).toEqual([]);
+  });
+
+  it('carries requirements across a list and resets them for later instructions', () => {
+    const result = suggestPromptFields('Require name, email, and phone. Add optional notes, then session.', [
+      { name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }, { name: 'Session' }
+    ]);
+    expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([
+      ['Name', true], ['Email', true], ['Phone', true], ['Notes', false], ['Session', undefined]
+    ]);
+  });
+
+  it('does not confuse literal marker text with an exact quoted field', () => {
+    const result = suggestPromptFields('Include zzfmquote1zz but exclude "Phone".', [
+      { name: 'zzfmquote1zz' }, { name: 'Phone' }
+    ]);
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['zzfmquote1zz']);
+  });
+
   it('limits prompt size before attempting any match', () => {
     expect(() => suggestPromptFields('x'.repeat(MAX_FORM_PROMPT_LENGTH + 1), [])).toThrow('2,000 characters');
   });

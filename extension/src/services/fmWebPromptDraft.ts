@@ -70,27 +70,43 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   }
   const concepts = new Map(CONCEPTS.flatMap((concept) => [...concept.phrases, ...concept.names].map((phrase) => [phrase, concept] as const)));
   const append = (mention: Mention, required?: boolean): void => {
-    if (mention.candidates.length !== 1 || draft.fields.length === 100) {
+    const field = mention.candidates.length === 1 ? mention.candidates[0] : undefined;
+    const existing = field && draft.fields.find((entry) => entry.field.name === field.name);
+    if (existing) {
+      if (required !== undefined) existing.required = required;
+      return;
+    }
+    if (!field || draft.fields.length === 100) {
       if (!draft.unmatched.includes(mention.label)) draft.unmatched.push(mention.label);
       return;
     }
-    const field = mention.candidates[0]!;
-    if (draft.fields.some((entry) => entry.field.name === field.name)) return;
     draft.fields.push({ field, required });
   };
 
   // Keep punctuation inside explicitly quoted FileMaker names intact.
-  const clauses = fieldPrompt.match(/(?:["“][^"”\r\n]*["”]|[^"“;.!?,\r\n])+/g) ?? [];
+  const clauses = fieldPrompt.match(/(?:["“][^"”\r\n]*["”]|[^"“;.!?,\r\n])+|[;.!?,\r\n]/g) ?? [];
+  let inherited: boolean | undefined;
+  let negated = false;
+  let comma = false;
   for (const raw of clauses) {
-    if (/\b(?:don['’]?t|do not|exclude|omit|without|skip|no need for|no)\b/i.test(raw.replace(/["“][^"”]*["”]/g, ''))) continue;
+    if (/^[;.!?\r\n]$/.test(raw)) {
+      inherited = undefined;
+      negated = false;
+      comma = false;
+      continue;
+    }
+    if (raw === ',') { comma = true;continue; }
+    if (!raw.trim()) continue;
     const quotes: string[] = [];
-    const clause = words(raw.replace(/["“]([^"”]+)["”]/g, (_, name: string) => {
-      quotes.push(name);
-      return ` zzfmquote${quotes.length}zz `;
-    }));
+    // The marker is outside the output alphabet of words(), so literal input cannot impersonate it.
+    const clause = raw.split(/(["“][^"”]+["”])/g).map((part, index) => {
+      if (index % 2 === 0) return words(part);
+      quotes.push(part.slice(1, -1));
+      return `\0${quotes.length}\0`;
+    }).filter(Boolean).join(' ');
     const mentions: Mention[] = [];
     for (const [index, name] of quotes.entries()) {
-      const marker = `zzfmquote${index + 1}zz`;
+      const marker = `\0${index + 1}\0`;
       const start = clause.indexOf(marker);
       const candidates = writable.filter((field) => field.name === name);
       mentions.push({ start, end: start + marker.length, label: name, candidates });
@@ -119,17 +135,25 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
     }
     mentions.sort((left, right) => left.start - right.start || right.end - left.end);
     let previousEnd = 0;
-    let inherited: boolean | undefined;
     for (const [index, mention] of mentions.entries()) {
       if (mention.start < previousEnd) continue;
       const before = clause.slice(previousEnd, mention.start).trim();
       const after = clause.slice(mention.end, mentions.slice(index + 1).find((next) => next.start >= mention.end)?.start).trim();
+      const isContinuation = /^and$/.test(before) || (comma && !before);
+      // Process directives in order. A negated include/require is one directive, not a positive command.
+      const directives = /\b(?:(do not|don t|dont|never)(?:\s+(?:include|add|collect|require|ask for))?|((?:exclude|omit|without|skip|no)(?: need for)?)|but|include|add|collect|require|ask for)\b/g;
+      for (const directive of before.matchAll(directives)) {
+        negated = Boolean(directive[1] || directive[2]);
+      }
       const prefix = /\b(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before)?.[1];
       const suffix = /^(?:is|are|as) (required|optional)\b/.exec(after)?.[1];
-      const required = qualifier(prefix ?? suffix ?? '') ?? (/^and$/.test(before) ? inherited : undefined);
-      append(mention, required);
+      const requirement = qualifier(prefix ?? suffix ?? '');
+      if (!negated) append(mention, requirement ?? (isContinuation ? inherited : undefined));
       previousEnd = mention.end;
-      inherited = required;
+      comma = false;
+      // Only a forward-scoped list requirement carries to the next coordinated item.
+      if (negated || requirement === false || (!isContinuation && !prefix)) inherited = undefined;
+      else if (prefix) inherited = requirement;
     }
   }
   return draft;
