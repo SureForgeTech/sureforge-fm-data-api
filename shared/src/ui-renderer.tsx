@@ -337,7 +337,10 @@ function FieldControl(props: {
     <div
       style={{
         ...style,
-        height: object.height + (object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) + (props.mode === 'runtime' ? runtimeFieldNoteSpace(object, props.runtimeData?.editing, props.runtimeData?.fieldErrors) : 0),
+        // Preserve legacy control geometry; intake presentation reserves space for its extra messages.
+        height: object.height + (object.labelPosition === 'top' ? FIELD_LAYOUT.labelSpace : 0) +
+          (props.mode === 'runtime' && (object.accessibleLabel !== undefined || object.helpText !== undefined || error)
+            ? runtimeFieldNoteSpace(object, props.runtimeData?.editing, props.runtimeData?.fieldErrors) : 0),
         display: 'flex',
         flexDirection: horizontalLabel ? 'row' : 'column',
         justifyContent: horizontalLabel ? 'space-between' : undefined,
