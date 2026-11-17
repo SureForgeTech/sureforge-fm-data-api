@@ -1,8 +1,8 @@
 # FileMaker Data API Tools for VS Code
 
-[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Marketplace installs](https://vsmarketplacebadges.dev/installs/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](LICENSE)
+[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Marketplace installs](https://vsmarketplacebadges.dev/installs/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![License: Apache-2.0](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](LICENSE)
 
-Create and preview FM Web apps in VS Code with a free, open-source FileMaker extension. Choose FileMaker fields or sample fields, customize an event-registration form without editing JSON, and preview it privately. The extension also provides Data API queries, record editing, schema comparison, batch tools, TypeScript generation and optional AI tools. MIT licensed, no telemetry.
+Create and preview FM Web apps in VS Code with a free, open-source FileMaker extension. Choose FileMaker fields or sample fields, customize an event-registration form without editing JSON, and preview it privately. The extension also provides Data API queries, record editing, schema comparison, batch tools, TypeScript generation and optional AI tools. Apache-2.0 licensed, no telemetry.
 
 Install it from the Marketplace: search for **FileMaker Data API Tools** (publisher SureForgeTech), or run `code --install-extension SureForgeTech.filemaker-data-api-tools`.
 
@@ -70,4 +70,4 @@ The generated FM Web app in `.fmweb/generated/runtime-next` receives the app sou
 
 ## License
 
-MIT. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](LICENSE).
