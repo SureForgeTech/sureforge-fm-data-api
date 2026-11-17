@@ -8,7 +8,7 @@ export interface AppEditorActions {
   save(definition: IntakeDefinition): Promise<void>;
   run(action: 'preview' | 'export' | 'layout' | 'filemaker'): Promise<void>;
   assertAvailable(): void;
-  changeSource?(): Promise<void>;
+  changeSource?(source?: 'filemaker' | 'draft'): Promise<void>;
 }
 
 export class FmWebAppPanel {
@@ -22,13 +22,13 @@ export class FmWebAppPanel {
     this.current.panel.reveal(vscode.ViewColumn.One);return true;
   }
 
-  static open(context: vscode.ExtensionContext, definition: IntakeDefinition, layout: LayoutDefinition, actions: AppEditorActions): void {
+  static open(context: vscode.ExtensionContext, definition: IntakeDefinition, layout: LayoutDefinition, actions: AppEditorActions, draft?: { unmatched: string[] }): void {
     if (this.revealIfOpen()) return;
     const panel = vscode.window.createWebviewPanel('filemakerFmWebApp', 'FM Web App — Event registration', vscode.ViewColumn.One,
       { enableScripts: true, retainContextWhenHidden: true, localResourceRoots: [vscode.Uri.joinPath(context.extensionUri, 'dist', 'webviews', 'fmWebApp', 'ui')] });
     const editor = new FmWebAppPanel(panel, definition, layout, actions);
     this.current = editor;context.subscriptions.push(panel);
-    panel.webview.html = renderAppEditor(panel.webview, context, definition, editor.fields, layout.fmLayoutName);
+    panel.webview.html = renderAppEditor(panel.webview, context, definition, editor.fields, layout.fmLayoutName, draft);
   }
 
   private constructor(private readonly panel: vscode.WebviewPanel, private readonly original: IntakeDefinition,
@@ -45,11 +45,12 @@ export class FmWebAppPanel {
       this.actions.assertAvailable();
       if (!message || typeof message !== 'object' || Array.isArray(message)) throw new Error('Invalid app editor request.');
       const request = message as Record<string, unknown>;
-      if (!['save', 'preview', 'export', 'layout', 'source', 'filemaker'].includes(String(request.action))
+      if (!['save', 'preview', 'export', 'layout', 'source', 'draft', 'filemaker'].includes(String(request.action))
         || Object.keys(request).some((key) => !['action', 'definition'].includes(key))) throw new Error('Unsupported app editor action.');
-      if (request.action === 'source') {
-        const answer = await vscode.window.showWarningMessage('Choose a new field source? Unsaved edits in this tab will be discarded. Your saved app stays unchanged until you save the replacement.', { modal: true }, 'Choose fields');
-        if (answer === 'Choose fields') { this.panel.dispose();await this.actions.changeSource?.(); }
+      if (request.action === 'source' || request.action === 'draft') {
+        const label = request.action === 'draft' ? 'Draft form' : 'Choose fields';
+        const answer = await vscode.window.showWarningMessage(`${label}? Unsaved edits in this tab will be discarded. Your saved app stays unchanged until you save the replacement.`, { modal: true }, label);
+        if (answer === label) { this.panel.dispose();await this.actions.changeSource?.(request.action === 'draft' ? 'draft' : undefined); }
         else await this.panel.webview.postMessage({ type: 'saved', message: 'Field source unchanged. Your edits remain in this tab.' });
         return;
       }
@@ -70,7 +71,7 @@ export class FmWebAppPanel {
   }
 }
 
-export function renderAppEditor(webview: vscode.Webview, context: vscode.ExtensionContext, definition: IntakeDefinition, fields: IntakeField[], sourceName = 'Sample registration fields'): string {
+export function renderAppEditor(webview: vscode.Webview, context: vscode.ExtensionContext, definition: IntakeDefinition, fields: IntakeField[], sourceName = 'Sample registration fields', draft?: { unmatched: string[] }): string {
   const nonce = createNonce();
   const script = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'dist', 'webviews', 'fmWebApp', 'ui', 'main.js'));
   const selected = new Set(definition.fields.map((field) => field.id));
@@ -81,7 +82,9 @@ export function renderAppEditor(webview: vscode.Webview, context: vscode.Extensi
 body{max-width:1000px;margin:0 auto;padding:24px}label{display:block;margin-top:12px}input,select,textarea{box-sizing:border-box;max-width:100%;width:100%}input[type=checkbox]{width:auto}fieldset{margin:16px 0;padding:16px;border:1px solid var(--vscode-panel-border)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.field-title{display:flex;align-items:center;gap:8px}.field-title label{margin:0}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.wide{grid-column:1/-1}code{white-space:pre-wrap;overflow-wrap:anywhere}button{cursor:pointer}#status{white-space:pre-wrap}#status.error{color:var(--vscode-errorForeground)}@media(max-width:600px){.field-grid{grid-template-columns:1fr}}
 </style></head><body class="fm-page"><h1>Create FM Web App</h1><p>Event registration · Select fields, customize your form, then save and preview.</p><p>Field layout: <strong>${escapeHtml(sourceName)}</strong></p>
 <p role="note">Save and preview uses sample registrations. Save to FileMaker enables real record creation only after you confirm the connection and layout in VS Code.</p>
-<form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><fieldset><legend>Event and branding</legend>
+${draft ? '<p role="note">Review the suggested field mappings and required settings before saving.</p>' : ''}
+${draft?.unmatched.length ? `<p>Check these requests against your FileMaker fields: ${escapeHtml(draft.unmatched.join(', '))}.</p>` : ''}
+<form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><button type="button" data-action="draft">Draft form from a prompt</button><fieldset><legend>Event and branding</legend>
 ${input('title', 'Event title', definition.title, 160)}
 <label for="description">Description</label><textarea id="description" maxlength="2000">${escapeHtml(definition.description)}</textarea>
 <label for="organization">Organization</label><input id="organization" maxlength="120" value="${escapeHtml(definition.branding?.organizationName ?? '')}"/>

@@ -95,7 +95,8 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
 
       ConnectionWizardPanel.createOrShow(context, profileStore, secretStore, fmClient, logger, undefined, {
         getTestPolicy: deps.getConnectionWizardTestPolicy,
-        afterSave: arg && typeof arg === 'object' && 'continueToFmWebApp' in arg && arg.continueToFmWebApp === true ? 'createFmWebApp' : undefined
+        afterSave: arg && typeof arg === 'object' && 'continueToFmWebApp' in arg && arg.continueToFmWebApp === true
+          ? ('draft' in arg && arg.draft === true ? 'draftFmWebApp' : 'createFmWebApp') : undefined
       });
     }),
 

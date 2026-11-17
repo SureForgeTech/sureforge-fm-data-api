@@ -40,6 +40,46 @@ function pickFileMaker() {
   });
 }
 describe('Create FM Web App production controller', () => {
+  it('preselects prompt matches from the chosen layout and opens a draft without saving or starting preview', async () => {
+    const { deps, project } = fixture();
+    vi.mocked(vscode.window.showInputBox).mockResolvedValue('Require attendee name and email, add optional session');
+    vi.mocked(vscode.window.showQuickPick).mockImplementation(async (items, options) => {
+      const choices = items as unknown as Array<{ label: string; picked?: boolean }>;
+      if (options?.canPickMany) {
+        expect(choices.map(({ label, picked }) => [label, picked])).toEqual([[' Full Name ', true], ['Email', true]]);
+        return choices.filter((item) => item.picked) as never;
+      }
+      return (choices.find((item) => item.label === 'Draft form from a prompt') ?? choices[0]) as never;
+    });
+    await createFmWebApp(deps as never);
+    const definition = open.mock.calls[0]![1] as ReturnType<typeof eventRegistrationExample>['definition'];
+    expect(definition.fields.map((field) => [field.fmFieldName, field.required])).toEqual([[' Full Name ', true], ['Email', true]]);
+    expect(open.mock.calls[0]![4]).toMatchObject({ unmatched: expect.arrayContaining([expect.stringMatching(/session/i)]) });
+    expect(project.ensureProjectInitialized).not.toHaveBeenCalled();
+    expect(project.syncMetadata).not.toHaveBeenCalled();
+    expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
+    await actions().save(definition);
+    await actions().run('preview');
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
+  });
+
+  it('cancels the prompt without selecting fields, saving files or opening an editor', async () => {
+    const { deps, project } = fixture();pickFileMaker();
+    vi.mocked(vscode.window.showInputBox).mockResolvedValue(undefined);
+    await createFmWebApp(deps as never, { source: 'draft' });
+    expect(vscode.window.showQuickPick).toHaveBeenCalledTimes(2);
+    expect(open).not.toHaveBeenCalled();
+    expect(project.ensureProjectInitialized).not.toHaveBeenCalled();
+  });
+
+  it('resumes prompt drafting after creating the first connection', async () => {
+    const { deps } = fixture();deps.profileStore.listProfiles.mockResolvedValue([]);
+    vi.mocked(vscode.window.showInformationMessage).mockResolvedValue('Add Connection' as never);
+    await createFmWebApp(deps as never, { source: 'draft' });
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.addConnectionProfile', { continueToFmWebApp: true, draft: true });
+    expect(open).not.toHaveBeenCalled();
+  });
+
   it('chooses exact FileMaker layout/fields, excludes readonly fields, and saves before preview', async () => {
     const { deps, project, fmClient } = fixture();pickFileMaker();
     await createFmWebApp(deps as never);
