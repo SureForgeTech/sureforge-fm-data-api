@@ -34,6 +34,10 @@ export const intakeDefinitionSchema = z.strictObject({
   description: z.string().max(2000).default(''),
   submitLabel: z.string().min(1).max(80).default('Submit'),
   successMessage: z.string().min(1).max(1000).default('Your submission was received.'),
+  branding: z.strictObject({
+    organizationName: z.string().max(120).default(''),
+    accentColor: z.string().regex(/^#[0-9a-fA-F]{6}$/).default('#215EA6')
+  }).optional(),
   fields: z.array(intakeFieldSchema).min(1).max(100)
 }).superRefine((definition, context) => {
   const ids = new Set<string>();

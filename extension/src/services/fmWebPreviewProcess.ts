@@ -67,9 +67,9 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     this.options = { platform: process.platform, spawn, kill: process.kill, tempRoot: tmpdir(), sourceEnv: process.env, ...options };
   }
 
-  public start(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string): Promise<void> {
+  public start(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map()): Promise<void> {
     activePreviews.add(this);
-    this.starting = this.launch(files, layouts, bridgeUrl, token, serverUrl);
+    this.starting = this.launch(files, layouts, bridgeUrl, token, serverUrl, intakes);
     return this.starting;
   }
 
@@ -113,7 +113,7 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     return { command: node, prefix: [cli], node };
   }
 
-  private async launch(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string): Promise<void> {
+  private async launch(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map()): Promise<void> {
     await this.removeStaleDirectories();
     const directory = await mkdtemp(path.join(this.options.tempRoot, 'fmweb-preview-'));
     this.directory = directory;
@@ -131,6 +131,13 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     for (const [name, bytes] of layouts) {
       if (path.basename(name) !== name || !name.endsWith('.layout.json')) throw new Error('Invalid layout path.');
       await writeFile(path.join(directory, 'layouts', name), bytes, { flag: 'wx', mode: 0o600 });
+    }
+    if (intakes.size) {
+      await mkdir(path.join(directory, 'intakes'), { mode: 0o700 });
+      for (const [name, bytes] of intakes) {
+        if (!/^[a-z][a-z0-9_-]{0,63}\.intake\.json$/.test(name) || bytes.length > 1048576) throw new Error('Invalid intake path or size.');
+        await writeFile(path.join(directory, 'intakes', name), bytes, { flag: 'wx', mode: 0o600 });
+      }
     }
     const userconfig = path.join(directory, 'user.npmrc');
     const globalconfig = path.join(directory, 'global.npmrc');

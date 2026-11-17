@@ -67,7 +67,8 @@ export function IntakeForm({ definition, layout }: { definition: IntakeDefinitio
     if (object) document.getElementById(`field-input-${object.id}`)?.focus();
   }
 
-  return <section aria-label={definition.title}>
+  return <section aria-label={definition.title} style={{ borderTop: `6px solid ${definition.branding?.accentColor ?? '#215EA6'}`, paddingTop: 16 }}>
+    {definition.branding?.organizationName ? <p>{definition.branding.organizationName}</p> : null}
     <h1>{definition.title}</h1><p>{definition.description}</p>
     <p role="note">Private sample preview. Use invented details. Duplicate protection lasts only while this preview process runs.</p>
     {errors.length ? <div ref={summary} role="alert" tabIndex={-1}>

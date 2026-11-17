@@ -15,3 +15,6 @@ Acceptance evidence for the assessment: the paths and gates above were read from
 Intake date fields explicitly use YYYY-MM-DD in both the renderer instruction and shared validation. A real FileMaker submission adapter must explicitly configure or convert this date format before writing; this foundation does not claim live-server date compatibility.
 
 Intake views opt into visible accessible labels, help text, required-state announcements and field-associated validation errors. Existing record views retain their current accessible names unless they explicitly opt in.
+
+
+Implementation follow-through (2026-11-16): the additive Build a Portal entry reuses the project service, existing Layout Mode command, existing private preview command, shared starter and renderer. It resumes user-owned intake/layout files, snapshots validated definitions into the isolated preview, and supports title/label/help/required settings and constrained branding. This is an editor-assisted JSON workflow rather than a new visual form designer; no developer usability study or live FileMaker submission is claimed.

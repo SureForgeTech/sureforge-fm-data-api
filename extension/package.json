@@ -123,7 +123,7 @@
     "viewsWelcome": [
       {
         "view": "filemakerExplorer",
-        "contents": "No FileMaker connections yet.\n[Add Connection Profile](command:filemakerDataApiTools.addConnectionProfile)\n[Open Walkthrough](command:filemakerDataApiTools.openWelcomeWalkthrough)\n\nYour passwords stay in the OS keychain. Learn more in the [User Guide](command:filemakerDataApiTools.openUserGuide)."
+        "contents": "No FileMaker connections yet.\n[Build a Portal with sample data](command:filemakerDataApiTools.buildPortal)\n[Add Connection Profile](command:filemakerDataApiTools.addConnectionProfile)\n[Open Walkthrough](command:filemakerDataApiTools.openWelcomeWalkthrough)\n\nYour passwords stay in the OS keychain. Learn more in the [User Guide](command:filemakerDataApiTools.openUserGuide)."
       },
       {
         "view": "filemakerLayoutInspector",
@@ -196,6 +196,7 @@
       }
     ],
     "commands": [
+      { "command": "filemakerDataApiTools.buildPortal", "title": "Build a Portal", "category": "FileMaker" },
       {
         "command": "filemakerDataApiTools.testMyServer",
         "title": "Test My Server",
@@ -2057,6 +2058,7 @@
         "description": "Read a FileMaker database (read only, needs AI tools switched on)",
         "isSticky": false,
         "commands": [
+      { "command": "filemakerDataApiTools.buildPortal", "title": "Build a Portal", "category": "FileMaker" },
           {
             "name": "layouts",
             "description": "List the layouts of the connection chosen for AI"

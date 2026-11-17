@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { NextRequest } from 'next/server';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { previewIntakes } from './intake-registry';
+import { eventRegistrationExample } from './registration-example';
 import { POST } from '../app/api/intake/[id]/route';
 
 const session = 's'.repeat(64);
@@ -17,6 +19,19 @@ beforeEach(() => vi.stubEnv('FMWEB_PREVIEW_SESSION', session));
 afterEach(() => vi.unstubAllEnvs());
 
 describe('private sample intake endpoint', () => {
+  it('validates the saved custom form rather than silently using the built-in definition', async () => {
+    const example = eventRegistrationExample();
+    example.definition.id = 'custom-event';
+    example.definition.fields = [{ ...example.definition.fields[0], id: 'attendee', label: 'Attendee' }];
+    const loaded = vi.spyOn(previewIntakes, 'load').mockResolvedValue(example);
+    try {
+      const accepted = await POST(request({ submissionId: randomUUID(), values: { attendee: 'Sample' } }), context('custom-event'));
+      expect(accepted.status).toBe(201);
+      const refused = await POST(request({ submissionId: randomUUID(), values }), context('custom-event'));
+      expect(refused.status).toBe(422);
+    } finally { loaded.mockRestore(); }
+  });
+
   it.each([
     [{ cookie: '' }, 401], [{ host: 'evil.test' }, 403], [{ origin: 'https://evil.test' }, 403],
     [{ 'content-type': 'text/plain' }, 415]

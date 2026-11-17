@@ -1,12 +1,11 @@
 import type { NextRequest } from 'next/server';
-import { eventRegistrationExample } from '../../../../lib/registration-example';
+import { previewIntakes } from '../../../../lib/intake-registry';
 import { createSyntheticIntakeAdapter, IntakeSubmissionService, type IntakeOutcome } from '../../../../lib/intake-submission';
 import { previewHostAllowed, previewSessionAllowed } from '../../../../lib/preview-security';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
-const example = eventRegistrationExample();
-const service = new IntakeSubmissionService(example.definition, createSyntheticIntakeAdapter());
+const services = new Map<string, IntakeSubmissionService>();
 const reply = (value: object, status: number) => Response.json(value, { status, headers: { 'Cache-Control': 'no-store' } });
 
 export async function POST(request: NextRequest, context: { params: Promise<{ id: string }> }): Promise<Response> {
@@ -14,7 +13,13 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (!previewSessionAllowed(request)) return reply({ error: 'Preview session is required.' }, 401);
   if (request.headers.get('origin') !== `http://${request.headers.get('host')}`) return reply({ error: 'Origin is not allowed.' }, 403);
   const { id } = await context.params;
-  if (id !== example.definition.id) return reply({ error: 'Unknown sample form.' }, 404);
+  const example = await previewIntakes.load(id);
+  if (!example) return reply({ error: 'Unknown or invalid sample form.' }, 404);
+  let service = services.get(id);
+  if (!service) {
+    service = new IntakeSubmissionService(example.definition, createSyntheticIntakeAdapter());
+    services.set(id, service);
+  }
   if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return reply({ error: 'Use a JSON submission.' }, 415);
   let body = '';
   const reader = request.body?.getReader();

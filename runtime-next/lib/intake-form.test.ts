@@ -28,6 +28,8 @@ async function submit() { await act(async () => { host.querySelector('form')!.di
 describe('registration form workflow', () => {
   it('renders the existing controls responsively, validates before network and focuses a usable error summary', async () => {
     mount();expect(host.textContent).toContain('Private sample preview');
+    expect(host.textContent).toContain('Your organization');
+    expect(host.querySelector('section')?.style.borderTopColor).toBe('rgb(33, 94, 166)');
     expect(host.querySelectorAll('input')).toHaveLength(2);expect(host.querySelector('select')).not.toBeNull();
     expect(host.querySelector('textarea')).not.toBeNull();
     const textarea = host.querySelector('textarea')!;
