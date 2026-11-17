@@ -16,17 +16,29 @@ describe('intake date instructions', () => {
         id: '11111111-1111-4111-8111-111111111111', name: 'Date', fmFieldName: ' Date ',
         x: 24, y: 24, width: 240, height: 34, format: 'date' }] });
       const definition = intakeDefinitionSchema.parse({ schemaVersion: 1, id: 'registration', layoutId: source.id,
-        environmentId: 'sample', title: 'Registration', fields: [{ id: 'date', fmFieldName: ' Date ', label: 'Event date', kind: 'date' }] });
+        environmentId: 'sample', title: 'Registration', fields: [{ id: 'date', fmFieldName: ' Date ', label: 'Event date', kind: 'date', required: true, helpText: 'Choose the workshop date.' }] });
       act(() => root.render(<LayoutContainer layout={intakeLayout(definition, layout)} mode="runtime"
         runtimeData={{ creating: true, editing: true, fieldValues: {} }} />));
       expect(host.textContent).toContain('Use YYYY-MM-DD');
+      expect(host.textContent).toContain('Choose the workshop date.');
+      expect(host.querySelector('input')?.getAttribute('aria-label')).toBe('Event date');
+      expect(host.querySelector('input')?.getAttribute('aria-required')).toBe('true');
       expect(host.textContent).not.toContain("server's date format");
       expect(validateIntakeSubmission(definition, { date: '2026-11-16' }).valid).toBe(true);
       expect(validateIntakeSubmission(definition, { date: '11/16/2026' }).valid).toBe(false);
+      act(() => root.render(<LayoutContainer layout={intakeLayout(definition, layout)} mode="runtime"
+        runtimeData={{ creating: true, editing: true, fieldValues: {}, fieldErrors: { ' Date ': 'Enter a real ISO date.' } }} />));
+      const input = host.querySelector('input')!;
+      expect(input.getAttribute('aria-invalid')).toBe('true');
+      const error = document.getElementById(input.getAttribute('aria-errormessage')!)!;
+      expect(error.textContent).toBe('Enter a real ISO date.');
+      expect(input.getAttribute('aria-describedby')).toContain(error.id);
       act(() => root.render(<LayoutContainer layout={layout} mode="runtime"
         runtimeData={{ creating: true, editing: true, fieldValues: {} }} />));
       expect(host.textContent).toContain("Use the server's date format");
       expect(host.textContent).not.toContain('Use YYYY-MM-DD');
+      expect(host.querySelector('input')?.getAttribute('aria-label')).toBe(' Date ');
+      expect(host.querySelector('input')?.hasAttribute('aria-invalid')).toBe(false);
     } finally { act(() => root.unmount());host.remove(); }
   });
 });
