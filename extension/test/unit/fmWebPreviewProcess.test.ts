@@ -68,13 +68,16 @@ afterEach(async () => {
 });
 
 describe('private preview process', () => {
-  it('copies saved intake data beside source layouts with owner-only files', async () => {
+  it('keeps saved intake source layouts separate from normal record views with owner-only files', async () => {
     const process = preview();
     await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),
       new Map([['source.layout.json', Buffer.from('{"id":"source"}')]]), 'http://127.0.0.1:1234', 'synthetic', undefined,
-      new Map([['event-registration.intake.json', Buffer.from('{"id":"event-registration"}')]]));
+      new Map([['event-registration.intake.json', Buffer.from('{"id":"event-registration"}')]]),
+      new Map([['a1111111-1111-4111-8111-111111111111.layout.json', Buffer.from('{"name":"portal source"}')]]));
     const root = path.dirname(calls[1]!.options.cwd as string);
     expect(JSON.parse(await readFile(path.join(root, 'intakes', 'event-registration.intake.json'), 'utf8')).id).toBe('event-registration');
+    expect(JSON.parse(await readFile(path.join(root, 'intake-layouts', 'a1111111-1111-4111-8111-111111111111.layout.json'), 'utf8')).name).toBe('portal source');
+    expect(JSON.parse(await readFile(path.join(root, 'layouts', 'source.layout.json'), 'utf8')).id).toBe('source');
     expect((await lstat(path.join(root, 'intakes', 'event-registration.intake.json'))).mode & 0o777).toBe(0o600);
   });
 

@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { FIELD_LAYOUT } from './field-standards';
-import { layoutDefinitionSchema, type LayoutDefinition } from './layout-schema';
-import { numericText, runtimeFieldKind } from './record-edit';
+import { migrateLayoutDefinition, layoutDefinitionSchema, type LayoutDefinition } from './layout-schema';
+import { layoutFieldKind, numericText, runtimeFieldKind } from './record-edit';
 
 export const INTAKE_SCHEMA_VERSION = 1;
 const inputId = z.string().regex(/^[a-z][a-z0-9_-]{0,63}$/);
@@ -61,6 +61,37 @@ export interface IntakeValidationError {
 export type IntakeValidationResult =
   | { valid: true; fieldData: Record<string, string | number> }
   | { valid: false; errors: IntakeValidationError[] };
+
+/** Migrate an authored source while keeping its referenced identity and legacy access hints. */
+export function migrateIntakeSource(definition: IntakeDefinition, input: unknown): LayoutDefinition {
+  const form = intakeDefinitionSchema.parse(definition);
+  const layout = migrateLayoutDefinition(input);
+  const raw = input && typeof input === 'object' && !Array.isArray(input) ? input as Record<string, unknown> : {};
+  if (raw.schemaVersion === undefined || raw.schemaVersion === 0) {
+    if (raw.id !== undefined && raw.id !== form.layoutId) throw new Error('The legacy source belongs to a different layout.');
+    // The legacy migration creates an id; the confined source filename already supplies the stable reference here.
+    layout.id = form.layoutId;
+    const fields = Array.isArray(raw.objects) ? raw.objects : [];
+    layout.objects = layout.objects.map((object) => {
+      if (object.type !== 'field') return object;
+      let kind = runtimeFieldKind(object);
+      for (const entry of fields) {
+        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+        const original = entry as Record<string, unknown>;
+        if (original.fmFieldName !== object.fmFieldName) continue;
+        const metadata = original.metadata && typeof original.metadata === 'object' ? original.metadata as Record<string, unknown> : {};
+        const text = (value: unknown): string | undefined => typeof value === 'string' ? value : undefined;
+        const hinted = runtimeFieldKind({ fmFieldName: object.fmFieldName, kind: text(original.kind), result: text(original.result),
+          metadata: { type: text(metadata.type), result: text(metadata.result) } });
+        const global = layoutFieldKind({ name: object.fmFieldName, global: original.global ?? metadata.global, type: text(metadata.type) });
+        if (hinted !== 'normal') kind = hinted;
+        else if (global !== 'normal') kind = global;
+      }
+      return { ...object, kind };
+    });
+  }
+  return layout;
+}
 
 /** The same pure validation runs before browser submission and again at the trusted server adapter. */
 export function validateIntakeSubmission(definition: IntakeDefinition, input: unknown): IntakeValidationResult {

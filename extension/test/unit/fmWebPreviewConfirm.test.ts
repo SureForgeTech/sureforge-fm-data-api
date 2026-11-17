@@ -63,6 +63,25 @@ function start() {
 }
 
 describe('FM Web preview', () => {
+  it('keeps edited normal layout artifacts skipped while passing portal sources separately', async () => {
+    const id = 'a1111111-1111-4111-8111-111111111111';
+    const source = Buffer.from('{"source":"portal"}');
+    portalSnapshot.mockResolvedValueOnce({
+      intakes: new Map([['event-registration.intake.json', Buffer.from('{}')]]), layouts: new Map([[`${id}.layout.json`, source]])
+    });
+    try {
+      const { run, generator } = start();
+      generator.listLayoutDefinitions.mockResolvedValueOnce([{ id, name: 'Normal record view' }]);
+      generator.generateLayoutPage.mockRejectedValueOnce(new GenerationSkippedError('edited layout'));
+      vi.mocked(vscode.window.showWarningMessage).mockImplementation(async (_message, ...items) => items.includes('Run' as never) ? 'Run' as never : undefined);
+      await run();
+      expect(generator.generateLayoutPage).toHaveBeenCalledWith(id);
+      const args = processStart.mock.calls.at(-1) as unknown as [unknown, Map<string, Buffer>, unknown, unknown, unknown, Map<string, Buffer>, Map<string, Buffer>];
+      expect(args[1].has(`${id}.layout.json`)).toBe(false);
+      expect(args[6].get(`${id}.layout.json`)).toBe(source);
+    } finally { portalSnapshot.mockReset().mockResolvedValue({ intakes: new Map(), layouts: new Map() }); }
+  });
+
   it('validates portal export before inspecting or changing runtime files', async () => {
     const { regenerate, generator } = start();
     portalSnapshot.mockRejectedValueOnce(new Error('Cannot export portal definition "broken.intake.json".'));
@@ -118,7 +137,7 @@ describe('FM Web preview', () => {
     await run();
 
     expect(terminal.sendText).not.toHaveBeenCalled();
-    expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', expect.any(Map));
+    expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', expect.any(Map), expect.any(Map));
   });
 
   it('passes bridge credentials only to the private process, leaving runtime env files untouched', async () => {
@@ -128,7 +147,7 @@ describe('FM Web preview', () => {
     await run();
 
     expect(generator.writeBridgeEnv).not.toHaveBeenCalled();
-    expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', expect.any(Map));
+    expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', expect.any(Map), expect.any(Map));
   });
 
   it('warns once about a previous stop failure and still starts the next preview', async () => {
@@ -154,7 +173,7 @@ describe('FM Web preview', () => {
       .mockResolvedValueOnce({ outputPath }).mockRejectedValueOnce(new GenerationSkippedError('linked.layout.json'));
     vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Run' as never);
     await run();
-    expect(processStart).toHaveBeenCalledWith(expect.any(Map), new Map([['good.layout.json', Buffer.from('{"name":" Exact good layout "}')]]), expect.any(String), expect.any(String), 'https://fm.example.com/fmi', expect.any(Map));
+    expect(processStart).toHaveBeenCalledWith(expect.any(Map), new Map([['good.layout.json', Buffer.from('{"name":" Exact good layout "}')]]), expect.any(String), expect.any(String), 'https://fm.example.com/fmi', expect.any(Map), expect.any(Map));
     const warnings = vi.mocked(vscode.window.showWarningMessage).mock.calls.map(([message]) => String(message));
     expect(warnings.some((message) => message.includes('skipped') && message.includes(' Edited layout ') && message.includes(' Linked layout '))).toBe(true);
     expect(vscode.window.showErrorMessage).not.toHaveBeenCalled();

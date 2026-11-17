@@ -75,6 +75,15 @@ export function registerFmWebProjectCommands(
           catch { void vscode.window.showWarningMessage('The saved portal definition is open for repair. Its schema, sample environment or source mappings are invalid; preview remains unavailable until they are valid.'); }
           return;
         }
+        if (action.action === 'layout') {
+          const source = await intakes.layoutForEdit('event-registration');
+          if (source.valid) await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: source.id });
+          else {
+            await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(source.filePath)));
+            void vscode.window.showWarningMessage('The invalid source layout is open for repair. Your files were preserved. Save valid layout JSON before reopening Layout Mode.');
+          }
+          return;
+        }
         let saved;
         if (action.action === 'create') {
           try { saved = await intakes.ensureEventStarter(); }
@@ -85,9 +94,7 @@ export function registerFmWebProjectCommands(
             return;
           }
         } else saved = await intakes.load('event-registration');
-        if (action.action === 'layout') {
-          await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: saved.layout.id });
-        } else if (action.action === 'export') {
+        if (action.action === 'export') {
           await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
         } else if (action.action === 'preview') {
           await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer');
@@ -305,10 +312,9 @@ export function registerFmWebProjectCommands(
         const listing = ignored.map((file) => displayText(file, Infinity)).join('\n');
         if (listing.length > 12000) throw new Error('Too many ignored runtime files to show safely in the preview confirmation.');
         const portalFiles = await intakes.previewFiles();
-        const layouts = new Map<string, Buffer>(portalFiles.layouts);
+        const layouts = new Map<string, Buffer>();
         const skippedLayouts: string[] = [];
         for (const layout of await fmWebRuntimeGenerator.listLayoutDefinitions()) {
-          if (layouts.has(`${layout.id}.layout.json`)) continue;
           try {
             const generated = await fmWebRuntimeGenerator.generateLayoutPage(layout.id);
             layouts.set(path.basename(generated.outputPath), await readFile(generated.outputPath));
@@ -332,7 +338,7 @@ export function registerFmWebProjectCommands(
         const profileId = project?.activeProfileId ?? profileStore.getActiveProfileId();
         const profile = profileId ? await profileStore.getProfile(profileId) : undefined;
         preview = new FmWebPreviewProcess();
-        await preview.start(templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl, portalFiles.intakes);
+        await preview.start(templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl, portalFiles.intakes, portalFiles.layouts);
         vscode.window.showInformationMessage('FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.');
       } catch (error) {
         await preview?.dispose().catch(() => logger.warn('Could not stop the private preview or finish its temporary-file cleanup.'));

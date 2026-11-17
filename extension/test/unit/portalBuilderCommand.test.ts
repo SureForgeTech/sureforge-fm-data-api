@@ -2,9 +2,10 @@ import * as vscode from 'vscode';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
 const create = vi.hoisted(() => vi.fn());
+const layoutEdit = vi.hoisted(() => vi.fn());
 const editable = vi.hoisted(() => vi.fn());
 const load = vi.hoisted(() => vi.fn());
-vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { ensureEventStarter = create; load = load; definitionPathForEdit = editable; } }));
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { ensureEventStarter = create; load = load; definitionPathForEdit = editable; layoutForEdit = layoutEdit; } }));
 function handler() {
   registerFmWebProjectCommands({ context: {} as never, profileStore: {} as never, fmClient: {} as never,
     schemaService: {} as never, fmWebProjectService: {} as never, fmWebRuntimeGenerator: {} as never,
@@ -16,9 +17,23 @@ beforeEach(() => {
   const saved = { definitionPath: '/workspace/.fmweb/intakes/event-registration.intake.json', layout: { id: 'source-layout' } };
   create.mockReset().mockResolvedValue(saved);load.mockReset().mockResolvedValue(saved);
   editable.mockReset().mockResolvedValue(saved.definitionPath);
+  layoutEdit.mockReset().mockResolvedValue({ id: 'source-layout', filePath: '/workspace/.fmweb/layouts/source.layout.json', valid: true });
 });
 afterEach(() => { (vscode.workspace as { isTrusted: boolean }).isTrusted = true; });
 describe('Build a Portal guided entry', () => {
+  it('opens source Layout Mode when a mapping is invalid, without full form validation', async () => {
+    load.mockRejectedValue(new Error('Invalid mapping'));
+    vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ action: 'layout' } as never);
+    await handler()();expect(load).not.toHaveBeenCalled();
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.openLayoutMode', { layoutId: 'source-layout' });
+  });
+  it('opens malformed source JSON directly for repair instead of sending it into the designer', async () => {
+    layoutEdit.mockResolvedValue({ id: 'source-layout', filePath: '/workspace/.fmweb/layouts/source.layout.json', valid: false });
+    vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ action: 'layout' } as never);
+    await handler()();expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
+    expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith(expect.objectContaining({ fsPath: '/workspace/.fmweb/layouts/source.layout.json' }));
+  });
+
   it.each(['create', 'edit'])('opens invalid saved data for repair during %s without replacing it', async (action) => {
     create.mockRejectedValue(new Error('Invalid definition'));load.mockRejectedValue(new Error('Invalid definition'));
     vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ action } as never);
@@ -40,7 +55,7 @@ describe('Build a Portal guided entry', () => {
   });
   it.each(['create', 'edit', 'preview', 'layout', 'export'])('routes %s through saved data or existing commands', async (action) => {
     vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ action } as never);await handler()();
-    if (action === 'create') expect(create).toHaveBeenCalledOnce();else expect(load).toHaveBeenCalledWith('event-registration');
+    if (action === 'create') expect(create).toHaveBeenCalledOnce();else if (action === 'layout') expect(layoutEdit).toHaveBeenCalledWith('event-registration');else expect(load).toHaveBeenCalledWith('event-registration');
     if (action === 'preview') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer');
     else if (action === 'export') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.generateFmWebNextApp');
     else if (action === 'layout') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.openLayoutMode', { layoutId: 'source-layout' });
