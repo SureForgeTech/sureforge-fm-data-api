@@ -155,7 +155,7 @@ export class FmWebIntakeService {
   public async saveApp(input: unknown, revision: string): Promise<SavedIntake> {
     const definition = intakeDefinitionSchema.parse(input);
     const current = await this.loadForEditing('event-registration');
-    if (current.revision !== revision) throw new Error('The app changed in another editor. Reopen Create FM Web App to load those changes.');
+    if (current.revision !== revision) throw new Error('The app changed in another editor. Close this app tab and run Create FM Web App to load those changes.');
     if (definition.id !== current.definition.id || definition.layoutId !== current.definition.layoutId
       || definition.environmentId !== current.definition.environmentId) throw new Error('The editor cannot change the app target.');
     intakeLayout(definition, current.layout);
@@ -167,7 +167,7 @@ export class FmWebIntakeService {
     const temporary = path.join(path.dirname(target), `.app-${randomUUID()}.tmp`);
     try {
       await writeFile(temporary, bytes, { flag: 'wx', mode: info.mode & 0o777 });
-      if ((await this.loadForEditing('event-registration')).revision !== revision) throw new Error('The app changed during Save. Reopen Create FM Web App to load those changes.');
+      if ((await this.loadForEditing('event-registration')).revision !== revision) throw new Error('The app changed during Save. Close this app tab and run Create FM Web App to load those changes.');
       await this.confined(target);
       if ((await lstat(target)).nlink > 1) throw new Error('The app definition acquired a hard link during Save.');
       await renameReplacing(temporary, target);
