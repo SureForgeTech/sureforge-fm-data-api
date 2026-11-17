@@ -53,10 +53,11 @@ describe('Build a Portal guided entry', () => {
     (vscode.workspace as { isTrusted: boolean }).isTrusted = false;await handler()();
     expect(vscode.window.showQuickPick).not.toHaveBeenCalled();expect(create).not.toHaveBeenCalled();
   });
-  it.each(['create', 'edit', 'preview', 'layout'])('routes %s through saved data or existing commands', async (action) => {
+  it.each(['create', 'edit', 'preview', 'layout', 'export'])('routes %s through saved data or existing commands', async (action) => {
     vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ action } as never);await handler()();
     if (action === 'create') expect(create).toHaveBeenCalledOnce();else if (action === 'layout') expect(layoutEdit).toHaveBeenCalledWith('event-registration');else expect(load).toHaveBeenCalledWith('event-registration');
     if (action === 'preview') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer');
+    else if (action === 'export') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.generateFmWebNextApp');
     else if (action === 'layout') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.openLayoutMode', { layoutId: 'source-layout' });
     else expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith(expect.objectContaining({ fsPath: '/workspace/.fmweb/intakes/event-registration.intake.json' }));
   });

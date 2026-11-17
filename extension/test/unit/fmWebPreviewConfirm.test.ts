@@ -5,10 +5,11 @@ import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
-import { FmWebIntakeService } from '../../src/services/fmWebIntakeService';
-import { GenerationSkippedError } from '../../src/services/generatedFileWriter';
+import { GenerationCancelledError, GenerationSkippedError } from '../../src/services/generatedFileWriter';
 
-vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { async previewFiles() { return { intakes: new Map(), layouts: new Map() }; } } }));
+const portalExport = vi.hoisted(() => vi.fn(async () => [] as string[]));
+const portalSnapshot = vi.hoisted(() => vi.fn(async () => ({ intakes: new Map<string, Buffer>(), layouts: new Map<string, Buffer>() })));
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { previewFiles = portalSnapshot; exportSnapshot = portalExport; } }));
 
 const processStart = vi.hoisted(() => vi.fn(async () => undefined));
 const processDispose = vi.hoisted(() => vi.fn(async () => undefined));
@@ -25,7 +26,7 @@ function start() {
     inspectPreviewFiles: vi.fn(async () => [] as string[]),
     removePreviewFiles: vi.fn(async () => undefined),
     previewTemplateFiles: vi.fn(async () => new Map()),
-    generateRuntimeAppTemplate: vi.fn(async () => undefined),
+    generateRuntimeAppTemplate: vi.fn(async () => ({ created: [] as string[], updated: [] as string[], skipped: [] as string[], needsManualUpdate: [] as string[] })),
     listLayoutDefinitions: vi.fn(async (): Promise<Array<{ id: string; name: string }>> => []),
     generateLayoutPage: vi.fn(async (): Promise<{ outputPath: string }> => ({ outputPath: '' })),
     writeBridgeEnv: vi.fn(async () => undefined),
@@ -63,10 +64,21 @@ function start() {
 }
 
 describe('FM Web preview', () => {
+  it('reports completed runtime generation and edited-file warnings when only portal data export is cancelled', async () => {
+    const { regenerate, generator } = start();
+    generator.generateRuntimeAppTemplate.mockResolvedValueOnce({ created: ['app/page.tsx'], updated: [], skipped: [], needsManualUpdate: ['shared/src/index.ts'] });
+    portalExport.mockRejectedValueOnce(new GenerationCancelledError());
+    await regenerate();
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('1 created'));
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('Only portal data export was cancelled'));
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('shared/src/index.ts'));
+    expect(vscode.window.showErrorMessage).not.toHaveBeenCalled();
+  });
+
   it('keeps edited normal layout artifacts skipped while passing portal sources separately', async () => {
     const id = 'a1111111-1111-4111-8111-111111111111';
     const source = Buffer.from('{"source":"portal"}');
-    const spy = vi.spyOn(FmWebIntakeService.prototype, 'previewFiles').mockResolvedValueOnce({
+    portalSnapshot.mockResolvedValueOnce({
       intakes: new Map([['event-registration.intake.json', Buffer.from('{}')]]), layouts: new Map([[`${id}.layout.json`, source]])
     });
     try {
@@ -79,13 +91,26 @@ describe('FM Web preview', () => {
       const args = processStart.mock.calls.at(-1) as unknown as [unknown, Map<string, Buffer>, unknown, unknown, unknown, Map<string, Buffer>, Map<string, Buffer>];
       expect(args[1].has(`${id}.layout.json`)).toBe(false);
       expect(args[6].get(`${id}.layout.json`)).toBe(source);
-    } finally { spy.mockRestore(); }
+    } finally { portalSnapshot.mockReset().mockResolvedValue({ intakes: new Map(), layouts: new Map() }); }
+  });
+
+  it('validates portal export before inspecting or changing runtime files', async () => {
+    const { regenerate, generator } = start();
+    portalSnapshot.mockRejectedValueOnce(new Error('Cannot export portal definition "broken.intake.json".'));
+    await regenerate();
+    expect(portalSnapshot).toHaveBeenCalledWith('export');
+    expect(generator.inspectPreviewFiles).not.toHaveBeenCalled();
+    expect(generator.removePreviewFiles).not.toHaveBeenCalled();
+    expect(generator.generateRuntimeAppTemplate).not.toHaveBeenCalled();
+    expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('Cannot export portal definition'), 'Details…', 'Copy as Bug Report');
   });
 
   let directory: string | undefined;
   afterEach(async () => { if (directory) await rm(directory, { recursive: true, force: true }); directory = undefined; });
   beforeEach(() => {
     vi.clearAllMocks();
+    portalSnapshot.mockReset().mockResolvedValue({ intakes: new Map(), layouts: new Map() });
+    portalExport.mockReset().mockResolvedValue([]);
     (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
   });
 

@@ -3,8 +3,10 @@ import { constants } from 'fs';
 import { lstat, mkdir, open, readdir, realpath, writeFile } from 'fs/promises';
 import path from 'path';
 import type { FmWebProjectService } from './fmWebProjectService';
-import { assertSafeOutputFolder } from './generatedFileWriter';
+import { assertSafeOutputFolder, writeGeneratedFiles } from './generatedFileWriter';
 import { resolveConfinedFile } from '../utils/pathConfinement';
+
+export interface PortalPreviewFiles { intakes: Map<string, Buffer>; layouts: Map<string, Buffer> }
 
 export interface SavedIntake {
   definition: IntakeDefinition;
@@ -105,7 +107,7 @@ export class FmWebIntakeService {
     const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${id}.intake.json`));
     const definition = intakeDefinitionSchema.parse(await this.read(definitionPath));
     if (definition.id !== id) throw new Error('Portal filename and identifier must match.');
-    if (definition.environmentId !== 'sample') throw new Error('This portal preview supports only the sample environment. No live FileMaker adapter is configured.');
+    if (definition.environmentId !== 'sample') throw new Error('This portal starter supports only the sample environment. No live FileMaker adapter is configured.');
     const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${definition.layoutId}.layout.json`));
     const source = migrateIntakeSource(definition, await this.read(layoutPath));
     const layout = await this.project.prepareLayout?.(source) ?? source;
@@ -114,17 +116,37 @@ export class FmWebIntakeService {
     return { definition, layout, definitionPath, layoutPath };
   }
 
-  public async previewFiles(): Promise<{ intakes: Map<string, Buffer>; layouts: Map<string, Buffer> }> {
+  public async exportSnapshot(snapshot: PortalPreviewFiles): Promise<string[]> {
+    const files: Array<{ path: string; content: string }> = [];
+    for (const [folder, entries] of [['intakes', snapshot.intakes], ['intake-layouts', snapshot.layouts]] as const) {
+      for (const [name, bytes] of entries) {
+        const safeName = folder === 'intakes' ? /^[a-z][a-z0-9_-]{0,63}\.intake\.json$/ : /^[0-9a-f-]{36}\.layout\.json$/i;
+        if (!safeName.test(name) || bytes.length > 1048576) throw new Error('Invalid portal export filename or size.');
+        const target = await this.confined(path.join(this.project.getProjectRoot(), 'generated', folder, name));
+        const parsed: unknown = JSON.parse(bytes.toString('utf8'));
+        let unchanged = false;
+        try { unchanged = JSON.stringify(await this.read(target)) === JSON.stringify(parsed); }
+        catch (error) { if (!(error instanceof SyntaxError) && (error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+        if (!unchanged) files.push({ path: target, content: `${JSON.stringify(parsed, null, 2)}\n` });
+      }
+    }
+    // Saved/exported JSON is data owned by the user. A marker from older layout generation must not grant overwrite permission.
+    return writeGeneratedFiles(files, await realpath(this.project.getWorkspaceRoot()!), { confirmExisting: true });
+  }
+
+  public async previewFiles(purpose: 'preview' | 'export' = 'preview'): Promise<PortalPreviewFiles> {
     const directory = path.join(this.project.getProjectRoot(), 'intakes');
     await this.confined(path.join(directory, 'check.intake.json'));
     let entries: string[];
     try { entries = (await readdir(directory)).filter((name) => name.endsWith('.intake.json')); }
     catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return { intakes: new Map(), layouts: new Map() }; throw error; }
-    if (entries.length > 50) throw new Error('Preview at most 50 portal definitions at a time.');
+    if (entries.length > 50) throw new Error(`Cannot ${purpose} more than 50 portal definitions at a time.`);
     const intakes = new Map<string, Buffer>();
     const layouts = new Map<string, Buffer>();
     for (const name of entries.sort()) {
-      const saved = await this.load(name.slice(0, -'.intake.json'.length));
+      let saved: SavedIntake;
+      try { saved = await this.load(name.slice(0, -'.intake.json'.length)); }
+      catch { throw new Error(`Cannot ${purpose} portal definition ${JSON.stringify(name)}. Check its schema, sample environment and exact mappings to an existing source layout.`); }
       intakes.set(name, Buffer.from(JSON.stringify(saved.definition)));
       layouts.set(`${saved.layout.id}.layout.json`, Buffer.from(JSON.stringify(saved.layout)));
     }

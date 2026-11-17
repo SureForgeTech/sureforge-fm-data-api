@@ -9,7 +9,7 @@ import type { FmBridgeServer } from '../services/fmBridgeServer';
 import { FmWebIntakeService } from '../services/fmWebIntakeService';
 import type { FmWebProjectService } from '../services/fmWebProjectService';
 import type { FmWebRuntimeGenerator } from '../services/fmWebRuntimeGenerator';
-import { GenerationSkippedError } from '../services/generatedFileWriter';
+import { GenerationCancelledError, GenerationSkippedError } from '../services/generatedFileWriter';
 import type { Logger } from '../services/logger';
 import type { ProfileStore } from '../services/profileStore';
 import type { SchemaService } from '../services/schemaService';
@@ -61,6 +61,7 @@ export function registerFmWebProjectCommands(
           { label: 'Create or resume event registration', action: 'create', description: 'Sample data; no connection needed' },
           { label: 'Edit form and exact field mappings', action: 'edit', description: 'Title, labels, help, required fields and branding' },
           { label: 'Preview saved portal', action: 'preview', description: 'Validate definitions, then start the private sample preview' },
+          { label: 'Export app scaffold', action: 'export', description: 'Generate the runtime with saved forms and layouts; preserves edits' },
           { label: 'Open source layout', action: 'layout', description: 'Continue in the existing Layout Mode designer' }
         ], { title: 'Build a Portal', placeHolder: 'Create → edit → preview → submit with invented details' });
         if (!action) return;
@@ -93,7 +94,9 @@ export function registerFmWebProjectCommands(
             return;
           }
         } else saved = await intakes.load('event-registration');
-        if (action.action === 'preview') {
+        if (action.action === 'export') {
+          await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
+        } else if (action.action === 'preview') {
           await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer');
         } else {
           await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(saved.definitionPath)));
@@ -215,6 +218,7 @@ export function registerFmWebProjectCommands(
       }
 
       try {
+        const portalFiles = await intakes.previewFiles('export');
         const files = await fmWebRuntimeGenerator.inspectPreviewFiles();
         if (files.length) {
           const listing = files.map((file) => displayText(file, Infinity)).join('\n');
@@ -231,6 +235,13 @@ export function registerFmWebProjectCommands(
           `Generated Next.js runtime template in .fmweb/generated/runtime-next (${summary.created.length} created, ${summary.updated.length} updated, ${summary.skipped.length} skipped).`
         );
         warnAboutEditedManagedFiles(summary.needsManualUpdate);
+        try {
+          const skippedPortalFiles = await intakes.exportSnapshot(portalFiles);
+          if (skippedPortalFiles.length) void vscode.window.showWarningMessage('Some existing portal data files were preserved. The exported app uses those saved copies; review them before running it.');
+        } catch (error) {
+          if (!(error instanceof GenerationCancelledError)) throw error;
+          void vscode.window.showInformationMessage('The runtime app was generated. Only portal data export was cancelled; existing exported data was preserved.');
+        }
       } catch (error) {
         await showCommandError(error, {
           fallbackMessage: 'Failed to generate FM Web Next.js runtime template.',
