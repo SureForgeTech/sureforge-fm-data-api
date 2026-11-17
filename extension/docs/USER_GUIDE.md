@@ -127,6 +127,7 @@ The table lists every extension command. Titles have the **FileMaker:** prefix i
 | List Active Plugins | Lists loaded plugins and opens a selected plugin's details as JSON. | Shown in power-user mode; needs a loaded plugin. |
 | Toggle Offline Mode | Toggles your offline setting and reports the effective mode. | Always shown; workspace or policy settings can keep offline mode on. |
 | Refresh Offline Metadata Cache | Reads layouts and metadata into the offline cache. | Always shown; needs a profile and workspace trust. |
+| Create FM Web App | Creates or resumes an event-registration app with field selection, form customization and private preview without JSON editing. | Always shown; needs a trusted workspace folder. FileMaker fields need a saved connection; sample fields do not. |
 | Build a Portal | Creates or resumes an editable event-registration sample and offers mapping, layout and private preview actions. | Always shown; needs an open trusted workspace. No saved profile is needed for the sample. |
 | Initialize FM Web Project | Creates the .fmweb project structure and configuration. | Shown with a profile; needs a trusted workspace folder. |
 | Sync FM Web Project Metadata | Saves layouts, scripts and fields for the selected project profile. | Shown with an initialized FM Web project; needs a profile and trust. |
@@ -801,7 +802,11 @@ Regenerate after a schema change, and use a [schema diff](#schema-snapshots-and-
 
 ## FM Web and Layout Mode
 
-For a first portal without a server connection, run **FileMaker: Build a Portal**. Create or resume the event-registration starter, edit its saved form, then preview it with invented details. This sample creates no real records. See [Build a Portal with sample data](./FM_WEB.md#build-a-portal-with-sample-data).
+Start with **FileMaker: Create FM Web App**, or the new-file button above Connections. Choose **Use FileMaker fields** to select a saved connection, layout and writable registration fields, or choose **Try sample fields** without a connection. The form editor lets you change labels, help text, required rules, input types, choices, field order, event text and organization/color branding without editing JSON. Choose **Save and preview**, then use invented details in the private browser preview.
+
+Reopen **Create FM Web App** to continue editing the saved app. FileMaker supplies field metadata when selected; registration submissions are still synthetic and create no FileMaker records. **Export app** creates an editable app folder, not a public deployment. See [Create FM Web App](./FM_WEB.md#create-fm-web-app) for the complete flow.
+
+The following commands remain available for advanced projects, existing workflows and source-layout editing. **Build a Portal** also retains its earlier JSON-based starter and repair actions.
 
 FM Web is an experimental workflow for designing web layouts that sit on top of your FileMaker data and generating a small Next.js app from them. Project files are under `.fmweb/` in the workspace and need a trusted workspace; the running preview uses a separate private temporary folder.
 

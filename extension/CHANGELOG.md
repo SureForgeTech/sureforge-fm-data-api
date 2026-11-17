@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+**FM Web app creation**
+
+- Create FM Web App guides connection, layout and field selection, then opens a form editor for labels, rules, order and branding without JSON editing. Save and preview uses sample submissions; reopen the command to continue editing. Existing advanced commands are preserved.
+
 **Local portal sample**
 
 - Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.
