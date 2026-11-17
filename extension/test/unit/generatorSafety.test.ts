@@ -1,4 +1,4 @@
-import { mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'fs/promises';
+import { link, mkdtemp, mkdir, readFile, rm, symlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -105,4 +105,24 @@ it('rechecks file symlinks after confirmation even when the target has identical
   }) as never);
   await expect(writeGeneratedFiles([{ path: target, content: 'generated' }], root)).rejects.toThrow(/changed during/);
   expect(await readFile(outside, 'utf8')).toBe('mine');
+});
+
+it('refuses an existing hard-linked output before asking or modifying its outside alias', async () => {
+  const { root } = await fixture();
+  const outside = await mkdtemp(join(tmpdir(), 'fm-hardlink-outside-'));roots.push(outside);
+  const original = join(outside, 'synthetic-original.json');const target = join(root, 'export.json');
+  await writeFile(original, '{"synthetic":"original"}');await link(original, target);
+  await expect(writeGeneratedFiles([{ path: target, content: '{"synthetic":"replacement"}' }], root, { confirmExisting: true })).rejects.toThrow('multiple hard links');
+  expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
+  expect(await readFile(original, 'utf8')).toBe('{"synthetic":"original"}');
+});
+it('rechecks hard links added during the overwrite dialog before touching the file', async () => {
+  const { root } = await fixture();const target = join(root, 'export.json');
+  const outside = await mkdtemp(join(tmpdir(), 'fm-hardlink-outside-'));roots.push(outside);
+  const alias = join(outside, 'synthetic-alias.json');await writeFile(target, '{"synthetic":"original"}');
+  vi.mocked(vscode.window.showWarningMessage).mockImplementationOnce((async () => {
+    await link(target, alias);return 'Overwrite';
+  }) as never);
+  await expect(writeGeneratedFiles([{ path: target, content: '{"synthetic":"replacement"}' }], root, { confirmExisting: true })).rejects.toThrow('changed during generation');
+  expect(await readFile(alias, 'utf8')).toBe('{"synthetic":"original"}');
 });

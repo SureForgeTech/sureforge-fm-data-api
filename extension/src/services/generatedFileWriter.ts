@@ -29,6 +29,7 @@ export async function writeGeneratedFiles(files: Array<{ path: string; content: 
     try {
       const info = await lstat(file.path);
       if (!info.isFile() || info.isSymbolicLink()) throw new Error(`Cannot replace ${file.path}: it is not a regular file.`);
+      if (info.nlink > 1) throw new Error(`Cannot replace ${file.path}: it has multiple hard links.`);
       const text = await readFile(file.path, 'utf8');
       existing.set(file.path, text);
       if (options.confirmExisting || !isGeneratedFile(text)) conflicts.push(file.path);
@@ -55,7 +56,7 @@ export async function writeGeneratedFiles(files: Array<{ path: string; content: 
     // Do not replace a file that appeared or changed while the confirmation was open.
     if (existing.has(file.path)) {
       const info = await lstat(file.path);
-      if (info.isSymbolicLink() || await readFile(file.path, 'utf8') !== existing.get(file.path)) {
+      if (info.isSymbolicLink() || info.nlink > 1 || await readFile(file.path, 'utf8') !== existing.get(file.path)) {
         throw new Error(`${file.path} changed during generation. Run the command again.`);
       }
       await writeFile(file.path, file.content, 'utf8');

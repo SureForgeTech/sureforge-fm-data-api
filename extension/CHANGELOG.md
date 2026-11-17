@@ -4,6 +4,8 @@
 
 **Local portal sample**
 
+- Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.
+
 - Export app scaffold now carries saved forms and source layouts into the generated app. Re-export keeps identical files and asks before replacing changed data, including marked generated layouts.
 
 - Build a Portal creates or resumes editable event-registration forms with exact mappings, labels, help, required fields and basic branding, then previews saved definitions privately with sample data.

@@ -131,7 +131,7 @@ describe('saved portal starters', () => {
     await writeFile(saved.definitionPath, raw);
     await expect(service.ensureEventStarter()).rejects.toThrow();
     await expect(service.previewFiles()).rejects.toThrow();
-    await expect(service.previewFiles('export')).rejects.toThrow('Cannot export portal definition \"event-registration.intake.json\"');
+    await expect(service.previewFiles('export')).rejects.toThrow('Cannot export portal definition "event-registration.intake.json"');
     expect(await readFile(saved.definitionPath, 'utf8')).toBe(raw);
   });
   it('refuses source and definition links, including an intermediate intake folder link', async () => {
