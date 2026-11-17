@@ -21,7 +21,7 @@ export function isGeneratedFile(text: string): boolean {
 }
 
 /** Review all collisions before writing any file. A dismissed dialog means Cancel. */
-export async function writeGeneratedFiles(files: Array<{ path: string; content: string }>, workspaceRoot?: string): Promise<string[]> {
+export async function writeGeneratedFiles(files: Array<{ path: string; content: string }>, workspaceRoot?: string, options: { confirmExisting?: boolean } = {}): Promise<string[]> {
   const existing = new Map<string, string>();
   const conflicts: string[] = [];
   for (const file of files) {
@@ -31,7 +31,7 @@ export async function writeGeneratedFiles(files: Array<{ path: string; content: 
       if (!info.isFile() || info.isSymbolicLink()) throw new Error(`Cannot replace ${file.path}: it is not a regular file.`);
       const text = await readFile(file.path, 'utf8');
       existing.set(file.path, text);
-      if (!isGeneratedFile(text)) conflicts.push(file.path);
+      if (options.confirmExisting || !isGeneratedFile(text)) conflicts.push(file.path);
     } catch (error) {
       if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     }

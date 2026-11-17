@@ -61,12 +61,15 @@ export function registerFmWebProjectCommands(
           { label: 'Create or resume event registration', action: 'create', description: 'Sample data; no connection needed' },
           { label: 'Edit form and exact field mappings', action: 'edit', description: 'Title, labels, help, required fields and branding' },
           { label: 'Preview saved portal', action: 'preview', description: 'Validate definitions, then start the private sample preview' },
+          { label: 'Export app scaffold', action: 'export', description: 'Generate the runtime with saved forms and layouts; preserves edits' },
           { label: 'Open source layout', action: 'layout', description: 'Continue in the existing Layout Mode designer' }
         ], { title: 'Build a Portal', placeHolder: 'Create → edit → preview → submit with invented details' });
         if (!action) return;
         const saved = action.action === 'create' ? await intakes.ensureEventStarter() : await intakes.load('event-registration');
         if (action.action === 'layout') {
           await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: saved.layout.id });
+        } else if (action.action === 'export') {
+          await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
         } else if (action.action === 'preview') {
           await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer');
         } else {
@@ -189,6 +192,7 @@ export function registerFmWebProjectCommands(
       }
 
       try {
+        const portalFiles = await intakes.previewFiles();
         const files = await fmWebRuntimeGenerator.inspectPreviewFiles();
         if (files.length) {
           const listing = files.map((file) => displayText(file, Infinity)).join('\n');
@@ -201,6 +205,8 @@ export function registerFmWebProjectCommands(
           await fmWebRuntimeGenerator.removePreviewFiles(files);
         }
         const summary = await fmWebRuntimeGenerator.generateRuntimeAppTemplate();
+        const skippedPortalFiles = await intakes.exportSnapshot(portalFiles);
+        if (skippedPortalFiles.length) void vscode.window.showWarningMessage('Some existing portal data files were preserved. The exported app uses those saved copies; review them before running it.');
         vscode.window.showInformationMessage(
           `Generated Next.js runtime template in .fmweb/generated/runtime-next (${summary.created.length} created, ${summary.updated.length} updated, ${summary.skipped.length} skipped).`
         );

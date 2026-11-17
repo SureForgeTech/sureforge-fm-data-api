@@ -3,8 +3,10 @@ import { constants } from 'fs';
 import { lstat, mkdir, open, readdir, realpath, writeFile } from 'fs/promises';
 import path from 'path';
 import type { FmWebProjectService } from './fmWebProjectService';
-import { assertSafeOutputFolder } from './generatedFileWriter';
+import { assertSafeOutputFolder, writeGeneratedFiles } from './generatedFileWriter';
 import { resolveConfinedFile } from '../utils/pathConfinement';
+
+export interface PortalPreviewFiles { intakes: Map<string, Buffer>; layouts: Map<string, Buffer> }
 
 export interface SavedIntake {
   definition: IntakeDefinition;
@@ -78,7 +80,25 @@ export class FmWebIntakeService {
     return { definition, layout, definitionPath, layoutPath };
   }
 
-  public async previewFiles(): Promise<{ intakes: Map<string, Buffer>; layouts: Map<string, Buffer> }> {
+  public async exportSnapshot(snapshot: PortalPreviewFiles): Promise<string[]> {
+    const files: Array<{ path: string; content: string }> = [];
+    for (const [folder, entries] of [['intakes', snapshot.intakes], ['layouts', snapshot.layouts]] as const) {
+      for (const [name, bytes] of entries) {
+        const safeName = folder === 'intakes' ? /^[a-z][a-z0-9_-]{0,63}\.intake\.json$/ : /^[0-9a-f-]{36}\.layout\.json$/i;
+        if (!safeName.test(name) || bytes.length > 1048576) throw new Error('Invalid portal export filename or size.');
+        const target = await this.confined(path.join(this.project.getProjectRoot(), 'generated', folder, name));
+        const parsed: unknown = JSON.parse(bytes.toString('utf8'));
+        let unchanged = false;
+        try { unchanged = JSON.stringify(await this.read(target)) === JSON.stringify(parsed); }
+        catch (error) { if (!(error instanceof SyntaxError) && (error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
+        if (!unchanged) files.push({ path: target, content: `${JSON.stringify(parsed, null, 2)}\n` });
+      }
+    }
+    // Saved/exported JSON is data owned by the user. A marker from older layout generation must not grant overwrite permission.
+    return writeGeneratedFiles(files, await realpath(this.project.getWorkspaceRoot()!), { confirmExisting: true });
+  }
+
+  public async previewFiles(): Promise<PortalPreviewFiles> {
     const directory = path.join(this.project.getProjectRoot(), 'intakes');
     await this.confined(path.join(directory, 'check.intake.json'));
     let entries: string[];

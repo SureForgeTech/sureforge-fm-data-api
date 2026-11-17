@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
 import { GenerationSkippedError } from '../../src/services/generatedFileWriter';
 
-vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { async previewFiles() { return { intakes: new Map(), layouts: new Map() }; } } }));
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { async previewFiles() { return { intakes: new Map(), layouts: new Map() }; } async exportSnapshot() { return []; } } }));
 
 const processStart = vi.hoisted(() => vi.fn(async () => undefined));
 const processDispose = vi.hoisted(() => vi.fn(async () => undefined));

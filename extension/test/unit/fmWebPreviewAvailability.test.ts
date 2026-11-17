@@ -6,6 +6,8 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { async previewFiles() { return { intakes: new Map(), layouts: new Map() }; } } }));
+
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
 import {
   PREVIEW_AVAILABLE_CONTEXT_KEY,

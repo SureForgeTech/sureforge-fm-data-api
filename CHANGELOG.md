@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- Export app scaffold includes the saved portal definitions and source layouts, so generated apps use the same custom form as private preview. Changed exported data always asks before replacement.
+
 - Build a Portal creates or resumes editable event-registration forms with exact mappings, labels, help, required fields and basic branding, then previews saved definitions privately with sample data.
 
 - VSIX builds include the FM Web runtime and shared templates, enabling local app generation and preview without a repository checkout.
