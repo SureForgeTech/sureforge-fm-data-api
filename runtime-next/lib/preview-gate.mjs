@@ -30,3 +30,15 @@ export function previewGateStatus(request, session, upgrade = false) {
       new URLSearchParams(target.slice(2)).has('launch')) return 200;
   return 401;
 }
+
+/** Land on an explicitly selected form once, after launch redemption has set the session cookie. */
+export function createPreviewLandingRedirect(session, intakeId) {
+  const destination = typeof intakeId === 'string' && /^[a-z]/.test(intakeId) && !/[^a-z0-9_-]/.test(intakeId) && intakeId.length <= 64
+    ? `/intake/${intakeId}` : undefined;
+  let pending = Boolean(destination);
+  return (request) => {
+    if (!pending || request.method !== 'GET' || request.url !== '/' || previewGateStatus(request, session) !== 200) return undefined;
+    pending = false;
+    return destination;
+  };
+}

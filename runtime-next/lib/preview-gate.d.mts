@@ -5,3 +5,8 @@ export function previewGateStatus(
   session: string | undefined,
   upgrade?: boolean
 ): 200 | 401 | 403;
+
+export function createPreviewLandingRedirect(
+  session: string | undefined,
+  intakeId: string | undefined
+): (request: Pick<IncomingMessage, 'headers' | 'method' | 'url'>) => string | undefined;

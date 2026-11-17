@@ -67,9 +67,9 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     this.options = { platform: process.platform, spawn, kill: process.kill, tempRoot: tmpdir(), sourceEnv: process.env, ...options };
   }
 
-  public start(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map(), intakeLayouts: Map<string, Buffer> = new Map()): Promise<void> {
+  public start(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map(), intakeLayouts: Map<string, Buffer> = new Map(), startIntakeId?: string): Promise<void> {
     activePreviews.add(this);
-    this.starting = this.launch(files, layouts, bridgeUrl, token, serverUrl, intakes, intakeLayouts);
+    this.starting = this.launch(files, layouts, bridgeUrl, token, serverUrl, intakes, intakeLayouts, startIntakeId);
     return this.starting;
   }
 
@@ -113,7 +113,11 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     return { command: node, prefix: [cli], node };
   }
 
-  private async launch(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map(), intakeLayouts: Map<string, Buffer> = new Map()): Promise<void> {
+  private async launch(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map(), intakeLayouts: Map<string, Buffer> = new Map(), startIntakeId?: string): Promise<void> {
+    if (startIntakeId !== undefined) {
+      const validId = /^[a-z]/.test(startIntakeId) && !/[^a-z0-9_-]/.test(startIntakeId) && startIntakeId.length <= 64;
+      if (!validId || !intakes.has(`${startIntakeId}.intake.json`)) throw new Error('The requested preview intake is invalid or missing.');
+    }
     await this.removeStaleDirectories();
     const directory = await mkdtemp(path.join(this.options.tempRoot, 'fmweb-preview-'));
     this.directory = directory;
@@ -166,6 +170,7 @@ export class FmWebPreviewProcess implements vscode.Disposable {
       cwd: root, shell: false, windowsHide: true, detached: this.options.platform !== 'win32',
       env: { ...env, NODE_ENV: 'development', FMWEB_BRIDGE_URL: bridgeUrl, FMWEB_BRIDGE_TOKEN: token, FMWEB_SERVER_ORIGIN: serverOrigin(serverUrl),
         FMWEB_LAUNCH_CODE: launch, FMWEB_PREVIEW_SESSION: session,
+        ...(startIntakeId === undefined ? {} : { FMWEB_PREVIEW_INTAKE_ID: startIntakeId }),
         FMWEB_LAUNCH_EXPIRES: String(Date.now() + 120_000), FMWEB_LAUNCH_STATE: path.join(directory, 'launch-used') },
       stdio: ['ignore', 'pipe', 'pipe']
     });
