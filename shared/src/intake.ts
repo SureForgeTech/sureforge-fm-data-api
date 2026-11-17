@@ -120,6 +120,7 @@ export function intakeLayout(definition: IntakeDefinition, source: LayoutDefinit
       width: Math.max(1, Math.min(560, layout.canvas.width - FIELD_LAYOUT.pageMargin * 2)), height,
       zIndex: 0, behavior: undefined, kind: 'normal' as const,
       format: field.kind === 'number' ? 'number' as const : field.kind === 'date' ? 'date' as const : 'text' as const,
+      dateFormat: field.kind === 'date' ? 'iso' as const : undefined,
       label: field.label, labelPosition: 'top' as const, required: field.required,
       displayType: field.kind === 'select' ? 'dropdown' as const : 'editBox' as const,
       options: field.options, multiline: field.kind === 'textarea'

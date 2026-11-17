@@ -114,7 +114,9 @@ export function LayoutContainer({
 
 function runtimeFieldNote(object: LayoutObject, editing = false): string | undefined {
   if (object.type !== 'field') return undefined;
-  return [fieldKindNote(runtimeFieldKind(object)), editing && object.format === 'date' ? "Use the server's date format, keeping the same order and separators." : undefined].filter(Boolean).join(' ') || undefined;
+  return [fieldKindNote(runtimeFieldKind(object)), editing && object.format === 'date'
+    ? object.dateFormat === 'iso' ? 'Use YYYY-MM-DD (for example 2026-11-16).'
+      : "Use the server's date format, keeping the same order and separators." : undefined].filter(Boolean).join(' ') || undefined;
 }
 
 function runtimeFieldNoteSpace(object: LayoutObject, editing = false): number {
