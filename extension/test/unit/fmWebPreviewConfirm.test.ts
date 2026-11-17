@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { eventRegistrationExample } from '@fmweb/shared';
 import { mkdtemp, rm, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
 import path from 'path';
@@ -37,20 +38,21 @@ function start() {
   (vscode.window as unknown as { createTerminal: unknown }).createTerminal = vi.fn(() => terminal);
 
   const bridge = {
+    setRegistrationHandler: vi.fn(),
     ensureStarted: vi.fn(async () => ({ baseUrl: 'http://127.0.0.1:1234' })),
     getSessionToken: () => 'session-token',
     stop: vi.fn(async () => undefined)
   };
 
   registerFmWebProjectCommands({
-    context: {} as never,
-    profileStore: { getActiveProfileId: () => 'p1', getProfile: async () => ({ serverUrl: 'https://fm.example.com/fmi' }) } as never,
-    fmClient: {} as never,
+    context: { globalStorageUri: { fsPath: '/tmp/registration-command-test-storage' } } as never,
+    profileStore: { getActiveProfileId: () => 'p1', getProfile: async () => ({ id: 'p1', name: 'Registration QA', database: 'Events', authMode: 'direct', serverUrl: 'https://fm.example.com/fmi' }) } as never,
+    fmClient: { createRecord: vi.fn(), getLayoutMetadata: async () => ({ fieldMetaData: eventRegistrationExample().definition.fields.map((field) => ({ name: field.fmFieldName, type: 'normal', result: 'text' })) }) } as never,
     schemaService: {} as never,
-    fmWebProjectService: { readProjectConfig: async () => ({ activeProfileId: 'p1' }) } as never,
+    fmWebProjectService: { getWorkspaceRoot: () => '/workspace', readProjectConfig: async () => ({ activeProfileId: 'p1' }) } as never,
     fmWebRuntimeGenerator: generator as never,
     fmBridgeServer: bridge as never,
-    roleGuard: { assertFeature: vi.fn(async () => true) } as never,
+    roleGuard: { getFeatureGuard: () => ({ allowed: true }), assertFeature: vi.fn(async () => true) } as never,
     logger: { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } as never,
     refreshExplorer: vi.fn()
   });
@@ -153,6 +155,24 @@ describe('FM Web preview', () => {
     expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', expect.any(Map), expect.any(Map));
   });
 
+  it('enables real submissions only after a modal names the approved connection and layout', async () => {
+    const app = eventRegistrationExample();
+    const intakes = new Map([['event-registration.intake.json', Buffer.from(JSON.stringify(app.definition))]]);
+    const layouts = new Map([[`${app.layout.id}.layout.json`, Buffer.from(JSON.stringify(app.layout))]]);
+    portalSnapshot.mockResolvedValueOnce({ intakes, layouts });
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Enable FileMaker saves' as never);
+    const { run, bridge } = start();await run({ intakeId: 'event-registration', registrationMode: 'filemaker' });
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('REAL FILEMAKER SAVES'), { modal: true }, 'Enable FileMaker saves');
+    const prompt = String(vi.mocked(vscode.window.showWarningMessage).mock.calls[0]?.[0]);expect(prompt).toContain('Registration QA');expect(prompt).toContain('Events');expect(prompt).toContain(' Registrations ');
+    expect(bridge.setRegistrationHandler).toHaveBeenCalledOnce();
+    expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', intakes, layouts, 'event-registration', 'filemaker');
+  });
+  it('does not enable FileMaker writes if the confirmation is declined', async () => {
+    const app = eventRegistrationExample();portalSnapshot.mockResolvedValueOnce({ intakes: new Map([['event-registration.intake.json', Buffer.from(JSON.stringify(app.definition))]]), layouts: new Map([[`${app.layout.id}.layout.json`, Buffer.from(JSON.stringify(app.layout))]]) });
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue(undefined);const { run, bridge } = start();
+    await run({ intakeId: 'event-registration', registrationMode: 'filemaker' });
+    expect(bridge.setRegistrationHandler).not.toHaveBeenCalled();expect(processStart).not.toHaveBeenCalled();
+  });
   it('passes the explicitly selected saved intake as the eighth private preview argument', async () => {
     const intakes = new Map([['event-registration.intake.json', Buffer.from('{"id":"event-registration"}')]]);
     const layouts = new Map([['a1111111-1111-4111-8111-111111111111.layout.json', Buffer.from('{}')]]);

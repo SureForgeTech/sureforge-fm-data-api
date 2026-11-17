@@ -10,7 +10,7 @@ export function bridgeRouteRefusal(
   configuration: ConfigurationReader,
   roleGuard: Pick<RoleGuard, 'getFeatureGuard'>
 ): string | undefined {
-  const isWrite = route === '/editRecord' || route === '/createRecord' || route === '/deleteRecord';
+  const isWrite = route === '/editRecord' || route === '/createRecord' || route === '/deleteRecord' || route === '/submitRegistration';
   const isScript = route === '/runScript';
   if ((isWrite || isScript) && isOfflineModeOn(configuration)) {
     return 'Offline mode is enabled; the preview app cannot change data or run scripts.';

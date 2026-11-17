@@ -51,7 +51,7 @@ describe('bridge route policy', () => {
     const off = config({
       'features.recordEdit.enabled': { defaultValue: true, globalValue: false, workspaceValue: true }
     });
-    for (const route of ['/editRecord', '/createRecord', '/deleteRecord']) {
+    for (const route of ['/editRecord', '/createRecord', '/deleteRecord', '/submitRegistration']) {
       expect(bridgeRouteRefusal(route, off, allow)).toMatch(/features\.recordEdit\.enabled/);
     }
     expect(bridgeRouteRefusal('/find', off, allow)).toBeUndefined();
@@ -67,7 +67,7 @@ describe('bridge route policy', () => {
           : { allowed: true }
     };
     const none = config({});
-    for (const route of ['/editRecord', '/createRecord', '/deleteRecord']) {
+    for (const route of ['/editRecord', '/createRecord', '/deleteRecord', '/submitRegistration']) {
       expect(bridgeRouteRefusal(route, none, viewer as never)).toMatch(/viewer/);
     }
     expect(bridgeRouteRefusal('/find', none, viewer as never)).toBeUndefined();

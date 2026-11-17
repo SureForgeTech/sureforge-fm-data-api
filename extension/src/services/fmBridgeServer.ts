@@ -38,6 +38,7 @@ export class FmBridgeServer {
   private sessionToken: string | undefined;
   private rateLimiter: BridgeRateLimiter | undefined;
   private rateLimitWarningEmitted = false;
+  private registrationHandler?: (payload: unknown) => Promise<Record<string, unknown>>;
   private scriptPromptPending = false;
   private scriptPromptAfter = 0;
 
@@ -102,7 +103,10 @@ export class FmBridgeServer {
     };
   }
 
+  public setRegistrationHandler(handler: (payload: unknown) => Promise<Record<string, unknown>>): void { this.registrationHandler = handler; }
+
   public async stop(): Promise<void> {
+    this.registrationHandler = undefined;
     if (!this.server) {
       return;
     }
@@ -230,6 +234,11 @@ export class FmBridgeServer {
     const refusal = await this.options.authorizeRoute?.(route);
     if (refusal) {
       throw new FMClientError(refusal, { status: 403 });
+    }
+
+    if (route === '/submitRegistration') {
+      if (!this.registrationHandler) throw new FMClientError('FileMaker registration saves have not been approved for this preview.', { status: 403 });
+      return this.registrationHandler(payload);
     }
 
     // The preview app is repository code. It may name a profile only if that is the one the
