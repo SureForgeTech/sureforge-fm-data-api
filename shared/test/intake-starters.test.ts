@@ -18,7 +18,8 @@ describe('reusable portal starter and branding', () => {
   it('keeps current sources intact, handles missing legacy ids and rejects unmapped legacy shapes', () => {
     const { definition, layout } = eventRegistrationExample();
     expect(migrateIntakeSource(definition, layout)).toEqual(layout);
-    const { id: _id, ...withoutId } = layout;
+    const withoutId: Record<string, unknown> = { ...layout };
+    delete withoutId.id;
     const migrated = migrateIntakeSource(definition, { ...withoutId, schemaVersion: 0, objects: [null, [], 7, { type: 'text', text: 'Instructions' }, ...layout.objects] });
     expect(migrated.id).toBe(definition.layoutId);
     expect(intakeLayout(definition, migrated).objects).toHaveLength(definition.fields.length);

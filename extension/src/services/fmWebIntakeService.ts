@@ -1,4 +1,4 @@
-import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { CURRENT_LAYOUT_SCHEMA_VERSION, eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'fs';
 import { lstat, mkdir, open, readdir, realpath, writeFile } from 'fs/promises';
 import path from 'path';
@@ -88,7 +88,7 @@ export class FmWebIntakeService {
       const source = await this.read(filePath);
       migrateLayoutDefinition(source);
       const raw = source as Record<string, unknown>;
-      valid = raw.id === layoutId || (raw.id === undefined && (raw.schemaVersion === undefined || raw.schemaVersion === 0));
+      valid = raw.schemaVersion === CURRENT_LAYOUT_SCHEMA_VERSION && raw.id === layoutId;
     }
     catch { /* Invalid source JSON opens directly for repair, without replacing it. */ }
     return { id: layoutId, filePath, valid };
