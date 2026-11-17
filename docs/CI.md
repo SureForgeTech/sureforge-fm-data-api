@@ -20,6 +20,8 @@ CI concurrency groups use the workflow name and pull request number, or the run 
 
 The `release` job and the dependency auto-merge workflow use the composite action `.github/actions/ensure-gh`. It reuses an installed GitHub CLI or downloads version 2.102.0 for Linux amd64/arm64 and verifies its release checksum, exposing the executable at `$RUNNER_TEMP/gh-cli/bin/gh`. The auto-merge workflow checks out the trusted pull request base commit for this local action, with persisted credentials disabled.
 
+The tagged release pipeline keeps its `extension-vsix` workflow artifact for 14 days after upload. The `publish`, `publish-ovsx` and `release` jobs download it, so environment approvals and failed-job retries must leave time for those downloads before it expires. This limit does not delete published GitHub release assets.
+
 ## Required status check
 
 Branch protection on `main` requires one status check, **`build-test`**, and no approving review. Nothing else is required today. Code scanning default setup is not configured on this repository, so there is no required scanning check.
