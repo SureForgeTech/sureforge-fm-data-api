@@ -2,8 +2,9 @@ import * as vscode from 'vscode';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
 const create = vi.hoisted(() => vi.fn());
+const editable = vi.hoisted(() => vi.fn());
 const load = vi.hoisted(() => vi.fn());
-vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { ensureEventStarter = create; load = load; } }));
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { ensureEventStarter = create; load = load; definitionPathForEdit = editable; } }));
 function handler() {
   registerFmWebProjectCommands({ context: {} as never, profileStore: {} as never, fmClient: {} as never,
     schemaService: {} as never, fmWebProjectService: {} as never, fmWebRuntimeGenerator: {} as never,
@@ -13,10 +14,21 @@ function handler() {
 beforeEach(() => {
   vi.clearAllMocks();(vscode.workspace as { isTrusted: boolean }).isTrusted = true;
   const saved = { definitionPath: '/workspace/.fmweb/intakes/event-registration.intake.json', layout: { id: 'source-layout' } };
-  create.mockResolvedValue(saved);load.mockResolvedValue(saved);
+  create.mockReset().mockResolvedValue(saved);load.mockReset().mockResolvedValue(saved);
+  editable.mockReset().mockResolvedValue(saved.definitionPath);
 });
 afterEach(() => { (vscode.workspace as { isTrusted: boolean }).isTrusted = true; });
 describe('Build a Portal guided entry', () => {
+  it.each(['create', 'edit'])('opens invalid saved data for repair during %s without replacing it', async (action) => {
+    create.mockRejectedValue(new Error('Invalid definition'));load.mockRejectedValue(new Error('Invalid definition'));
+    vi.mocked(vscode.window.showQuickPick).mockResolvedValue({ action } as never);
+    await handler()();
+    expect(editable).toHaveBeenCalledWith('event-registration');
+    expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith(expect.objectContaining({ fsPath: '/workspace/.fmweb/intakes/event-registration.intake.json' }));
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('repair'));
+    expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
+  });
+
   it('offers a sample journey without a saved profile and stops cleanly on cancel', async () => {
     vi.mocked(vscode.window.showQuickPick).mockResolvedValue(undefined);await handler()();
     expect(create).not.toHaveBeenCalled();expect(load).not.toHaveBeenCalled();

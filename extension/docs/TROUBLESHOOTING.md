@@ -564,11 +564,11 @@ Executing an update also needs `filemaker.features.recordEdit.enabled` and permi
 
 ### Likely cause
 
-- On Windows, the preview searches absolute PATH entries for `node.exe` and `node_modules\npm\bin\npm-cli.js` (the standard Node.js installer layout); these can be in separate entries. A version manager such as nvm-windows works only if its PATH entries expose both files in those locations; a non-standard npm location may produce **Could not find Node.js and npm on PATH**. On macOS and Linux, the preview runs `npm` from PATH. Port 3000 may be occupied, or dependencies cannot be downloaded. The Marketplace package does not include the preview template.
+- On Windows, the preview searches absolute PATH entries for `node.exe` and `node_modules\npm\bin\npm-cli.js` (the standard Node.js installer layout); these can be in separate entries. A version manager such as nvm-windows works only if its PATH entries expose both files in those locations; a non-standard npm location may produce **Could not find Node.js and npm on PATH**. On macOS and Linux, the preview runs `npm` from PATH. Port 3000 may be occupied, or dependencies cannot be downloaded. Older or incomplete installations may lack the preview template; current VSIX builds bundle it.
 
 ### Fix steps
 
-1. Use the source checkout for the preview. Use the standard Node.js installer layout (or expose both required files through absolute PATH entries) and restart VS Code so it sees PATH.
+1. If the template is missing, use a current VSIX build or a source checkout. Use the standard Node.js installer layout (or expose both required files through absolute PATH entries) and restart VS Code so it sees PATH.
 2. Stop the service using `127.0.0.1:3000`; the preview will not open another service as its own.
 3. Check proxy and extra certificate environment settings if the install fails. Workspace npm configuration and `.env` overrides are ignored, and no install scripts run. The start dialog lists edited or added runtime files it will ignore; it leaves them alone. See [FM Web reference](./FM_WEB.md) for the clean private copy, named regeneration confirmation and cancellation cleanup.
 

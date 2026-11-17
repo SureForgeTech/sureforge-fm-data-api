@@ -15,8 +15,13 @@ function request(body: unknown = { submissionId: randomUUID(), values }, headers
     body: typeof body === 'string' ? body : JSON.stringify(body)
   });
 }
-beforeEach(() => vi.stubEnv('FMWEB_PREVIEW_SESSION', session));
-afterEach(() => vi.unstubAllEnvs());
+beforeEach(() => {
+  vi.stubEnv('FMWEB_PREVIEW_SESSION', session);
+  // Unit contracts use the synthetic fixture, independent of customized exported form files.
+  // The registry suite and standalone HTTP acceptance exercise actual saved definitions.
+  vi.spyOn(previewIntakes, 'load').mockImplementation(async (id) => id === 'event-registration' ? eventRegistrationExample() : undefined);
+});
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
 
 describe('private sample intake endpoint', () => {
   it('validates the saved custom form rather than silently using the built-in definition', async () => {

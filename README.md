@@ -38,7 +38,7 @@ The Marketplace page is [extension/README.md](extension/README.md).
 | `extension/` | The VS Code extension (published as `SureForgeTech.filemaker-data-api-tools`) | The extension itself. |
 | `shared/` | Shared schema, types and renderer utilities | Imported by the extension and by both workspaces below. |
 | `designer-ui/` | React webview app for FM Web Layout Mode | The Layout Mode bundle. `extension/scripts/build-designer-ui-if-available.mjs` builds it and copies it into the extension; the extension build fails when the bundle cannot be produced. |
-| `runtime-next/` | Next.js runtime template for generated FM Web apps | The FM Web preview template. `fmWebRuntimeGenerator` (`extension/src/services/fmWebRuntimeGenerator.ts`) copies it into `.fmweb/generated/runtime-next` in your workspace. It is **not** part of the Marketplace VSIX, so a Marketplace install says plainly that the preview is unavailable rather than generating an app that cannot work. Run the extension from this repository to use the preview. |
+| `runtime-next/` | Next.js runtime template for generated FM Web apps | The FM Web preview template. `fmWebRuntimeGenerator` (`extension/src/services/fmWebRuntimeGenerator.ts`) copies it into `.fmweb/generated/runtime-next` in your workspace. The VSIX bundles this template and shared sources under `dist/fmweb-template`. Installed extensions prefer that kit; development hosts prefer repository sources. Older or incomplete installations report a missing template. |
 | `docs/` | Maintainer, security and release documentation | — |
 | `tools/` | Release helpers (`release-notes.sh`, the pinned `vsce` install) | — |
 
