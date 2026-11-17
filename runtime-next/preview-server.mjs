@@ -6,11 +6,12 @@
 import { EventEmitter } from 'node:events';
 import { createServer } from 'node:http';
 import next from 'next';
-import { previewGateStatus } from './lib/preview-gate.mjs';
+import { createPreviewLandingRedirect, previewGateStatus } from './lib/preview-gate.mjs';
 
 const hostname = '127.0.0.1';
 const port = 3000;
 const session = process.env.FMWEB_PREVIEW_SESSION;
+const landingRedirect = createPreviewLandingRedirect(session, process.env.FMWEB_PREVIEW_INTAKE_ID);
 const refusals = {
   401: 'Open this preview using the private launch link from VS Code.',
   403: 'Preview Host is not allowed.'
@@ -29,6 +30,12 @@ const server = createServer((request, response) => {
   if (status !== 200) {
     response.writeHead(status, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
     response.end(refusals[status]);
+    return;
+  }
+  const destination = landingRedirect(request);
+  if (destination) {
+    response.writeHead(303, { Location: destination, 'Cache-Control': 'no-store', 'Referrer-Policy': 'no-referrer' });
+    response.end();
     return;
   }
   void handle(request, response);

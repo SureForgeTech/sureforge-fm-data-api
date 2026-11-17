@@ -2,6 +2,20 @@
 
 Reference for the FM Web workflow (Layout Mode, generated Next.js runtime and the local bridge). For the steps a user follows, see [FM Web and Layout Mode](./USER_GUIDE.md#fm-web-and-layout-mode) in the user guide. FM Web is experimental.
 
+## Create FM Web App
+
+**FileMaker: Create FM Web App** is the main entry point. It is also available from the new-file button above Connections and the first Getting Started step.
+
+1. Open a trusted workspace folder. Choose **Use FileMaker fields** or **Try sample fields**.
+2. For FileMaker fields, choose a saved connection, a layout and the registration fields. The picker excludes calculations, summaries, containers and globals. Exact layout and field names are preserved. If no connection exists, the flow offers the existing connection setup.
+3. Customize the event-registration form in its editor: event title and description, submit/success text, organization and accent color, included fields, labels, help, required rules, input types, maximum lengths and single-choice options. Move fields up or down to set their order.
+4. Choose **Save and preview**. Save creates the project files; preview uses the existing confirmation and opens a private browser session. Use invented details: registration submissions are synthetic and create no FileMaker records, even when the field names came from a real connection.
+5. Run **Create FM Web App** again to continue editing the saved app. No setup commands or JSON editing are needed for the normal create/customize/preview path.
+
+Saves preserve the authored source layout and refuse to replace a form changed by another editor. Reopen the app editor to load those changes. Cancelling field selection creates no app definition. The advanced **Export app** action generates an editable app folder and reveals it in VS Code; **Source layout** opens Layout Mode. Export does not publish a website or configure a live submission backend.
+
+Existing **Build a Portal**, initialization, profile selection, metadata sync, generation and preview commands remain available for advanced work and compatible workflows. The older JSON-based starter and repair path is documented below.
+
 ## Architecture
 
 Four layers:
@@ -84,7 +98,7 @@ npm test
 npm run lint
 ```
 
-Press `F5` to open an Extension Development Host and run the FM Web commands from the Command Palette: **Initialize FM Web Project**, **Select Active Profile**, **Sync FM Web Project Metadata**, **Open FM Web Layout Mode**, **Generate FM Web Next.js App**, **Generate FM Web Layout Page**, **Start FM Web Preview Server**.
+Press `F5` to open an Extension Development Host and start with **Create FM Web App**. The advanced FM Web commands remain available in the Command Palette: **Initialize FM Web Project**, **Select Active Profile**, **Sync FM Web Project Metadata**, **Open FM Web Layout Mode**, **Generate FM Web Next.js App**, **Generate FM Web Layout Page**, **Start FM Web Preview Server**.
 
 ## Event registration sample
 
@@ -97,7 +111,7 @@ The sample intake files are editable scaffolding in a generated app. Generation 
 
 ### Build a Portal with sample data
 
-Run **FileMaker: Build a Portal** from an open trusted workspace, or use the connection view's sample-data link. No saved FileMaker connection is required. Choose **Create or resume event registration**. The command adds only missing files under `.fmweb/intakes/` and `.fmweb/layouts/`; existing edits are never replaced. Repeating it repairs a setup interrupted between those two files. **Edit form and exact field mappings** opens even invalid JSON for repair; resuming an invalid existing starter also opens that preserved definition. Validation is still required before preview.
+For the earlier JSON-based workflow, run **FileMaker: Build a Portal** from an open trusted workspace. The main connection-view entry now opens **Create FM Web App**. No saved FileMaker connection is required. Choose **Create or resume event registration**. The command adds only missing files under `.fmweb/intakes/` and `.fmweb/layouts/`; existing edits are never replaced. Repeating it repairs a setup interrupted between those two files. **Edit form and exact field mappings** opens even invalid JSON for repair; resuming an invalid existing starter also opens that preserved definition. Validation is still required before preview.
 
 The saved `.intake.json` is a version 1 data contract. Edit `title`, `description`, `submitLabel`, `successMessage`, field `label`, `helpText`, `required`, `maxLength` and select `options`. Optional `branding` supports an `organizationName` and a six-digit `accentColor` such as `#215EA6`; it accepts no URL, HTML or CSS. `fmFieldName` must exactly name a writable nonglobal field in the referenced source layout, including spaces and case. Use **Open source layout** to continue in Layout Mode even if a field mapping is invalid. If source layout JSON is malformed or uses the legacy schema, that action opens the preserved source file for repair or migration instead. Keep the referenced layout ID when converting to the current schema; the legacy designer migration creates a new ID. Private portal preview can migrate legacy sources in memory without changing their referenced identity. A malformed form JSON must first be repaired through **Edit form and exact field mappings** so its source reference can be read. Keep the stable input IDs when changing labels.
 

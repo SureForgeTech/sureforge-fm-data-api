@@ -1,10 +1,12 @@
 import { CURRENT_LAYOUT_SCHEMA_VERSION, eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'fs';
-import { lstat, mkdir, open, readdir, realpath, writeFile } from 'fs/promises';
+import { createHash, randomUUID } from 'crypto';
+import { lstat, mkdir, open, readdir, realpath, rm, writeFile } from 'fs/promises';
 import path from 'path';
 import type { FmWebProjectService } from './fmWebProjectService';
 import { assertSafeOutputFolder, writeGeneratedFiles } from './generatedFileWriter';
 import { resolveConfinedFile } from '../utils/pathConfinement';
+import { renameReplacing } from '../utils/renameReplacing';
 
 export interface PortalPreviewFiles { intakes: Map<string, Buffer>; layouts: Map<string, Buffer> }
 
@@ -13,6 +15,7 @@ export interface SavedIntake {
   layout: LayoutDefinition;
   definitionPath: string;
   layoutPath: string;
+  revision: string;
 }
 
 /** Data-only starter files belong to the user. Resuming never overwrites either file. */
@@ -102,18 +105,90 @@ export class FmWebIntakeService {
     return { id: layoutId, filePath, valid };
   }
 
-  public async load(id: string): Promise<SavedIntake> {
+  public async load(id: string): Promise<SavedIntake> { return this.readApp(id, true); }
+
+  public async loadForEditing(id: string): Promise<SavedIntake> { return this.readApp(id, false); }
+
+  private async readApp(id: string, validateMappings: boolean): Promise<SavedIntake> {
     if (!/^[a-z][a-z0-9_-]{0,63}$/.test(id)) throw new Error('Invalid portal identifier.');
     const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${id}.intake.json`));
-    const definition = intakeDefinitionSchema.parse(await this.read(definitionPath));
+    const rawDefinition = await this.read(definitionPath);
+    const definition = intakeDefinitionSchema.parse(rawDefinition);
     if (definition.id !== id) throw new Error('Portal filename and identifier must match.');
     if (definition.environmentId !== 'sample') throw new Error('This portal starter supports only the sample environment. No live FileMaker adapter is configured.');
     const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${definition.layoutId}.layout.json`));
-    const source = migrateIntakeSource(definition, await this.read(layoutPath));
+    const rawLayout = await this.read(layoutPath);
+    const source = migrateIntakeSource(definition, rawLayout);
     const layout = await this.project.prepareLayout?.(source) ?? source;
     // Validate every mapping, not just the form JSON shape.
+    if (validateMappings) intakeLayout(definition, layout);
+    const revision = createHash('sha256').update(JSON.stringify([rawDefinition, rawLayout])).digest('hex');
+    return { definition, layout, definitionPath, layoutPath, revision };
+  }
+
+  /** Create only missing app files. The editor's first Save is the user's creation action. */
+  public async createApp(input: unknown, source: unknown): Promise<SavedIntake> {
+    const definition = intakeDefinitionSchema.parse(input);
+    const parsedLayout = layoutDefinitionSchema.parse(source);
+    const layout = await this.project.prepareLayout?.(parsedLayout) ?? parsedLayout;
+    if (definition.id !== 'event-registration' || definition.environmentId !== 'sample') throw new Error('Unsupported app target.');
     intakeLayout(definition, layout);
-    return { definition, layout, definitionPath, layoutPath };
+    const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${definition.id}.intake.json`));
+    const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${layout.id}.layout.json`));
+    const files = [[layoutPath, layout], [definitionPath, definition]] as const;
+    for (const [, value] of files) if (Buffer.byteLength(JSON.stringify(value), 'utf8') > 1048576) throw new Error('Choose fewer fields or shorter choices; the app definition exceeds 1 MiB.');
+    await this.project.ensureProjectInitialized();
+    for (const [file, value] of files) {
+      await assertSafeOutputFolder(path.dirname(file), await realpath(this.project.getWorkspaceRoot()!));
+      await mkdir(path.dirname(file), { recursive: true });
+      const target = await this.confined(file);
+      try { await writeFile(target, `${JSON.stringify(value, null, 2)}\n`, { encoding: 'utf8', mode: 0o600, flag: 'wx' }); }
+      catch (error) {
+        if (file !== layoutPath || (error as NodeJS.ErrnoException).code !== 'EEXIST'
+          || JSON.stringify(migrateLayoutDefinition(await this.read(file))) !== JSON.stringify(layout)) throw error;
+      }
+    }
+    return this.load(definition.id);
+  }
+
+  /** Explicit editor saves replace the definition atomically and refuse changes made elsewhere. */
+  public async saveApp(input: unknown, revision: string, replacementSource?: unknown): Promise<SavedIntake> {
+    const definition = intakeDefinitionSchema.parse(input);
+    const current = await this.loadForEditing('event-registration');
+    if (current.revision !== revision) throw new Error('The app changed in another editor. Close this app tab and run Create FM Web App to load those changes.');
+    if (definition.id !== current.definition.id || (!replacementSource && definition.layoutId !== current.definition.layoutId)
+      || definition.environmentId !== current.definition.environmentId) throw new Error('The editor cannot change the app target.');
+    let source = current.layout;
+    if (replacementSource) {
+      const parsed = layoutDefinitionSchema.parse(replacementSource);
+      source = await this.project.prepareLayout?.(parsed) ?? parsed;
+      if (source.id === current.layout.id) throw new Error('Choose a new source layout for replacement.');
+    }
+    intakeLayout(definition, source);
+    const bytes = `${JSON.stringify(definition, null, 2)}\n`;
+    if (Buffer.byteLength(bytes, 'utf8') > 1048576) throw new Error('The app definition exceeds 1 MiB.');
+    const target = await this.confined(current.definitionPath);
+    const info = await lstat(target);
+    if (!info.isFile() || info.nlink > 1) throw new Error('The app definition must be a regular file with no hard links.');
+    if (replacementSource) {
+      const sourceBytes = `${JSON.stringify(source, null, 2)}\n`;
+      if (Buffer.byteLength(sourceBytes, 'utf8') > 1048576) throw new Error('The source layout exceeds 1 MiB.');
+      const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${source.id}.layout.json`));
+      await assertSafeOutputFolder(path.dirname(layoutPath), await realpath(this.project.getWorkspaceRoot()!));
+      try { await writeFile(layoutPath, sourceBytes, { encoding: 'utf8', mode: 0o600, flag: 'wx' }); }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST' || JSON.stringify(migrateLayoutDefinition(await this.read(layoutPath))) !== JSON.stringify(source)) throw error;
+      }
+    }
+    const temporary = path.join(path.dirname(target), `.app-${randomUUID()}.tmp`);
+    try {
+      await writeFile(temporary, bytes, { flag: 'wx', mode: info.mode & 0o777 });
+      if ((await this.loadForEditing('event-registration')).revision !== revision) throw new Error('The app changed during Save. Close this app tab and run Create FM Web App to load those changes.');
+      await this.confined(target);
+      if ((await lstat(target)).nlink > 1) throw new Error('The app definition acquired a hard link during Save.');
+      await renameReplacing(temporary, target);
+    } finally { await rm(temporary, { force: true }); }
+    return this.load(definition.id);
   }
 
   public async exportSnapshot(snapshot: PortalPreviewFiles): Promise<string[]> {

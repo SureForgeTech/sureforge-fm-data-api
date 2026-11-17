@@ -2,13 +2,21 @@
 
 [![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Marketplace installs](https://vsmarketplacebadges.dev/installs/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](LICENSE)
 
-A free, open-source VS Code extension for the FileMaker Data API: connect, query, edit records, compare schemas, export and update in batches, generate TypeScript types, and (optionally, off by default) give AI tools safe access, including a read-only `@filemaker` chat participant. MIT licensed, no telemetry.
+Create and preview FM Web apps in VS Code with a free, open-source FileMaker extension. Choose FileMaker fields or sample fields, customize an event-registration form without editing JSON, and preview it privately. The extension also provides Data API queries, record editing, schema comparison, batch tools, TypeScript generation and optional AI tools. MIT licensed, no telemetry.
 
 Install it from the Marketplace: search for **FileMaker Data API Tools** (publisher SureForgeTech), or run `code --install-extension SureForgeTech.filemaker-data-api-tools`.
 
 Version **1.9.0** adds new related portal rows to Create Record on direct connections. It mostly improves safety: batch updates follow write rules, old saved addresses lose embedded credentials safely, and server responses and the source-checkout FM Web preview have tighter limits. Read the [upgrade notes](extension/UPGRADE.md) for the new prompts and settings rules.
 
 We have used it against one of our own FileMaker Servers and a built-in mock of the Data API. We would love more people to try it on other server versions and setups and tell us what they find: see [Compatibility](extension/docs/COMPATIBILITY.md) and [open an issue](https://github.com/SureForgeTech/sureforge-fm-data-api/issues) with anything you notice. FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
+
+## Create an FM Web app
+
+1. Open a trusted workspace folder and run **FileMaker: Create FM Web App**, or use the new-file button above Connections.
+2. Choose a saved FileMaker connection and layout, then select the registration fields. **Try sample fields** starts without a connection.
+3. Customize labels, required rules, input types, choices, field order and branding in the form editor. Choose **Save and preview**.
+
+Run the same command again to continue editing the saved app. Registration submissions in this workflow use sample data and create no FileMaker records. Advanced source-layout and export controls remain available; exporting creates an editable app folder, not a public deployment. See the [FM Web guide](extension/docs/FM_WEB.md#create-fm-web-app).
 
 ## Documentation
 

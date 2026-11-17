@@ -81,6 +81,30 @@ describe('private preview process', () => {
     if (globalThis.process.platform !== 'win32') expect((await lstat(path.join(root, 'intakes', 'event-registration.intake.json'))).mode & 0o777).toBe(0o600);
   });
 
+  it('passes an explicit saved intake landing only to the private server', async () => {
+    const process = preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'inherited-target' });
+    await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),
+      new Map(), 'http://127.0.0.1:1234', 'synthetic', undefined,
+      new Map([['event-registration.intake.json', Buffer.from('{"id":"event-registration"}')]]),
+      new Map(), 'event-registration');
+    expect(calls[0]!.options.env).not.toHaveProperty('FMWEB_PREVIEW_INTAKE_ID');
+    expect(calls[1]!.options.env).toHaveProperty('FMWEB_PREVIEW_INTAKE_ID', 'event-registration');
+    expect(vi.mocked(vscode.env.openExternal).mock.calls[0]?.[0].toString()).toMatch(/^http:\/\/127\.0\.0\.1:3000\/\?launch=/);
+  });
+
+  it.each(['', '../event-registration', 'event-registration?next=evil', 'Upper', 'a\n', 'a\u2028', 'a'.repeat(65), 'missing'])('rejects invalid or absent landing intake %s before any process or temp copy', async (id) => {
+    const process = preview();
+    await expect(process.start(new Map(), new Map(), 'http://127.0.0.1:1234', 'synthetic', undefined,
+      new Map([['event-registration.intake.json', Buffer.from('{}')]]), new Map(), id)).rejects.toThrow('intake is invalid or missing');
+    expect(calls).toHaveLength(0);
+    expect(await readdir(directory)).toEqual([]);
+  });
+
+  it('keeps the default homepage when no explicit landing is supplied, ignoring inherited values', async () => {
+    await start(preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'event-registration' }));
+    for (const call of calls) expect(call.options.env).not.toHaveProperty('FMWEB_PREVIEW_INTAKE_ID');
+  });
+
   it.each(['../escape.intake.json', 'Upper.intake.json', 'bad.json'])('rejects unsafe intake filename %s before spawning', async (name) => {
     const process = preview();
     await expect(process.start(new Map(), new Map(), 'http://127.0.0.1:1234', 'synthetic', undefined,

@@ -68,6 +68,7 @@ export class ConnectionWizardPanel {
     const current = ConnectionWizardPanel.currentPanel;
     if (current) {
       current.editingProfile = editingProfile;
+      current.options.afterSave = options.afterSave;
       current.panel.reveal(vscode.ViewColumn.One);
       current.dispatch(() => sendLoadProfile(current.host), 'loadProfile');
       return;

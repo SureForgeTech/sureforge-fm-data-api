@@ -14,9 +14,10 @@ interface CapturedPanel {
   fireMessage: (message: unknown) => Promise<void>;
   posted: unknown[];
   logger: { warn: ReturnType<typeof vi.fn> };
+  secretStore: { setPassword: ReturnType<typeof vi.fn> };
 }
 
-function setupPanel(editingProfile?: Record<string, unknown>): CapturedPanel {
+function setupPanel(editingProfile?: Record<string, unknown>, afterSave?: 'createFmWebApp'): CapturedPanel {
   const posted: unknown[] = [];
   let messageHandler: ((message: unknown) => unknown) | undefined;
 
@@ -73,7 +74,8 @@ function setupPanel(editingProfile?: Record<string, unknown>): CapturedPanel {
     secretStore as never,
     fmClient as never,
     logger as never,
-    editingProfile as never
+    editingProfile as never,
+    { afterSave }
   );
 
   return {
@@ -81,7 +83,8 @@ function setupPanel(editingProfile?: Record<string, unknown>): CapturedPanel {
       await messageHandler?.(message);
     },
     posted,
-    logger
+    logger,
+    secretStore
   };
 }
 
@@ -106,6 +109,22 @@ describe('Connection wizard post-save connect offer', () => {
     readFile.mockRejectedValue({ code: 'FileNotFound' });
   });
 
+  it('resumes app creation only after credentials are saved', async () => {
+    const panel = setupPanel(undefined, 'createFmWebApp');
+    let release!: () => void;
+    panel.secretStore.setPassword.mockImplementationOnce(() => new Promise<void>((resolve) => { release = resolve; }));
+    void panel.fireMessage(validSavePayload);
+    await vi.waitFor(() => expect(panel.secretStore.setPassword).toHaveBeenCalled());
+    expect(vscode.commands.executeCommand).not.toHaveBeenCalled();release();
+    await vi.waitFor(() => expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true }));
+    expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
+  });
+  it('does not resume app creation when credentials fail to save', async () => {
+    const panel = setupPanel(undefined, 'createFmWebApp');panel.secretStore.setPassword.mockRejectedValueOnce(new Error('Credential store unavailable'));
+    await panel.fireMessage(validSavePayload);
+    await vi.waitFor(() => expect(panel.posted).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'saveError' })])));
+    expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
+  });
   it('offers Connect Now after a successful save', async () => {
     vi.mocked(vscode.window.showInformationMessage).mockResolvedValue(undefined as never);
 

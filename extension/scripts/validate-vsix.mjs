@@ -35,6 +35,7 @@ export async function validateVsix(file) {
       throw new Error(`VSIX contains private or generated template state: ${name}`);
     }
   }
+  if (!entries.has('extension/dist/webviews/fmWebApp/ui/main.js')) throw new Error('VSIX is missing dist/webviews/fmWebApp/ui/main.js');
   const layoutBytes = entries.get('extension/dist/webviews/layoutMode/ui/index.js') ?? 0;
   if (layoutBytes <= 200 * 1024) {
     throw new Error(`VSIX must contain the real Layout Mode bundle (over 200 KiB); found ${layoutBytes} bytes.`);

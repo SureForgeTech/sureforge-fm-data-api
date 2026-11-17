@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- Create FM Web App is the main guided workflow: choose FileMaker or sample fields, customize an event-registration form without JSON, save and preview, then reopen it to continue editing. Existing commands remain available.
+
 - Export app scaffold includes the saved portal definitions and source layouts, so generated apps use the same custom form as private preview. Changed exported data always asks before replacement.
 
 - Build a Portal creates or resumes editable event-registration forms with exact mappings, labels, help, required fields and basic branding, then previews saved definitions privately with sample data.

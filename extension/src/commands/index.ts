@@ -88,13 +88,14 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
 
   return [
     ...registerConnectionDiagnosticCommands(deps),
-    vscode.commands.registerCommand('filemakerDataApiTools.addConnectionProfile', async () => {
+    vscode.commands.registerCommand('filemakerDataApiTools.addConnectionProfile', async (arg: unknown) => {
       if (!(await roleGuard.assertFeature('writeOperations', 'Add Connection Profile'))) {
         return;
       }
 
       ConnectionWizardPanel.createOrShow(context, profileStore, secretStore, fmClient, logger, undefined, {
-        getTestPolicy: deps.getConnectionWizardTestPolicy
+        getTestPolicy: deps.getConnectionWizardTestPolicy,
+        afterSave: arg && typeof arg === 'object' && 'continueToFmWebApp' in arg && arg.continueToFmWebApp === true ? 'createFmWebApp' : undefined
       });
     }),
 

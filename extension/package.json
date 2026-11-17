@@ -50,6 +50,7 @@
     "crud"
   ],
   "activationEvents": [
+    "onWebviewPanel:filemakerFmWebApp",
     "onStartupFinished",
     "onWebviewPanel:filemakerConnectionWizard",
     "onWebviewPanel:filemakerQueryBuilder",
@@ -123,7 +124,7 @@
     "viewsWelcome": [
       {
         "view": "filemakerExplorer",
-        "contents": "No FileMaker connections yet.\n[Build a Portal with sample data](command:filemakerDataApiTools.buildPortal)\n[Add Connection Profile](command:filemakerDataApiTools.addConnectionProfile)\n[Open Walkthrough](command:filemakerDataApiTools.openWelcomeWalkthrough)\n\nYour passwords stay in the OS keychain. Learn more in the [User Guide](command:filemakerDataApiTools.openUserGuide)."
+        "contents": "No FileMaker connections yet.\n[Create FM Web App](command:filemakerDataApiTools.createFmWebApp)\n[Add Connection Profile](command:filemakerDataApiTools.addConnectionProfile)\n[Open Walkthrough](command:filemakerDataApiTools.openWelcomeWalkthrough)\n\nYour passwords stay in the OS keychain. Learn more in the [User Guide](command:filemakerDataApiTools.openUserGuide)."
       },
       {
         "view": "filemakerLayoutInspector",
@@ -134,8 +135,15 @@
       {
         "id": "filemakerGettingStarted",
         "title": "Get started with FileMaker Data API Tools",
-        "description": "Connect to FileMaker, run a query, inspect a layout, and generate typed code.",
+        "description": "Create an FM Web app, customize a registration form, and preview it. Connection and API tools remain available.",
         "steps": [
+          {
+            "id": "create-web-app",
+            "title": "Create an FM Web app",
+            "description": "Choose FileMaker fields or sample fields, customize an event registration form, then save and preview. No JSON editing is needed.\n[Create FM Web App](command:filemakerDataApiTools.createFmWebApp)",
+            "media": { "markdown": "docs/walkthroughs/create-web-app.md" },
+            "completionEvents": ["onCommand:filemakerDataApiTools.createFmWebApp"]
+          },
           {
             "id": "addProfile",
             "title": "Add a connection profile",
@@ -196,6 +204,7 @@
       }
     ],
     "commands": [
+      { "command": "filemakerDataApiTools.createFmWebApp", "title": "Create FM Web App", "category": "FileMaker", "icon": "$(new-file)" },
       { "command": "filemakerDataApiTools.buildPortal", "title": "Build a Portal", "category": "FileMaker" },
       {
         "command": "filemakerDataApiTools.testMyServer",
@@ -596,6 +605,7 @@
     ],
     "menus": {
       "view/title": [
+        { "command": "filemakerDataApiTools.createFmWebApp", "when": "view == filemakerExplorer", "group": "navigation@0" },
         {
           "command": "filemakerDataApiTools.addConnectionProfile",
           "when": "view == filemakerExplorer",
