@@ -1,6 +1,6 @@
 # FileMaker Data API Tools
 
-[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Last commit](https://img.shields.io/github/last-commit/SureForgeTech/sureforge-fm-data-api)](https://github.com/SureForgeTech/sureforge-fm-data-api/commits/main) [![License: MIT](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/LICENSE)
+[![Marketplace version](https://vsmarketplacebadges.dev/version/SureForgeTech.filemaker-data-api-tools.svg)](https://marketplace.visualstudio.com/items?itemName=SureForgeTech.filemaker-data-api-tools) [![Last commit](https://img.shields.io/github/last-commit/SureForgeTech/sureforge-fm-data-api)](https://github.com/SureForgeTech/sureforge-fm-data-api/commits/main) [![License: Apache-2.0](https://img.shields.io/github/license/SureForgeTech/sureforge-fm-data-api)](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/LICENSE)
 
 For Claris FileMaker Server (Data API). FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 
@@ -8,7 +8,7 @@ Create an FM Web app from FileMaker fields, customize an event-registration form
 
 ![Connect to a FileMaker server and run a find request in under 10 seconds.](docs/marketplace/connection-wizard.gif)
 
-**Built by [ABD Enterprises](https://abdenterprises.com).** Free, open source (MIT), no telemetry, no cloud account.
+**Built by [ABD Enterprises](https://abdenterprises.com).** Free, open source (Apache-2.0), no telemetry, no cloud account.
 
 Version **1.9.0** adds new related portal rows to Create Record on direct connections. It mostly improves safety: batch updates follow write rules, old saved addresses lose embedded credentials safely, and server responses and the source-checkout FM Web preview have tighter limits. Read the [upgrade notes](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/UPGRADE.md) for the new prompts and settings rules.
 
@@ -184,7 +184,7 @@ Read the [security overview](https://github.com/SureForgeTech/sureforge-fm-data-
 
 ## Need help with FileMaker integration?
 
-This extension is free and MIT-licensed. The team behind it, [ABD Enterprises](https://abdenterprises.com), has been delivering FileMaker integration, migration, and modernization work since 2005.
+This extension is free and Apache-2.0-licensed. The team behind it, [ABD Enterprises](https://abdenterprises.com), has been delivering FileMaker integration, migration, and modernization work since 2005.
 
 If you need a hand with the work behind the tool:
 

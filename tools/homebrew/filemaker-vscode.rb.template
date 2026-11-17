@@ -18,7 +18,7 @@ class FilemakerVscode < Formula
   url "__VSIX_URL__"
   sha256 "__VSIX_SHA256__"
   version "__VERSION__"
-  license "MIT"
+  license "Apache-2.0"
 
   depends_on "visual-studio-code" => :recommended
 

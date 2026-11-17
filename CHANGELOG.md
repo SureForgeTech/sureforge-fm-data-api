@@ -43,6 +43,7 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.
 - Update `CODE_OF_CONDUCT.md` to the Contributor Covenant 2.1 text with the project-wide enforcement contact (contribute@sureforgetech.com).
 - The copyright holder in both MIT `LICENSE` files and the extension's author are now SureForgeTech; the licence text is unchanged.
 - Added shared intake-form contracts, exact FileMaker field mapping and browser/server validation for the upcoming local registration workflow.
