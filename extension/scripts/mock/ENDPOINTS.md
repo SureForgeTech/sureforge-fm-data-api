@@ -5,6 +5,9 @@ This file lists the Claris FileMaker Data API surface as documented, and what th
 
 ## Running it
 
+Use the mock only with synthetic data and the demo accounts below. It listens on loopback, logs request bodies,
+and keeps records in memory. Restarting or resetting discards writes.
+
 ```bash
 cd extension
 npm run mock:server        # http://127.0.0.1:18080 (PORT=0 picks a free port); prints a MOCK_READY JSON line
@@ -174,12 +177,25 @@ tested against the URL path); `{ "clear": true }` removes all; `GET /__admin/fau
 | `status-413`, `-429` (`retryAfter`), `-502`, `-503`, `-504`                    | that status with an HTML gateway page                                                |
 | `slow` (`delayMs`)                                                             | hold the response                                                                    |
 | `drop-mid-response`, `reset-connection`                                        | close the socket after the headers / immediately                                     |
+| `drop-after-create`                                                            | commit a successful record creation, then close the socket before replying           |
 | `data-api-disabled`                                                            | HTML 404 for every `/fmi/data` path                                                  |
 | `messages-nonzero-200` (`code`)                                                | HTTP 200 whose `messages[0].code` is not 0                                           |
 | `find-no-match-500`                                                            | a find with no match answers 500 / 401 instead of 404 / 401                          |
 | `record-locked`, `record-gone`, `validation-fail`                              | create / edit / delete answers 301 / 101 / 509                                       |
 | `field-readonly` (`field`)                                                     | writing that field answers 201                                                       |
 | `script-error`, `script-error-after-edit`, `script-huge-result`, `script-slow` | script endpoint error code 3 / scriptError 3 after a save / 2 MB result / 20 s delay |
+
+To exercise an uncertain registration outcome, add the following configuration through `POST /__admin/fault` before
+submitting a form against the local mock:
+
+```json
+{"name":"drop-after-create","count":1,"path":"/databases/Sales/layouts/Contacts/records$"}
+```
+
+The mock consumes this fault only after a matching create succeeds, including creates through the mock proxy.
+Find the record using a synthetic field value and check `GET /__admin/log` for one create marked
+`fault: "drop-after-create"`. Reads and rejected creates do not consume the fault. The next create succeeds
+normally once its count is exhausted.
 
 Other admin calls: `POST /__admin/account {name, password?}` changes an account (the stored password "goes bad"),
 `POST /__admin/reset-accounts`, `POST /__admin/many {db, n}` creates layout `Big` with `n` records, `POST /__admin/schema` adds/removes a field or renames a layout.

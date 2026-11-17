@@ -989,9 +989,12 @@ export function createEngine(options = {}) {
     table.rows.push(row);
     if (isPlainObject(body.portalData))
       applyPortalData(db, layout, row, body.portalData, fmt, body.options);
-    return withScripts(db, scriptParamsFrom(body, ctx.query), ctx, async () => ({
+    const result = await withScripts(db, scriptParamsFrom(body, ctx.query), ctx, async () => ({
       response: { recordId: row.recordId, modId: row.modId }
-    })).then((r) => json(okBody(r.response)));
+    }));
+    // The row is already committed. A dropped reply leaves the client unsure whether to retry.
+    if (takeFault('drop-after-create', ctx)) return { drop: true, fault: 'drop-after-create' };
+    return json(okBody(result.response));
   }
 
   function applyPortalData(db, layout, row, portalData, fmt, options) {
@@ -1346,6 +1349,7 @@ export function createEngine(options = {}) {
       code: out.json?.messages?.[0]?.code ?? code,
       ms: Date.now() - started
     };
+    if (out.fault) entry.fault = out.fault;
     if (ctx.body && typeof ctx.body === 'object' && Object.keys(ctx.body).length)
       entry.body = truncate(ctx.body);
     state.log.push(entry);

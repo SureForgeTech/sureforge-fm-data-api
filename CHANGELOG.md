@@ -43,6 +43,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The loopback FileMaker mock can save a record and drop its reply, so registration tests verify that an uncertain write is not retried.
+
 - Pull requests are now welcome with a DCO sign-off (`git commit -s`): the organization contributing guide says so, and a new `dco` workflow checks the sign-off on pull requests from outside contributors.
 - The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.
 - Update `CODE_OF_CONDUCT.md` to the Contributor Covenant 2.1 text with the project-wide enforcement contact (contribute@sureforgetech.com).
