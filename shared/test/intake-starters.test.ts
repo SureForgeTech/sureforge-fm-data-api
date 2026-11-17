@@ -25,6 +25,12 @@ describe('reusable portal starter and branding', () => {
     expect(intakeLayout(definition, migrated).objects).toHaveLength(definition.fields.length);
     expect(() => intakeLayout(definition, migrateIntakeSource(definition, null))).toThrow('writable');
   });
+  it('keeps a readonly hint when legacy data repeats a field with later normal entries', () => {
+    const { definition, layout } = eventRegistrationExample();
+    const first = layout.objects[0];
+    const source = { ...layout, schemaVersion: 0, objects: [{ ...first, kind: 'calculation' }, ...layout.objects] };
+    expect(() => intakeLayout(definition, migrateIntakeSource(definition, source))).toThrow('writable');
+  });
   it('has exact stable mappings and validates only invented sample values', () => {
     const sample = eventRegistrationExample();
     expect(sample.layout.fmLayoutName).toBe(' Registrations ');
