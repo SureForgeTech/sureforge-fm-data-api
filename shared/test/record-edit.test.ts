@@ -101,6 +101,12 @@ describe('record draft patches and validation', () => {
 });
 
 describe('record scalar safety', () => {
+  it('preserves extended decimal text with interior zeros as well as trailing zeros', () => {
+    const value = `1.${'0'.repeat(10000)}1`;
+    expect(numericText(value)).toBe(value);
+    expect(numericText(`-${value}`)).toBe(`-${value}`);
+    expect(numericText(`12.5${'0'.repeat(10000)}`)).toBe(12.5);
+  });
   it.each([
     ['0012', 12],
     ['+12.5', 12.5],
