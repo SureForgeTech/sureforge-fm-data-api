@@ -31,6 +31,7 @@ describe('saved portal starters', () => {
     const { service: original, project } = fixture();const saved = await original.ensureEventStarter();
     await writeFile(saved.layoutPath, JSON.stringify({ ...saved.layout, schemaVersion: 0 }));
     expect((await original.load('event-registration')).layout.id).toBe(saved.layout.id);
+    expect((await original.layoutForEdit('event-registration')).valid).toBe(false);
     const service = new FmWebIntakeService({ ...project, prepareLayout: async (layout) => ({ ...layout, objects: layout.objects.map((object, index) => index || object.type !== 'field' ? object : { ...object, kind: 'calculation' }) }) });
     await expect(service.load('event-registration')).rejects.toThrow('writable');
   });

@@ -80,7 +80,7 @@ export function registerFmWebProjectCommands(
           if (source.valid) await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: source.id });
           else {
             await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(source.filePath)));
-            void vscode.window.showWarningMessage('The invalid source layout is open for repair. Your files were preserved. Save valid layout JSON before reopening Layout Mode.');
+            void vscode.window.showWarningMessage('The source layout is open for repair or migration. Your file was preserved. Layout Mode needs current schema JSON with the same layout ID.');
           }
           return;
         }
