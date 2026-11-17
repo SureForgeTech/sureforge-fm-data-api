@@ -105,8 +105,15 @@ describe('prompt form suggestions', () => {
 
   it('does not remove an included field just because it should not be required', () => {
     const fields = [{ name: 'Phone' }];
-    expect(suggestPromptFields('Include "Phone". Do not require "Phone".', fields).fields)
-      .toEqual([{ field: fields[0], required: undefined }]);
+    expect(suggestPromptFields('Require "Phone". Do not require "Phone".', fields).fields)
+      .toEqual([{ field: fields[0], required: false }]);
+    expect(suggestPromptFields('Do not require "Phone".', fields).fields).toEqual([]);
+  });
+
+  it('distinguishes collecting a field from requiring it in a coordinated exclusion', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    const result = suggestPromptFields('Include "Email". Do not collect "Phone" or require "Email".', fields);
+    expect(result.fields).toEqual([{ field: fields[0], required: false }]);
   });
 
   it('limits prompt size before attempting any match', () => {
