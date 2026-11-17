@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'crypto';
 import { access, chmod, lstat, mkdir, readdir, readFile, rm, writeFile } from 'fs/promises';
 import path from 'path';
 
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 
 import { assertSafeOutputFolder, GENERATED_MARKER, GenerationSkippedError, writeGeneratedFiles } from './generatedFileWriter';
 import { migrateLayoutDefinition } from '../fmweb/layoutSchema';
@@ -191,7 +191,7 @@ export function decideManagedRefresh(
 export class RuntimeTemplateUnavailableError extends Error {
   public constructor() {
     super(
-      'The FM Web preview is not available in this installation. It needs the runtime-next and shared packages from the sureforge-fm-data-api repository, which the Marketplace extension does not include. Open that repository (or run the extension from source) to use the preview.'
+      'The FM Web preview is not available in this installation. This installation is missing its runtime-next and shared template packages. Reinstall the extension or rebuild it from the sureforge-fm-data-api source repository.'
     );
     this.name = 'RuntimeTemplateUnavailableError';
   }
@@ -199,12 +199,13 @@ export class RuntimeTemplateUnavailableError extends Error {
 
 /**
  * Where the runtime template lives for an extension installed at `extensionRoot`, or undefined when
- * this installation does not carry it (the Marketplace package leaves out runtime-next). The
+ * this installation does not carry it. The
  * generator and the activation-time context key both use this, so a command is hidden exactly when
  * invoking it would fail with RuntimeTemplateUnavailableError.
  */
-export async function resolveRuntimeTemplateRoot(extensionRoot: string): Promise<string | undefined> {
-  const candidates = [
+export async function resolveRuntimeTemplateRoot(extensionRoot: string, preferSource = false): Promise<string | undefined> {
+  const packaged = path.join(extensionRoot, 'dist', 'fmweb-template', 'runtime-next');
+  const sourceCandidates = [
     // path-join disposition: the extension folder and the fixed "runtime-next" package name; no input chooses these parts.
     path.join(extensionRoot, '..', 'runtime-next'),
     // path-join disposition: the extension folder and a fixed package name; the folder is only read.
@@ -213,8 +214,13 @@ export async function resolveRuntimeTemplateRoot(extensionRoot: string): Promise
     path.join(extensionRoot, 'src', 'runtime-template')
   ];
 
+  const candidates = preferSource ? [...sourceCandidates, packaged] : [packaged, ...sourceCandidates];
   for (const candidate of candidates) {
-    // path-join disposition: the candidate is one of the three fixed template roots above and "package.json" is a fixed name.
+    if (candidate === packaged && !(await Promise.all([
+      path.join(candidate, 'preview-server.mjs'), path.join(candidate, '..', 'shared', 'package.json'),
+      path.join(candidate, '..', 'shared', 'src', 'index.ts')
+    ].map(exists))).every(Boolean)) continue;
+    // path-join disposition: the candidate is one of the fixed template roots above and "package.json" is a fixed name.
     if (await exists(path.join(candidate, 'package.json'))) {
       return candidate;
     }
@@ -229,9 +235,10 @@ export const PREVIEW_AVAILABLE_CONTEXT_KEY = 'filemaker.fmWebPreviewAvailable';
 /** Sets the context key from what this installation carries. Returns the value it set. */
 export async function publishPreviewAvailability(
   extensionRoot: string,
-  setContext: (key: string, value: boolean) => Thenable<unknown> | void
+  setContext: (key: string, value: boolean) => Thenable<unknown> | void,
+  preferSource = false
 ): Promise<boolean> {
-  const available = await resolveRuntimeTemplateRoot(extensionRoot).then(
+  const available = await resolveRuntimeTemplateRoot(extensionRoot, preferSource).then(
     (root) => root !== undefined,
     () => false
   );
@@ -604,7 +611,7 @@ export class FmWebRuntimeGenerator {
   }
 
   private resolveTemplateRoot(): Promise<string | undefined> {
-    return resolveRuntimeTemplateRoot(this.context.extensionUri.fsPath);
+    return resolveRuntimeTemplateRoot(this.context.extensionUri.fsPath, this.context.extensionMode !== vscode.ExtensionMode.Production);
   }
 
   private assertWorkspaceTrusted(): void {

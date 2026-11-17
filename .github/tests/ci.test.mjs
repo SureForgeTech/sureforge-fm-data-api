@@ -7,6 +7,7 @@ import { test } from 'node:test';
 import { fileURLToPath } from 'node:url';
 import { parse } from 'yaml';
 import './e2e-journeys.test.mjs';
+import './fmweb-template.test.mjs';
 
 const read = (file) => readFileSync(new URL(`../${file}`, import.meta.url), 'utf8');
 // A file anywhere in the repository, for checks that reach outside .github/.

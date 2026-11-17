@@ -1,4 +1,5 @@
 import { createHash } from 'crypto';
+import { execFileSync } from 'child_process';
 import { createRequire } from 'module';
 import type * as FsPromises from 'fs/promises';
 import { chmod, link, lstat, mkdtemp, mkdir, readdir, readFile, rm, stat, symlink, writeFile } from 'fs/promises';
@@ -743,14 +744,23 @@ describe('FM Web runtime template', () => {
     const marketplace = path.join(dir, 'ext');
     await mkdir(marketplace, { recursive: true });
     await expect(generator(marketplace).generateRuntimeAppTemplate()).rejects.toBeInstanceOf(RuntimeTemplateUnavailableError);
-    await expect(generator(marketplace).generateRuntimeAppTemplate()).rejects.toThrow(/Marketplace extension does not include/);
+    await expect(generator(marketplace).generateRuntimeAppTemplate()).rejects.toThrow(/missing its runtime-next and shared template packages/);
     // No half-built fallback app is left behind.
     await expect(stat(path.join(dir, 'runtime-next'))).rejects.toThrow();
   });
 
-  it('the VSIX really leaves the runtime template out (so the message above is what a Marketplace user sees)', async () => {
-    const ignore = (await readFile(path.join(extensionDir, '.vscodeignore'), 'utf8')).split(/\r?\n/);
-    expect(ignore).toContain('../**');
+  it('generates and previews from a staged kit without access to the source repository layout', async () => {
+    const installed = path.join(dir, 'installed');
+    const kit = path.join(installed, 'dist/fmweb-template');
+    execFileSync(process.execPath, [path.join(extensionDir, 'scripts/build-fmweb-template.mjs'), kit]);
+    const gen = generator(installed);
+    const files = await gen.previewTemplateFiles();
+    expect(files.has('app/intake/[id]/page.tsx')).toBe(true);
+    expect(files.has('shared/src/intake.ts')).toBe(true);
+    expect([...files.keys()].some((file) => /(?:^|\/)(?:node_modules|\.env[^/]*|\.npmrc)(?:\/|$)/.test(file))).toBe(false);
+    const result = await gen.generateRuntimeAppTemplate();
+    expect(result.created).toContain('app/api/intake/[id]/route.ts');
+    expect(await readFile(path.join(gen.getGeneratedRuntimeRoot(), 'shared/src/intake.ts'), 'utf8')).toContain('validateIntakeSubmission');
   });
 
   it('writes .env.local without following a symbolic link, and refuses a link at the target', async () => {
