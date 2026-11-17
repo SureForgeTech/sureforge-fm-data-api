@@ -41,6 +41,8 @@ export class PreviewIntakeRegistry {
     if (this.loaded.size >= 50) return Promise.resolve(undefined);
     const result = this.read(id);
     this.loaded.set(id, result);
+    // Bound in-flight reads, but a typo or invalid definition must not occupy a saved-form slot.
+    void result.then((value) => { if (!value && this.loaded.get(id) === result) this.loaded.delete(id); });
     return result;
   }
 

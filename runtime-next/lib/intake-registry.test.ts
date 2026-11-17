@@ -48,10 +48,13 @@ describe('private portal definition registry', () => {
     if (kind === 'folderLink') { await rm(path.dirname(form), { recursive: true });await symlink(root, path.dirname(form), 'dir'); }
     expect(await new PreviewIntakeRegistry(root).load(id)).toBeUndefined();
   });
-  it('bounds cached target state without evicting an existing form snapshot', async () => {
+  it('does not let missing targets consume capacity or evict successful form snapshots', async () => {
     const registry = new PreviewIntakeRegistry(root);
     const loaded = await registry.load(id);
     for (let i = 0; i < 55; i++) await registry.load(`form-${i}`);
     expect(await registry.load('last')).toBeUndefined();expect(await registry.load(id)).toBe(loaded);
+    await files();
+    await writeFile(path.join(root, 'intakes', 'custom-event.intake.json'), JSON.stringify({ ...example.definition, id: 'custom-event' }));
+    expect((await registry.load('custom-event'))?.definition.id).toBe('custom-event');
   });
 });
