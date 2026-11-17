@@ -43,7 +43,7 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
-- Pull requests are now welcome with a DCO sign-off (`git commit -s`): `CONTRIBUTING.md` says so, and a new `dco` workflow checks the sign-off on pull requests from outside contributors.
+- Pull requests are now welcome with a DCO sign-off (`git commit -s`): the organization contributing guide says so, and a new `dco` workflow checks the sign-off on pull requests from outside contributors.
 - Update `CODE_OF_CONDUCT.md` to the Contributor Covenant 2.1 text with the project-wide enforcement contact (contribute@sureforgetech.com).
 - The copyright holder in both MIT `LICENSE` files and the extension's author are now SureForgeTech; the licence text is unchanged.
 - Added shared intake-form contracts, exact FileMaker field mapping and browser/server validation for the upcoming local registration workflow.
