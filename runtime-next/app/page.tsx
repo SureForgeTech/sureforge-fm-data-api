@@ -6,7 +6,8 @@ export default function HomePage(): JSX.Element {
     <main className="runtime-home">
       <h1>FM Web Runtime Template</h1>
       <p>Open a generated layout page to preview runtime rendering.</p>
-      <Link href="/layouts/example">Open Example Layout</Link>
+      <p><Link href="/intake/event-registration">Try the event registration sample</Link></p>
+      <p><Link href="/layouts/example">Open Example Layout</Link></p>
     </main>
   );
 }

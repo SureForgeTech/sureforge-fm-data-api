@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+**Local portal sample**
+
+- The source-installed FM Web preview now includes a responsive event-registration sample with shared validation and duplicate-submission protection. It uses synthetic data and creates no FileMaker record.
+
 **Security**
 
 - If a saved server address still carried a password that could not be moved to secure storage, editing the address used to leave the connection on the old server. The new address now takes effect and the old password is dropped; you are asked to enter the password again, as for any changed address.

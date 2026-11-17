@@ -24,7 +24,7 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
-- None.
+- Added a private event-registration sample that reuses FM Web fields, validates submissions on both sides and reports duplicate or uncertain outcomes without automatic write retries. It uses a synthetic adapter, not a FileMaker server.
 
 ### [FIX]
 
