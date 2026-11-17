@@ -128,8 +128,8 @@ function runtimeFieldError(object: LayoutObject, errors?: Record<string, string>
 }
 
 function runtimeFieldNoteSpace(object: LayoutObject, editing = false, errors?: Record<string, string>): number {
-  const note = [runtimeFieldNote(object, editing), runtimeFieldError(object, errors)].filter(Boolean).join(' ');
-  return note ? Math.ceil(note.length / Math.max(1, Math.floor(object.width / 7))) * 16 + 4 : 0;
+  const notes = [runtimeFieldNote(object, editing), runtimeFieldError(object, errors)].filter(Boolean) as string[];
+  return notes.reduce((height, note) => height + Math.ceil(note.length / Math.max(1, Math.floor(object.width / 7))) * 16 + 4, 0);
 }
 
 interface LayoutObjectRendererProps {
@@ -352,8 +352,8 @@ function FieldControl(props: {
       data-fm-field-kind={runtimeFieldKind(object)}
       data-fm-label-position={object.labelPosition}
     >
-      {note ? <span id={`${inputId}-note`} role="note" style={{ overflowWrap: 'anywhere' }}>{note}</span> : null}
-      {error ? <span id={`${inputId}-error`} style={{ color: '#b21e3b', overflowWrap: 'anywhere' }}>{error}</span> : null}
+      {note ? <span id={`${inputId}-note`} role="note" style={{ overflowWrap: 'anywhere', lineHeight: '16px', paddingBottom: 4, flexShrink: 0 }}>{note}</span> : null}
+      {error ? <span id={`${inputId}-error`} style={{ color: '#b21e3b', overflowWrap: 'anywhere', lineHeight: '16px', paddingBottom: 4, flexShrink: 0 }}>{error}</span> : null}
       {object.labelPosition === 'right' ? (
         <>
           <div style={inlineControlStyle}>{fieldControl}</div>
