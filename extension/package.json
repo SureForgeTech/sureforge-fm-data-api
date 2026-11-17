@@ -2058,7 +2058,6 @@
         "description": "Read a FileMaker database (read only, needs AI tools switched on)",
         "isSticky": false,
         "commands": [
-      { "command": "filemakerDataApiTools.buildPortal", "title": "Build a Portal", "category": "FileMaker" },
           {
             "name": "layouts",
             "description": "List the layouts of the connection chosen for AI"

@@ -127,6 +127,7 @@ The table lists every extension command. Titles have the **FileMaker:** prefix i
 | List Active Plugins | Lists loaded plugins and opens a selected plugin's details as JSON. | Shown in power-user mode; needs a loaded plugin. |
 | Toggle Offline Mode | Toggles your offline setting and reports the effective mode. | Always shown; workspace or policy settings can keep offline mode on. |
 | Refresh Offline Metadata Cache | Reads layouts and metadata into the offline cache. | Always shown; needs a profile and workspace trust. |
+| Build a Portal | Creates or resumes an editable event-registration sample and offers mapping, layout and private preview actions. | Always shown; needs an open trusted workspace. No saved profile is needed for the sample. |
 | Initialize FM Web Project | Creates the .fmweb project structure and configuration. | Shown with a profile; needs a trusted workspace folder. |
 | Sync FM Web Project Metadata | Saves layouts, scripts and fields for the selected project profile. | Shown with an initialized FM Web project; needs a profile and trust. |
 | Select Active Profile | Selects the active profile and, in a trusted folder, saves it to the FM Web project (creating the project if needed). | Shown with a profile. |
@@ -799,6 +800,8 @@ Regenerate after a schema change, and use a [schema diff](#schema-snapshots-and-
 ---
 
 ## FM Web and Layout Mode
+
+For a first portal without a server connection, run **FileMaker: Build a Portal**. Create or resume the event-registration starter, edit its saved form, then preview it with invented details. This sample creates no real records. See [Build a Portal with sample data](./FM_WEB.md#build-a-portal-with-sample-data).
 
 FM Web is an experimental workflow for designing web layouts that sit on top of your FileMaker data and generating a small Next.js app from them. Project files are under `.fmweb/` in the workspace and need a trusted workspace; the running preview uses a separate private temporary folder.
 
