@@ -75,6 +75,10 @@ export function IntakeForm({ definition, layout }: { definition: IntakeDefinitio
         <div ref={canvasHost} style={{ width: '100%' }}>
           <LayoutContainer layout={layout} mode="runtime" runtimeData={{ creating: true, editing: !locked,
             viewport: { width, height: layout.canvas.height },
+            fieldErrors: Object.fromEntries(errors.flatMap((error) => {
+              const field = definition.fields.find((item) => item.id === error.fieldId);
+              return field ? [[field.fmFieldName, error.message]] : [];
+            })),
             fieldValues: Object.fromEntries(definition.fields.map((field) => [field.fmFieldName, values[field.id] ?? ''])),
             onFieldChange: (name, value) => {
               const field = definition.fields.find((item) => item.fmFieldName === name);

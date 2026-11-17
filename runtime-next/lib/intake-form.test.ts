@@ -22,18 +22,24 @@ function change(name: string, value: string) {
     else { Object.getOwnPropertyDescriptor(HTMLInputElement.prototype, 'value')!.set!.call(control, value);control.dispatchEvent(new Event('input', { bubbles: true })); }
   });
 }
-function fill() { change(' Full Name ', '  Sample Attendee  ');change('Email Address', 'sample@example.test');change('Session', 'Morning'); }
+function fill() { change('Your name', '  Sample Attendee  ');change('Email address', 'sample@example.test');change('Workshop session', 'Morning'); }
 async function submit() { await act(async () => { host.querySelector('form')!.dispatchEvent(new Event('submit', { bubbles: true, cancelable: true })); }); }
 
 describe('registration form workflow', () => {
   it('renders the existing controls responsively, validates before network and focuses a usable error summary', async () => {
     mount();expect(host.textContent).toContain('Private sample preview');
     expect(host.querySelectorAll('input')).toHaveLength(2);expect(host.querySelector('select')).not.toBeNull();
-    expect(host.querySelector('textarea')).not.toBeNull();expect(host.querySelector('[data-mode="runtime"]')).not.toBeNull();
+    expect(host.querySelector('textarea')).not.toBeNull();
+    const textarea = host.querySelector('textarea')!;
+    expect(document.getElementById(textarea.getAttribute('aria-describedby')!)?.textContent).toContain('Use invented information in this sample.');expect(host.querySelector('[data-mode="runtime"]')).not.toBeNull();
     await submit();expect(fetch).not.toHaveBeenCalled();
+    const name = host.querySelector('[aria-label="Your name"]')!;
+    expect(name.getAttribute('aria-required')).toBe('true');
+    expect(name.getAttribute('aria-invalid')).toBe('true');
+    expect(document.getElementById(name.getAttribute('aria-errormessage')!)?.textContent).toBe('This field is required.');
     expect(document.activeElement).toBe(host.querySelector('[role="alert"]'));
     act(() => (host.querySelector('[role="alert"] button') as HTMLButtonElement).click());
-    expect(document.activeElement).toBe(host.querySelector('[aria-label=" Full Name "]'));
+    expect(document.activeElement).toBe(host.querySelector('[aria-label="Your name"]'));
     Object.defineProperty(window, 'innerWidth', { value: 375, configurable: true });
     act(() => window.dispatchEvent(new Event('resize')));
     expect((host.querySelector('[data-mode="runtime"]') as HTMLElement).style.width).toBe('327px');
@@ -69,7 +75,7 @@ describe('registration form workflow', () => {
   ])('keeps uncertain outcomes and drafts without automatic or repeated writes', async (response) => {
     vi.mocked(fetch).mockImplementation(response);mount();fill();await submit();
     expect(host.textContent).toContain('outcome is uncertain');expect(host.textContent).not.toContain('canary');
-    expect(host.querySelector<HTMLInputElement>('[aria-label=" Full Name "]')?.value).toBe('  Sample Attendee  ');
+    expect(host.querySelector<HTMLInputElement>('[aria-label="Your name"]')?.value).toBe('  Sample Attendee  ');
     await submit();expect(fetch).toHaveBeenCalledTimes(1);
   });
   it.each([
