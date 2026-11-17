@@ -49,6 +49,8 @@ const fieldObjectSchema = objectBaseSchema.extend({
   fmFieldName: z.string().min(1),
   displayType: fieldDisplaySchema.default('editBox'),
   format: fieldFormatSchema.default('text'),
+  /** Intake dates use ISO text; existing record views retain the FileMaker server's format. */
+  dateFormat: z.enum(['server', 'iso']).optional(),
   kind: z.enum(['normal', 'calculation', 'summary', 'container', 'global']).catch('normal').default('normal').optional(),
   metadata: z.object({ type: z.string().optional(), result: z.string().optional() }).optional(),
   result: z.string().optional(),
