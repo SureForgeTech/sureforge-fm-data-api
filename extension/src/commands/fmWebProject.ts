@@ -15,6 +15,7 @@ import type { ProfileStore } from '../services/profileStore';
 import type { SchemaService } from '../services/schemaService';
 import type { RoleGuard } from '../enterprise/roleGuard';
 import { LayoutModePanel } from '../webviews/layoutMode';
+import { createFmWebApp } from './createFmWebApp';
 import { resolveProfileFromArg, showCommandError } from './common';
 
 interface RegisterFmWebProjectCommandDeps {
@@ -49,9 +50,17 @@ export function registerFmWebProjectCommands(
   const intakes = new FmWebIntakeService(fmWebProjectService);
   let preview: FmWebPreviewProcess | undefined;
   let previewStarting = false;
+  let appStarting = false;
   context.subscriptions?.push({ dispose: () => { void preview?.dispose().catch(() => undefined); } });
 
   return [
+    vscode.commands.registerCommand('filemakerDataApiTools.createFmWebApp', async () => {
+      if (appStarting) return;
+      appStarting = true;
+      try { await createFmWebApp({ context, project: fmWebProjectService, generator: fmWebRuntimeGenerator, profileStore, fmClient }); }
+      catch (error) { await showCommandError(error, { fallbackMessage: 'Could not create the FM Web app.', logger, logMessage: 'Create FM Web App failed.' }); }
+      finally { appStarting = false; }
+    }),
     vscode.commands.registerCommand('filemakerDataApiTools.buildPortal', async () => {
       if (!vscode.workspace.isTrusted) {
         void vscode.window.showWarningMessage('Workspace trust is required to build a portal.'); return;

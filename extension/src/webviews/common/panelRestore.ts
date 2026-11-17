@@ -19,6 +19,7 @@ import { createNonce } from './csp';
  * page back, and that page reads the snapshot it stored itself.
  */
 export const RESTORABLE_PANELS: ReadonlyArray<{ viewType: string; reopenWith: string }> = [
+  { viewType: 'filemakerFmWebApp', reopenWith: 'FileMaker: Create FM Web App' },
   { viewType: 'filemakerConnectionWizard', reopenWith: 'FileMaker: Add Connection Profile' },
   { viewType: 'filemakerRecordViewer', reopenWith: 'FileMaker: Open Record Viewer' },
   { viewType: 'filemakerRecordEditor', reopenWith: 'FileMaker: Open Record Editor' },

@@ -82,7 +82,7 @@ describe('THIRD_PARTY_NOTICES.txt', () => {
 
 // Exercise real ZIPs, not the source file list: .vscodeignore and vsce decide what ships.
 describe('VSIX contents', () => {
-  const required = ['dist/extension.js', 'dist/aiMcpShim.js', 'dist/schemaDiffWorker.js'];
+  const required = ['dist/extension.js', 'dist/aiMcpShim.js', 'dist/schemaDiffWorker.js', 'dist/webviews/fmWebApp/ui/main.js'];
   const layout = 'dist/webviews/layoutMode/ui/index.js';
   const templates = ['runtime-next/package.json', 'runtime-next/preview-server.mjs',
     'runtime-next/app/intake/[id]/page.tsx', 'runtime-next/app/api/intake/[id]/route.ts',
