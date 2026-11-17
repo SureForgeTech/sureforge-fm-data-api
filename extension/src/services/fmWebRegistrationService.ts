@@ -88,14 +88,26 @@ export class FmWebRegistrationService {
 
   private async readAttempt(file: string): Promise<Attempt | undefined> {
     let handle;
-    try { handle = await open(file, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0)); }
+    let identity: { dev: number; ino: number } | undefined;
+    try {
+      const info = await lstat(file);
+      if (!info.isFile() || info.isSymbolicLink() || info.nlink > 1) throw new Error('Invalid registration receipt storage.');
+      identity = info;
+      handle = await open(file, constants.O_RDONLY | (constants.O_NOFOLLOW ?? 0) | (constants.O_NONBLOCK ?? 0));
+    }
     catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return undefined;throw error; }
     try {
       const info = await handle.stat();
-      if (!info.isFile() || info.nlink > 1 || info.size > 1024) throw new Error('Invalid registration receipt storage.');
+      if (!identity || info.dev !== identity.dev || info.ino !== identity.ino || !info.isFile() || info.nlink > 1 || info.size > 1024) throw new Error('Invalid registration receipt storage.');
       const bytes = Buffer.alloc(1025);const read = await handle.read(bytes, 0, bytes.length, 0);
       if (read.bytesRead > 1024) throw new Error('Invalid registration receipt size.');
-      const value: unknown = JSON.parse(bytes.subarray(0, read.bytesRead).toString('utf8'));
+      let value: unknown;
+      try { value = JSON.parse(bytes.subarray(0, read.bytesRead).toString('utf8')) as unknown; }
+      catch {
+        // A concurrent claimant may still be writing, or a crash may have left a partial claim.
+        // O_EXCL below still refuses it; never overwrite or dispatch from unreadable state.
+        return undefined;
+      }
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid registration receipt.');
       const attempt = value as Attempt;
       if (!/^[a-f0-9]{64}$/.test(attempt.fingerprint) || !['pending', 'accepted', 'rejected'].includes(attempt.status)

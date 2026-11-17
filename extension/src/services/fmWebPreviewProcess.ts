@@ -114,6 +114,7 @@ export class FmWebPreviewProcess implements vscode.Disposable {
   }
 
   private async launch(files: Map<string, Buffer>, layouts: Map<string, Buffer>, bridgeUrl: string, token: string, serverUrl?: string, intakes: Map<string, Buffer> = new Map(), intakeLayouts: Map<string, Buffer> = new Map(), startIntakeId?: string, registrationMode?: 'filemaker'): Promise<void> {
+    if (registrationMode === 'filemaker' && !startIntakeId) throw new Error('Real registrations require an explicit saved intake.');
     if (startIntakeId !== undefined) {
       const validId = /^[a-z]/.test(startIntakeId) && !/[^a-z0-9_-]/.test(startIntakeId) && startIntakeId.length <= 64;
       if (!validId || !intakes.has(`${startIntakeId}.intake.json`)) throw new Error('The requested preview intake is invalid or missing.');

@@ -24,6 +24,12 @@ beforeEach(async () => { root = await mkdtemp(path.join(tmpdir(), 'fm-registrati
 afterEach(async () => { await rm(root, { recursive: true, force: true }); });
 
 describe('FileMaker registration service durable write boundary', () => {
+  it.each(['', '{"fingerprint":'])('does not retry an incomplete durable claim (%s)', async (bytes) => {
+    const { target, service, request, createRecord } = fixture();await mkdir(target.ledgerRoot);
+    const file = path.join(target.ledgerRoot, `${request.submissionId}.json`);await writeFile(file, bytes);
+    expect(await service.submit(request)).toEqual({ status: 'uncertain' });expect(createRecord).not.toHaveBeenCalled();
+    expect(await readFile(file, 'utf8')).toBe(bytes);
+  });
   it('creates exactly the approved layout and mapped fields, retaining whitespace and only a receipt hash on disk', async () => {
     const { service, request, target, createRecord } = fixture();
     expect(await service.submit(request)).toEqual({ status: 'accepted', receipt: 'fm-42' });

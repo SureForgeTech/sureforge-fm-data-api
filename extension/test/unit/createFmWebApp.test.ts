@@ -52,6 +52,7 @@ describe('Create FM Web App production controller', () => {
     const saved = JSON.parse(await readFile(path.join(root, '.fmweb/intakes/event-registration.intake.json'), 'utf8'));
     expect(saved.title).toBe('Registration day');expect(saved.fields[0].fmFieldName).toBe(' Full Name ');
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
+    await actions().run('filemaker');expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration', registrationMode: 'filemaker' });
     await actions().save({ ...model, title: 'Updated day' });expect(project.syncMetadata).toHaveBeenCalledOnce();
   });
   it('continues through connection creation when no profiles exist', async () => {
