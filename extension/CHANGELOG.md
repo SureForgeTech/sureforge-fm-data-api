@@ -11,6 +11,8 @@
 
 **Maintenance**
 
+- Record editing keeps long decimal values exact instead of rounding them during numeric conversion.
+
 - Added the shared form-definition and validation foundation for local registration portals. The guided portal workflow is not available yet.
 
 - Routine small updates to the libraries the extension builds on (axios 1.21.1; the web page generator now uses Next.js 16.4.6). No behavior change is intended.
