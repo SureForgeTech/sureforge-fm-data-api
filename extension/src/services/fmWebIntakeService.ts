@@ -53,7 +53,7 @@ export class FmWebIntakeService {
     // A changed layoutId must not silently manufacture a different source layout.
     try {
       const existing = intakeDefinitionSchema.parse(await this.read(definitionPath));
-      if (existing.layoutId !== layout.id) return this.load(existing.id);
+      if (existing.layoutId !== layout.id) return this.load(definition.id);
     } catch (error) { if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error; }
     for (const [file, value] of [[layoutPath, layout], [definitionPath, definition]] as const) {
       await assertSafeOutputFolder(path.dirname(file), await realpath(this.project.getWorkspaceRoot()!));
@@ -63,6 +63,15 @@ export class FmWebIntakeService {
       catch (error) { if ((error as NodeJS.ErrnoException).code !== 'EEXIST') throw error; }
     }
     return this.load(definition.id);
+  }
+
+  /** Editing must remain possible even when the data is invalid. Still enforce trust, paths and regular bounded files. */
+  public async definitionPathForEdit(id: string): Promise<string> {
+    if (!/^[a-z][a-z0-9_-]{0,63}$/.test(id)) throw new Error('Invalid portal identifier.');
+    const file = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${id}.intake.json`));
+    const info = await lstat(file);
+    if (!info.isFile() || info.size > 1048576) throw new Error('Portal definition must be a regular file under 1 MiB.');
+    return file;
   }
 
   public async load(id: string): Promise<SavedIntake> {

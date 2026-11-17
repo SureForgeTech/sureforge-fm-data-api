@@ -97,7 +97,7 @@ The sample intake files are editable scaffolding in a generated app. Generation 
 
 ### Build a Portal with sample data
 
-Run **FileMaker: Build a Portal** from an open trusted workspace, or use the connection view's sample-data link. No saved FileMaker connection is required. Choose **Create or resume event registration**. The command adds only missing files under `.fmweb/intakes/` and `.fmweb/layouts/`; existing edits are never replaced. Repeating it repairs a setup interrupted between those two files.
+Run **FileMaker: Build a Portal** from an open trusted workspace, or use the connection view's sample-data link. No saved FileMaker connection is required. Choose **Create or resume event registration**. The command adds only missing files under `.fmweb/intakes/` and `.fmweb/layouts/`; existing edits are never replaced. Repeating it repairs a setup interrupted between those two files. **Edit form and exact field mappings** opens even invalid JSON for repair; resuming an invalid existing starter also opens that preserved definition. Validation is still required before preview.
 
 The saved `.intake.json` is a version 1 data contract. Edit `title`, `description`, `submitLabel`, `successMessage`, field `label`, `helpText`, `required`, `maxLength` and select `options`. Optional `branding` supports an `organizationName` and a six-digit `accentColor` such as `#215EA6`; it accepts no URL, HTML or CSS. `fmFieldName` must exactly name a writable nonglobal field in the referenced source layout, including spaces and case. Use **Open source layout** to continue in Layout Mode. Keep the stable input IDs when changing labels.
 

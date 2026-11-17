@@ -15,6 +15,23 @@ function fixture() {
 beforeEach(async () => { root = await mkdtemp(path.join(tmpdir(), 'fmweb-intake-')); trusted = true; });
 afterEach(async () => { await rm(root, { recursive: true, force: true }); });
 describe('saved portal starters', () => {
+  it('keeps malformed JSON openable for repair without validation or overwrite', async () => {
+    const { service } = fixture();const saved = await service.ensureEventStarter();
+    await writeFile(saved.definitionPath, '{broken');
+    expect(await service.definitionPathForEdit('event-registration')).toBe(saved.definitionPath);
+    await expect(service.load('event-registration')).rejects.toThrow();
+    expect(await readFile(saved.definitionPath, 'utf8')).toBe('{broken');
+  });
+  it('never resumes a different portal when the original file has a changed id and layout', async () => {
+    const { service } = fixture();const saved = await service.ensureEventStarter();
+    const otherLayout = { ...saved.layout, id: 'c1111111-1111-4111-8111-111111111111' };
+    const other = { ...saved.definition, id: 'other', layoutId: otherLayout.id };
+    await writeFile(path.join(path.dirname(saved.layoutPath), `${otherLayout.id}.layout.json`), JSON.stringify(otherLayout));
+    await writeFile(path.join(path.dirname(saved.definitionPath), 'other.intake.json'), JSON.stringify(other));
+    await writeFile(saved.definitionPath, JSON.stringify(other));
+    await expect(service.ensureEventStarter()).rejects.toThrow('filename');
+  });
+
   it('creates and resumes exact mapped, credential-free user files without replacing edits', async () => {
     const { service } = fixture();
     const saved = await service.ensureEventStarter();

@@ -64,7 +64,26 @@ export function registerFmWebProjectCommands(
           { label: 'Open source layout', action: 'layout', description: 'Continue in the existing Layout Mode designer' }
         ], { title: 'Build a Portal', placeHolder: 'Create → edit → preview → submit with invented details' });
         if (!action) return;
-        const saved = action.action === 'create' ? await intakes.ensureEventStarter() : await intakes.load('event-registration');
+        const openDefinition = async (): Promise<void> => {
+          const file = await intakes.definitionPathForEdit('event-registration');
+          await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(file)));
+        };
+        if (action.action === 'edit') {
+          await openDefinition();
+          try { await intakes.load('event-registration'); }
+          catch { void vscode.window.showWarningMessage('The saved portal definition is open for repair. Its schema, sample environment or source mappings are invalid; preview remains unavailable until they are valid.'); }
+          return;
+        }
+        let saved;
+        if (action.action === 'create') {
+          try { saved = await intakes.ensureEventStarter(); }
+          catch (error) {
+            // A typo must not lock the user out of the very file they need to repair.
+            try { await openDefinition(); } catch { throw error; }
+            void vscode.window.showWarningMessage('Your existing portal definition was preserved and opened for repair. Check its schema, sample environment and source layout mappings, then resume the starter.');
+            return;
+          }
+        } else saved = await intakes.load('event-registration');
         if (action.action === 'layout') {
           await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: saved.layout.id });
         } else if (action.action === 'preview') {
