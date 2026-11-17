@@ -275,6 +275,7 @@ jobs:
         with:
           name: extension-vsix
           path: artifacts/*.vsix
+          retention-days: 14
 
       # The shipped bundles are minified and carry no source map; the external maps from this very
       # build are kept as a release asset so a user-reported stack trace can be symbolicated.
