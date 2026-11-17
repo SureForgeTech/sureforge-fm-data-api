@@ -51,8 +51,36 @@ describe('Create FM Web App production controller', () => {
     expect(project.setActiveProfile).toHaveBeenCalledWith('profile');expect(project.syncMetadata).toHaveBeenCalledOnce();
     const saved = JSON.parse(await readFile(path.join(root, '.fmweb/intakes/event-registration.intake.json'), 'utf8'));
     expect(saved.title).toBe('Registration day');expect(saved.fields[0].fmFieldName).toBe(' Full Name ');
-    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer');
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
     await actions().save({ ...model, title: 'Updated day' });expect(project.syncMetadata).toHaveBeenCalledOnce();
+  });
+  it('continues through connection creation when no profiles exist', async () => {
+    const { deps } = fixture();deps.profileStore.listProfiles.mockResolvedValue([]);pickFileMaker();
+    vi.mocked(vscode.window.showInformationMessage).mockResolvedValue('Add Connection' as never);
+    await createFmWebApp(deps as never);
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.addConnectionProfile', { continueToFmWebApp: true });
+    expect(open).not.toHaveBeenCalled();
+  });
+  it('changes a sample app to FileMaker fields on Save and preserves the original source', async () => {
+    const { deps, project } = fixture();const sample = eventRegistrationExample();
+    const service = new FmWebIntakeService(project);const old = await service.createApp(sample.definition, sample.layout);
+    const bytes = await readFile(old.layoutPath, 'utf8');pickFileMaker();
+    await createFmWebApp(deps as never, { source: 'filemaker', changeSource: true });
+    expect((await service.load('event-registration')).revision).toBe(old.revision);
+    const definition = open.mock.calls[0]![1] as typeof sample.definition;
+    expect(definition.title).toBe(sample.definition.title);expect(definition.fields.map((field) => field.fmFieldName)).toEqual([' Full Name ', 'Email']);
+    await actions().save(definition);
+    const updated = await service.load('event-registration');expect(updated.layout.fmLayoutName).toBe(' Registrations ');
+    expect(updated.layout.id).not.toBe(old.layout.id);expect(await readFile(old.layoutPath, 'utf8')).toBe(bytes);
+    await actions().save({ ...definition, title: 'Next edit' });
+    expect((await service.load('event-registration')).definition.title).toBe('Next edit');
+  });
+  it('cancels a source change without modifying the saved sample', async () => {
+    const { deps, project } = fixture();const sample = eventRegistrationExample();const service = new FmWebIntakeService(project);
+    const old = await service.createApp(sample.definition, sample.layout);
+    vi.mocked(vscode.window.showQuickPick).mockResolvedValue(undefined);
+    await createFmWebApp(deps as never, { source: 'filemaker', changeSource: true });
+    expect(open).not.toHaveBeenCalled();expect((await service.load('event-registration')).revision).toBe(old.revision);
   });
   it('resumes a saved app without repeating setup or reading the server', async () => {
     const { deps, project, fmClient } = fixture();const app = eventRegistrationExample();

@@ -6,4 +6,4 @@ Choose FileMaker fields from a saved connection and layout, or start with sample
 
 Choose **Save and preview** to save the app and start its private browser preview. Use invented details: registration submissions are synthetic and create no FileMaker records. Return to **Create FM Web App** to continue editing the saved app.
 
-**Export app** creates an editable app folder and reveals it in VS Code. Advanced source-layout and API commands remain available.
+Use **Choose FileMaker fields** in the editor to replace sample fields or select fields again. Your saved app stays unchanged until you save the replacement. **Export app** creates an editable app folder and reveals it in VS Code. Advanced source-layout and API commands remain available.

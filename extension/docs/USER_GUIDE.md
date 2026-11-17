@@ -804,7 +804,7 @@ Regenerate after a schema change, and use a [schema diff](#schema-snapshots-and-
 
 Start with **FileMaker: Create FM Web App**, or the new-file button above Connections. Choose **Use FileMaker fields** to select a saved connection, layout and writable registration fields, or choose **Try sample fields** without a connection. The form editor lets you change labels, help text, required rules, input types, choices, field order, event text and organization/color branding without editing JSON. Choose **Save and preview**, then use invented details in the private browser preview.
 
-Reopen **Create FM Web App** to continue editing the saved app. FileMaker supplies field metadata when selected; registration submissions are still synthetic and create no FileMaker records. **Export app** creates an editable app folder, not a public deployment. See [Create FM Web App](./FM_WEB.md#create-fm-web-app) for the complete flow.
+Reopen **Create FM Web App** to continue editing the saved app. FileMaker supplies field metadata when selected; registration submissions are still synthetic and create no FileMaker records. Use **Choose FileMaker fields** in the editor to replace sample fields or select fields again. Your saved app stays unchanged until you save the replacement. **Export app** creates an editable app folder, not a public deployment. See [Create FM Web App](./FM_WEB.md#create-fm-web-app) for the complete flow.
 
 The following commands remain available for advanced projects, existing workflows and source-layout editing. **Build a Portal** also retains its earlier JSON-based starter and repair actions.
 

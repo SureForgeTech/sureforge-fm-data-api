@@ -129,6 +129,12 @@ export async function handleSave(ctx: WizardContext, data: WizardFormData): Prom
       message: `Profile "${profile.name}" saved.`
     });
 
+    if (isNewProfile && ctx.options.afterSave === 'createFmWebApp') {
+      ctx.options.afterSave = undefined;
+      await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true });
+      return;
+    }
+
     // Close the gap between "saved" and "connected": the natural next step
     // after creating a profile is to open a session, but until now the user
     // had to discover and run FileMaker: Connect themselves. Offer it inline

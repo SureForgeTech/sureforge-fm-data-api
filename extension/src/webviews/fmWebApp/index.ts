@@ -8,6 +8,7 @@ export interface AppEditorActions {
   save(definition: IntakeDefinition): Promise<void>;
   run(action: 'preview' | 'export' | 'layout'): Promise<void>;
   assertAvailable(): void;
+  changeSource?(): Promise<void>;
 }
 
 export class FmWebAppPanel {
@@ -44,8 +45,14 @@ export class FmWebAppPanel {
       this.actions.assertAvailable();
       if (!message || typeof message !== 'object' || Array.isArray(message)) throw new Error('Invalid app editor request.');
       const request = message as Record<string, unknown>;
-      if (!['save', 'preview', 'export', 'layout'].includes(String(request.action))
+      if (!['save', 'preview', 'export', 'layout', 'source'].includes(String(request.action))
         || Object.keys(request).some((key) => !['action', 'definition'].includes(key))) throw new Error('Unsupported app editor action.');
+      if (request.action === 'source') {
+        const answer = await vscode.window.showWarningMessage('Choose a new field source? Unsaved edits in this tab will be discarded. Your saved app stays unchanged until you save the replacement.', { modal: true }, 'Choose fields');
+        if (answer === 'Choose fields') { this.panel.dispose();await this.actions.changeSource?.(); }
+        else await this.panel.webview.postMessage({ type: 'saved', message: 'Field source unchanged. Your edits remain in this tab.' });
+        return;
+      }
       const checked = intakeDefinitionSchema.safeParse(request.definition);
       if (!checked.success) throw new Error('Check the event title, labels and character limits. Single-choice fields need 1–100 unique choices, each at most 200 characters.');
       const definition = checked.data;
@@ -74,7 +81,7 @@ export function renderAppEditor(webview: vscode.Webview, context: vscode.Extensi
 body{max-width:1000px;margin:0 auto;padding:24px}label{display:block;margin-top:12px}input,select,textarea{box-sizing:border-box;max-width:100%;width:100%}input[type=checkbox]{width:auto}fieldset{margin:16px 0;padding:16px;border:1px solid var(--vscode-panel-border)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.field-title{display:flex;align-items:center;gap:8px}.field-title label{margin:0}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.wide{grid-column:1/-1}code{white-space:pre-wrap;overflow-wrap:anywhere}button{cursor:pointer}#status{white-space:pre-wrap}#status.error{color:var(--vscode-errorForeground)}@media(max-width:600px){.field-grid{grid-template-columns:1fr}}
 </style></head><body class="fm-page"><h1>Create FM Web App</h1><p>Event registration · Select fields, customize your form, then save and preview.</p><p>Field layout: <strong>${escapeHtml(sourceName)}</strong></p>
 <p role="note">Preview accepts sample registrations only. Use invented details. No FileMaker records are created.</p>
-<form id="app-form"><fieldset><legend>Event and branding</legend>
+<form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><fieldset><legend>Event and branding</legend>
 ${input('title', 'Event title', definition.title, 160)}
 <label for="description">Description</label><textarea id="description" maxlength="2000">${escapeHtml(definition.description)}</textarea>
 <label for="organization">Organization</label><input id="organization" maxlength="120" value="${escapeHtml(definition.branding?.organizationName ?? '')}"/>

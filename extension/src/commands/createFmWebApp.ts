@@ -18,7 +18,9 @@ interface CreateAppDependencies {
   fmClient: FMClient;
 }
 
-export async function createFmWebApp(deps: CreateAppDependencies): Promise<void> {
+export interface CreateAppOptions { source?: 'filemaker'; changeSource?: boolean }
+
+export async function createFmWebApp(deps: CreateAppDependencies, options: CreateAppOptions = {}): Promise<void> {
   const { context, project, generator, profileStore, fmClient } = deps;
   const workspace = project.getWorkspaceRoot();
   if (!workspace) {
@@ -45,19 +47,21 @@ export async function createFmWebApp(deps: CreateAppDependencies): Promise<void>
     // Missing sources are an existing app needing repair, not permission to replace its definition.
     try { await intakes.definitionPathForEdit('event-registration');throw new Error('The saved app has a missing source layout. Open Build a Portal to repair it.', { cause: error }); }
     catch (existingError) { if ((existingError as NodeJS.ErrnoException).code !== 'ENOENT') throw existingError; }
-    const source = await vscode.window.showQuickPick([
+  }
+  if (!saved || options.changeSource) {
+    const source = options.source === 'filemaker' ? { value: 'filemaker' } : await vscode.window.showQuickPick([
       { label: 'Use FileMaker fields', description: 'Choose a connection, layout and registration fields', value: 'filemaker' },
       { label: 'Try sample fields', description: 'Start immediately without a FileMaker connection', value: 'sample' }
     ], { title: 'Create FM Web App · Event registration', placeHolder: 'Where should the form fields come from?', ignoreFocusOut: true });
     if (!source) return;
     if (source.value === 'sample') model = eventRegistrationExample();
     else {
-      let profiles = await profileStore.listProfiles();
+      const profiles = await profileStore.listProfiles();
       if (!profiles.length) {
         const answer = await vscode.window.showInformationMessage('Add a FileMaker connection to choose its fields.', 'Add Connection');
         if (answer !== 'Add Connection') return;
-        await vscode.commands.executeCommand('filemakerDataApiTools.addConnectionProfile');
-        profiles = await profileStore.listProfiles();if (!profiles.length) return;
+        await vscode.commands.executeCommand('filemakerDataApiTools.addConnectionProfile', { continueToFmWebApp: true });
+        return;
       }
       const picked = await vscode.window.showQuickPick(profiles.map((item) => ({ label: item.name, description: item.database, profile: item })),
         { title: 'Create FM Web App · Connection', placeHolder: 'Choose the FileMaker solution', ignoreFocusOut: true });
@@ -69,7 +73,7 @@ export async function createFmWebApp(deps: CreateAppDependencies): Promise<void>
       const metadata = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading registration fields' }, () => fmClient.getLayoutMetadata(profile!, selected.name, { recordHistory: false }));
       const all = designerLayoutMetadata(selected.name, metadata).fields;
       const writable = writableAppFields(all);
-      if (!writable.length) throw new Error('This layout has no writable, nonglobal fields. Choose a registration layout with editable fields.', { cause: error });
+      if (!writable.length) throw new Error('This layout has no writable, nonglobal fields. Choose a registration layout with editable fields.');
       const fields = await vscode.window.showQuickPick(writable.map((field) => ({ label: field.name,
         description: field.type ?? 'Text', picked: /^(?:full[ _]?name|first[ _]?name|last[ _]?name|email(?:[ _]?address)?|session|notes)$/i.test(field.name.trim()), field })),
       { title: 'Create FM Web App · Fields', placeHolder: 'Select 1–100 registration fields. Calculations, summaries, containers and globals are excluded.', canPickMany: true, ignoreFocusOut: true });
@@ -77,13 +81,22 @@ export async function createFmWebApp(deps: CreateAppDependencies): Promise<void>
       model = registrationAppFromFields(selected.name, fields.map((item) => item.field));
     }
   }
+  if (saved && options.changeSource) {
+    const previous = saved;
+    model = { ...model!, definition: { ...previous.definition, layoutId: model!.layout.id, fields: model!.definition.fields.map((field) => {
+      const existing = previous.layout.fmLayoutName === model!.layout.fmLayoutName
+        ? previous.definition.fields.find((item) => item.fmFieldName === field.fmFieldName) : undefined;
+      return existing ? { ...existing, id: field.id, fmFieldName: field.fmFieldName } : field;
+    }) } };
+  }
   assertAvailable();
   let preparedProfile = false;
-  FmWebAppPanel.open(context, model.definition, model.layout, {
+  const selectedModel = model!;
+  FmWebAppPanel.open(context, selectedModel.definition, selectedModel.layout, {
     assertAvailable,
     save: async (definition) => {
       assertAvailable();
-      if (!saved) {
+      if (!saved || saved.layout.id !== selectedModel.layout.id) {
         if (profile && !preparedProfile) {
           await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Preparing the FM Web app' }, async () => {
             await project.setActiveProfile(profile!.id);
@@ -91,13 +104,14 @@ export async function createFmWebApp(deps: CreateAppDependencies): Promise<void>
           });
           preparedProfile = true;assertAvailable();
         }
-        saved = await intakes.createApp(definition, model.layout);
+        saved = saved ? await intakes.saveApp(definition, saved.revision, selectedModel.layout) : await intakes.createApp(definition, selectedModel.layout);
       } else saved = await intakes.saveApp(definition, saved.revision);
     },
+    changeSource: async () => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true }); },
     run: async (action) => {
       assertAvailable();
-      if (action === 'preview') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer');
-      else if (action === 'layout') await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: model.layout.id });
+      if (action === 'preview') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
+      else if (action === 'layout') await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: selectedModel.layout.id });
       else {
         await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
         await vscode.commands.executeCommand('revealInExplorer', vscode.Uri.file(generator.getGeneratedRuntimeRoot()));

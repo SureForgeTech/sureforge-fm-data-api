@@ -152,18 +152,34 @@ export class FmWebIntakeService {
   }
 
   /** Explicit editor saves replace the definition atomically and refuse changes made elsewhere. */
-  public async saveApp(input: unknown, revision: string): Promise<SavedIntake> {
+  public async saveApp(input: unknown, revision: string, replacementSource?: unknown): Promise<SavedIntake> {
     const definition = intakeDefinitionSchema.parse(input);
     const current = await this.loadForEditing('event-registration');
     if (current.revision !== revision) throw new Error('The app changed in another editor. Close this app tab and run Create FM Web App to load those changes.');
-    if (definition.id !== current.definition.id || definition.layoutId !== current.definition.layoutId
+    if (definition.id !== current.definition.id || (!replacementSource && definition.layoutId !== current.definition.layoutId)
       || definition.environmentId !== current.definition.environmentId) throw new Error('The editor cannot change the app target.');
-    intakeLayout(definition, current.layout);
+    let source = current.layout;
+    if (replacementSource) {
+      const parsed = layoutDefinitionSchema.parse(replacementSource);
+      source = await this.project.prepareLayout?.(parsed) ?? parsed;
+      if (source.id === current.layout.id) throw new Error('Choose a new source layout for replacement.');
+    }
+    intakeLayout(definition, source);
     const bytes = `${JSON.stringify(definition, null, 2)}\n`;
     if (Buffer.byteLength(bytes, 'utf8') > 1048576) throw new Error('The app definition exceeds 1 MiB.');
     const target = await this.confined(current.definitionPath);
     const info = await lstat(target);
     if (!info.isFile() || info.nlink > 1) throw new Error('The app definition must be a regular file with no hard links.');
+    if (replacementSource) {
+      const sourceBytes = `${JSON.stringify(source, null, 2)}\n`;
+      if (Buffer.byteLength(sourceBytes, 'utf8') > 1048576) throw new Error('The source layout exceeds 1 MiB.');
+      const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${source.id}.layout.json`));
+      await assertSafeOutputFolder(path.dirname(layoutPath), await realpath(this.project.getWorkspaceRoot()!));
+      try { await writeFile(layoutPath, sourceBytes, { encoding: 'utf8', mode: 0o600, flag: 'wx' }); }
+      catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'EEXIST' || JSON.stringify(migrateLayoutDefinition(await this.read(layoutPath))) !== JSON.stringify(source)) throw error;
+      }
+    }
     const temporary = path.join(path.dirname(target), `.app-${randomUUID()}.tmp`);
     try {
       await writeFile(temporary, bytes, { flag: 'wx', mode: info.mode & 0o777 });

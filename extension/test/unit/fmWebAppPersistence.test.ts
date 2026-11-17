@@ -33,6 +33,14 @@ describe('app editor persistence', () => {
     await expect(api.saveApp({ ...current.definition, fields: [{ ...current.definition.fields[0]!, fmFieldName: 'Admin' }] }, current.revision)).rejects.toThrow('writable');
     expect((await api.load('event-registration')).definition.title).toBe('Edited elsewhere');
   });
+  it('refuses a stale source replacement before creating any new files', async () => {
+    const api = service();const app = eventRegistrationExample();const saved = await api.createApp(app.definition, app.layout);
+    const replacement = eventRegistrationExample();
+    await api.saveApp({ ...saved.definition, title: 'Edited externally' }, saved.revision);
+    await expect(api.saveApp({ ...saved.definition, layoutId: replacement.layout.id }, saved.revision, replacement.layout)).rejects.toThrow('changed');
+    expect(await readdir(path.dirname(saved.layoutPath))).toEqual([path.basename(saved.layoutPath)]);
+    expect((await api.load('event-registration')).definition.title).toBe('Edited externally');
+  });
   it('can remove a broken mapping through the editor while preview still refuses it', async () => {
     const api = service();const app = eventRegistrationExample();const saved = await api.createApp(app.definition, app.layout);
     await writeFile(saved.definitionPath, JSON.stringify({ ...saved.definition, fields: [...saved.definition.fields, { ...saved.definition.fields[0], id: 'missing', fmFieldName: 'Missing' }] }));

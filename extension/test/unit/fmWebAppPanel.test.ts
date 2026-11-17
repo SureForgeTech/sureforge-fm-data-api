@@ -16,13 +16,14 @@ function fixture() {
   const save = vi.fn<(definition: IntakeDefinition) => Promise<void>>().mockResolvedValue(undefined);
   const run = vi.fn<(action: string) => Promise<void>>().mockResolvedValue(undefined);
   const assertAvailable = vi.fn();
+  const changeSource = vi.fn(async () => undefined);
   const webview = { html: '', cspSource: 'vscode-resource:', asWebviewUri: (uri: unknown) => String(uri),
     onDidReceiveMessage: (listener: typeof receive) => { receive = listener; },
     postMessage: vi.fn(async (message) => { dom?.window.dispatchEvent(new dom.window.MessageEvent('message', { data: message }));return true; }) };
-  const panel = { webview, reveal: vi.fn(), onDidDispose: (listener: () => void) => { dispose = listener; } };
+  const panel = { webview, reveal: vi.fn(), onDidDispose: (listener: () => void) => { dispose = listener; }, dispose: vi.fn(() => dispose()) };
   vi.mocked(vscode.window.createWebviewPanel).mockReturnValue(panel as never);
-  FmWebAppPanel.open(context, app.definition, app.layout, { save, run, assertAvailable });
-  return { app, save, run, assertAvailable, panel, webview };
+  FmWebAppPanel.open(context, app.definition, app.layout, { save, run, assertAvailable, changeSource });
+  return { app, save, run, assertAvailable, changeSource, panel, webview };
 }
 function browser(html: string) {
   if (!JSDOM) throw new Error('jsdom is required');
@@ -56,6 +57,29 @@ describe('FM Web app form editor', () => {
     expect(definition.fields[2]?.options).toEqual(['Morning', 'Evening']);
     expect(save.mock.invocationCallOrder[0]).toBeLessThan(run.mock.invocationCallOrder[0]!);
     expect(vscode.workspace.openTextDocument).not.toHaveBeenCalled();
+  });
+  it('confirms changing fields without saving an invalid draft', async () => {
+    const { webview, save, changeSource, panel } = fixture();const { document } = browser(webview.html);
+    (document.getElementById('title') as DomElement).value = '';
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Choose fields' as never);
+    (document.querySelector('[data-action="source"]') as DomElement).click();
+    await vi.waitFor(() => expect(changeSource).toHaveBeenCalledOnce());
+    expect(save).not.toHaveBeenCalled();expect(panel.dispose).toHaveBeenCalledOnce();
+  });
+  it('keeps the editor and draft when changing fields is canceled', async () => {
+    const { webview, save, changeSource, panel } = fixture();const { document } = browser(webview.html);
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue(undefined);
+    (document.querySelector('[data-action="source"]') as DomElement).click();
+    await vi.waitFor(() => expect(webview.postMessage).toHaveBeenCalled());
+    expect(save).not.toHaveBeenCalled();expect(changeSource).not.toHaveBeenCalled();expect(panel.dispose).not.toHaveBeenCalled();
+  });
+  it('marks a reordered saved form as unsaved', async () => {
+    const { webview, save } = fixture();const { document } = browser(webview.html);
+    (document.getElementById('save') as DomElement).click();
+    await vi.waitFor(() => expect(save).toHaveBeenCalledOnce());
+    await vi.waitFor(() => expect(document.getElementById('status')?.textContent).toBe('App saved.'));
+    (document.querySelectorAll('.app-field')[1]!.querySelector('[data-move="up"]') as DomElement).click();
+    expect(document.getElementById('status')?.textContent).toBe('Unsaved changes');
   });
   it('refuses tampered targets, names and unsupported actions at the host boundary', async () => {
     const { app, save, webview } = fixture();

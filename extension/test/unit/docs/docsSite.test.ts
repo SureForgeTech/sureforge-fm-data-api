@@ -56,7 +56,8 @@ describe('documentation website from the real repository', () => {
     }
     const guide = document(html('guide/index.html'));
     expect(guide.querySelectorAll('nav[aria-label="On this page"] a').length).toBeGreaterThan(30);
-    expect(guide.querySelectorAll('nav[aria-label="Guide pages"] a')).toHaveLength(7);
+    expect(guide.querySelectorAll('nav[aria-label="Guide pages"] a')).toHaveLength(pages.filter((page) => page.startsWith('guide/') && page !== 'guide/index.html').length);
+    expect(html('guide/index.html')).toContain('walkthroughs/create-web-app/index.html');
     for (const selector of ['header', 'main#main', 'footer', 'a.skip-link[href="#main"]']) {
       expect(guide.querySelectorAll(selector)).toHaveLength(1);
     }

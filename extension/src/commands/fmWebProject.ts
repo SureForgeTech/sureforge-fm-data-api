@@ -54,10 +54,10 @@ export function registerFmWebProjectCommands(
   context.subscriptions?.push({ dispose: () => { void preview?.dispose().catch(() => undefined); } });
 
   return [
-    vscode.commands.registerCommand('filemakerDataApiTools.createFmWebApp', async () => {
+    vscode.commands.registerCommand('filemakerDataApiTools.createFmWebApp', async (arg: unknown) => {
       if (appStarting) return;
       appStarting = true;
-      try { await createFmWebApp({ context, project: fmWebProjectService, generator: fmWebRuntimeGenerator, profileStore, fmClient }); }
+      try { await createFmWebApp({ context, project: fmWebProjectService, generator: fmWebRuntimeGenerator, profileStore, fmClient }, arg && typeof arg === 'object' ? { source: 'source' in arg && arg.source === 'filemaker' ? 'filemaker' : undefined, changeSource: 'changeSource' in arg && arg.changeSource === true } : {}); }
       catch (error) { await showCommandError(error, { fallbackMessage: 'Could not create the FM Web app.', logger, logMessage: 'Create FM Web App failed.' }); }
       finally { appStarting = false; }
     }),
@@ -306,7 +306,7 @@ export function registerFmWebProjectCommands(
       }
     }),
 
-    vscode.commands.registerCommand('filemakerDataApiTools.startFmWebPreviewServer', async () => {
+    vscode.commands.registerCommand('filemakerDataApiTools.startFmWebPreviewServer', async (arg: unknown) => {
       if (!vscode.workspace.isTrusted) {
         vscode.window.showWarningMessage(
           'Workspace trust is required to start FM Web preview services.'
@@ -352,7 +352,11 @@ export function registerFmWebProjectCommands(
         const profileId = project?.activeProfileId ?? profileStore.getActiveProfileId();
         const profile = profileId ? await profileStore.getProfile(profileId) : undefined;
         preview = new FmWebPreviewProcess();
-        await preview.start(templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl, portalFiles.intakes, portalFiles.layouts);
+        const intakeId = arg && typeof arg === 'object' && 'intakeId' in arg ? arg.intakeId : undefined;
+        if (intakeId !== undefined && (typeof intakeId !== 'string' || !/^[a-z][a-z0-9_-]{0,63}$/.test(intakeId) || !portalFiles.intakes.has(`${intakeId}.intake.json`))) throw new Error('Choose an existing app to preview.');
+        const previewArgs = [templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl, portalFiles.intakes, portalFiles.layouts] as const;
+        if (typeof intakeId === 'string') await preview.start(...previewArgs, intakeId);
+        else await preview.start(...previewArgs);
         vscode.window.showInformationMessage('FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.');
       } catch (error) {
         await preview?.dispose().catch(() => logger.warn('Could not stop the private preview or finish its temporary-file cleanup.'));

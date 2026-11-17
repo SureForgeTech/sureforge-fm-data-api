@@ -12,7 +12,9 @@
   }
   updateFields();
   form.addEventListener('change', updateFields);
-  form.addEventListener('input', () => { if (!busy) { status.className = '';status.textContent = 'Unsaved changes'; } });
+  function markDirty() { if (!busy) { status.className = '';status.textContent = 'Unsaved changes'; } }
+  form.addEventListener('input', markDirty);
+  form.addEventListener('change', markDirty);
   function send(action) {
     if (busy) return;
     const rows = Array.from(document.querySelectorAll('.app-field'));
@@ -36,11 +38,12 @@
   form.addEventListener('submit', event => { event.preventDefault();send('save'); });
   form.addEventListener('click', event => {
     const button = event.target.closest('button');if (!button || busy) return;
+    if (button.dataset.action === 'source') { vscode.postMessage({ action: 'source' });return; }
     if (button.dataset.action) send(button.dataset.action);
     if (button.dataset.move) {
       const row = button.closest('.app-field');
-      if (button.dataset.move === 'up' && row.previousElementSibling) row.parentNode.insertBefore(row, row.previousElementSibling);
-      if (button.dataset.move === 'down' && row.nextElementSibling) row.parentNode.insertBefore(row.nextElementSibling, row);
+      if (button.dataset.move === 'up' && row.previousElementSibling) { row.parentNode.insertBefore(row, row.previousElementSibling);markDirty(); }
+      if (button.dataset.move === 'down' && row.nextElementSibling) { row.parentNode.insertBefore(row.nextElementSibling, row);markDirty(); }
     }
   });
   window.addEventListener('message', event => {

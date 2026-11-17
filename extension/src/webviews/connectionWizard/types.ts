@@ -7,6 +7,8 @@ export interface CertificateState {
 export type ConnectionWizardTestPolicy = 'off' | 'warn' | 'block';
 
 export interface ConnectionWizardOptions {
+  /** One-shot continuation after credentials have been saved successfully. */
+  afterSave?: 'createFmWebApp';
   /** Resolved at message time so settings updates flow live. */
   getTestPolicy?: () => ConnectionWizardTestPolicy;
 }
