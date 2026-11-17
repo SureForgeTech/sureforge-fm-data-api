@@ -8,7 +8,7 @@ Open the Extensions view in VS Code (`Cmd+Shift+X` on macOS, `Ctrl+Shift+X` on W
 
 To install one particular version, download the `.vsix` from the [GitHub releases](https://github.com/SureForgeTech/sureforge-fm-data-api/releases) and run **Extensions: Install from VSIX...** in VS Code. A VSIX does not update itself; the Marketplace always has the newest build.
 
-Before you connect, you need a FileMaker Server with the Data API enabled, an HTTPS address your computer can reach, and an account whose privilege set has the `fmrest` extended privilege ("Access via FileMaker Data API"). The FM Web preview is not part of the Marketplace build; use the repository if you want that preview. See [Before you start](./USER_GUIDE.md#before-you-start).
+Before you connect, you need a FileMaker Server with the Data API enabled, an HTTPS address your computer can reach, and an account whose privilege set has the `fmrest` extended privilege ("Access via FileMaker Data API"). VSIX builds include the FM Web runtime template for a private local preview; no repository checkout is required. Older or incomplete installations may lack the template. The preview is experimental and is not a public deployment service. See [Before you start](./USER_GUIDE.md#before-you-start).
 
 ## Should I connect directly or through a proxy?
 

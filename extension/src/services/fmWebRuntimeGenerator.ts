@@ -2,7 +2,7 @@ import { createHash, randomBytes } from 'crypto';
 import { access, chmod, lstat, mkdir, readdir, readFile, rm, writeFile } from 'fs/promises';
 import path from 'path';
 
-import type * as vscode from 'vscode';
+import * as vscode from 'vscode';
 
 import { assertSafeOutputFolder, GENERATED_MARKER, GenerationSkippedError, writeGeneratedFiles } from './generatedFileWriter';
 import { migrateLayoutDefinition } from '../fmweb/layoutSchema';
@@ -145,13 +145,13 @@ export const SHIPPED_MARKED_HASHES: Record<string, string[]> = {
   'app/layouts/[id]/runtime-layout-client.tsx': ['af043b1732695714beff33ba56ad162cd3267191d90990bc856702c2a89aa234', 'd9c9bfe748179467d616281aee05c944bd2a78d6a260e3e3b9b2897bd8176f4a', '6becf8abb393e1e501f75390540b0fbefec17c9ca77803fc4f9352157a67249e', '12d62d25e10b9a94af9e23f997c0bfc1f522c5d50906d67cc6b13a10de6748e5', '40c2f2e4b688c23049ecd70ae2d707766a079953e09134c3ddfd13e7fea09a5b', 'a0cb143cc37ecc41db012951881277e7bd5cfb413ae257ce5ce7909b40466d42', '8e4ee2d8871914d66669a2b17aa72502be87a08ec021ffc96dd84b8dfdd44a13', '3699982b4cafeee34798a1f389a70236b8fc44d280a06497a720376da8ed561b', '1ba07edbce098c6d206bab7538fb453f9a5ab196a583716cbefa9e1001b90986', 'fb4d98cf46983d6a2cb000623765f90249e39a01d5b772d99d71798dd6348732']
 };
 
-/** Known shipped shared sources (including generated package.json). Keep old hashes when updating. */
+/** Known generated shared sources (including generated package.json). Keep prior identities when updating. */
 export const SHIPPED_SHARED_HASHES: Record<string, string[]> = {
   'src/field-order.ts': ['2c1a5d992d4daf838e2d13c43b1939043a4163eb13af4eae0cbddf6ad27ec966', '3b60a97a6b9b023be8d7e3d86d4c7cc0125e3f6bd9bde2db8ca7706b063e6bfa'],
   'src/layout-schema.ts': ['e7f4b45780facf95f8250a74b4e60afd27c5af455ee015e879fa062e69f0d63b', '5f19d99380319c6c1e1352730784559dbb23ba03da792bcdf9fc7118be024129', '1a1f837967649e78baa192dc0d735e026a1349080d7dfe9000e4aa8d8aa044cd', 'cb6a8e7c5c79fdde431b3e004fb1ae4897ce7a481712370ed545ff5d36ec9a38'],
   'src/ui-renderer.tsx': ['485d4b2022d64ac21ebcd36c58f57792e36b448a7fec9b9a6a2eeb1373a522ab', 'dea92786b52f47ddbd02a1f0b4f34c73155303a9725e06cbcf2a3ade8301e0c7', '72926b784cc27a5d5046b448797b25b80a30f1af8fe12d70ef2d8061b2746728', '083c1a277145bbe9b08e36f5020322dd95d32766ac6c7ae8730a2e392594f082', 'ce2223340e0dd67a0b74e8fe0604d5cbd7f73011728442df09c8566afbf3780a', '9d1998bddce48ddcb138c3d606a30091db89e8c30d5688ed641bbf91de1fded2', 'd261d2c2e95c8414dfa402f90a3169ee4623c0e5dc0281cef7c393229427f230', 'b22bc542cad58058be38eea520684a5e52c5d457b196cfb426123f4bd274cccf', 'f95fe0fdf2e60fb0afb59e2a742f59e4afe3f97c6398cc881f3b4ffc33c64f2b'],
   'src/field-standards.ts': ['dbd9dcbac9791a895962a977c37a3f3602729f0903c8ccbda05f40fc873421cf', '94b0eadb1666dce9e7f98ae43effde612dbab49cbdccfa80cf819de80dbb7547', '3ff4a3d7ae593c0edc13ccd41007f7a56d9bba620bbebaf26f960068c487ad82', 'afd81a07b641a620894238a0383c1fca55f265b5e0484ebd6d1ab644aa343a5e', 'e5ac70259470aea19e72065ed9150f8802e998a5f01e75231941c6b75aed7bfd', '6778e726e0ca9e1351bf9df86c4ad2dd60e7ea38d3c4cb8598475bdc35fc57af'],
-  'src/record-edit.ts': ['6f3b044bb3fbbbc00f80ce85761d2c8f02daa874ad62e310c7ba6e5c7b12132c', '8ec99479832ae7f19bd3d34027a014e02db6ebeb2b05d20f29685ab6a04639d3', 'b44afc69a6766e1bbc06ed12f46ad8402075454505eb04a0fb077b71d3e87e51', '7d1308d3c1e015448c4f420ca9549cad84d3b8247b65f16d7f78f7b8376f9c44', 'a19ca01072fa6c0309fcf077c7801f024b307cd4ee918c7cc796a005d44171fb', 'ca68a1755203a2343568128ed51bc13695f899e850d68b9cc839addee0b2f5bd', '96035065dfe20a4a53608cef6ed74af438ab4ab349204f88c7a0f158c31bd37d'],
+  'src/record-edit.ts': ['6f3b044bb3fbbbc00f80ce85761d2c8f02daa874ad62e310c7ba6e5c7b12132c', '8ec99479832ae7f19bd3d34027a014e02db6ebeb2b05d20f29685ab6a04639d3', 'b44afc69a6766e1bbc06ed12f46ad8402075454505eb04a0fb077b71d3e87e51', '7d1308d3c1e015448c4f420ca9549cad84d3b8247b65f16d7f78f7b8376f9c44', 'a19ca01072fa6c0309fcf077c7801f024b307cd4ee918c7cc796a005d44171fb', 'ca68a1755203a2343568128ed51bc13695f899e850d68b9cc839addee0b2f5bd', '96035065dfe20a4a53608cef6ed74af438ab4ab349204f88c7a0f158c31bd37d', '65bf659996a5cfd1778f6011a102c8c149e3f25a7a3f6201b79fdc37bc351c1e'],
   'src/index.ts': ['a78e69d0c2565173c08ca580ebd1f640e9c6fcecee7cecf58a36ce2a82ad96c2', '06c864f496f814f388ecf810d7ccff61b81ebcb434b45b46ed19a0ccf0fdb201', '343e6054fb7cc512f235739c53d9e19768e90960ca038f17f1fd795717c0df46', 'd2a391e29938de24f23bc6ca138f51609c35ba99311b9e32878a5937165d2952'],
   'package.json': ['304d3c7084ac8c0d59f83461fbdf4cb97feb64f9a19062ed8345e520b637247c', 'bb0fcb4d253b13d7116c659da2be09774b674c10a8b82823d08e5acf88c64c82', 'dfc8712f1dc893048abc19198115d700c816667d739d6811a77b8e899b24b33f'],
   'src/intake.ts': ['ba3cd6806344732c37b75c7129174937508fe62a176b7758d211cdd081fbdc9f']
@@ -191,7 +191,7 @@ export function decideManagedRefresh(
 export class RuntimeTemplateUnavailableError extends Error {
   public constructor() {
     super(
-      'The FM Web preview is not available in this installation. It needs the runtime-next and shared packages from the sureforge-fm-data-api repository, which the Marketplace extension does not include. Open that repository (or run the extension from source) to use the preview.'
+      'The FM Web preview is not available in this installation. This installation is missing its runtime-next and shared template packages. Reinstall the extension or rebuild it from the sureforge-fm-data-api source repository.'
     );
     this.name = 'RuntimeTemplateUnavailableError';
   }
@@ -199,12 +199,13 @@ export class RuntimeTemplateUnavailableError extends Error {
 
 /**
  * Where the runtime template lives for an extension installed at `extensionRoot`, or undefined when
- * this installation does not carry it (the Marketplace package leaves out runtime-next). The
+ * this installation does not carry it. The
  * generator and the activation-time context key both use this, so a command is hidden exactly when
  * invoking it would fail with RuntimeTemplateUnavailableError.
  */
-export async function resolveRuntimeTemplateRoot(extensionRoot: string): Promise<string | undefined> {
-  const candidates = [
+export async function resolveRuntimeTemplateRoot(extensionRoot: string, preferSource = false): Promise<string | undefined> {
+  const packaged = path.join(extensionRoot, 'dist', 'fmweb-template', 'runtime-next');
+  const sourceCandidates = [
     // path-join disposition: the extension folder and the fixed "runtime-next" package name; no input chooses these parts.
     path.join(extensionRoot, '..', 'runtime-next'),
     // path-join disposition: the extension folder and a fixed package name; the folder is only read.
@@ -213,8 +214,13 @@ export async function resolveRuntimeTemplateRoot(extensionRoot: string): Promise
     path.join(extensionRoot, 'src', 'runtime-template')
   ];
 
+  const candidates = preferSource ? [...sourceCandidates, packaged] : [packaged, ...sourceCandidates];
   for (const candidate of candidates) {
-    // path-join disposition: the candidate is one of the three fixed template roots above and "package.json" is a fixed name.
+    if (candidate === packaged && !(await Promise.all([
+      path.join(candidate, 'preview-server.mjs'), path.join(candidate, '..', 'shared', 'package.json'),
+      path.join(candidate, '..', 'shared', 'src', 'index.ts')
+    ].map(exists))).every(Boolean)) continue;
+    // path-join disposition: the candidate is one of the fixed template roots above and "package.json" is a fixed name.
     if (await exists(path.join(candidate, 'package.json'))) {
       return candidate;
     }
@@ -229,9 +235,10 @@ export const PREVIEW_AVAILABLE_CONTEXT_KEY = 'filemaker.fmWebPreviewAvailable';
 /** Sets the context key from what this installation carries. Returns the value it set. */
 export async function publishPreviewAvailability(
   extensionRoot: string,
-  setContext: (key: string, value: boolean) => Thenable<unknown> | void
+  setContext: (key: string, value: boolean) => Thenable<unknown> | void,
+  preferSource = false
 ): Promise<boolean> {
-  const available = await resolveRuntimeTemplateRoot(extensionRoot).then(
+  const available = await resolveRuntimeTemplateRoot(extensionRoot, preferSource).then(
     (root) => root !== undefined,
     () => false
   );
@@ -604,7 +611,7 @@ export class FmWebRuntimeGenerator {
   }
 
   private resolveTemplateRoot(): Promise<string | undefined> {
-    return resolveRuntimeTemplateRoot(this.context.extensionUri.fsPath);
+    return resolveRuntimeTemplateRoot(this.context.extensionUri.fsPath, this.context.extensionMode !== vscode.ExtensionMode.Production);
   }
 
   private assertWorkspaceTrusted(): void {

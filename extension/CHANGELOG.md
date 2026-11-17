@@ -4,6 +4,8 @@
 
 **Local portal sample**
 
+- VSIX builds now include the runtime template needed to generate and preview FM Web apps without cloning this repository. Existing edited generated files are preserved.
+
 - The source-installed FM Web preview now includes a responsive event-registration sample with shared validation and duplicate-submission protection. It uses synthetic data and creates no FileMaker record.
 
 **Security**

@@ -851,11 +851,11 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     refreshAi();
   });
   if (secretChanges) context.subscriptions.push(secretChanges);
-  // Hide the preview commands in an installation that has no runtime template (the Marketplace
-  // package); computed the same way the generator resolves it.
+  // Show preview commands only when the installation carries a complete runtime template.
   runAndReport('Publishing the preview availability', logger, () =>
     publishPreviewAvailability(context.extensionUri.fsPath, (key, value) =>
-      vscode.commands.executeCommand('setContext', key, value)
+      vscode.commands.executeCommand('setContext', key, value),
+      context.extensionMode !== vscode.ExtensionMode.Production
     )
   );
   context.subscriptions.push(

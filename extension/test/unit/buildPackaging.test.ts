@@ -84,8 +84,12 @@ describe('THIRD_PARTY_NOTICES.txt', () => {
 describe('VSIX contents', () => {
   const required = ['dist/extension.js', 'dist/aiMcpShim.js', 'dist/schemaDiffWorker.js'];
   const layout = 'dist/webviews/layoutMode/ui/index.js';
+  const templates = ['runtime-next/package.json', 'runtime-next/preview-server.mjs',
+    'runtime-next/app/intake/[id]/page.tsx', 'runtime-next/app/api/intake/[id]/route.ts',
+    'shared/package.json', 'shared/src/index.ts', 'shared/src/intake.ts', 'manifest.json']
+    .map((file) => `dist/fmweb-template/${file}`);
 
-  async function checkArchive(options: { missing?: string; layoutBytes?: number; map?: string } = {}): Promise<void> {
+  async function checkArchive(options: { missing?: string; layoutBytes?: number; map?: string; privateFile?: string } = {}): Promise<void> {
     const require = createRequire(path.join(extensionDir, 'package.json'));
     const { ZipFile } = createRequire(require.resolve('@vscode/vsce/package.json'))('yazl');
     const { createWriteStream } = await import('fs');
@@ -93,11 +97,12 @@ describe('VSIX contents', () => {
     const dir = mkdtempSync(path.join(tmpdir(), 'vsix-contents-'));
     try {
       const zip = new ZipFile();
-      for (const file of required.filter((file) => file !== options.missing)) {
+      for (const file of [...required, ...templates].filter((file) => file !== options.missing)) {
         zip.addBuffer(Buffer.from('bundle'), `extension/${file}`);
       }
       if (options.missing !== layout) zip.addBuffer(Buffer.alloc(options.layoutBytes ?? 205_000, 120), `extension/${layout}`);
       if (options.map) zip.addBuffer(Buffer.from('{}'), `extension/${options.map}`);
+      if (options.privateFile) zip.addBuffer(Buffer.from('synthetic-canary'), `extension/dist/fmweb-template/${options.privateFile}`);
       zip.end();
       const archive = path.join(dir, 'test.vsix');
       await pipeline(zip.outputStream, createWriteStream(archive));
@@ -115,6 +120,15 @@ describe('VSIX contents', () => {
   it.each(required)('rejects a VSIX missing %s', async (missing) => {
     await expect(checkArchive({ missing })).rejects.toThrow(missing);
   });
+
+  it.each(templates)('rejects a VSIX missing its template resource %s', async (missing) => {
+    await expect(checkArchive({ missing })).rejects.toThrow('FM Web template file');
+  });
+
+  it.each(['runtime-next/.env.local', 'runtime-next/.npmrc', 'runtime-next/node_modules/package.json', 'shared/coverage/data.json'])
+    ('rejects private or generated state inside the template: %s', async (privateFile) => {
+      await expect(checkArchive({ privateFile })).rejects.toThrow('private or generated template state');
+    });
 
   it('rejects a missing Layout Mode bundle', async () => {
     await expect(checkArchive({ missing: layout })).rejects.toThrow('Layout Mode');

@@ -19,7 +19,7 @@ const manifest = JSON.parse(readFileSync(path.join(extensionDir, 'package.json')
   contributes: { commandPalette: Array<{ command: string; when?: string }>; menus: Record<string, Array<{ command: string; when?: string }>> };
 };
 
-/** Commands that cannot do anything without runtime-next, which the Marketplace package leaves out. */
+/** Commands require a complete template, from the packaged kit or a source development installation. */
 const NEEDS_TEMPLATE = ['filemakerDataApiTools.generateFmWebNextApp', 'filemakerDataApiTools.startFmWebPreviewServer'];
 
 describe('preview commands are hidden when the installation has no runtime template', () => {
@@ -32,7 +32,7 @@ describe('preview commands are hidden when the installation has no runtime templ
   });
 
   it('is computed the way the generator finds the template (the repository layout and an extension-local copy count; an empty folder does not)', async () => {
-    expect(await resolveRuntimeTemplateRoot(extensionDir)).toBe(path.resolve(extensionDir, '..', 'runtime-next'));
+    expect(await resolveRuntimeTemplateRoot(extensionDir, true)).toBe(path.resolve(extensionDir, '..', 'runtime-next'));
 
     const marketplace = path.join(dir, 'ext');
     await mkdir(marketplace, { recursive: true });
@@ -52,7 +52,27 @@ describe('preview commands are hidden when the installation has no runtime templ
     expect(await publishPreviewAvailability(marketplace, setContext)).toBe(false);
     expect(setContext).toHaveBeenLastCalledWith(PREVIEW_AVAILABLE_CONTEXT_KEY, false);
 
-    expect(await publishPreviewAvailability(extensionDir, setContext)).toBe(true);
+    expect(await publishPreviewAvailability(extensionDir, setContext, true)).toBe(true);
+    expect(setContext).toHaveBeenLastCalledWith(PREVIEW_AVAILABLE_CONTEXT_KEY, true);
+  });
+
+  it('prefers a complete bundled kit in an installed extension and refuses a partial kit', async () => {
+    const installed = path.join(dir, 'installed');
+    const root = path.join(installed, 'dist/fmweb-template');
+    await mkdir(path.join(root, 'runtime-next'), { recursive: true });
+    await writeFile(path.join(root, 'runtime-next/package.json'), '{}');
+    expect(await resolveRuntimeTemplateRoot(installed)).toBeUndefined();
+    await writeFile(path.join(root, 'runtime-next/preview-server.mjs'), 'export {};');
+    await mkdir(path.join(root, 'shared/src'), { recursive: true });
+    await writeFile(path.join(root, 'shared/package.json'), '{}');
+    await writeFile(path.join(root, 'shared/src/index.ts'), 'export {};');
+    expect(await resolveRuntimeTemplateRoot(installed)).toBe(path.join(root, 'runtime-next'));
+    // An unrelated sibling cannot shadow the template in an installed VSIX.
+    await mkdir(path.join(dir, 'runtime-next'));await writeFile(path.join(dir, 'runtime-next/package.json'), '{}');
+    expect(await resolveRuntimeTemplateRoot(installed)).toBe(path.join(root, 'runtime-next'));
+    expect(await resolveRuntimeTemplateRoot(installed, true)).toBe(path.join(dir, 'runtime-next'));
+    const setContext = vi.fn();
+    expect(await publishPreviewAvailability(installed, setContext)).toBe(true);
     expect(setContext).toHaveBeenLastCalledWith(PREVIEW_AVAILABLE_CONTEXT_KEY, true);
   });
 
@@ -133,7 +153,7 @@ describe('preview commands are hidden when the installation has no runtime templ
         await handler(command)();
         const shown = vi.mocked(vscode.window.showErrorMessage).mock.calls.map((call) => String(call[0])).join('\n');
         expect(shown).toMatch(/not available in this installation/);
-        expect(shown).toMatch(/Marketplace extension does not include/);
+        expect(shown).toMatch(/missing its runtime-next and shared template packages/);
         expect(handler.createTerminal).not.toHaveBeenCalled();
         expect(handler.ensureStarted).not.toHaveBeenCalled();
         expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
