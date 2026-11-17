@@ -112,7 +112,7 @@ export class FmWebIntakeService {
 
   public async exportSnapshot(snapshot: PortalPreviewFiles): Promise<string[]> {
     const files: Array<{ path: string; content: string }> = [];
-    for (const [folder, entries] of [['intakes', snapshot.intakes], ['layouts', snapshot.layouts]] as const) {
+    for (const [folder, entries] of [['intakes', snapshot.intakes], ['intake-layouts', snapshot.layouts]] as const) {
       for (const [name, bytes] of entries) {
         const safeName = folder === 'intakes' ? /^[a-z][a-z0-9_-]{0,63}\.intake\.json$/ : /^[0-9a-f-]{36}\.layout\.json$/i;
         if (!safeName.test(name) || bytes.length > 1048576) throw new Error('Invalid portal export filename or size.');
