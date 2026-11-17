@@ -22,8 +22,11 @@ describe('saved portal starters', () => {
     expect(await service.exportSnapshot(snapshot)).toEqual([]);
     const exported = path.join(root, '.fmweb', 'generated', 'intakes', 'event-registration.intake.json');
     expect(JSON.parse(await readFile(exported, 'utf8')).title).toBe(saved.definition.title);
+    const extra = path.join(root, '.fmweb', 'generated', 'intakes', 'older-form.intake.json');
+    await writeFile(extra, '{"id":"older-form"}');
     vi.mocked(vscode.window.showWarningMessage).mockClear();
-    await service.exportSnapshot(snapshot);expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
+    await service.exportSnapshot(snapshot);
+    expect(await readFile(extra, 'utf8')).toBe('{"id":"older-form"}');expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
   });
   it('asks before replacing changed exported forms and marked layouts, preserves skips and respects cancellation', async () => {
     const { service } = fixture();const saved = await service.ensureEventStarter();const snapshot = await service.previewFiles();
@@ -35,6 +38,7 @@ describe('saved portal starters', () => {
     await writeFile(layout, marked);
     vi.mocked(vscode.window.showWarningMessage).mockResolvedValueOnce('Skip existing' as never);
     expect(await service.exportSnapshot(snapshot)).toHaveLength(2);
+    expect(vscode.window.showWarningMessage).toHaveBeenLastCalledWith(expect.stringContaining('exported portal data files differ'), expect.any(Object), 'Overwrite', 'Skip existing');
     expect(await readFile(layout, 'utf8')).toBe(marked);expect(await readFile(exported, 'utf8')).toContain('My exported edit');
     vi.mocked(vscode.window.showWarningMessage).mockResolvedValueOnce(undefined);
     await expect(service.exportSnapshot(snapshot)).rejects.toThrow('cancelled');
