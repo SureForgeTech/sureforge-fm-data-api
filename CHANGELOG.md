@@ -30,7 +30,6 @@ PR title prefix matches the highest-tier label added:
 
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
-- None.
 
 ### [INTERNAL]
 
