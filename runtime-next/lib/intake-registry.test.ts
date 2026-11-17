@@ -8,9 +8,9 @@ let root: string;
 const example = eventRegistrationExample();
 const id = example.definition.id;
 async function files() {
-  await mkdir(path.join(root, 'intakes'));await mkdir(path.join(root, 'layouts'));
+  await mkdir(path.join(root, 'intakes'));await mkdir(path.join(root, 'intake-layouts'));
   const form = path.join(root, 'intakes', `${id}.intake.json`);
-  const layout = path.join(root, 'layouts', `${example.layout.id}.layout.json`);
+  const layout = path.join(root, 'intake-layouts', `${example.layout.id}.layout.json`);
   await writeFile(form, JSON.stringify({ ...example.definition, title: 'Saved custom event' }));
   await writeFile(layout, JSON.stringify(example.layout));return { form, layout };
 }

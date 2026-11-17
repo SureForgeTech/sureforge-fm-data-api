@@ -15,6 +15,25 @@ function fixture() {
 beforeEach(async () => { root = await mkdtemp(path.join(tmpdir(), 'fmweb-intake-')); trusted = true; });
 afterEach(async () => { await rm(root, { recursive: true, force: true }); });
 describe('saved portal starters', () => {
+  it('resolves source repair independently of mapping, environment and presentation validity', async () => {
+    const { service } = fixture();const saved = await service.ensureEventStarter();
+    await writeFile(saved.definitionPath, JSON.stringify({ ...saved.definition, environmentId: 'production', branding: { accentColor: 'invalid' }, fields: [] }));
+    expect(await service.layoutForEdit('event-registration')).toEqual({ id: saved.layout.id, filePath: saved.layoutPath, valid: true });
+    await writeFile(saved.layoutPath, '{broken');
+    expect((await service.layoutForEdit('event-registration')).valid).toBe(false);
+    expect(await readFile(saved.layoutPath, 'utf8')).toBe('{broken');
+    await writeFile(saved.layoutPath, JSON.stringify({ ...saved.layout, id: 'c1111111-1111-4111-8111-111111111111' }));
+    expect((await service.layoutForEdit('event-registration')).valid).toBe(false);
+  });
+
+  it('prepares source metadata before allowing mapped fields and migrates legacy ids', async () => {
+    const { service: original, project } = fixture();const saved = await original.ensureEventStarter();
+    await writeFile(saved.layoutPath, JSON.stringify({ ...saved.layout, schemaVersion: 0 }));
+    expect((await original.load('event-registration')).layout.id).toBe(saved.layout.id);
+    const service = new FmWebIntakeService({ ...project, prepareLayout: async (layout) => ({ ...layout, objects: layout.objects.map((object, index) => index || object.type !== 'field' ? object : { ...object, kind: 'calculation' }) }) });
+    await expect(service.load('event-registration')).rejects.toThrow('writable');
+  });
+
   it('keeps malformed JSON openable for repair without validation or overwrite', async () => {
     const { service } = fixture();const saved = await service.ensureEventStarter();
     await writeFile(saved.definitionPath, '{broken');

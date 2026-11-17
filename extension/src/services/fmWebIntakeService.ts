@@ -1,4 +1,4 @@
-import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'fs';
 import { lstat, mkdir, open, readdir, realpath, writeFile } from 'fs/promises';
 import path from 'path';
@@ -15,7 +15,7 @@ export interface SavedIntake {
 
 /** Data-only starter files belong to the user. Resuming never overwrites either file. */
 export class FmWebIntakeService {
-  constructor(private readonly project: Pick<FmWebProjectService, 'getProjectRoot' | 'getWorkspaceRoot' | 'isWorkspaceTrusted' | 'ensureProjectInitialized' | 'getLayoutsDirPath'>) {}
+  constructor(private readonly project: Pick<FmWebProjectService, 'getProjectRoot' | 'getWorkspaceRoot' | 'isWorkspaceTrusted' | 'ensureProjectInitialized' | 'getLayoutsDirPath'> & Partial<Pick<FmWebProjectService, 'prepareLayout'>>) {}
 
   private async confined(file: string): Promise<string> {
     if (!this.project.isWorkspaceTrusted()) throw new Error('Workspace trust is required to build a portal.');
@@ -74,6 +74,26 @@ export class FmWebIntakeService {
     return file;
   }
 
+  /** Mapping validation must not prevent opening the source that fixes the mapping. */
+  public async layoutForEdit(id: string): Promise<{ id: string; filePath: string; valid: boolean }> {
+    const definitionPath = await this.definitionPathForEdit(id);
+    const raw = await this.read(definitionPath);
+    const layoutId = layoutDefinitionSchema.shape.id.parse(raw && typeof raw === 'object' && !Array.isArray(raw)
+      ? (raw as Record<string, unknown>).layoutId : undefined);
+    const filePath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${layoutId}.layout.json`));
+    const info = await lstat(filePath);
+    if (!info.isFile() || info.size > 1048576) throw new Error('Source layout must be a regular file under 1 MiB.');
+    let valid = false;
+    try {
+      const source = await this.read(filePath);
+      migrateLayoutDefinition(source);
+      const raw = source as Record<string, unknown>;
+      valid = raw.id === layoutId || (raw.id === undefined && (raw.schemaVersion === undefined || raw.schemaVersion === 0));
+    }
+    catch { /* Invalid source JSON opens directly for repair, without replacing it. */ }
+    return { id: layoutId, filePath, valid };
+  }
+
   public async load(id: string): Promise<SavedIntake> {
     if (!/^[a-z][a-z0-9_-]{0,63}$/.test(id)) throw new Error('Invalid portal identifier.');
     const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${id}.intake.json`));
@@ -81,7 +101,8 @@ export class FmWebIntakeService {
     if (definition.id !== id) throw new Error('Portal filename and identifier must match.');
     if (definition.environmentId !== 'sample') throw new Error('This portal preview supports only the sample environment. No live FileMaker adapter is configured.');
     const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${definition.layoutId}.layout.json`));
-    const layout = layoutDefinitionSchema.parse(await this.read(layoutPath));
+    const source = migrateIntakeSource(definition, await this.read(layoutPath));
+    const layout = await this.project.prepareLayout?.(source) ?? source;
     // Validate every mapping, not just the form JSON shape.
     intakeLayout(definition, layout);
     return { definition, layout, definitionPath, layoutPath };

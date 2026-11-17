@@ -1,6 +1,29 @@
 import { describe, expect, it } from 'vitest';
-import { eventRegistrationExample, intakeDefinitionSchema, validateIntakeSubmission } from '../src';
+import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, migrateIntakeSource, validateIntakeSubmission } from '../src';
 describe('reusable portal starter and branding', () => {
+  it('migrates legacy sources with a stable reference and exact names', () => {
+    const { definition, layout } = eventRegistrationExample();
+    const migrated = migrateIntakeSource(definition, { ...layout, schemaVersion: 0 });
+    expect(migrated.id).toBe(definition.layoutId);
+    expect(intakeLayout(definition, migrated).objects[0]).toMatchObject({ fmFieldName: ' Full Name ' });
+    expect(() => migrateIntakeSource(definition, { ...layout, schemaVersion: 0, id: 'another' })).toThrow('different');
+    expect(() => migrateIntakeSource(definition, { ...layout, schemaVersion: 99 })).toThrow('newer');
+  });
+  it.each([{ kind: 'calculation' }, { result: 'summary' }, { result: 'container' }, { kind: 'global' }, { global: true }, { metadata: { type: 'calculation' } }, { metadata: { type: 'global' } }, { metadata: { global: true } }])('does not erase legacy readonly/global hints %j', (hint) => {
+    const { definition, layout } = eventRegistrationExample();
+    const source = { ...layout, schemaVersion: 0, objects: layout.objects.map((object, index) => index ? object : { ...object, ...hint }) };
+    expect(() => intakeLayout(definition, migrateIntakeSource(definition, source))).toThrow('writable');
+  });
+
+  it('keeps current sources intact, handles missing legacy ids and rejects unmapped legacy shapes', () => {
+    const { definition, layout } = eventRegistrationExample();
+    expect(migrateIntakeSource(definition, layout)).toEqual(layout);
+    const { id: _id, ...withoutId } = layout;
+    const migrated = migrateIntakeSource(definition, { ...withoutId, schemaVersion: 0, objects: [null, [], 7, { type: 'text', text: 'Instructions' }, ...layout.objects] });
+    expect(migrated.id).toBe(definition.layoutId);
+    expect(intakeLayout(definition, migrated).objects).toHaveLength(definition.fields.length);
+    expect(() => intakeLayout(definition, migrateIntakeSource(definition, null))).toThrow('writable');
+  });
   it('has exact stable mappings and validates only invented sample values', () => {
     const sample = eventRegistrationExample();
     expect(sample.layout.fmLayoutName).toBe(' Registrations ');

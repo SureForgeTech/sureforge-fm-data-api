@@ -1,4 +1,4 @@
-import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'node:fs';
 import { lstat, open, realpath } from 'node:fs/promises';
 import path from 'node:path';
@@ -56,7 +56,7 @@ export class PreviewIntakeRegistry {
       }
       const definition = intakeDefinitionSchema.parse(await readJson(root, 'intakes', `${id}.intake.json`));
       if (definition.id !== id || definition.environmentId !== 'sample') return undefined;
-      const source = layoutDefinitionSchema.parse(await readJson(root, 'layouts', `${definition.layoutId}.layout.json`));
+      const source = migrateIntakeSource(definition, await readJson(root, 'intake-layouts', `${definition.layoutId}.layout.json`));
       return { definition, layout: intakeLayout(definition, source) };
     } catch { return undefined; }
   }
