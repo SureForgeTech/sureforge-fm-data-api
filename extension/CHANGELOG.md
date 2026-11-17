@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+**Licence**
+
+- The extension's MIT licence now names SureForgeTech as the copyright holder, and the extension's author is SureForgeTech. The licence terms are unchanged.
+
 **FM Web app creation**
 
 - Save to FileMaker opens a private registration form after confirming the connection, database and layout. Submitting creates a real record with the mapped fields; credentials stay in the extension. Persistent submission tracking prevents the same submission from being dispatched again after a restart or uncertain result. Sample preview remains available.
