@@ -1,3 +1,4 @@
+import * as filesystem from 'fs/promises';
 import { randomUUID } from 'crypto';
 import { link, mkdir, mkdtemp, readFile, readdir, rm, symlink, writeFile } from 'fs/promises';
 import { tmpdir } from 'os';
@@ -5,6 +6,11 @@ import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { eventRegistrationExample } from '@fmweb/shared';
 import { FmWebRegistrationService } from '../../src/services/fmWebRegistrationService';
+
+vi.mock('fs/promises', async (importOriginal) => {
+  const actual = await importOriginal<typeof filesystem>();
+  return { ...actual, readdir: vi.fn(actual.readdir) };
+});
 
 type Target = ConstructorParameters<typeof FmWebRegistrationService>[0];
 let root: string;
@@ -27,8 +33,12 @@ describe('FileMaker registration service durable write boundary', () => {
   it.each(['', '{"fingerprint":'])('does not retry an incomplete durable claim (%s)', async (bytes) => {
     const { target, service, request, createRecord } = fixture();await mkdir(target.ledgerRoot);
     const file = path.join(target.ledgerRoot, `${request.submissionId}.json`);await writeFile(file, bytes);
-    expect(await service.submit(request)).toEqual({ status: 'uncertain' });expect(createRecord).not.toHaveBeenCalled();
-    expect(await readFile(file, 'utf8')).toBe(bytes);
+    const original = await vi.importActual<typeof filesystem>('fs/promises');
+    const fullLedger = vi.mocked(filesystem.readdir).mockClear().mockResolvedValue(Array.from({ length: 10000 }, (_, index) => `${index}.json`) as never);
+    try {
+      expect(await service.submit(request)).toEqual({ status: 'uncertain' });expect(createRecord).not.toHaveBeenCalled();
+      expect(fullLedger).not.toHaveBeenCalled();expect(await readFile(file, 'utf8')).toBe(bytes);
+    } finally { fullLedger.mockImplementation(original.readdir).mockClear(); }
   });
   it('creates exactly the approved layout and mapped fields, retaining whitespace and only a receipt hash on disk', async () => {
     const { service, request, target, createRecord } = fixture();

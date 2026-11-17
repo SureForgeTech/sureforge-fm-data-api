@@ -43,6 +43,7 @@ export class FmWebRegistrationService {
     const root = await this.directory();
     const file = path.join(root, `${id}.json`);
     const previous = await this.readAttempt(file);
+    if (previous === null) return { status: 'uncertain' };
     if (previous) return this.prior(id, fingerprint, previous);
     if ((await readdir(root)).filter((name) => name.endsWith('.json')).length >= 10000) return { status: 'capacity' };
     const pending: Attempt = { fingerprint, status: 'pending' };
@@ -86,7 +87,7 @@ export class FmWebRegistrationService {
     return directory;
   }
 
-  private async readAttempt(file: string): Promise<Attempt | undefined> {
+  private async readAttempt(file: string): Promise<Attempt | undefined | null> {
     let handle;
     let identity: { dev: number; ino: number } | undefined;
     try {
@@ -106,7 +107,7 @@ export class FmWebRegistrationService {
       catch {
         // A concurrent claimant may still be writing, or a crash may have left a partial claim.
         // O_EXCL below still refuses it; never overwrite or dispatch from unreadable state.
-        return undefined;
+        return null;
       }
       if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('Invalid registration receipt.');
       const attempt = value as Attempt;
