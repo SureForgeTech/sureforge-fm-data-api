@@ -4,6 +4,7 @@
 
 **Licence**
 
+- The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.
 - The extension's MIT licence now names SureForgeTech as the copyright holder, and the extension's author is SureForgeTech. The licence terms are unchanged.
 
 **FM Web app creation**

@@ -94,7 +94,7 @@ It remains a source-checkout feature, unavailable in the Marketplace package. Th
 
 ## What license is the extension under?
 
-MIT. The extension is free and open source. See [LICENSE](../../LICENSE).
+Apache-2.0. The extension is free and open source. See [LICENSE](../../LICENSE).
 
 ## How can I contribute?
 
