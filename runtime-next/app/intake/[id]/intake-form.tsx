@@ -39,6 +39,14 @@ export function IntakeForm({ definition, layout }: { definition: IntakeDefinitio
         method: 'POST', cache: 'no-store', headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ submissionId: submissionId.current, values }), signal: AbortSignal.timeout(20000)
       });
+      // The private server and route reject these requests before any submission write is attempted.
+      if ([400, 401, 403, 404, 413, 415].includes(response.status)) {
+        const message = response.status === 401 || response.status === 403
+          ? 'The preview refused this request before submission. Keep your values and reopen the private preview before trying again.'
+          : response.status === 413 ? 'The submission was not sent because it is too large. Shorten your inputs before trying again.'
+            : 'The preview did not accept this request. Keep your values and check the form or reopen the preview before trying again.';
+        setErrors([{ code: 'shape', message }]);busy.current = false;setStatus('editing');return;
+      }
       const result: unknown = await response.json();
       const body = result && typeof result === 'object' ? result as Record<string, unknown> : {};
       if (response.status === 201 && body.status === 'accepted' && typeof body.receipt === 'string' && /^[a-z0-9-]{1,80}$/i.test(body.receipt)) {
