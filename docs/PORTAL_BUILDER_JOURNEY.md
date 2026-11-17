@@ -13,3 +13,5 @@ First implementation scope: shared versioned intake definition referencing an ex
 Acceptance evidence for the assessment: the paths and gates above were read from extension/package.json, extension/src/commands/fmWebProject.ts, extension/src/services/fmWebProjectService.ts, shared/src/layout-schema.ts, shared/src/ui-renderer.tsx and runtime-next/app/api/bridge/[route]/route.ts. This is a source assessment; no representative-developer usability study or production FileMaker compatibility is claimed.
 
 Intake date fields explicitly use YYYY-MM-DD in both the renderer instruction and shared validation. A real FileMaker submission adapter must explicitly configure or convert this date format before writing; this foundation does not claim live-server date compatibility.
+
+Intake views opt into visible accessible labels, help text, required-state announcements and field-associated validation errors. Existing record views retain their current accessible names unless they explicitly opt in.

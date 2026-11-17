@@ -57,6 +57,8 @@ const fieldObjectSchema = objectBaseSchema.extend({
   multiline: z.boolean().default(false).optional(),
   options: z.array(z.string()).optional(),
   label: z.string().optional(),
+  accessibleLabel: z.string().max(200).optional(),
+  helpText: z.string().max(1000).optional(),
   labelPosition: z.enum(['top', 'left', 'right', 'none']).default('top'),
   required: z.boolean().default(false)
 });
