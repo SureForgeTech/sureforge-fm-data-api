@@ -58,7 +58,7 @@ The connection wizard takes a direct or proxy connection, tests it step by step,
 
 ![Layout Mode with six fields placed on a layout](docs/marketplace/layout-mode.png)
 
-Layout Mode places fields from a synced layout on a canvas for an FM Web project. Generating and previewing an FM Web app need the source checkout; those commands are not in the Marketplace package. Standard field sizes and spacing, an action that arranges the selection into a standard form, one that standardizes it (each undone in one step) and blank, form, two-column and first-portal starter templates keep layouts tidy. The find form, Record Editor and Record Viewer show fields the same way.
+Layout Mode places fields from a synced layout on a canvas for an FM Web project. VSIX builds include the template for generating and privately previewing an FM Web app without a source checkout. Older or incomplete installations hide these commands until a complete template is available. Standard field sizes and spacing, an action that arranges the selection into a standard form, one that standardizes it (each undone in one step) and blank, form, two-column and first-portal starter templates keep layouts tidy. The find form, Record Editor and Record Viewer show fields the same way.
 
 ![@filemaker in the Chat view answering a find](docs/marketplace/chat-participant.png)
 
