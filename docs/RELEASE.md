@@ -92,7 +92,9 @@ Do this against the release branch (the content that will be tagged), not after 
   ```
   The tag must point at the commit whose `package.json` says `X.Y.Z`; the publish job refuses anything else.
 - [ ] Watch the run. When **publish** waits, open the run, choose **Review deployments**, tick **marketplace** and approve. (If the Entra setup is not done, publish by hand instead; see below.) **publish-ovsx** waits for the same approval a second time — approve it too once the token is stored.
+  Complete both approvals and the downstream artifact downloads within 14 days of the **package** job uploading `extension-vsix`; that workflow artifact expires after 14 days.
 - [ ] **publish-ovsx** runs after **publish** (it only starts once the marketplace deployment is approved and the Azure check passed) and must be green before **release** runs; if it fails, the run stops there and no GitHub release is cut. Read its error before retrying, and use "Re-run failed jobs" so `vsce publish` is not re-run.
+  This retry requires the `extension-vsix` artifact to remain available. If it has expired, stop retrying downstream jobs: they cannot recreate it. Regenerate and validate the package through the release process, and check which stores already accepted the version before retrying publication.
 - [ ] **release** creates the GitHub release with the VSIX, `sourcemaps-vX.Y.Z.tgz` and the changelog text. Open it and read it.
 
 ### 5. Verify after publishing
