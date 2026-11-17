@@ -17,11 +17,12 @@ function request(body: unknown = { submissionId: randomUUID(), values }, headers
 }
 beforeEach(() => {
   vi.stubEnv('FMWEB_PREVIEW_SESSION', session);
+  vi.stubEnv('FMWEB_REGISTRATION_MODE', 'sample');
   // Unit contracts use the synthetic fixture, independent of customized exported form files.
   // The registry suite and standalone HTTP acceptance exercise actual saved definitions.
   vi.spyOn(previewIntakes, 'load').mockImplementation(async (id) => id === 'event-registration' ? eventRegistrationExample() : undefined);
 });
-afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });
+afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs();vi.unstubAllGlobals(); });
 
 describe('private sample intake endpoint', () => {
   it('validates the saved custom form rather than silently using the built-in definition', async () => {
@@ -88,5 +89,43 @@ describe('private sample intake endpoint', () => {
     expect(await (await POST(request(body), context())).json()).toEqual(receipt);
     const conflict = await POST(request({ ...body, values: { ...values, name: 'Changed' } }), context());
     expect(conflict.status).toBe(409);expect(await conflict.json()).toEqual({ status: 'conflict' });
+  });
+});
+
+
+describe('private real FileMaker intake endpoint', () => {
+  function realMode() {
+    vi.stubEnv('FMWEB_REGISTRATION_MODE', 'filemaker');vi.stubEnv('FMWEB_BRIDGE_URL', 'http://127.0.0.1:43210/fm');vi.stubEnv('FMWEB_BRIDGE_TOKEN', 'private-server-token');
+    const fetchFn = vi.fn<typeof fetch>().mockResolvedValue(Response.json({ status: 'accepted', receipt: 'fm-real-receipt' }));
+    vi.stubGlobal('fetch', fetchFn);return fetchFn;
+  }
+  it('hands the original form id, submission id and values to the approved extension endpoint', async () => {
+    const fetchFn = realMode();const body = { submissionId: randomUUID(), values };
+    const response = await POST(request(body), context());expect(response.status).toBe(201);expect(await response.json()).toEqual({ status: 'accepted', receipt: 'fm-real-receipt' });
+    expect(fetchFn).toHaveBeenCalledOnce();const [url, init] = fetchFn.mock.calls[0];
+    expect(url).toBe('http://127.0.0.1:43210/fm/submitRegistration');expect(JSON.parse(String(init?.body))).toEqual({ intakeId: 'event-registration', ...body });
+    expect(JSON.stringify(await (await POST(request({ ...body, profileId: 'another-profile' }), context())).json())).not.toContain('private-server-token');
+    expect(fetchFn).toHaveBeenCalledOnce();
+  });
+  it('does not reuse a cached synthetic service after real mode is enabled', async () => {
+    const body = { submissionId: randomUUID(), values };
+    const first = await POST(request(body), context());expect(await first.json()).toMatchObject({ receipt: expect.stringMatching(/^sample-/) });
+    const fetchFn = realMode();const second = await POST(request(body), context());
+    expect(await second.json()).toEqual({ status: 'accepted', receipt: 'fm-real-receipt' });expect(fetchFn).toHaveBeenCalledOnce();
+  });
+  it.each([[{ cookie: '' },401],[{ origin:'http://evil.invalid' },403],[{ host:'evil.invalid' },403],[{ 'content-type':'text/plain' },415]])('retains private request guards before any real bridge request', async (headers,status) => {
+    const fetchFn = realMode();expect((await POST(request(undefined,headers as Record<string,string>),context())).status).toBe(status);expect(fetchFn).not.toHaveBeenCalled();
+  });
+  it('fails closed without a configured bridge and never falls back to a synthetic acceptance', async () => {
+    const fetchFn = realMode();vi.stubEnv('FMWEB_BRIDGE_URL','');
+    const response = await POST(request(),context());expect(response.status).toBe(422);expect(await response.json()).toEqual({status:'rejected'});expect(fetchFn).not.toHaveBeenCalled();
+  });
+  it('retains byte limits and malformed-envelope rejection before the real handoff', async () => {
+    const fetchFn = realMode();expect((await POST(request(' '.repeat(32769)),context())).status).toBe(413);
+    expect((await POST(request({submissionId:randomUUID(),values,layout:'Admin'}),context())).status).toBe(400);expect(fetchFn).not.toHaveBeenCalled();
+  });
+  it('never reports synthetic success on an unknown real write outcome', async () => {
+    const fetchFn = realMode();fetchFn.mockRejectedValueOnce(new Error('upstream-secret-canary'));
+    const response = await POST(request(),context());expect(response.status).toBe(409);expect(await response.json()).toEqual({status:'uncertain'});expect(fetchFn).toHaveBeenCalledOnce();
   });
 });

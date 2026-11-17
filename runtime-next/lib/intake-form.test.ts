@@ -10,11 +10,12 @@ let host: HTMLDivElement;let root: Root;
 const accepted = () => Response.json({ status: 'accepted', receipt: 'sample-success' }, { status: 201 });
 beforeEach(() => {
   (globalThis as unknown as { IS_REACT_ACT_ENVIRONMENT: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
+  sessionStorage.clear();
   host = document.createElement('div');document.body.appendChild(host);root = createRoot(host);
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(accepted()));
 });
 afterEach(() => { act(() => root.unmount());host.remove();vi.unstubAllGlobals();vi.restoreAllMocks(); });
-function mount() { const example = eventRegistrationExample();act(() => root.render(React.createElement(IntakeForm, example))); }
+function mount(mode?: 'sample' | 'filemaker') { const example = eventRegistrationExample();act(() => root.render(React.createElement(IntakeForm, { ...example, mode }))); }
 function change(name: string, value: string) {
   act(() => {
     const control = host.querySelector<HTMLInputElement | HTMLSelectElement>(`[aria-label="${name}"]`)!;
@@ -101,5 +102,51 @@ describe('registration form workflow', () => {
     await submit();expect(host.textContent).toContain('sample-success');
     const ids = vi.mocked(fetch).mock.calls.map(([, init]) => JSON.parse(String(init?.body)).submissionId);
     expect(ids[1]).toBe(ids[0]);
+  });
+});
+
+
+describe('live FileMaker registration browser behavior', () => {
+  const storageKey = () => { const { definition } = eventRegistrationExample();return `fmweb.registration.v1.${definition.id}.${definition.layoutId}`; };
+  function remount() { act(() => root.unmount());root = createRoot(host);mount('filemaker'); }
+  it('clearly identifies actual writes and uses a real success confirmation instead of the sample success message', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ status:'accepted',receipt:'fm-real-123' },{status:201}));
+    mount('filemaker');expect(host.querySelector('[role="note"]')?.textContent).toContain('creates a real record');
+    expect(host.querySelector('button[type="submit"]')?.textContent).toBe('Register');fill();await submit();
+    expect(host.querySelector('[role="status"]')?.textContent).toContain('Registration saved to FileMaker.');
+    expect(host.querySelector('[role="status"]')?.textContent).not.toContain('No FileMaker record was created');
+    expect(sessionStorage.getItem(storageKey())).not.toContain('Sample Attendee');
+    expect(sessionStorage.getItem(storageKey())).not.toContain('sample@example.test');
+    expect(JSON.parse(sessionStorage.getItem(storageKey())!)).toMatchObject({state:'accepted',receipt:'fm-real-123'});
+  });
+  it('restores accepted state after reload and requires an explicit new attendee action', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ status:'accepted',receipt:'fm-real-123' },{status:201}));
+    mount('filemaker');fill();await submit();remount();
+    expect(host.querySelector('[role="status"]')?.textContent).toContain('fm-real-123');
+    expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);await submit();expect(fetch).toHaveBeenCalledOnce();
+    act(() => (Array.from(host.querySelectorAll('button')).find(button=>button.textContent==='Register another attendee')!).click());
+    expect(sessionStorage.getItem(storageKey())).toBeNull();expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(false);
+  });
+  it('preserves a pending safety marker before dispatch and locks uncertain attempts across reload', async () => {
+    vi.mocked(fetch).mockImplementationOnce(async () => {
+      expect(JSON.parse(sessionStorage.getItem(storageKey())!)).toMatchObject({state:'pending',id:expect.any(String)});
+      throw new Error('synthetic-network-failure');
+    });
+    mount('filemaker');fill();await submit();expect(host.textContent).toContain('outcome is uncertain');remount();
+    expect(host.textContent).toContain('outcome is uncertain');expect(host.textContent).not.toContain('loses duplicate protection');
+    await submit();expect(fetch).toHaveBeenCalledOnce();
+  });
+  it('fails closed before a real request if session storage cannot preserve pending state', async () => {
+    mount('filemaker');fill();vi.spyOn(Storage.prototype,'setItem').mockImplementationOnce(()=>{throw new Error('storage blocked');});
+    await submit();expect(fetch).not.toHaveBeenCalled();expect(host.textContent).toContain('Enable session storage before submitting');
+  });
+  it('treats unreadable prior safety state as uncertain', async () => {
+    sessionStorage.setItem(storageKey(),'{malformed');mount('filemaker');await submit();
+    expect(fetch).not.toHaveBeenCalled();expect(host.textContent).toContain('could not be restored');expect(host.querySelector<HTMLButtonElement>('button[type="submit"]')?.disabled).toBe(true);
+  });
+  it('clears a definite rejection and uses a new id only on the next explicit retry', async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(Response.json({ status:'rejected' },{status:422})).mockResolvedValueOnce(Response.json({ status:'accepted',receipt:'fm-real-123' },{status:201}));
+    mount('filemaker');fill();await submit();expect(sessionStorage.getItem(storageKey())).toBeNull();await submit();
+    const ids = vi.mocked(fetch).mock.calls.map(([,init])=>JSON.parse(String(init?.body)).submissionId);expect(ids[1]).not.toBe(ids[0]);expect(fetch).toHaveBeenCalledTimes(2);
   });
 });
