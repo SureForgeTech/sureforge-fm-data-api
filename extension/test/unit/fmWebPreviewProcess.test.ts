@@ -81,6 +81,16 @@ describe('private preview process', () => {
     if (globalThis.process.platform !== 'win32') expect((await lstat(path.join(root, 'intakes', 'event-registration.intake.json'))).mode & 0o777).toBe(0o600);
   });
 
+  it('passes explicit real mode only to the server and ignores inherited real-mode values', async () => {
+    const process = preview('linux', { FMWEB_REGISTRATION_MODE: 'filemaker' });
+    await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),new Map(), 'http://127.0.0.1:1234','synthetic',undefined,new Map([['event-registration.intake.json', Buffer.from('{}')]]),new Map(),'event-registration','filemaker');
+    expect(calls[0]!.options.env).not.toHaveProperty('FMWEB_REGISTRATION_MODE');
+    expect(calls[1]!.options.env).toHaveProperty('FMWEB_REGISTRATION_MODE', 'filemaker');
+  });
+  it('refuses real mode without an explicit saved form before spawning', async () => {
+    await expect(preview().start(new Map(),new Map(),'http://127.0.0.1:1234','synthetic',undefined,new Map(),new Map(),undefined,'filemaker')).rejects.toThrow('explicit saved intake');
+    expect(calls).toHaveLength(0);
+  });
   it('passes an explicit saved intake landing only to the private server', async () => {
     const process = preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'inherited-target' });
     await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),
@@ -101,8 +111,8 @@ describe('private preview process', () => {
   });
 
   it('keeps the default homepage when no explicit landing is supplied, ignoring inherited values', async () => {
-    await start(preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'event-registration' }));
-    for (const call of calls) expect(call.options.env).not.toHaveProperty('FMWEB_PREVIEW_INTAKE_ID');
+    await start(preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'event-registration', FMWEB_REGISTRATION_MODE: 'filemaker' }));
+    for (const call of calls) { expect(call.options.env).not.toHaveProperty('FMWEB_PREVIEW_INTAKE_ID');expect(call.options.env).not.toHaveProperty('FMWEB_REGISTRATION_MODE'); }
   });
 
   it.each(['../escape.intake.json', 'Upper.intake.json', 'bad.json'])('rejects unsafe intake filename %s before spawning', async (name) => {

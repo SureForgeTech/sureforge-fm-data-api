@@ -14,9 +14,9 @@ We have used it against one of our own FileMaker Servers and a built-in mock of 
 
 1. Open a trusted workspace folder and run **FileMaker: Create FM Web App**, or use the new-file button above Connections.
 2. Choose a saved FileMaker connection and layout, then select the registration fields. **Try sample fields** starts without a connection.
-3. Customize labels, required rules, input types, choices, field order and branding in the form editor. Choose **Save and preview**.
+3. Customize labels, required rules, input types, choices, field order and branding in the form editor. Choose **Save and preview** for sample data, or **Save to FileMaker** and confirm the connection, database and layout to accept real registrations.
 
-Run the same command again to continue editing the saved app. Registration submissions in this workflow use sample data and create no FileMaker records. Advanced source-layout and export controls remain available; exporting creates an editable app folder, not a public deployment. See the [FM Web guide](extension/docs/FM_WEB.md#create-fm-web-app).
+Run the same command again to continue editing the saved app. Sample preview creates no FileMaker records. The confirmed FileMaker mode saves real registrations through the extension, with credentials kept out of the browser and persistent tracking for repeated or uncertain submissions. Advanced source-layout and export controls remain available; exporting creates an editable app folder, not a public deployment. See the [FM Web guide](extension/docs/FM_WEB.md#create-fm-web-app).
 
 ## Documentation
 

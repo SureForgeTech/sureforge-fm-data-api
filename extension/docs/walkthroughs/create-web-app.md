@@ -4,6 +4,8 @@ Run **FileMaker: Create FM Web App**, or use the new-file button above Connectio
 
 Choose FileMaker fields from a saved connection and layout, or start with sample fields. Select the registration fields, then edit the event title, branding, labels, required rules and choices in the form editor. Use Move up and Move down to arrange fields.
 
-Choose **Save and preview** to save the app and start its private browser preview. Use invented details: registration submissions are synthetic and create no FileMaker records. Return to **Create FM Web App** to continue editing the saved app.
+Choose **Save and preview** for an invented-data sample, or **Save to FileMaker** to accept real registrations. The latter saves the app and names the connection, database and layout in a native confirmation. Choose **Enable FileMaker saves**, then submit the private browser form to create a real record. Credentials stay in the extension. Return to **Create FM Web App** to continue editing the saved app.
+
+A repeated submission identifier reuses its original receipt after success. An uncertain write is never retried automatically, even after restarting the preview; check FileMaker before starting a new submission.
 
 Use **Choose FileMaker fields** in the editor to replace sample fields or select fields again. Your saved app stays unchanged until you save the replacement. **Export app** creates an editable app folder and reveals it in VS Code. Advanced source-layout and API commands remain available.

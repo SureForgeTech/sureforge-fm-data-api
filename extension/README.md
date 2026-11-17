@@ -4,7 +4,7 @@
 
 For Claris FileMaker Server (Data API). FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 
-Create an FM Web app from FileMaker fields, customize an event-registration form without editing JSON, and preview it privately in your browser. Registration submissions in this workflow use sample data and create no FileMaker records. Connection, query, schema, record and export tools remain available in VS Code.
+Create an FM Web app from FileMaker fields, customize an event-registration form without editing JSON, and preview it privately in your browser. Choose sample preview or explicitly confirm **Save to FileMaker** to save real registrations through the extension; credentials stay out of the browser. Connection, query, schema, record and export tools remain available in VS Code.
 
 ![Connect to a FileMaker server and run a find request in under 10 seconds.](docs/marketplace/connection-wizard.gif)
 
@@ -16,7 +16,7 @@ We have used it against one of our own FileMaker Servers and a built-in mock of 
 
 ## What it does
 
-- **Create an FM Web app**: choose a connection, layout and registration fields, or start with sample fields. Customize the form, save and preview; reopen the same command to continue editing.
+- **Create an FM Web app**: choose a connection, layout and registration fields, or start with sample fields. Customize the form, then preview sample submissions or confirm real FileMaker saves; reopen the same command to continue editing.
 - **Connect** directly to the FileMaker Data API or through your own proxy. Passwords stay in your operating system keychain.
 - **Find** with a visual query builder or raw JSON, and page, sort and export the results.
 - **Edit** records (create, update, delete, container upload), in a trusted workspace. If someone else changed a record, your save is refused instead of overwriting theirs.
@@ -97,9 +97,9 @@ To install a specific version, download the `.vsix` from the [GitHub releases](h
 
 1. Open a trusted workspace folder and run **FileMaker: Create FM Web App**, or use the new-file button above Connections.
 2. Choose **Use FileMaker fields**, select a saved connection and layout, then pick the registration fields. **Try sample fields** works without a connection.
-3. Customize the event title, labels, required rules, choices, field order and branding in the form editor. Choose **Save and preview** and use invented details in the private preview.
+3. Customize the event title, labels, required rules, choices, field order and branding in the form editor. Choose **Save and preview** for invented sample data, or **Save to FileMaker** and confirm the connection, database and layout. Submit the private browser form to create a real record.
 
-Reopen **Create FM Web App** to resume the saved app. **Export app** creates an editable app folder; it does not publish a public website. Registration submissions remain synthetic. Existing **Build a Portal**, Layout Mode and API commands are still available for advanced work.
+Reopen **Create FM Web App** to resume the saved app. **Export app** creates an editable app folder; it does not publish a public website. Sample preview remains synthetic; confirmed FileMaker mode uses persistent submission tracking and never retries an uncertain write automatically. Existing **Build a Portal**, Layout Mode and API commands are still available for advanced work.
 
 For Data API work, use **FileMaker: Add Connection Profile**, test and save the connection, then open **FileMaker: Open Query Builder**.
 

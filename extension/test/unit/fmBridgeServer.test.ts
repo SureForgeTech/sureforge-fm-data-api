@@ -28,6 +28,19 @@ describe('FmBridgeServer', () => {
     vi.mocked(vscode.window.showWarningMessage).mockReset().mockResolvedValue('Run script' as never);
   });
 
+  it('requires approved registration handler and clears it when stopped', async () => {
+    const client = createFmClientStub();const server = new FmBridgeServer(createProfileStoreStub(), client, createFmWebProjectServiceStub(), logger);
+    expect((await invokeBridgeRequest(server, '/fm/submitRegistration', { payload: {} })).status).toBe(403);
+    const handler = vi.fn(async () => ({ status: 'accepted', receipt: 'fm-42' }));server.setRegistrationHandler(handler);
+    expect((await invokeBridgeRequest(server, '/fm/submitRegistration', { payload: { intakeId: 'event-registration' } })).json).toEqual({ status: 'accepted', receipt: 'fm-42' });
+    expect(handler).toHaveBeenCalledWith({ intakeId: 'event-registration' });expect(client.createRecord).not.toHaveBeenCalled();
+    await server.stop();expect((await invokeBridgeRequest(server, '/fm/submitRegistration', { payload: {} })).status).toBe(403);
+  });
+  it('applies write policy before approved registration dispatch', async () => {
+    const server = new FmBridgeServer(createProfileStoreStub(), createFmClientStub(), createFmWebProjectServiceStub(), logger, { authorizeRoute: async () => 'Writes disabled' });
+    const handler = vi.fn(async () => ({ status: 'accepted' }));server.setRegistrationHandler(handler);
+    expect((await invokeBridgeRequest(server, '/fm/submitRegistration', { payload: {} })).status).toBe(403);expect(handler).not.toHaveBeenCalled();
+  });
   it.each([null, 'http://localhost:3001', 'http://127.0.0.1:3001', 'https://localhost:3000',
     'http://localhost:3000/', 'http://user@localhost:3000', 'null'])('A1 refuses absent or non-preview origin %s even with a valid token', async (origin) => {
     const client = createFmClientStub();

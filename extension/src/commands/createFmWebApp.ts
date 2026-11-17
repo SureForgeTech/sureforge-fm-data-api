@@ -110,7 +110,8 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
     changeSource: async () => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true }); },
     run: async (action) => {
       assertAvailable();
-      if (action === 'preview') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
+      if (action === 'filemaker') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration', registrationMode: 'filemaker' });
+      else if (action === 'preview') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
       else if (action === 'layout') await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: selectedModel.layout.id });
       else {
         await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');

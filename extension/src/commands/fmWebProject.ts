@@ -1,3 +1,8 @@
+import { intakeDefinitionSchema, layoutDefinitionSchema, stableRecordStringify } from '@fmweb/shared';
+import { FmWebRegistrationService } from '../services/fmWebRegistrationService';
+import { designerLayoutMetadata } from '../fmweb/fieldMetadata';
+import { writableAppFields } from '../services/fmWebAppModel';
+import { bridgeRouteRefusal } from '../utils/bridgePolicy';
 import { readFile } from 'fs/promises';
 import path from 'path';
 import { displayText } from '../ai/aiText';
@@ -340,22 +345,64 @@ export function registerFmWebProjectCommands(
         if (skippedLayouts.length) void vscode.window.showWarningMessage(`These layouts were skipped in the preview because their generated files were edited or are symbolic links: ${skippedLayouts.join(', ')}. Your files were left untouched.`);
         const runtimeRoot = fmWebRuntimeGenerator.getGeneratedRuntimeRoot();
         const templateFiles = await fmWebRuntimeGenerator.previewTemplateFiles();
+        const real = arg && typeof arg === 'object' && 'registrationMode' in arg && arg.registrationMode === 'filemaker';
+        const requestedIntake = arg && typeof arg === 'object' && 'intakeId' in arg ? arg.intakeId : undefined;
+        const project = await fmWebProjectService.readProjectConfig();
+        const profileId = project?.activeProfileId ?? profileStore.getActiveProfileId();
+        const storedProfile = profileId ? await profileStore.getProfile(profileId) : undefined;
+        const profile = storedProfile ? structuredClone(storedProfile) : undefined;
+        const workspaceRoot = real ? fmWebProjectService.getWorkspaceRoot() : undefined;
+        let registration: { definition: ReturnType<typeof intakeDefinitionSchema.parse>; layout: ReturnType<typeof layoutDefinitionSchema.parse> } | undefined;
+        if (real) {
+          if (!profile || !context.globalStorageUri?.fsPath || !workspaceRoot) throw new Error('Choose FileMaker fields and a saved connection before enabling FileMaker saves.');
+          if (typeof requestedIntake !== 'string' || !/^[a-z][a-z0-9_-]{0,63}$/.test(requestedIntake)) throw new Error('Choose an existing registration app.');
+          const raw = portalFiles.intakes.get(`${requestedIntake}.intake.json`);
+          if (!raw) throw new Error('Choose an existing registration app.');
+          const definition = intakeDefinitionSchema.parse(JSON.parse(raw.toString('utf8')));
+          const source = portalFiles.layouts.get(`${definition.layoutId}.layout.json`);
+          if (!source) throw new Error('The registration source is missing.');
+          const layout = layoutDefinitionSchema.parse(JSON.parse(source.toString('utf8')));
+          if (!layout.fmLayoutName) throw new Error('Choose a FileMaker layout before enabling saves.');
+          const metadata = await fmClient.getLayoutMetadata(profile, layout.fmLayoutName, { recordHistory: false });
+          const writable = new Set(writableAppFields(designerLayoutMetadata(layout.fmLayoutName, metadata).fields).map((field) => field.name));
+          if (definition.fields.some((field) => !writable.has(field.fmFieldName))) throw new Error('The form contains fields that are missing, global or read-only on this connection. Choose FileMaker fields again.');
+          const refusal = bridgeRouteRefusal('/submitRegistration', vscode.workspace.getConfiguration('filemaker'), roleGuard);
+          if (refusal) throw new Error(refusal);
+          registration = { definition, layout };
+        }
+        const fieldNames = registration?.definition.fields.map((field) => displayText(field.fmFieldName, Infinity)).join(', ');
+        if (fieldNames && fieldNames.length > 12000) throw new Error('Choose fewer fields so the FileMaker save approval can show every exact field name.');
+        const connectionHost = registration && profile ? displayText(new URL(profile.authMode === 'proxy' ? profile.proxyEndpoint ?? profile.serverUrl : profile.serverUrl).host, Infinity) : '';
+        const runLabel = real ? 'Enable FileMaker saves' : 'Run';
+        const destination = registration && profile ? `\n\nREAL FILEMAKER SAVES: Submitting this form will create records.\nConnection: ${displayText(profile.name, Infinity)}\nServer host: ${connectionHost}\nDatabase: ${displayText(profile.database, Infinity)}\nLayout: ${displayText(registration.layout.fmLayoutName!, Infinity)}\nFields (${registration.definition.fields.length}): ${fieldNames}.\nDuplicate protection persists across restarts; uncertain writes must be checked in FileMaker before a new submission.` : '';
         const answer = await vscode.window.showWarningMessage(
-          `Start the FM Web preview?\n\nA fresh private temporary copy of the shipped template will run these commands:\n${previewInstallDescription(templateFiles)}\n${PREVIEW_DEV_DESCRIPTION}\n\nThe npm command uses pinned empty --userconfig and --globalconfig files, an explicit --prefix and private cache, and a cleared configuration environment. The template's preview server runs Next on 127.0.0.1:3000 and checks the private session before every request, hot reload included. Dependencies named in the template package.json are downloaded from registry.npmjs.org. No install scripts run.\n\nThe runtime checked was:\n${displayText(runtimeRoot, Infinity)}\n\nWorkspace npm configuration and .env overrides are ignored. Your runtime files are left untouched.${ignored.length ? `\nThese edited or added files are ignored in the private preview:\n${listing}` : ''}\n\nThe extension opens your browser with a one-time private launch link.`,
-          { modal: true }, 'Run'
+          `Start the FM Web preview?${destination}\n\nA fresh private temporary copy of the shipped template will run these commands:\n${previewInstallDescription(templateFiles)}\n${PREVIEW_DEV_DESCRIPTION}\n\nThe npm command uses pinned empty --userconfig and --globalconfig files, an explicit --prefix and private cache, and a cleared configuration environment. The template's preview server runs Next on 127.0.0.1:3000 and checks the private session before every request, hot reload included. Dependencies named in the template package.json are downloaded from registry.npmjs.org. No install scripts run.\n\nThe runtime checked was:\n${displayText(runtimeRoot, Infinity)}\n\nWorkspace npm configuration and .env overrides are ignored. Your runtime files are left untouched.${ignored.length ? `\nThese edited or added files are ignored in the private preview:\n${listing}` : ''}\n\nThe extension opens your browser with a one-time private launch link.`,
+          { modal: true }, runLabel
         );
-        if (answer !== 'Run') { await fmWebRuntimeGenerator.clearBridgeEnv(); return; }
+        if (answer !== runLabel) { await fmWebRuntimeGenerator.clearBridgeEnv(); return; }
         const bridge = await fmBridgeServer.ensureStarted();
         const token = fmBridgeServer.getSessionToken();
         if (!token) throw new Error('Bridge session is not ready.');
-        const project = await fmWebProjectService.readProjectConfig();
-        const profileId = project?.activeProfileId ?? profileStore.getActiveProfileId();
-        const profile = profileId ? await profileStore.getProfile(profileId) : undefined;
+        if (registration && profile) {
+          const binding = stableRecordStringify(profile as unknown as Record<string, unknown>);
+          const service = new FmWebRegistrationService({ ...registration, profile, ledgerRoot: path.join(context.globalStorageUri.fsPath, 'registration-receipts'),
+            createRecord: fmClient.createRecord.bind(fmClient),
+            assertAllowed: async () => {
+              const currentProject = await fmWebProjectService.readProjectConfig();
+              const currentProfile = await profileStore.getProfile(profile.id);
+              const refusal = bridgeRouteRefusal('/submitRegistration', vscode.workspace.getConfiguration('filemaker'), roleGuard);
+              if (!vscode.workspace.isTrusted || fmWebProjectService.getWorkspaceRoot() !== workspaceRoot || fmBridgeServer.getSessionToken() !== token
+                || (currentProject?.activeProfileId ?? profileStore.getActiveProfileId()) !== profile.id || !currentProfile
+                || stableRecordStringify(currentProfile as unknown as Record<string, unknown>) !== binding || refusal) throw new Error('The approved connection, workspace, session or write policy changed. Start Save to FileMaker again.');
+            } });
+          fmBridgeServer.setRegistrationHandler((payload) => service.submit(payload));
+        }
         preview = new FmWebPreviewProcess();
         const intakeId = arg && typeof arg === 'object' && 'intakeId' in arg ? arg.intakeId : undefined;
         if (intakeId !== undefined && (typeof intakeId !== 'string' || !/^[a-z][a-z0-9_-]{0,63}$/.test(intakeId) || !portalFiles.intakes.has(`${intakeId}.intake.json`))) throw new Error('Choose an existing app to preview.');
         const previewArgs = [templateFiles, layouts, bridge.baseUrl, token, profile?.serverUrl, portalFiles.intakes, portalFiles.layouts] as const;
-        if (typeof intakeId === 'string') await preview.start(...previewArgs, intakeId);
+        if (real && typeof intakeId === 'string') await preview.start(...previewArgs, intakeId, 'filemaker');
+        else if (typeof intakeId === 'string') await preview.start(...previewArgs, intakeId);
         else await preview.start(...previewArgs);
         vscode.window.showInformationMessage('FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.');
       } catch (error) {
