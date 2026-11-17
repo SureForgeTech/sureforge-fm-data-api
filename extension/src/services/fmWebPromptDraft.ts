@@ -86,12 +86,12 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   // Keep punctuation inside explicitly quoted FileMaker names intact.
   const clauses = fieldPrompt.match(/(?:["“][^"”\r\n]*["”]|[^"“;.!?,\r\n])+|[;.!?,\r\n]/g) ?? [];
   let inherited: boolean | undefined;
-  let negated = false;
+  let negated: 'exclude' | 'skip' | undefined;
   let comma = false;
   for (const raw of clauses) {
     if (/^[;.!?\r\n]$/.test(raw)) {
       inherited = undefined;
-      negated = false;
+      negated = undefined;
       comma = false;
       continue;
     }
@@ -140,15 +140,24 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const before = clause.slice(previousEnd, mention.start).trim();
       const after = clause.slice(mention.end, mentions.slice(index + 1).find((next) => next.start >= mention.end)?.start).trim();
       const isContinuation = /^and$/.test(before) || (comma && !before);
-      // Process directives in order. A negated include/require is one directive, not a positive command.
-      const directives = /\b(?:(do not|don t|dont|never)(?:\s+(?:include|add|collect|require|ask for))?|((?:exclude|omit|without|skip|no)(?: need for)?)|but|include|add|collect|require|ask for)\b/g;
+      // Negation continues through "or collect" and ends at an explicit positive instruction.
+      const directives = /\b(?:(do not|don t|dont|never)(?:\s+(include|add|collect|require|ask for))?|(exclude|omit|without|skip|no(?: need for)?)|(or\s+)?(?:but|include|add|collect|require|ask for))\b/g;
       for (const directive of before.matchAll(directives)) {
-        negated = Boolean(directive[1] || directive[2]);
+        if (directive[1] || directive[3]) negated = directive[2] === 'require' ? 'skip' : 'exclude';
+        else if (!directive[4]) negated = undefined;
       }
       const prefix = /\b(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before)?.[1];
       const suffix = /^(?:is|are|as) (required|optional)\b/.exec(after)?.[1];
       const requirement = qualifier(prefix ?? suffix ?? '');
-      if (!negated) append(mention, requirement ?? (isContinuation ? inherited : undefined));
+      if (!negated) {
+        append(mention, requirement ?? (isContinuation ? inherited : undefined));
+      } else if (negated === 'exclude') {
+        if (mention.candidates.length === 1) {
+          const name = mention.candidates[0]!.name;
+          draft.fields = draft.fields.filter(({ field }) => field.name !== name);
+        }
+        draft.unmatched = draft.unmatched.filter((label) => label !== mention.label);
+      }
       previousEnd = mention.end;
       comma = false;
       // Only a forward-scoped list requirement carries to the next coordinated item.

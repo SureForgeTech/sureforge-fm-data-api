@@ -88,6 +88,27 @@ describe('prompt form suggestions', () => {
     expect(result.fields.map(({ field }) => field.name)).toEqual(['zzfmquote1zz']);
   });
 
+  it('continues a negated directive across or but allows a positive instruction after but', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Do not include "Email" or collect "Phone".', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Do not include "Email", but collect "Phone".', fields).fields)
+      .toEqual([{ field: fields[1], required: undefined }]);
+  });
+
+  it('removes a previously suggested field and permits an explicit reinclude', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    const excludePhone = 'Include "Email" and "Phone". Exclude "Phone".';
+    expect(suggestPromptFields(excludePhone, fields).fields.map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields(excludePhone + ' Include optional "Phone".', fields).fields)
+      .toEqual([{ field: fields[0], required: undefined }, { field: fields[1], required: false }]);
+  });
+
+  it('does not remove an included field just because it should not be required', () => {
+    const fields = [{ name: 'Phone' }];
+    expect(suggestPromptFields('Include "Phone". Do not require "Phone".', fields).fields)
+      .toEqual([{ field: fields[0], required: undefined }]);
+  });
+
   it('limits prompt size before attempting any match', () => {
     expect(() => suggestPromptFields('x'.repeat(MAX_FORM_PROMPT_LENGTH + 1), [])).toThrow('2,000 characters');
   });
