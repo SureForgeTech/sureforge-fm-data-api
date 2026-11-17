@@ -9,7 +9,7 @@ import type { FmBridgeServer } from '../services/fmBridgeServer';
 import { FmWebIntakeService } from '../services/fmWebIntakeService';
 import type { FmWebProjectService } from '../services/fmWebProjectService';
 import type { FmWebRuntimeGenerator } from '../services/fmWebRuntimeGenerator';
-import { GenerationSkippedError } from '../services/generatedFileWriter';
+import { GenerationCancelledError, GenerationSkippedError } from '../services/generatedFileWriter';
 import type { Logger } from '../services/logger';
 import type { ProfileStore } from '../services/profileStore';
 import type { SchemaService } from '../services/schemaService';
@@ -231,12 +231,17 @@ export function registerFmWebProjectCommands(
           await fmWebRuntimeGenerator.removePreviewFiles(files);
         }
         const summary = await fmWebRuntimeGenerator.generateRuntimeAppTemplate();
-        const skippedPortalFiles = await intakes.exportSnapshot(portalFiles);
-        if (skippedPortalFiles.length) void vscode.window.showWarningMessage('Some existing portal data files were preserved. The exported app uses those saved copies; review them before running it.');
         vscode.window.showInformationMessage(
           `Generated Next.js runtime template in .fmweb/generated/runtime-next (${summary.created.length} created, ${summary.updated.length} updated, ${summary.skipped.length} skipped).`
         );
         warnAboutEditedManagedFiles(summary.needsManualUpdate);
+        try {
+          const skippedPortalFiles = await intakes.exportSnapshot(portalFiles);
+          if (skippedPortalFiles.length) void vscode.window.showWarningMessage('Some existing portal data files were preserved. The exported app uses those saved copies; review them before running it.');
+        } catch (error) {
+          if (!(error instanceof GenerationCancelledError)) throw error;
+          void vscode.window.showInformationMessage('The runtime app was generated. Only portal data export was cancelled; existing exported data was preserved.');
+        }
       } catch (error) {
         await showCommandError(error, {
           fallbackMessage: 'Failed to generate FM Web Next.js runtime template.',

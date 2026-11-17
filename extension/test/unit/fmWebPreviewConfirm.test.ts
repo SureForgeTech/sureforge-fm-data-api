@@ -5,10 +5,11 @@ import path from 'path';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
-import { GenerationSkippedError } from '../../src/services/generatedFileWriter';
+import { GenerationCancelledError, GenerationSkippedError } from '../../src/services/generatedFileWriter';
 
+const portalExport = vi.hoisted(() => vi.fn(async () => [] as string[]));
 const portalSnapshot = vi.hoisted(() => vi.fn(async () => ({ intakes: new Map<string, Buffer>(), layouts: new Map<string, Buffer>() })));
-vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { previewFiles = portalSnapshot; async exportSnapshot() { return []; } } }));
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { previewFiles = portalSnapshot; exportSnapshot = portalExport; } }));
 
 const processStart = vi.hoisted(() => vi.fn(async () => undefined));
 const processDispose = vi.hoisted(() => vi.fn(async () => undefined));
@@ -25,7 +26,7 @@ function start() {
     inspectPreviewFiles: vi.fn(async () => [] as string[]),
     removePreviewFiles: vi.fn(async () => undefined),
     previewTemplateFiles: vi.fn(async () => new Map()),
-    generateRuntimeAppTemplate: vi.fn(async () => undefined),
+    generateRuntimeAppTemplate: vi.fn(async () => ({ created: [] as string[], updated: [] as string[], skipped: [] as string[], needsManualUpdate: [] as string[] })),
     listLayoutDefinitions: vi.fn(async (): Promise<Array<{ id: string; name: string }>> => []),
     generateLayoutPage: vi.fn(async (): Promise<{ outputPath: string }> => ({ outputPath: '' })),
     writeBridgeEnv: vi.fn(async () => undefined),
@@ -63,6 +64,17 @@ function start() {
 }
 
 describe('FM Web preview', () => {
+  it('reports completed runtime generation and edited-file warnings when only portal data export is cancelled', async () => {
+    const { regenerate, generator } = start();
+    generator.generateRuntimeAppTemplate.mockResolvedValueOnce({ created: ['app/page.tsx'], updated: [], skipped: [], needsManualUpdate: ['shared/src/index.ts'] });
+    portalExport.mockRejectedValueOnce(new GenerationCancelledError());
+    await regenerate();
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('1 created'));
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(expect.stringContaining('Only portal data export was cancelled'));
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('shared/src/index.ts'));
+    expect(vscode.window.showErrorMessage).not.toHaveBeenCalled();
+  });
+
   it('keeps edited normal layout artifacts skipped while passing portal sources separately', async () => {
     const id = 'a1111111-1111-4111-8111-111111111111';
     const source = Buffer.from('{"source":"portal"}');
@@ -98,6 +110,7 @@ describe('FM Web preview', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     portalSnapshot.mockReset().mockResolvedValue({ intakes: new Map(), layouts: new Map() });
+    portalExport.mockReset().mockResolvedValue([]);
     (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
   });
 
