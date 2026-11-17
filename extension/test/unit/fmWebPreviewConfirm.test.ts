@@ -164,6 +164,7 @@ describe('FM Web preview', () => {
     const { run, bridge } = start();await run({ intakeId: 'event-registration', registrationMode: 'filemaker' });
     expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(expect.stringContaining('REAL FILEMAKER SAVES'), { modal: true }, 'Enable FileMaker saves');
     const prompt = String(vi.mocked(vscode.window.showWarningMessage).mock.calls[0]?.[0]);expect(prompt).toContain('Registration QA');expect(prompt).toContain('Events');expect(prompt).toContain(' Registrations ');
+    expect(prompt).toContain('fm.example.com');for (const field of app.definition.fields) expect(prompt).toContain(field.fmFieldName);
     expect(bridge.setRegistrationHandler).toHaveBeenCalledOnce();
     expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', intakes, layouts, 'event-registration', 'filemaker');
   });
