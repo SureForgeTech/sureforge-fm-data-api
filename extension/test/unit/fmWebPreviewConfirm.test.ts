@@ -7,7 +7,8 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { registerFmWebProjectCommands } from '../../src/commands/fmWebProject';
 import { GenerationSkippedError } from '../../src/services/generatedFileWriter';
 
-vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { async previewFiles() { return { intakes: new Map(), layouts: new Map() }; } async exportSnapshot() { return []; } } }));
+const portalSnapshot = vi.hoisted(() => vi.fn(async () => ({ intakes: new Map<string, Buffer>(), layouts: new Map<string, Buffer>() })));
+vi.mock('../../src/services/fmWebIntakeService', () => ({ FmWebIntakeService: class { previewFiles = portalSnapshot; async exportSnapshot() { return []; } } }));
 
 const processStart = vi.hoisted(() => vi.fn(async () => undefined));
 const processDispose = vi.hoisted(() => vi.fn(async () => undefined));
@@ -62,10 +63,22 @@ function start() {
 }
 
 describe('FM Web preview', () => {
+  it('validates portal export before inspecting or changing runtime files', async () => {
+    const { regenerate, generator } = start();
+    portalSnapshot.mockRejectedValueOnce(new Error('Cannot export portal definition "broken.intake.json".'));
+    await regenerate();
+    expect(portalSnapshot).toHaveBeenCalledWith('export');
+    expect(generator.inspectPreviewFiles).not.toHaveBeenCalled();
+    expect(generator.removePreviewFiles).not.toHaveBeenCalled();
+    expect(generator.generateRuntimeAppTemplate).not.toHaveBeenCalled();
+    expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('Cannot export portal definition'), 'Details…', 'Copy as Bug Report');
+  });
+
   let directory: string | undefined;
   afterEach(async () => { if (directory) await rm(directory, { recursive: true, force: true }); directory = undefined; });
   beforeEach(() => {
     vi.clearAllMocks();
+    portalSnapshot.mockReset().mockResolvedValue({ intakes: new Map(), layouts: new Map() });
     (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
   });
 

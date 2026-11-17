@@ -72,7 +72,7 @@ export class FmWebIntakeService {
     const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${id}.intake.json`));
     const definition = intakeDefinitionSchema.parse(await this.read(definitionPath));
     if (definition.id !== id) throw new Error('Portal filename and identifier must match.');
-    if (definition.environmentId !== 'sample') throw new Error('This portal preview supports only the sample environment. No live FileMaker adapter is configured.');
+    if (definition.environmentId !== 'sample') throw new Error('This portal starter supports only the sample environment. No live FileMaker adapter is configured.');
     const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${definition.layoutId}.layout.json`));
     const layout = layoutDefinitionSchema.parse(await this.read(layoutPath));
     // Validate every mapping, not just the form JSON shape.
@@ -98,17 +98,19 @@ export class FmWebIntakeService {
     return writeGeneratedFiles(files, await realpath(this.project.getWorkspaceRoot()!), { confirmExisting: true });
   }
 
-  public async previewFiles(): Promise<PortalPreviewFiles> {
+  public async previewFiles(purpose: 'preview' | 'export' = 'preview'): Promise<PortalPreviewFiles> {
     const directory = path.join(this.project.getProjectRoot(), 'intakes');
     await this.confined(path.join(directory, 'check.intake.json'));
     let entries: string[];
     try { entries = (await readdir(directory)).filter((name) => name.endsWith('.intake.json')); }
     catch (error) { if ((error as NodeJS.ErrnoException).code === 'ENOENT') return { intakes: new Map(), layouts: new Map() }; throw error; }
-    if (entries.length > 50) throw new Error('Preview at most 50 portal definitions at a time.');
+    if (entries.length > 50) throw new Error(`Cannot ${purpose} more than 50 portal definitions at a time.`);
     const intakes = new Map<string, Buffer>();
     const layouts = new Map<string, Buffer>();
     for (const name of entries.sort()) {
-      const saved = await this.load(name.slice(0, -'.intake.json'.length));
+      let saved: SavedIntake;
+      try { saved = await this.load(name.slice(0, -'.intake.json'.length)); }
+      catch { throw new Error(`Cannot ${purpose} portal definition ${JSON.stringify(name)}. Check its schema, sample environment and exact mappings to an existing source layout.`); }
       intakes.set(name, Buffer.from(JSON.stringify(saved.definition)));
       layouts.set(`${saved.layout.id}.layout.json`, Buffer.from(JSON.stringify(saved.layout)));
     }

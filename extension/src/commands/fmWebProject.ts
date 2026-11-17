@@ -192,7 +192,7 @@ export function registerFmWebProjectCommands(
       }
 
       try {
-        const portalFiles = await intakes.previewFiles();
+        const portalFiles = await intakes.previewFiles('export');
         const files = await fmWebRuntimeGenerator.inspectPreviewFiles();
         if (files.length) {
           const listing = files.map((file) => displayText(file, Infinity)).join('\n');
