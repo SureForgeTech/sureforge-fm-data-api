@@ -95,6 +95,9 @@ describe('shared submission validation', () => {
   it('uses the existing numeric conversion without rounding large FileMaker values', () => {
     expect(validateIntakeSubmission(field('number'), { value: '9007199254740993' })).toMatchObject({ valid: true, fieldData: { ' Exact::Field ': '9007199254740993' } });
     expect(validateIntakeSubmission(field('number'), { value: '12.5' })).toMatchObject({ valid: true, fieldData: { ' Exact::Field ': 12.5 } });
+    for (const value of ['12345678901234.567', '0.12345678901234567890', '-9007199254740990.5']) {
+      expect(validateIntakeSubmission(field('number'), { value })).toMatchObject({ valid: true, fieldData: { ' Exact::Field ': value } });
+    }
   });
 });
 
