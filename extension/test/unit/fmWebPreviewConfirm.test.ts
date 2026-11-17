@@ -58,7 +58,7 @@ function start() {
   const registered = vi.mocked(vscode.commands.registerCommand).mock.calls.filter(
     ([id]) => id === 'filemakerDataApiTools.startFmWebPreviewServer'
   );
-  const handler = registered[registered.length - 1]?.[1] as () => Promise<void>;
+  const handler = registered[registered.length - 1]?.[1] as (arg?: unknown) => Promise<void>;
   const regenerate = vi.mocked(vscode.commands.registerCommand).mock.calls.filter(([id]) => id === 'filemakerDataApiTools.generateFmWebNextApp').pop()?.[1] as () => Promise<void>;
   return { run: handler, regenerate, terminal, generator, bridge };
 }
@@ -151,6 +151,34 @@ describe('FM Web preview', () => {
 
     expect(terminal.sendText).not.toHaveBeenCalled();
     expect(processStart).toHaveBeenCalledWith(expect.any(Map), expect.any(Map), 'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', expect.any(Map), expect.any(Map));
+  });
+
+  it('passes the explicitly selected saved intake as the eighth private preview argument', async () => {
+    const intakes = new Map([['event-registration.intake.json', Buffer.from('{"id":"event-registration"}')]]);
+    const layouts = new Map([['a1111111-1111-4111-8111-111111111111.layout.json', Buffer.from('{}')]]);
+    portalSnapshot.mockResolvedValueOnce({ intakes, layouts });
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Run' as never);
+    const { run } = start();
+
+    await run({ intakeId: 'event-registration' });
+
+    expect(processStart).toHaveBeenCalledExactlyOnceWith(expect.any(Map), expect.any(Map),
+      'http://127.0.0.1:1234', 'session-token', 'https://fm.example.com/fmi', intakes, layouts, 'event-registration');
+    expect(vscode.window.showErrorMessage).not.toHaveBeenCalled();
+  });
+
+  it('rejects a selected intake absent from the saved snapshot without starting preview', async () => {
+    portalSnapshot.mockResolvedValueOnce({
+      intakes: new Map([['another-app.intake.json', Buffer.from('{}')]]), layouts: new Map()
+    });
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Run' as never);
+    const { run } = start();
+
+    await run({ intakeId: 'event-registration' });
+
+    expect(processStart).not.toHaveBeenCalled();
+    expect(vscode.window.showErrorMessage).toHaveBeenCalledWith(expect.stringContaining('Choose an existing app to preview.'), 'Details…', 'Copy as Bug Report');
+    expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
   });
 
   it('passes bridge credentials only to the private process, leaving runtime env files untouched', async () => {
