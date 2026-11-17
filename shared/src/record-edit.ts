@@ -220,7 +220,9 @@ export function numericText(value: string): number | string {
 function decimalIdentity(mantissa: string, exponent: number): string {
   const fractionLength = mantissa.split('.')[1]?.length ?? 0;
   const digits = mantissa.replace('.', '').replace(/^0+/, '');
-  const significant = digits.replace(/0+$/, '');
+  let end = digits.length;
+  while (end > 0 && digits.charCodeAt(end - 1) === 48) end--;
+  const significant = digits.slice(0, end);
   return `${significant}:${exponent - fractionLength + digits.length - significant.length}`;
 }
 
