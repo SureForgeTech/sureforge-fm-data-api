@@ -72,23 +72,22 @@ export function migrateIntakeSource(definition: IntakeDefinition, input: unknown
     // The legacy migration creates an id; the confined source filename already supplies the stable reference here.
     layout.id = form.layoutId;
     const fields = Array.isArray(raw.objects) ? raw.objects : [];
-    layout.objects = layout.objects.map((object) => {
-      if (object.type !== 'field') return object;
-      let kind = runtimeFieldKind(object);
-      for (const entry of fields) {
-        if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
-        const original = entry as Record<string, unknown>;
-        if (original.fmFieldName !== object.fmFieldName) continue;
-        const metadata = original.metadata && typeof original.metadata === 'object' ? original.metadata as Record<string, unknown> : {};
-        const text = (value: unknown): string | undefined => typeof value === 'string' ? value : undefined;
-        const hinted = runtimeFieldKind({ fmFieldName: object.fmFieldName, kind: text(original.kind), result: text(original.result),
-          metadata: { type: text(metadata.type), result: text(metadata.result) } });
-        const global = layoutFieldKind({ name: object.fmFieldName, global: original.global ?? metadata.global, type: text(metadata.type) });
-        if (hinted !== 'normal') kind = hinted;
-        else if (global !== 'normal') kind = global;
-      }
-      return { ...object, kind };
-    });
+    const access = new Map<string, ReturnType<typeof runtimeFieldKind>>();
+    const text = (value: unknown): string | undefined => typeof value === 'string' ? value : undefined;
+    for (const entry of fields) {
+      if (!entry || typeof entry !== 'object' || Array.isArray(entry)) continue;
+      const original = entry as Record<string, unknown>;
+      if (typeof original.fmFieldName !== 'string') continue;
+      const metadata = original.metadata && typeof original.metadata === 'object' ? original.metadata as Record<string, unknown> : {};
+      const hinted = runtimeFieldKind({ fmFieldName: original.fmFieldName, kind: text(original.kind), result: text(original.result),
+        metadata: { type: text(metadata.type), result: text(metadata.result) } });
+      const global = layoutFieldKind({ name: original.fmFieldName, global: original.global ?? metadata.global, type: text(metadata.type) });
+      const kind = hinted === 'normal' ? global : hinted;
+      // Any read-only hint wins when legacy data repeats a field. Normal entries never erase it.
+      if (kind !== 'normal' || !access.has(original.fmFieldName)) access.set(original.fmFieldName, kind);
+    }
+    layout.objects = layout.objects.map((object) => object.type === 'field'
+      ? { ...object, kind: access.get(object.fmFieldName) ?? runtimeFieldKind(object) } : object);
   }
   return layout;
 }
