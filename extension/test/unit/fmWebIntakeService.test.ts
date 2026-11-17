@@ -15,6 +15,17 @@ function fixture() {
 beforeEach(async () => { root = await mkdtemp(path.join(tmpdir(), 'fmweb-intake-')); trusted = true; });
 afterEach(async () => { await rm(root, { recursive: true, force: true }); });
 describe('saved portal starters', () => {
+  it('accepts a trusted workspace root alias while refusing short-name candidates below it', async () => {
+    const parent = root;
+    try {
+      root = path.join(parent, 'TRUSTED~1');await mkdir(root);
+      const { service, project } = fixture();
+      expect((await service.ensureEventStarter()).definition.id).toBe('event-registration');
+      const unsafe = new FmWebIntakeService({ ...project, getProjectRoot: () => path.join(root, 'NESTED~1') });
+      await expect(unsafe.ensureEventStarter()).rejects.toThrow('short name');
+    } finally { root = parent; }
+  });
+
   it('resolves source repair independently of mapping, environment and presentation validity', async () => {
     const { service } = fixture();const saved = await service.ensureEventStarter();
     await writeFile(saved.definitionPath, JSON.stringify({ ...saved.definition, environmentId: 'production', branding: { accentColor: 'invalid' }, fields: [] }));

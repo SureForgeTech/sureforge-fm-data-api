@@ -78,7 +78,7 @@ describe('private preview process', () => {
     expect(JSON.parse(await readFile(path.join(root, 'intakes', 'event-registration.intake.json'), 'utf8')).id).toBe('event-registration');
     expect(JSON.parse(await readFile(path.join(root, 'intake-layouts', 'a1111111-1111-4111-8111-111111111111.layout.json'), 'utf8')).name).toBe('portal source');
     expect(JSON.parse(await readFile(path.join(root, 'layouts', 'source.layout.json'), 'utf8')).id).toBe('source');
-    expect((await lstat(path.join(root, 'intakes', 'event-registration.intake.json'))).mode & 0o777).toBe(0o600);
+    if (globalThis.process.platform !== 'win32') expect((await lstat(path.join(root, 'intakes', 'event-registration.intake.json'))).mode & 0o777).toBe(0o600);
   });
 
   it.each(['../escape.intake.json', 'Upper.intake.json', 'bad.json'])('rejects unsafe intake filename %s before spawning', async (name) => {
