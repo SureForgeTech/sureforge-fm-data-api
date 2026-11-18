@@ -8,7 +8,7 @@ Choose **Try sample fields** to start with invented data and no connection, or *
 
 Choose **Draft form from a prompt** to describe the fields you want. Pick a FileMaker layout, review the suggested mappings, and adjust the draft in the form editor. Suggestions use field metadata and the extension matches them on your computer.
 
-Choose **Save and preview** for an invented-data sample, or **Save to FileMaker** to accept real registrations. The latter saves the app and names the connection, database and layout in a native confirmation. Choose **Enable FileMaker saves**, then submit the private browser form to create a real record. Credentials stay in the extension. Return to **Create FM Web App** to continue editing the saved app.
+Choose **Save and preview** for an invented-data sample, or **Save to FileMaker** to accept real submissions. The latter saves the app and names the connection, database and layout in a native confirmation. Choose **Enable FileMaker saves**, then submit the private browser form to create a real record. Credentials stay in the extension. Return to **Create FM Web App** to continue editing the saved app.
 
 A repeated submission identifier reuses its original receipt after success. An uncertain write is never retried automatically, even after restarting the preview; check FileMaker before starting a new submission.
 
