@@ -187,4 +187,28 @@ describe('prompt form suggestions', () => {
     const result = suggestPromptFields('Require "Name and email', [{ name: 'Name' }, { name: 'Email' }]);
     expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([['Name', true], ['Email', true]]);
   });
+
+  it('does not take the article for the title', () => {
+    expect(suggestPromptFields('Make a form with email.', [{ name: 'Email' }]).title).toBeUndefined();
+    expect(suggestPromptFields('Make the form.', []).title).toBeUndefined();
+    expect(suggestPromptFields('Make a registration form.', []).title).toBe('Registration');
+    expect(suggestPromptFields('Create an A Team form with email.', [{ name: 'Email' }]).title).toBe('A Team');
+  });
+
+  it('suggests the fields named in the title as well', () => {
+    const result = suggestPromptFields('Make a name and email form.', [{ name: 'Name' }, { name: 'Email' }]);
+    expect(result.title).toBe('Name and email');
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['Name', 'Email']);
+  });
+
+  it('reads a requirement negation that follows the field', () => {
+    const fields = [{ name: 'Email' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Require email, notes not required.', fields).fields
+      .map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
+    expect(suggestPromptFields('Require email, notes optional.', fields).fields
+      .map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
+    expect(suggestPromptFields("Require email, don't include phone, notes not required.", [
+      { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }
+    ]).fields.map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
+  });
 });

@@ -56,10 +56,12 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   if (prompt.length > MAX_FORM_PROMPT_LENGTH) throw new Error('Describe your form in 2,000 characters or fewer.');
   const explicitTitle = /\b(?:titled|called)\s+["“]([^"”\r\n]{1,160})["”]/i.exec(prompt);
   // The captured descriptor must not be the article itself, so "Make a form." has no title rather than "A".
-  const openingTitle = /^\s*(?:build|create|draft|make)\s+(?:(?:a|an|the)\s+)?((?!\s*(?:a|an|the)\s)[^.;!?\r\n]{1,160}?)\s+form\b/i.exec(prompt);
+  const openingTitle = /^\s*(?:build|create|draft|make)\s+(?:(?:a|an|the)\s+)?((?!(?:a|an|the)\s+form\b)[^.;!?\r\n]{1,160}?)\s+form\b/i.exec(prompt);
   const opening = openingTitle?.[1]?.trim();
   const title = explicitTitle?.[1]?.trim() || (opening ? opening.charAt(0).toUpperCase() + opening.slice(1) : undefined);
-  const fieldPrompt = prompt.replace(explicitTitle?.[0] ?? '', '').replace(openingTitle?.[0] ?? '', '');
+  // The opening title stays in the field prompt: "Make a name and email form." names two fields as well as a
+  // title, and dropping it would lose them. An explicitly quoted title is a title, so it is removed.
+  const fieldPrompt = prompt.replace(explicitTitle?.[0] ?? '', '');
   const draft: PromptFormDraft = { title, fields: [], unmatched: [] };
   const writable = writableAppFields([...fields]);
   const byName = new Map<string, DesignerFieldMetadata[]>();
@@ -168,7 +170,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // The head clause's own polarity starts the list's anchor.
       if (headPending) { anchorNegated = negated; headPending = false; }
       const prefix = /\b(not\s+(?:\w+\s+)?)?(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before);
-      const suffix = /^(?:is|are|as) (not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
+      const suffix = /^(?:(?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
       const requirement = qualifier((prefix ?? suffix)?.[2] ?? '', Boolean((prefix ?? suffix)?.[1]));
       if (!negated) {
         append(mention, requirement ?? (isContinuation ? inherited : undefined));
