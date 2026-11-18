@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Describe a form in Create FM Web App and review suggested FileMaker fields in the visual editor.
+
 **Licence**
 
 - The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.

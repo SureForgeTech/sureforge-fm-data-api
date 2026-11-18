@@ -17,7 +17,7 @@ interface CapturedPanel {
   secretStore: { setPassword: ReturnType<typeof vi.fn> };
 }
 
-function setupPanel(editingProfile?: Record<string, unknown>, afterSave?: 'createFmWebApp'): CapturedPanel {
+function setupPanel(editingProfile?: Record<string, unknown>, afterSave?: 'createFmWebApp' | 'draftFmWebApp'): CapturedPanel {
   const posted: unknown[] = [];
   let messageHandler: ((message: unknown) => unknown) | undefined;
 
@@ -118,6 +118,12 @@ describe('Connection wizard post-save connect offer', () => {
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled();release();
     await vi.waitFor(() => expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true }));
     expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
+  });
+  it('resumes the prompt path after the first connection is saved', async () => {
+    const panel = setupPanel(undefined, 'draftFmWebApp');
+    await panel.fireMessage(validSavePayload);
+    await vi.waitFor(() => expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
+      'filemakerDataApiTools.createFmWebApp', { source: 'draft', changeSource: true }));
   });
   it('does not resume app creation when credentials fail to save', async () => {
     const panel = setupPanel(undefined, 'createFmWebApp');panel.secretStore.setPassword.mockRejectedValueOnce(new Error('Credential store unavailable'));

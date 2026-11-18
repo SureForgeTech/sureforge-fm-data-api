@@ -4,6 +4,7 @@ import { designerLayoutMetadata } from '../fmweb/fieldMetadata';
 import { FmWebAppPanel } from '../webviews/fmWebApp';
 import { FmWebIntakeService, type SavedIntake } from '../services/fmWebIntakeService';
 import { registrationAppFromFields, writableAppFields } from '../services/fmWebAppModel';
+import { MAX_FORM_PROMPT_LENGTH, suggestPromptFields } from '../services/fmWebPromptDraft';
 import type { FMClient } from '../services/fmClient';
 import type { FmWebProjectService } from '../services/fmWebProjectService';
 import type { FmWebRuntimeGenerator } from '../services/fmWebRuntimeGenerator';
@@ -18,7 +19,7 @@ interface CreateAppDependencies {
   fmClient: FMClient;
 }
 
-export interface CreateAppOptions { source?: 'filemaker'; changeSource?: boolean }
+export interface CreateAppOptions { source?: 'filemaker' | 'draft'; changeSource?: boolean }
 
 export async function createFmWebApp(deps: CreateAppDependencies, options: CreateAppOptions = {}): Promise<void> {
   const { context, project, generator, profileStore, fmClient } = deps;
@@ -41,6 +42,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
   let saved: SavedIntake | undefined;
   let model: { definition: IntakeDefinition; layout: LayoutDefinition };
   let profile: ConnectionProfile | undefined;
+  let draft: ReturnType<typeof suggestPromptFields> | undefined;
   try { saved = await intakes.loadForEditing('event-registration');model = saved; }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
@@ -49,8 +51,9 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
     catch (existingError) { if ((existingError as NodeJS.ErrnoException).code !== 'ENOENT') throw existingError; }
   }
   if (!saved || options.changeSource) {
-    const source = options.source === 'filemaker' ? { value: 'filemaker' } : await vscode.window.showQuickPick([
+    const source = options.source ? { value: options.source } : await vscode.window.showQuickPick([
       { label: 'Use FileMaker fields', description: 'Choose a connection, layout and registration fields', value: 'filemaker' },
+      { label: 'Draft form from a prompt', description: 'Describe a form and review suggested FileMaker fields', value: 'draft' },
       { label: 'Try sample fields', description: 'Start immediately without a FileMaker connection', value: 'sample' }
     ], { title: 'Create FM Web App · Event registration', placeHolder: 'Where should the form fields come from?', ignoreFocusOut: true });
     if (!source) return;
@@ -60,7 +63,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
       if (!profiles.length) {
         const answer = await vscode.window.showInformationMessage('Add a FileMaker connection to choose its fields.', 'Add Connection');
         if (answer !== 'Add Connection') return;
-        await vscode.commands.executeCommand('filemakerDataApiTools.addConnectionProfile', { continueToFmWebApp: true });
+        await vscode.commands.executeCommand('filemakerDataApiTools.addConnectionProfile', { continueToFmWebApp: true, ...(source.value === 'draft' ? { draft: true } : {}) });
         return;
       }
       const picked = await vscode.window.showQuickPick(profiles.map((item) => ({ label: item.name, description: item.database, profile: item })),
@@ -74,9 +77,33 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
       const all = designerLayoutMetadata(selected.name, metadata).fields;
       const writable = writableAppFields(all);
       if (!writable.length) throw new Error('This layout has no writable, nonglobal fields. Choose a registration layout with editable fields.');
-      const fields = await vscode.window.showQuickPick(writable.map((field) => ({ label: field.name,
-        description: field.type ?? 'Text', picked: /^(?:full[ _]?name|first[ _]?name|last[ _]?name|email(?:[ _]?address)?|session|notes)$/i.test(field.name.trim()), field })),
-      { title: 'Create FM Web App · Fields', placeHolder: 'Select 1–100 registration fields. Calculations, summaries, containers and globals are excluded.', canPickMany: true, ignoreFocusOut: true });
+      if (source.value === 'draft') {
+        const prompt = await vscode.window.showInputBox({
+          title: 'Draft form from a prompt',
+          prompt: 'Describe the fields you want. Suggestions use this layout’s field names.',
+          placeHolder: 'Require attendee name and email, add an optional session',
+          ignoreFocusOut: true,
+          validateInput: (value) => !value.trim() ? 'Describe at least one field.'
+            : value.length > MAX_FORM_PROMPT_LENGTH ? 'Use 2,000 characters or fewer.' : undefined
+        });
+        if (!prompt?.trim() || prompt.length > MAX_FORM_PROMPT_LENGTH) return;
+        draft = suggestPromptFields(prompt, writable);
+      }
+      const suggested = new Map(draft?.fields.map((item) => [item.field.name, item]));
+      const suggestedFields = draft?.fields.map((item) => item.field) ?? [];
+      const ordered = [...suggestedFields, ...writable.filter((field) => !suggested.has(field.name))];
+      const fields = await vscode.window.showQuickPick(ordered.map((field) => ({
+        label: field.name,
+        description: suggested.has(field.name) ? 'Suggested' : field.type ?? 'Text',
+        picked: draft ? suggested.has(field.name) : /^(?:full[ _]?name|first[ _]?name|last[ _]?name|email(?:[ _]?address)?|session|notes)$/i.test(field.name.trim()),
+        field
+      })), {
+        title: draft ? 'Review suggested FileMaker fields' : 'Create FM Web App · Fields',
+        placeHolder: draft && !suggested.size
+          ? 'No confident matches. Choose the FileMaker fields for your form.'
+          : 'Select 1–100 writable registration fields.',
+        canPickMany: true, ignoreFocusOut: true
+      });
       if (!fields) return;
       model = registrationAppFromFields(selected.name, fields.map((item) => item.field));
     }
@@ -88,6 +115,14 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         ? previous.definition.fields.find((item) => item.fmFieldName === field.fmFieldName) : undefined;
       return existing ? { ...existing, id: field.id, fmFieldName: field.fmFieldName } : field;
     }) } };
+  }
+  if (draft) {
+    if (draft.title) model!.definition.title = draft.title;
+    const suggested = new Map(draft.fields.map((item) => [item.field.name, item]));
+    for (const field of model!.definition.fields) {
+      const suggestion = suggested.get(field.fmFieldName);
+      if (suggestion?.required !== undefined) field.required = suggestion.field.required === true || suggestion.required;
+    }
   }
   assertAvailable();
   let preparedProfile = false;
@@ -107,7 +142,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         saved = saved ? await intakes.saveApp(definition, saved.revision, selectedModel.layout) : await intakes.createApp(definition, selectedModel.layout);
       } else saved = await intakes.saveApp(definition, saved.revision);
     },
-    changeSource: async () => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true }); },
+    changeSource: async (source = 'filemaker') => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source, changeSource: true }); },
     run: async (action) => {
       assertAvailable();
       if (action === 'filemaker') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration', registrationMode: 'filemaker' });
@@ -118,5 +153,5 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         await vscode.commands.executeCommand('revealInExplorer', vscode.Uri.file(generator.getGeneratedRuntimeRoot()));
       }
     }
-  });
+  }, draft);
 }
