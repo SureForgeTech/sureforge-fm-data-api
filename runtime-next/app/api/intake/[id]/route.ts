@@ -15,7 +15,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
   if (request.headers.get('origin') !== `http://${request.headers.get('host')}`) return reply({ error: 'Origin is not allowed.' }, 403);
   const { id } = await context.params;
   const example = await previewIntakes.load(id);
-  if (!example) return reply({ error: 'Unknown or invalid registration form.' }, 404);
+  if (!example) return reply({ error: 'Unknown or invalid form.' }, 404);
   if (request.headers.get('content-type')?.split(';')[0].trim().toLowerCase() !== 'application/json') return reply({ error: 'Use a JSON submission.' }, 415);
   let body = '';
   const reader = request.body?.getReader();

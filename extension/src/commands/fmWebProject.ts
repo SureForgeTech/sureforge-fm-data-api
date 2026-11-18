@@ -355,12 +355,12 @@ export function registerFmWebProjectCommands(
         let registration: { definition: ReturnType<typeof intakeDefinitionSchema.parse>; layout: ReturnType<typeof layoutDefinitionSchema.parse> } | undefined;
         if (real) {
           if (!profile || !context.globalStorageUri?.fsPath || !workspaceRoot) throw new Error('Choose FileMaker fields and a saved connection before enabling FileMaker saves.');
-          if (typeof requestedIntake !== 'string' || !/^[a-z][a-z0-9_-]{0,63}$/.test(requestedIntake)) throw new Error('Choose an existing registration app.');
+          if (typeof requestedIntake !== 'string' || !/^[a-z][a-z0-9_-]{0,63}$/.test(requestedIntake)) throw new Error('Choose an existing app.');
           const raw = portalFiles.intakes.get(`${requestedIntake}.intake.json`);
-          if (!raw) throw new Error('Choose an existing registration app.');
+          if (!raw) throw new Error('Choose an existing app.');
           const definition = intakeDefinitionSchema.parse(JSON.parse(raw.toString('utf8')));
           const source = portalFiles.layouts.get(`${definition.layoutId}.layout.json`);
-          if (!source) throw new Error('The registration source is missing.');
+          if (!source) throw new Error('The source layout is missing.');
           const layout = layoutDefinitionSchema.parse(JSON.parse(source.toString('utf8')));
           if (!layout.fmLayoutName) throw new Error('Choose a FileMaker layout before enabling saves.');
           const metadata = await fmClient.getLayoutMetadata(profile, layout.fmLayoutName, { recordHistory: false });
