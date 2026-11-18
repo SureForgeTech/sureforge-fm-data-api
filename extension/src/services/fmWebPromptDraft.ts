@@ -55,7 +55,8 @@ function qualifier(value: string, negated = false): boolean | undefined {
 export function suggestPromptFields(prompt: string, fields: readonly DesignerFieldMetadata[]): PromptFormDraft {
   if (prompt.length > MAX_FORM_PROMPT_LENGTH) throw new Error('Describe your form in 2,000 characters or fewer.');
   const explicitTitle = /\b(?:titled|called)\s+["“]([^"”\r\n]{1,160})["”]/i.exec(prompt);
-  const openingTitle = /^\s*(?:build|create|draft|make)\s+(?:(?:a|an|the)\s+)?([^.;!?\r\n]{1,160}?)\s+form\b/i.exec(prompt);
+  // The captured descriptor must not be the article itself, so "Make a form." has no title rather than "A".
+  const openingTitle = /^\s*(?:build|create|draft|make)\s+(?:(?:a|an|the)\s+)?((?!\s*(?:a|an|the)\s)[^.;!?\r\n]{1,160}?)\s+form\b/i.exec(prompt);
   const opening = openingTitle?.[1]?.trim();
   const title = explicitTitle?.[1]?.trim() || (opening ? opening.charAt(0).toUpperCase() + opening.slice(1) : undefined);
   const fieldPrompt = prompt.replace(explicitTitle?.[0] ?? '', '').replace(openingTitle?.[0] ?? '', '');
@@ -183,9 +184,13 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       }
       previousEnd = mention.end;
       comma = false;
-      // Only a forward-scoped list requirement carries to the next coordinated item.
-      if (negated || requirement === false || (!isContinuation && !prefix)) inherited = undefined;
-      else if (prefix) inherited = requirement;
+      // Only a forward-scoped list requirement carries to the next coordinated item. An exclusion says nothing
+      // about how mandatory the rest of the list is, so it does not end the requirement scope: "Require email,
+      // don't include phone, and notes." keeps notes with the required head of the list.
+      if (!negated) {
+        if (requirement === false || (!isContinuation && !prefix)) inherited = undefined;
+        else if (prefix) inherited = requirement;
+      }
     }
     // A clause that ends positive becomes the anchor for the items coordinated with it.
     if (negated === undefined) anchorNegated = undefined;
