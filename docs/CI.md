@@ -22,9 +22,9 @@ The `release` job and the dependency auto-merge workflow use the composite actio
 
 The tagged release pipeline keeps its `extension-vsix` workflow artifact for 14 days after upload. The `publish`, `publish-ovsx` and `release` jobs download it, so environment approvals and failed-job retries must leave time for those downloads before it expires. This limit does not delete published GitHub release assets.
 
-## Required status check
+## Required status checks
 
-The `main` rules require passing `build-test` and `e2e-ui-smoke` checks from GitHub Actions. The pull request also needs an eligible approval and resolved blocking review threads. CodeRabbit feedback is advisory.
+The `main` rules require passing `build-test` and `e2e-ui-smoke` checks from GitHub Actions. The pull request branch must be up to date with `main`. The pull request also needs an eligible approval and resolved blocking review threads. CodeRabbit feedback is advisory.
 
 After checkout and Node 22 setup, `build-test` runs, in order: the rotation calendar parser and reminder runner tests (`node --test scripts/*.test.mjs`, the shell expands the glob because Node 22 reads a directory argument as a module and fails), `npm ci`, `npm audit --omit=dev --audit-level=high`, lint (`--max-warnings=0`), workflow regression tests (`node --test .github/tests/ci.test.mjs`), the mock API contract (`npm run mock:check -w extension`), typecheck (the workspace TypeScript checks, including extension source and tests), `test:coverage` (Vitest, with coverage thresholds), build (shared output, esbuild bundles and webview assets), designer and runtime workspace tests (`npm test -w designer-ui -w runtime-next`, after shared is built), package check (`npm run package:check`: it first verifies that `extension/THIRD_PARTY_NOTICES.txt` is current, then runs `vsce package`), and the VSIX size budget. To run the checks locally (the size cap is enforced in CI):
 
@@ -50,7 +50,7 @@ If you add a check that should block merges, add its context to the branch prote
 
 After checkout and Node 22 setup, `cross-platform` runs on `windows-latest` and on `ubuntu-latest` (`fail-fast: false`, `permissions: contents: read`), in order: `npm ci`, `npm run build`, `npm test -w designer-ui -w runtime-next` (after shared is built), `npm run lint`, `npm run typecheck`, `npm run test:coverage` and `npm run package:check`. It does not run the dependency audit, workflow regression tests, mock API contract check or VSIX size budget (those stay in `build-test`), and it never touches the release jobs.
 
-It is **not a required check**: branch protection still requires only `build-test`, so a failure that only happens on one operating system is visible on the pull request without blocking unrelated work. Treat a red `cross-platform` run as a real bug on that platform: fix the product code or the test, and skip a test on a platform only with a stated reason and a test that covers the same behaviour there. Do not rename `build-test`.
+The required `build-test` job depends on both matrix jobs succeeding. A failure on either operating system blocks merge. Treat a red `cross-platform` run as a real bug on that platform: fix the product code or the test, and skip a test on a platform only with a stated reason and a test that covers the same behaviour there. Do not rename `build-test`.
 
 Windows checks out with `core.autocrlf=true` (Git for Windows default), which is deliberate: that is what Windows contributors have. `.gitattributes` sets `eol=lf`, so the working tree still comes out with LF.
 
@@ -74,7 +74,7 @@ On Windows, run them in PowerShell or cmd.exe with Node 22 and Git on the PATH (
 
 Two jobs drive a real VS Code (downloaded by `@vscode/test-electron`) through Playwright's Electron support, with the built VSIX installed, against the mock Data API in `extension/test/mock-server/`. The mock is the only server they talk to, so no FileMaker Server is needed. Both run on Linux only, because the desktop needs a display and `xvfb-run` provides one, and both run in strict mode (`E2E_STRICT=1`): a missing prerequisite, such as no VS Code download or no VSIX, fails the job instead of passing it silently.
 
-`e2e-ui-smoke` runs on every pull request, push to `main` and tag. It packages the VSIX and runs one journey, `extension/e2e-ui/journeys/j01b-first-run-happy-path.mjs`, selected with `E2E_ONLY=j01b`: add a profile, test the connection, save it, connect, and run the first query, all against the mock. It is short enough for every pull request, so the first-run path has a repeatable check. It is **not** a required status check: branch protection still requires only `build-test`, so a failure is visible on the pull request without blocking unrelated work.
+`e2e-ui-smoke` runs on every pull request, push to `main` and tag. It packages the VSIX and runs one journey, `extension/e2e-ui/journeys/j01b-first-run-happy-path.mjs`, selected with `E2E_ONLY=j01b`: add a profile, test the connection, save it, connect, and run the first query, all against the mock. It is short enough for every pull request, so the first-run path has a repeatable check. The smoke check is required on `main`.
 
 `e2e-ui` runs the full suite (every journey in `extension/e2e-ui/journeys/`) on a weekly schedule and before tagged releases. The tag `package` job depends on it, so a release is never published without a full real-desktop run.
 
@@ -91,7 +91,7 @@ Dependabot checks npm weekly (Monday 09:00 UTC) and GitHub Actions weekly. Root 
 
 | Update | Handling |
 | --- | --- |
-| Direct development dependency, patch or minor | `dependency-auto-merge.yml` enables auto-merge. GitHub merges only after `build-test` passes. |
+| Direct development dependency, patch or minor | `dependency-auto-merge.yml` enables auto-merge. GitHub merges once the pull request satisfies the required checks and review rules. |
 | Production dependency | Human review. |
 | Any major version not ignored above | Human review. |
 | Security update | Human review, reviewed daily. |
