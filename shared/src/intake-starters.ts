@@ -7,7 +7,10 @@ export interface IntakeStarter {
   id: string;
   label: string;
   description: string;
-  /** The copy a form built from this starter's fields carries. */
+  /**
+   * The copy a form built from this starter's FileMaker fields carries. The synthetic
+   * example keeps its own demo copy, as the event registration starter always has.
+   */
   copy: { title: string; description: string; submitLabel: string; successMessage: string };
   example: () => { definition: ReturnType<typeof intakeDefinitionSchema.parse>; layout: ReturnType<typeof layoutDefinitionSchema.parse> };
 }

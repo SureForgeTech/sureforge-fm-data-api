@@ -55,7 +55,7 @@ export class FmWebAppPanel {
         return;
       }
       const checked = intakeDefinitionSchema.safeParse(request.definition);
-      if (!checked.success) throw new Error('Check the event title, labels and character limits. Single-choice fields need 1–100 unique choices, each at most 200 characters.');
+      if (!checked.success) throw new Error('Check the form title, labels and character limits. Single-choice fields need 1–100 unique choices, each at most 200 characters.');
       const definition = checked.data;
       if (definition.id !== this.original.id || definition.layoutId !== this.original.layoutId || definition.environmentId !== this.original.environmentId
         || definition.fields.some((field) => !this.fields.some((allowed) => allowed.id === field.id && allowed.fmFieldName === field.fmFieldName))) {
@@ -71,7 +71,7 @@ export class FmWebAppPanel {
   }
 }
 
-export function renderAppEditor(webview: vscode.Webview, context: vscode.ExtensionContext, definition: IntakeDefinition, fields: IntakeField[], sourceName = 'Sample registration fields', draft?: { unmatched: string[] }): string {
+export function renderAppEditor(webview: vscode.Webview, context: vscode.ExtensionContext, definition: IntakeDefinition, fields: IntakeField[], sourceName = 'Sample fields', draft?: { unmatched: string[] }): string {
   const nonce = createNonce();
   const script = webview.asWebviewUri(vscode.Uri.joinPath(context.extensionUri, 'dist', 'webviews', 'fmWebApp', 'ui', 'main.js'));
   const selected = new Set(definition.fields.map((field) => field.id));
@@ -81,7 +81,7 @@ export function renderAppEditor(webview: vscode.Webview, context: vscode.Extensi
 <title>Create FM Web App</title><style nonce="${nonce}">${standardFieldsCss(true)}
 body{max-width:1000px;margin:0 auto;padding:24px}label{display:block;margin-top:12px}input,select,textarea{box-sizing:border-box;max-width:100%;width:100%}input[type=checkbox]{width:auto}fieldset{margin:16px 0;padding:16px;border:1px solid var(--vscode-panel-border)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.field-title{display:flex;align-items:center;gap:8px}.field-title label{margin:0}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.wide{grid-column:1/-1}code{white-space:pre-wrap;overflow-wrap:anywhere}button{cursor:pointer}#status{white-space:pre-wrap}#status.error{color:var(--vscode-errorForeground)}@media(max-width:600px){.field-grid{grid-template-columns:1fr}}
 </style></head><body class="fm-page"><h1>Create FM Web App</h1><p>Select fields, customize your form, then save and preview.</p><p>Field layout: <strong>${escapeHtml(sourceName)}</strong></p>
-<p role="note">Save and preview uses sample registrations. Save to FileMaker enables real record creation only after you confirm the connection and layout in VS Code.</p>
+<p role="note">Save and preview uses sample submissions. Save to FileMaker enables real record creation only after you confirm the connection and layout in VS Code.</p>
 ${draft ? '<p role="note">Review the suggested field mappings and required settings before saving.</p>' : ''}
 ${draft?.unmatched.length ? `<p>Check these requests against your FileMaker fields: ${escapeHtml(draft.unmatched.join(', '))}.</p>` : ''}
 <form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><button type="button" data-action="draft">Draft form from a prompt</button><fieldset><legend>Form and branding</legend>

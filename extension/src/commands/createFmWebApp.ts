@@ -87,7 +87,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
   if (!saved || options.changeSource) {
     const source = options.source ? { value: options.source } : await vscode.window.showQuickPick([
       { label: 'Try sample fields', description: 'Start immediately without a FileMaker connection', value: 'sample' },
-      { label: 'Use FileMaker fields', description: 'Choose a connection, layout and registration fields', value: 'filemaker' },
+      { label: 'Use FileMaker fields', description: 'Choose a connection, layout and fields', value: 'filemaker' },
       { label: 'Draft form from a prompt', description: 'Describe a form and review suggested FileMaker fields', value: 'draft' }
     ], { title: 'Create FM Web App · Data', placeHolder: 'Where should the form fields come from?', ignoreFocusOut: true });
     if (!source) return;
@@ -107,9 +107,9 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
       if (!picked) return;profile = picked.profile;
       const layouts = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading FileMaker layouts' }, () => fmClient.listLayouts(profile!));
       const selected = await vscode.window.showQuickPick(layouts.map((name) => ({ label: name, name })),
-        { title: 'Create FM Web App · Layout', placeHolder: 'Choose the layout containing registration fields', ignoreFocusOut: true });
+        { title: 'Create FM Web App · Layout', placeHolder: 'Choose the layout containing the fields', ignoreFocusOut: true });
       if (!selected) return;
-      const metadata = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading registration fields' }, () => fmClient.getLayoutMetadata(profile!, selected.name, { recordHistory: false }));
+      const metadata = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading fields' }, () => fmClient.getLayoutMetadata(profile!, selected.name, { recordHistory: false }));
       const all = designerLayoutMetadata(selected.name, metadata).fields;
       const writable = writableAppFields(all);
       if (!writable.length) throw new Error('This layout has no writable, nonglobal fields. Choose a registration layout with editable fields.');
@@ -137,7 +137,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         title: draft ? 'Review suggested FileMaker fields' : 'Create FM Web App · Fields',
         placeHolder: draft && !suggested.size
           ? 'No confident matches. Choose the FileMaker fields for your form.'
-          : 'Select 1–100 writable registration fields.',
+          : 'Select 1–100 writable fields.',
         canPickMany: true, ignoreFocusOut: true
       });
       if (!fields) return;
