@@ -112,7 +112,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
       const metadata = await vscode.window.withProgress({ location: vscode.ProgressLocation.Notification, title: 'Reading fields' }, () => fmClient.getLayoutMetadata(profile!, selected.name, { recordHistory: false }));
       const all = designerLayoutMetadata(selected.name, metadata).fields;
       const writable = writableAppFields(all);
-      if (!writable.length) throw new Error('This layout has no writable, nonglobal fields. Choose a registration layout with editable fields.');
+      if (!writable.length) throw new Error('This layout has no writable, nonglobal fields. Choose a layout with editable fields.');
       if (source.value === 'draft') {
         const prompt = await vscode.window.showInputBox({
           title: 'Draft form from a prompt',

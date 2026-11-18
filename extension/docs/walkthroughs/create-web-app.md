@@ -4,7 +4,7 @@ Run **FileMaker: Create FM Web App**, or use the new-file button above Connectio
 
 Choose a starter, **Event Registration** or **Feedback or Request Form**. The starter names the saved app, so choosing the same starter again reopens it instead of starting over.
 
-Choose **Try sample fields** to start with invented data and no connection, or **Use FileMaker fields** from a saved connection and layout. Select the registration fields, then edit the title, branding, labels, required rules and choices in the form editor. Use Move up and Move down to arrange fields.
+Choose **Try sample fields** to start with invented data and no connection, or **Use FileMaker fields** from a saved connection and layout. Select the fields, then edit the title, branding, labels, required rules and choices in the form editor. Use Move up and Move down to arrange fields.
 
 Choose **Draft form from a prompt** to describe the fields you want. Pick a FileMaker layout, review the suggested mappings, and adjust the draft in the form editor. Suggestions use field metadata and the extension matches them on your computer.
 
