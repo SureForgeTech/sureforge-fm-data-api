@@ -6,11 +6,12 @@ Reference for the FM Web workflow (Layout Mode, generated Next.js runtime and th
 
 **FileMaker: Create FM Web App** is the main entry point. It is also available from the new-file button above Connections and the first Getting Started step.
 
-1. Open a trusted workspace folder. Choose **Use FileMaker fields** or **Try sample fields**.
+1. Open a trusted workspace folder. Choose **Use FileMaker fields**, **Draft form from a prompt** or **Try sample fields**.
 2. For FileMaker fields, choose a saved connection, a layout and the registration fields. The picker excludes calculations, summaries, containers and globals. Exact layout and field names are preserved. If no connection exists, the flow offers the existing connection setup.
-3. Customize the event-registration form in its editor: event title and description, submit/success text, organization and accent color, included fields, labels, help, required rules, input types, maximum lengths and single-choice options. Move fields up or down to set their order.
-4. Choose **Save and preview** for a sample-only browser session with invented details, or **Save to FileMaker** to accept real registrations. The latter saves the form, names the connection, database and layout in a native confirmation, and opens a private browser session only after you choose **Enable FileMaker saves**. Submitting that browser form creates a real FileMaker record.
-5. Run **Create FM Web App** again to continue editing the saved app. No setup commands or JSON editing are needed for the normal create/customize/preview path.
+3. For a prompt, describe the form in your own words. The extension suggests the writable fields of the chosen layout that your wording points at, marks the ones you called required or optional, and lists the requests it could not map. Review the suggestions in the field picker and the form editor before saving. Exact layout and field names are preserved, and read-only or ambiguous fields are never suggested.
+4. Customize the event-registration form in its editor: event title and description, submit/success text, organization and accent color, included fields, labels, help, required rules, input types, maximum lengths and single-choice options. Move fields up or down to set their order.
+5. Choose **Save and preview** for a sample-only browser session with invented details, or **Save to FileMaker** to accept real registrations. The latter saves the form, names the connection, database and layout in a native confirmation, and opens a private browser session only after you choose **Enable FileMaker saves**. Submitting that browser form creates a real FileMaker record.
+6. Run **Create FM Web App** again to continue editing the saved app. No setup commands or JSON editing are needed for the normal create/customize/preview path.
 
 Saves preserve the authored source layout and refuse to replace a form changed by another editor. Reopen the app editor to load those changes. Cancelling field selection creates no app definition. The advanced **Export app** action generates an editable app folder and reveals it in VS Code; **Source layout** opens Layout Mode. Export does not publish a website or configure a live submission backend.
 

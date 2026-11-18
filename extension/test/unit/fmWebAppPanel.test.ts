@@ -66,6 +66,13 @@ describe('FM Web app form editor', () => {
     await vi.waitFor(() => expect(changeSource).toHaveBeenCalledOnce());
     expect(save).not.toHaveBeenCalled();expect(panel.dispose).toHaveBeenCalledOnce();
   });
+  it('opens prompt drafting from an existing editor only after confirmation', async () => {
+    const { webview, save, changeSource, panel } = fixture();const { document } = browser(webview.html);
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Draft form' as never);
+    (document.querySelector('[data-action="draft"]') as DomElement).click();
+    await vi.waitFor(() => expect(changeSource).toHaveBeenCalledWith('draft'));
+    expect(save).not.toHaveBeenCalled();expect(panel.dispose).toHaveBeenCalledOnce();
+  });
   it('keeps the editor and draft when changing fields is canceled', async () => {
     const { webview, save, changeSource, panel } = fixture();const { document } = browser(webview.html);
     vi.mocked(vscode.window.showWarningMessage).mockResolvedValue(undefined);

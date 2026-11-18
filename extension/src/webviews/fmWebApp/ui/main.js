@@ -38,7 +38,9 @@
   form.addEventListener('submit', event => { event.preventDefault();send('save'); });
   form.addEventListener('click', event => {
     const button = event.target.closest('button');if (!button || busy) return;
-    if (button.dataset.action === 'source') { vscode.postMessage({ action: 'source' });return; }
+    if (button.dataset.action === 'source' || button.dataset.action === 'draft') {
+      vscode.postMessage({ action: button.dataset.action });return;
+    }
     if (button.dataset.action) send(button.dataset.action);
     if (button.dataset.move) {
       const row = button.closest('.app-field');
