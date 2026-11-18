@@ -246,8 +246,8 @@ test('CI checks the mock contract and enforces a 3 MiB VSIX budget', () => {
   assert.equal(steps.find((step) => step.name === 'Enforce VSIX size budget').env.VSIX_BUDGET_BYTES, '3145728');
 });
 
-test('runner routing keeps check names; cross-platform uses hosted runners because the repository is public', () => {
-  assert.equal(ci.jobs['build-test']['runs-on'], '${{ fromJSON(vars.LINUX_RUNNER_LABELS) }}');
+test('required CI uses hosted runners without depending on repository runner variables', () => {
+  assert.equal(ci.jobs['build-test']['runs-on'], 'ubuntu-latest');
   assert.equal(ci.jobs['cross-platform'].name, 'cross-platform (${{ matrix.os }})');
   assert.equal(ci.jobs['cross-platform']['runs-on'], '${{ matrix.os }}');
   assert.deepEqual(ci.jobs['cross-platform'].strategy.matrix.os, ['windows-latest', 'ubuntu-latest']);

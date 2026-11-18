@@ -26,7 +26,8 @@ jobs:
   build-test:
     needs: cross-platform
     if: always()
-    runs-on: ${{ fromJSON(vars.LINUX_RUNNER_LABELS) }}
+    # The required check must have a runner even on contributor forks.
+    runs-on: ubuntu-latest
     steps:
       - name: Require successful platform checks
         env:
