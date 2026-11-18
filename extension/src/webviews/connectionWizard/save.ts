@@ -129,9 +129,10 @@ export async function handleSave(ctx: WizardContext, data: WizardFormData): Prom
       message: `Profile "${profile.name}" saved.`
     });
 
-    if (isNewProfile && ctx.options.afterSave === 'createFmWebApp') {
+    if (isNewProfile && ctx.options.afterSave) {
+      const continuation = ctx.options.afterSave;
       ctx.options.afterSave = undefined;
-      await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true });
+      await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source: continuation.source, changeSource: true, ...(continuation.starter ? { starter: continuation.starter } : {}) });
       return;
     }
 

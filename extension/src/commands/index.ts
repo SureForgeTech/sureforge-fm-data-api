@@ -95,7 +95,9 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
 
       ConnectionWizardPanel.createOrShow(context, profileStore, secretStore, fmClient, logger, undefined, {
         getTestPolicy: deps.getConnectionWizardTestPolicy,
-        afterSave: arg && typeof arg === 'object' && 'continueToFmWebApp' in arg && arg.continueToFmWebApp === true ? 'createFmWebApp' : undefined
+        afterSave: arg && typeof arg === 'object' && 'continueToFmWebApp' in arg && arg.continueToFmWebApp === true
+          ? { source: 'draft' in arg && arg.draft === true ? 'draft' : 'filemaker', starter: 'starter' in arg && typeof arg.starter === 'string' ? arg.starter : undefined }
+          : undefined
       });
     }),
 

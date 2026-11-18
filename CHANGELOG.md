@@ -26,6 +26,10 @@ PR title prefix matches the highest-tier label added:
 
 - The FileMaker commands are grouped in the Command Palette under Build a Web App, Connect and Test, Browse Data, Help and Advanced Tools. Command names, keyboard shortcuts and the sidebar are unchanged.
 
+- Create FM Web App starts with a starter: Event Registration or Feedback or Request Form. The starter names the saved app, so choosing the same one again reopens it. Sample fields come first, the wizard resumes by itself after you open a folder or add a first connection, and the sample receipt needs no credentials, code or JSON.
+
+- Draft a form from a prompt using your existing FileMaker connection, then review suggested fields and preview in the visual editor.
+
 - Event-registration forms can save real records to an explicitly confirmed FileMaker connection through the private extension bridge. Persistent submission tracking prevents automatic retries after an uncertain write; sample preview remains available.
 
 - Create FM Web App is the main guided workflow: choose FileMaker or sample fields, customize an event-registration form without JSON, save and preview, then reopen it to continue editing. Existing commands remain available.
@@ -44,6 +48,8 @@ PR title prefix matches the highest-tier label added:
 
 
 ### [INTERNAL]
+
+- The loopback FileMaker mock can save a record and drop its reply, so registration tests verify that an uncertain write is not retried.
 
 - Pull requests are now welcome with a DCO sign-off (`git commit -s`): the organization contributing guide says so, and a new `dco` workflow checks the sign-off on pull requests from outside contributors.
 - The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.

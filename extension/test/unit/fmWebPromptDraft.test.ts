@@ -1,0 +1,214 @@
+import { describe, expect, it } from 'vitest';
+import { MAX_FORM_PROMPT_LENGTH, suggestPromptFields } from '../../src/services/fmWebPromptDraft';
+
+describe('prompt form suggestions', () => {
+  it('recognizes registration concepts and preserves FileMaker spelling and value lists', () => {
+    const session = { name: 'WorkshopSession', type: 'text', options: ['Morning', 'Afternoon'] };
+    const result = suggestPromptFields(
+      'Build a workshop registration form. Require attendee name and email, let attendees choose a session, and add an optional accessibility notes field.',
+      [{ name: 'Accessibility_Notes' }, { name: 'AttendeeName' }, { name: ' Email Address ' }, session, { name: 'Notes' }]
+    );
+    expect(result.title).toBe('Workshop registration');
+    expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([
+      ['AttendeeName', true],
+      [' Email Address ', true],
+      ['WorkshopSession', undefined],
+      ['Accessibility_Notes', false]
+    ]);
+    expect(result.fields[2]?.field).toEqual(session);
+    expect(result.unmatched).toEqual([]);
+  });
+
+  it('does not guess between similar fields or match unrelated fields on substrings', () => {
+    const result = suggestPromptFields('Require email and phone. Include notes.', [
+      { name: ' Email ' }, { name: 'EmailAddress' }, { name: 'Microphone' }, { name: 'Notebook' }
+    ]);
+    expect(result.fields).toEqual([]);
+    expect(result.unmatched).toEqual(['Email', 'Phone', 'Notes']);
+  });
+
+  it('accepts exact quoted custom names and reports read-only or unknown requests', () => {
+    const custom = { name: ' Registration::Badge, Display ' };
+    const result = suggestPromptFields(
+      'Draft a form titled "Badge print". Include " Registration::Badge, Display ", "Count", and "Missing".',
+      [custom, { name: 'Count', kind: 'calculation' }]
+    );
+    expect(result.title).toBe('Badge print');
+    expect(result.fields).toEqual([{ field: custom, required: undefined }]);
+    expect(result.unmatched).toEqual(['Count', 'Missing']);
+  });
+
+  it('does not broaden accessibility into generic notes or pick excluded and global fields', () => {
+    const result = suggestPromptFields('Include accessibility notes. Do not include email. Require phone.', [
+      { name: 'Notes' }, { name: 'Email' }, { name: 'Phone', kind: 'global' }
+    ]);
+    expect(result.fields).toEqual([]);
+    expect(result.unmatched).toEqual(['Accessibility notes', 'Phone']);
+  });
+
+  it('leaves metadata and exact field names unchanged and does not suggest a column twice', () => {
+    const metadata = { name: 'Given Name', required: true };
+    const result = suggestPromptFields('Include first name and given name.', Object.freeze([Object.freeze(metadata)]));
+    expect(result.fields).toEqual([{ field: metadata, required: undefined }]);
+    expect(metadata.required).toBe(true);
+  });
+
+  it('does not suggest attendee name when the prompt asks only for company name', () => {
+    const result = suggestPromptFields('Include a company name.', [{ name: 'Name' }, { name: 'Company' }]);
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['Company']);
+  });
+
+  it('updates an earlier suggestion with a later explicit requirement', () => {
+    const result = suggestPromptFields('Include email. Email is required. Include email.', [{ name: 'Email' }]);
+    expect(result.fields).toEqual([{ field: { name: 'Email' }, required: true }]);
+  });
+
+  it('scopes exclusions to their own fields and respects a later positive instruction', () => {
+    const result = suggestPromptFields(
+      "Include email but exclude phone and company, and add notes. Don't require session.",
+      [{ name: 'Email' }, { name: 'Phone' }, { name: 'Company' }, { name: 'Notes' }, { name: 'Session' }]
+    );
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['Email', 'Notes']);
+    expect(result.unmatched).toEqual([]);
+  });
+
+  it('carries requirements across a list and resets them for later instructions', () => {
+    const result = suggestPromptFields('Require name, email, and phone. Add optional notes, then session.', [
+      { name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }, { name: 'Session' }
+    ]);
+    expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([
+      ['Name', true], ['Email', true], ['Phone', true], ['Notes', false], ['Session', undefined]
+    ]);
+  });
+
+  it('does not confuse literal marker text with an exact quoted field', () => {
+    const result = suggestPromptFields('Include zzfmquote1zz but exclude "Phone".', [
+      { name: 'zzfmquote1zz' }, { name: 'Phone' }
+    ]);
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['zzfmquote1zz']);
+  });
+
+  it('continues a negated directive across or but allows a positive instruction after but', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Do not include "Email" or collect "Phone".', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Do not include "Email", but collect "Phone".', fields).fields)
+      .toEqual([{ field: fields[1], required: undefined }]);
+  });
+
+  it('removes a previously suggested field and permits an explicit reinclude', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    const excludePhone = 'Include "Email" and "Phone". Exclude "Phone".';
+    expect(suggestPromptFields(excludePhone, fields).fields.map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields(excludePhone + ' Include optional "Phone".', fields).fields)
+      .toEqual([{ field: fields[0], required: undefined }, { field: fields[1], required: false }]);
+  });
+
+  it('does not remove an included field just because it should not be required', () => {
+    const fields = [{ name: 'Phone' }];
+    expect(suggestPromptFields('Require "Phone". Do not require "Phone".', fields).fields)
+      .toEqual([{ field: fields[0], required: false }]);
+    expect(suggestPromptFields('Do not require "Phone".', fields).fields).toEqual([]);
+  });
+
+  it('distinguishes collecting a field from requiring it in a coordinated exclusion', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    const result = suggestPromptFields('Include "Email". Do not collect "Phone" or require "Email".', fields);
+    expect(result.fields).toEqual([{ field: fields[0], required: false }]);
+  });
+
+  it('limits prompt size before attempting any match', () => {
+    expect(() => suggestPromptFields('x'.repeat(MAX_FORM_PROMPT_LENGTH + 1), [])).toThrow('2,000 characters');
+  });
+
+  it('treats a bare "not" as an exclusion', () => {
+    expect(suggestPromptFields('Include email but not phone.', [{ name: 'Email' }, { name: 'Phone' }]).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }]);
+    expect(suggestPromptFields('Require name and email, but not phone.', [
+      { name: 'Name' }, { name: 'Email' }, { name: 'Phone' }
+    ]).fields).toEqual([
+      { field: { name: 'Name' }, required: true },
+      { field: { name: 'Email' }, required: true }
+    ]);
+    expect(suggestPromptFields('Include email, not phone.', [{ name: 'Email' }, { name: 'Phone' }]).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }]);
+  });
+
+  it('reads "not required" as optional and "not optional" as required', () => {
+    expect(suggestPromptFields('Include email. Email is not required.', [{ name: 'Email' }]).fields)
+      .toEqual([{ field: { name: 'Email' }, required: false }]);
+    expect(suggestPromptFields('Include email but not required phone.', [{ name: 'Email' }, { name: 'Phone' }]).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: false }]);
+    expect(suggestPromptFields('Include email and email is not optional.', [{ name: 'Email' }]).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }]);
+    expect(suggestPromptFields('Include email and not strictly required phone.', [{ name: 'Email' }, { name: 'Phone' }]).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: false }]);
+  });
+
+  it('keeps a coordinated item with the list head rather than with the item before it', () => {
+    // "notes" coordinates with the head "Include email", so the exclusion of phone does not swallow it.
+    expect(suggestPromptFields("Include email, don't include phone, and notes.", [
+      { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }
+    ]).fields.map(({ field }) => field.name)).toEqual(['Email', 'Notes']);
+    // The head is negated here, so the coordinated item stays excluded with it.
+    expect(suggestPromptFields("Don't include phone, notes.", [{ name: 'Phone' }, { name: 'Notes' }]).fields)
+      .toEqual([]);
+    // An exclusion still covers the whole list it names.
+    expect(suggestPromptFields('Exclude phone, company, and notes.', [
+      { name: 'Phone' }, { name: 'Company' }, { name: 'Notes' }
+    ]).fields).toEqual([]);
+  });
+
+  it('keeps a coordinated item with an explicit reversal of the list', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    expect(suggestPromptFields("Don't include phone, but include email, and notes.", fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email', 'Notes']);
+  });
+
+  it('reads an emphatic inclusion as an inclusion', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Include not only email but also phone.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email', 'Phone']);
+    expect(suggestPromptFields('Include all the fields, not just email.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+  });
+
+  it('reads the usual ways of excluding a field', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Make a form that excludes phone and includes email.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Create a form that omits phone. Include email.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Draft a registration form leaving out phone, including email.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include everything except phone and email.', fields).fields).toEqual([]);
+  });
+
+  it('keeps the instruction that precedes an unterminated quote', () => {
+    const result = suggestPromptFields('Require "Name and email', [{ name: 'Name' }, { name: 'Email' }]);
+    expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([['Name', true], ['Email', true]]);
+  });
+
+  it('does not take the article for the title', () => {
+    expect(suggestPromptFields('Make a form with email.', [{ name: 'Email' }]).title).toBeUndefined();
+    expect(suggestPromptFields('Make the form.', []).title).toBeUndefined();
+    expect(suggestPromptFields('Make a registration form.', []).title).toBe('Registration');
+    expect(suggestPromptFields('Create an A Team form with email.', [{ name: 'Email' }]).title).toBe('A Team');
+  });
+
+  it('suggests the fields named in the title as well', () => {
+    const result = suggestPromptFields('Make a name and email form.', [{ name: 'Name' }, { name: 'Email' }]);
+    expect(result.title).toBe('Name and email');
+    expect(result.fields.map(({ field }) => field.name)).toEqual(['Name', 'Email']);
+  });
+
+  it('reads a requirement negation that follows the field', () => {
+    const fields = [{ name: 'Email' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Require email, notes not required.', fields).fields
+      .map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
+    expect(suggestPromptFields('Require email, notes optional.', fields).fields
+      .map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
+    expect(suggestPromptFields("Require email, don't include phone, notes not required.", [
+      { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }
+    ]).fields.map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
+  });
+});
