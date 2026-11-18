@@ -6,24 +6,26 @@ Reference for the FM Web workflow (Layout Mode, generated Next.js runtime and th
 
 **FileMaker: Create FM Web App** is the main entry point. It is also available from the new-file button above Connections and the first Getting Started step.
 
-1. Open a trusted workspace folder. Choose **Use FileMaker fields**, **Draft form from a prompt** or **Try sample fields**.
-2. For FileMaker fields, choose a saved connection, a layout and the registration fields. The picker excludes calculations, summaries, containers and globals. Exact layout and field names are preserved. If no connection exists, the flow offers the existing connection setup.
-3. For a prompt, describe the form in your own words. The extension suggests the writable fields of the chosen layout that your wording points at, marks the ones you called required or optional, and lists the requests it could not map. Review the suggestions in the field picker and the form editor before saving. Exact layout and field names are preserved, and read-only or ambiguous fields are never suggested.
-4. Customize the event-registration form in its editor: event title and description, submit/success text, organization and accent color, included fields, labels, help, required rules, input types, maximum lengths and single-choice options. Move fields up or down to set their order.
-5. Choose **Save and preview** for a sample-only browser session with invented details, or **Save to FileMaker** to accept real registrations. The latter saves the form, names the connection, database and layout in a native confirmation, and opens a private browser session only after you choose **Enable FileMaker saves**. Submitting that browser form creates a real FileMaker record.
-6. Run **Create FM Web App** again to continue editing the saved app. No setup commands or JSON editing are needed for the normal create/customize/preview path.
+1. Open a trusted workspace folder. If none is open, the wizard offers to open one and resumes by itself once the window reloads.
+2. Choose a starter: **Event Registration** or **Feedback or Request Form**. The starter names the saved app, its file and its preview address, so choosing the same starter again reopens that app.
+3. Choose where the fields come from: **Try sample fields** starts immediately with invented data and no connection, **Use FileMaker fields** selects a saved connection, layout and fields, and **Draft form from a prompt** describes the form in your own words. If no connection exists, the flow offers the existing connection setup and resumes once it is saved.
+4. For FileMaker fields, choose a saved connection, a layout and the fields. The picker excludes calculations, summaries, containers and globals. Exact layout and field names are preserved.
+5. For a prompt, describe the form in your own words. The extension suggests the writable fields of the chosen layout that your wording points at, marks the ones you called required or optional, and lists the requests it could not map. Review the suggestions in the field picker and the form editor before saving. Exact layout and field names are preserved, and read-only or ambiguous fields are never suggested.
+6. Customize the form in its editor: title and description, submit/success text, organization and accent color, included fields, labels, help, required rules, input types, maximum lengths and single-choice options. Move fields up or down to set their order.
+7. Choose **Save and preview** for a sample-only browser session with invented details, or **Save to FileMaker** to accept real submissions. The latter saves the form, names the connection, database and layout in a native confirmation, and opens a private browser session only after you choose **Enable FileMaker saves**. Submitting that browser form creates a real FileMaker record.
+8. Run **Create FM Web App** again to continue editing the saved app. No setup commands or JSON editing are needed for the normal create/customize/preview path.
 
 Saves preserve the authored source layout and refuse to replace a form changed by another editor. Reopen the app editor to load those changes. Cancelling field selection creates no app definition. The advanced **Export app** action generates an editable app folder and reveals it in VS Code; **Source layout** opens Layout Mode. Export does not publish a website or configure a live submission backend.
 
-### Save real registrations
+### Save real submissions
 
 Choose FileMaker fields and use a saved connection with permission to create records on the selected layout. **Save to FileMaker** requires workspace trust, online mode and the extension's record-editing and enterprise write permissions. The confirmation approves one private preview session; starting another preview requires confirmation again. Changing the connection or source requires a new confirmed session.
 
-The browser submits only the form identifier, submission identifier and entered values. The extension uses the approved connection, layout and exact field mappings, validates the values again, and creates the record through the existing authenticated FileMaker client. FileMaker credentials stay in the extension; the browser receives only a registration receipt.
+The browser submits only the form identifier, submission identifier and entered values. The extension uses the approved connection, layout and exact field mappings, validates the values again, and creates the record through the existing authenticated FileMaker client. FileMaker credentials stay in the extension; the browser receives only a submission receipt.
 
-Submission tracking is stored in the extension's local storage before a write is dispatched. Repeating the same submission identifier returns its original receipt after success, including after a preview restart. An identifier reused with different values is refused. A timeout or unknown result locks further submission and is never retried automatically; check FileMaker before starting a new submission. This protection follows the submission identifier, not the attendee's name or email, and does not prevent a second registration made with a new identifier or from another installation.
+Submission tracking is stored in the extension's local storage before a write is dispatched. Repeating the same submission identifier returns its original receipt after success, including after a preview restart. An identifier reused with different values is refused. A timeout or unknown result locks further submission and is never retried automatically; check FileMaker before starting a new submission. This protection follows the submission identifier, not the attendee's name or email, and does not prevent a second submission made with a new identifier or from another installation.
 
-The form identifies real FileMaker mode and reports a successful registration only after a confirmed record-creation response. **Save and preview** still uses synthetic submissions. Exporting source does not grant permission to write, publish the form, or create a standalone public backend.
+The form identifies real FileMaker mode and reports a successful submission only after a confirmed record-creation response. **Save and preview** still uses synthetic submissions. Exporting source does not grant permission to write, publish the form, or create a standalone public backend.
 
 Existing **Build a Portal**, initialization, profile selection, metadata sync, generation and preview commands remain available for advanced work and compatible workflows. The older JSON-based starter and repair path is documented below.
 
@@ -113,7 +115,7 @@ Press `F5` to open an Extension Development Host and start with **Create FM Web 
 
 ## Event registration sample
 
-In an installation with the bundled template, start the private FM Web preview and choose **Try the event registration sample** on its home page. The form reuses the shared field renderer and validates its input before sending and on the server. Use invented information: this sample acknowledges a synthetic submission and does not contact FileMaker or save a real registration.
+In an installation with the bundled template, start the private FM Web preview and choose **Try the event registration sample** on its home page. The form reuses the shared field renderer and validates its input before sending and on the server. Use invented information: this sample acknowledges a synthetic submission and does not contact FileMaker or save a real submission.
 
 The server accepts only the known sample form and its mapped fields, checks the preview session and exact Origin, and bounds the request to 32 KiB. A submission identifier prevents a repeated click from creating a second attempt in the same preview process. Accepted attempts replay their original receipt; an identifier reused with different values is refused. An uncertain result locks further submission and is never retried automatically. This is process-local preview behavior, not persistent or distributed duplicate protection; restarting the preview clears it.
 

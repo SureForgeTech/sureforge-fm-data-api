@@ -22,6 +22,20 @@ describe('private portal definition registry', () => {
     expect((await registry.load(id))?.definition.title).toBe(example.definition.title);
     for (const target of ['../escape', 'Unknown', 'a'.repeat(65), 'other']) expect(await registry.load(target)).toBeUndefined();
   });
+  it('serves the feedback starter from the catalogue when nothing is saved', async () => {
+    const registry = new PreviewIntakeRegistry(root);
+    const loaded = await registry.load('feedback-request');
+    expect(loaded?.definition.id).toBe('feedback-request');
+    expect(loaded?.definition.title).toBe('Feedback or request form');
+    expect(loaded?.layout.objects[0]).toMatchObject({ fmFieldName: ' Full Name ' });
+  });
+  it('serves a starter with no saved file even when another app is saved', async () => {
+    await files();
+    const registry = new PreviewIntakeRegistry(root);
+    expect((await registry.load('feedback-request'))?.definition.id).toBe('feedback-request');
+    expect((await registry.load(id))?.definition.title).toBe('Saved custom event');
+    expect(await registry.load('other')).toBeUndefined();
+  });
   it('loads saved mappings and branding, derives the view, and snapshots them until restart', async () => {
     const { form } = await files();const registry = new PreviewIntakeRegistry(root);
     const loaded = await registry.load(id);

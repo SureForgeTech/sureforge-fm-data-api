@@ -8,6 +8,7 @@ import { registerDiagnosticsCommands } from './commands/diagnostics';
 import { registerEnterpriseCommands } from './commands/enterprise';
 import { stopFmWebPreviews } from './services/fmWebPreviewProcess';
 import { registerFmWebProjectCommands } from './commands/fmWebProject';
+import { PENDING_FIRST_RUN_KEY } from './commands/createFmWebApp';
 import { registerCoreCommands } from './commands';
 import { registerHistoryCommands } from './commands/history';
 import { registerJobsCommands } from './commands/jobs';
@@ -693,6 +694,12 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     logger,
     refreshExplorer
   });
+
+  // Choosing a folder reloads the window, so the first-run wizard is resumed on activation.
+  if (context.globalState.get(PENDING_FIRST_RUN_KEY) === true) {
+    await context.globalState.update(PENDING_FIRST_RUN_KEY, undefined);
+    void vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp');
+  }
 
   const jobsStatusBar = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 95);
   jobsStatusBar.command = 'filemakerDataApiTools.showJobs';

@@ -17,7 +17,7 @@ interface CapturedPanel {
   secretStore: { setPassword: ReturnType<typeof vi.fn> };
 }
 
-function setupPanel(editingProfile?: Record<string, unknown>, afterSave?: 'createFmWebApp' | 'draftFmWebApp'): CapturedPanel {
+function setupPanel(editingProfile?: Record<string, unknown>, afterSave?: { source: 'filemaker' | 'draft'; starter?: string }): CapturedPanel {
   const posted: unknown[] = [];
   let messageHandler: ((message: unknown) => unknown) | undefined;
 
@@ -110,7 +110,7 @@ describe('Connection wizard post-save connect offer', () => {
   });
 
   it('resumes app creation only after credentials are saved', async () => {
-    const panel = setupPanel(undefined, 'createFmWebApp');
+    const panel = setupPanel(undefined, { source: 'filemaker' });
     let release!: () => void;
     panel.secretStore.setPassword.mockImplementationOnce(() => new Promise<void>((resolve) => { release = resolve; }));
     void panel.fireMessage(validSavePayload);
@@ -120,13 +120,19 @@ describe('Connection wizard post-save connect offer', () => {
     expect(vscode.window.showInformationMessage).not.toHaveBeenCalled();
   });
   it('resumes the prompt path after the first connection is saved', async () => {
-    const panel = setupPanel(undefined, 'draftFmWebApp');
+    const panel = setupPanel(undefined, { source: 'draft' });
     await panel.fireMessage(validSavePayload);
     await vi.waitFor(() => expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
       'filemakerDataApiTools.createFmWebApp', { source: 'draft', changeSource: true }));
   });
+  it('keeps the starter the user chose when it resumes after the connection is saved', async () => {
+    const panel = setupPanel(undefined, { source: 'filemaker', starter: 'feedback-request' });
+    await panel.fireMessage(validSavePayload);
+    await vi.waitFor(() => expect(vscode.commands.executeCommand).toHaveBeenCalledWith(
+      'filemakerDataApiTools.createFmWebApp', { source: 'filemaker', changeSource: true, starter: 'feedback-request' }));
+  });
   it('does not resume app creation when credentials fail to save', async () => {
-    const panel = setupPanel(undefined, 'createFmWebApp');panel.secretStore.setPassword.mockRejectedValueOnce(new Error('Credential store unavailable'));
+    const panel = setupPanel(undefined, { source: 'filemaker' });panel.secretStore.setPassword.mockRejectedValueOnce(new Error('Credential store unavailable'));
     await panel.fireMessage(validSavePayload);
     await vi.waitFor(() => expect(panel.posted).toEqual(expect.arrayContaining([expect.objectContaining({ type: 'saveError' })])));
     expect(vscode.commands.executeCommand).not.toHaveBeenCalled();
