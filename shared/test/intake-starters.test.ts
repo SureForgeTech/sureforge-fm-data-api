@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, migrateIntakeSource, validateIntakeSubmission } from '../src';
+import { eventRegistrationExample, feedbackRequestExample, intakeDefinitionSchema, intakeLayout, intakeStarters, migrateIntakeSource, starterById, validateIntakeSubmission } from '../src';
 describe('reusable portal starter and branding', () => {
   it('migrates legacy sources with a stable reference and exact names', () => {
     const { definition, layout } = eventRegistrationExample();
@@ -45,5 +45,44 @@ describe('reusable portal starter and branding', () => {
     for (const branding of [{ accentColor: 'url(https://example.test)' }, { accentColor: '#000;display:none' }, { logoUrl: 'https://example.test' }, { password: 'synthetic' }]) {
       expect(intakeDefinitionSchema.safeParse({ ...definition, branding }).success).toBe(false);
     }
+  });
+});
+
+describe('the starter catalogue the first-run wizard offers', () => {
+  it('offers an event registration and a feedback or request form', () => {
+    expect(intakeStarters.map((starter) => starter.id)).toEqual(['event-registration', 'feedback-request']);
+    expect(intakeStarters.map((starter) => starter.label)).toEqual(['Event Registration', 'Feedback or Request Form']);
+    expect(intakeStarters.every((starter) => starter.description.length > 0)).toBe(true);
+  });
+  it('resolves a starter by identifier and refuses an unknown one', () => {
+    expect(starterById('feedback-request')?.label).toBe('Feedback or Request Form');
+    expect(starterById('event-registration')?.label).toBe('Event Registration');
+    expect(starterById('other')).toBeUndefined();
+    expect(starterById('')).toBeUndefined();
+  });
+  it('gives every starter its own identifier, layout and exact field names', () => {
+    const ids = new Set<string>();
+    for (const starter of intakeStarters) {
+      const { definition, layout } = starter.example();
+      expect(definition.id).toBe(starter.id);
+      expect(definition.environmentId).toBe('sample');
+      expect(definition.id).toMatch(/^[a-z][a-z0-9_-]{0,63}$/);
+      expect(ids.has(definition.id)).toBe(false);ids.add(definition.id);
+      expect(layout.id).toBe(definition.layoutId);
+      expect(layout.objects).toHaveLength(definition.fields.length);
+      for (const object of layout.objects) {
+        if (object.type !== 'field') continue;
+        expect(object.fmFieldName.trim().length).toBeGreaterThan(0);
+      }
+    }
+  });
+  it('builds a feedback form that validates only invented sample values', () => {
+    const sample = feedbackRequestExample();
+    expect(sample.definition.title).toBe('Feedback or request form');
+    expect(sample.definition.fields.map((field) => field.fmFieldName)).toEqual([' Full Name ', 'Email Address', 'Topic', 'Message']);
+    expect(sample.layout.fmLayoutName).toBe(' Feedback ');
+    expect(validateIntakeSubmission(sample.definition, { name: 'Sample', email: 'sample@example.test', topic: 'General question', message: 'Invented' }).valid).toBe(true);
+    expect(validateIntakeSubmission(sample.definition, { name: 'Sample', email: 'sample@example.test', topic: 'General question' }).valid).toBe(false);
+    expect(feedbackRequestExample()).toEqual(sample);
   });
 });

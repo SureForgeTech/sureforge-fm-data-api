@@ -11,7 +11,14 @@ export function writableAppFields(fields: DesignerFieldMetadata[]): DesignerFiel
   });
 }
 
-export function registrationAppFromFields(layoutName: string, fields: DesignerFieldMetadata[]): { definition: IntakeDefinition; layout: LayoutDefinition } {
+export interface RegistrationAppOptions {
+  /** The starter identifier the saved app and its preview route use. */
+  id?: string;
+  /** The form title the editor opens with. */
+  title?: string;
+}
+
+export function registrationAppFromFields(layoutName: string, fields: DesignerFieldMetadata[], options: RegistrationAppOptions = {}): { definition: IntakeDefinition; layout: LayoutDefinition } {
   if (!fields.length || fields.length > 100 || writableAppFields(fields).length !== fields.length) throw new Error('Choose between 1 and 100 writable, nonglobal fields.');
   const layout = createBlankLayout('Event registration', layoutName);
   layout.canvas.width = 640;
@@ -34,8 +41,8 @@ export function registrationAppFromFields(layoutName: string, fields: DesignerFi
     return input;
   });
   layout.canvas.height = 80 * fields.length + 48;
-  const definition = intakeDefinitionSchema.parse({ schemaVersion: 1, id: 'event-registration', environmentId: 'sample',
-    layoutId: layout.id, title: 'Event registration', description: 'Register for our event.',
+  const definition = intakeDefinitionSchema.parse({ schemaVersion: 1, id: options.id ?? 'event-registration', environmentId: 'sample',
+    layoutId: layout.id, title: options.title ?? 'Event registration', description: 'Register for our event.',
     submitLabel: 'Register', successMessage: 'Sample registration accepted. No FileMaker record was created.',
     branding: { organizationName: '', accentColor: '#215EA6' }, fields: inputs });
   return { definition, layout };

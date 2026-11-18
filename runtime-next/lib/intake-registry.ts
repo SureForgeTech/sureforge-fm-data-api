@@ -1,4 +1,4 @@
-import { eventRegistrationExample, intakeDefinitionSchema, intakeLayout, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { intakeDefinitionSchema, intakeLayout, migrateIntakeSource, starterById, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'node:fs';
 import { lstat, open, realpath } from 'node:fs/promises';
 import path from 'node:path';
@@ -51,7 +51,9 @@ export class PreviewIntakeRegistry {
       const root = await realpath(this.generatedRoot);
       try { await lstat(path.join(root, 'intakes')); }
       catch (error) {
-        if ((error as NodeJS.ErrnoException).code === 'ENOENT' && id === 'event-registration') return eventRegistrationExample();
+        // A starter with no saved file yet is served from the synthetic catalogue.
+        const starter = starterById(id);
+        if ((error as NodeJS.ErrnoException).code === 'ENOENT' && starter) return starter.example();
         throw error;
       }
       const definition = intakeDefinitionSchema.parse(await readJson(root, 'intakes', `${id}.intake.json`));

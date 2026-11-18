@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { eventRegistrationExample, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { eventRegistrationExample, intakeStarters, starterById, type IntakeDefinition, type IntakeStarter, type LayoutDefinition } from '@fmweb/shared';
 import { designerLayoutMetadata } from '../fmweb/fieldMetadata';
 import { FmWebAppPanel } from '../webviews/fmWebApp';
 import { FmWebIntakeService, type SavedIntake } from '../services/fmWebIntakeService';
@@ -11,6 +11,9 @@ import type { FmWebRuntimeGenerator } from '../services/fmWebRuntimeGenerator';
 import type { ProfileStore } from '../services/profileStore';
 import type { ConnectionProfile } from '../types/fm';
 
+/** The key the pending first-run wizard is stored under while a folder is opened. */
+export const PENDING_FIRST_RUN_KEY = 'filemaker.pendingFirstRunWizard';
+
 interface CreateAppDependencies {
   context: vscode.ExtensionContext;
   project: FmWebProjectService;
@@ -19,7 +22,18 @@ interface CreateAppDependencies {
   fmClient: FMClient;
 }
 
-export interface CreateAppOptions { source?: 'filemaker' | 'draft'; changeSource?: boolean }
+export interface CreateAppOptions {
+  source?: 'filemaker' | 'draft';
+  changeSource?: boolean;
+  /** The starter the user picked. The wizard asks for one when this is absent. */
+  starter?: string;
+}
+
+/** The starter the wizard offers, or the one it was given. */
+function pickStarter(chosen?: string): IntakeStarter | undefined {
+  if (chosen) return starterById(chosen);
+  return undefined;
+}
 
 export async function createFmWebApp(deps: CreateAppDependencies, options: CreateAppOptions = {}): Promise<void> {
   const { context, project, generator, profileStore, fmClient } = deps;
@@ -28,7 +42,11 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
     const choice = await vscode.window.showInformationMessage('Choose a workspace folder for your FM Web app.', 'Open Folder');
     if (choice === 'Open Folder') {
       const folders = await vscode.window.showOpenDialog({ canSelectFolders: true, canSelectFiles: false, canSelectMany: false, openLabel: 'Use app folder' });
-      if (folders?.[0]) await vscode.commands.executeCommand('vscode.openFolder', folders[0]);
+      if (folders?.[0]) {
+        // Opening a folder reloads the window, so the wizard is remembered and resumed on activation.
+        await context.globalState.update(PENDING_FIRST_RUN_KEY, true);
+        await vscode.commands.executeCommand('vscode.openFolder', folders[0]);
+      }
     }
     return;
   }
@@ -39,31 +57,43 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
   assertAvailable();
   if (FmWebAppPanel.revealIfOpen()) return;
   const intakes = new FmWebIntakeService(project);
+  // The starter is the app's identity: it names the saved app, its file and its preview route.
+  let starter = pickStarter(options.starter);
+  if (!starter && !options.changeSource) {
+    const picked = await vscode.window.showQuickPick(intakeStarters.map((item) => ({ label: item.label, description: item.description, starter: item })), {
+      title: 'Create FM Web App · Starter', placeHolder: 'What kind of form are you making?', ignoreFocusOut: true
+    });
+    if (!picked) return;
+    starter = picked.starter;
+  }
+  const appId = starter?.id ?? 'event-registration';
   let saved: SavedIntake | undefined;
   let model: { definition: IntakeDefinition; layout: LayoutDefinition };
   let profile: ConnectionProfile | undefined;
   let draft: ReturnType<typeof suggestPromptFields> | undefined;
-  try { saved = await intakes.loadForEditing('event-registration');model = saved; }
+  try { saved = await intakes.loadForEditing(appId);model = saved; }
   catch (error) {
     if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error;
     // Missing sources are an existing app needing repair, not permission to replace its definition.
-    try { await intakes.definitionPathForEdit('event-registration');throw new Error('The saved app has a missing source layout. Open Build a Portal to repair it.', { cause: error }); }
+    try { await intakes.definitionPathForEdit(appId);throw new Error('The saved app has a missing source layout. Open Build a Portal to repair it.', { cause: error }); }
     catch (existingError) { if ((existingError as NodeJS.ErrnoException).code !== 'ENOENT') throw existingError; }
   }
   if (!saved || options.changeSource) {
     const source = options.source ? { value: options.source } : await vscode.window.showQuickPick([
+      { label: 'Try sample fields', description: 'Start immediately without a FileMaker connection', value: 'sample' },
       { label: 'Use FileMaker fields', description: 'Choose a connection, layout and registration fields', value: 'filemaker' },
-      { label: 'Draft form from a prompt', description: 'Describe a form and review suggested FileMaker fields', value: 'draft' },
-      { label: 'Try sample fields', description: 'Start immediately without a FileMaker connection', value: 'sample' }
-    ], { title: 'Create FM Web App · Event registration', placeHolder: 'Where should the form fields come from?', ignoreFocusOut: true });
+      { label: 'Draft form from a prompt', description: 'Describe a form and review suggested FileMaker fields', value: 'draft' }
+    ], { title: 'Create FM Web App · Data', placeHolder: 'Where should the form fields come from?', ignoreFocusOut: true });
     if (!source) return;
-    if (source.value === 'sample') model = eventRegistrationExample();
+    if (source.value === 'sample') model = (starter?.example() ?? eventRegistrationExample());
     else {
       const profiles = await profileStore.listProfiles();
       if (!profiles.length) {
         const answer = await vscode.window.showInformationMessage('Add a FileMaker connection to choose its fields.', 'Add Connection');
         if (answer !== 'Add Connection') return;
-        await vscode.commands.executeCommand('filemakerDataApiTools.addConnectionProfile', { continueToFmWebApp: true, ...(source.value === 'draft' ? { draft: true } : {}) });
+        await vscode.commands.executeCommand('filemakerDataApiTools.addConnectionProfile', {
+          continueToFmWebApp: true, ...(source.value === 'draft' ? { draft: true } : {}), ...(starter ? { starter: starter.id } : {})
+        });
         return;
       }
       const picked = await vscode.window.showQuickPick(profiles.map((item) => ({ label: item.name, description: item.database, profile: item })),
@@ -105,7 +135,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         canPickMany: true, ignoreFocusOut: true
       });
       if (!fields) return;
-      model = registrationAppFromFields(selected.name, fields.map((item) => item.field));
+      model = registrationAppFromFields(selected.name, fields.map((item) => item.field), { id: appId, title: starter?.label });
     }
   }
   if (saved && options.changeSource) {
@@ -142,11 +172,11 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         saved = saved ? await intakes.saveApp(definition, saved.revision, selectedModel.layout) : await intakes.createApp(definition, selectedModel.layout);
       } else saved = await intakes.saveApp(definition, saved.revision);
     },
-    changeSource: async (source = 'filemaker') => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source, changeSource: true }); },
+    changeSource: async (source = 'filemaker') => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source, changeSource: true, ...(starter ? { starter: starter.id } : {}) }); },
     run: async (action) => {
       assertAvailable();
-      if (action === 'filemaker') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration', registrationMode: 'filemaker' });
-      else if (action === 'preview') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
+      if (action === 'filemaker') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: appId, registrationMode: 'filemaker' });
+      else if (action === 'preview') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: appId });
       else if (action === 'layout') await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: selectedModel.layout.id });
       else {
         await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
