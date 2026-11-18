@@ -45,7 +45,12 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
       if (folders?.[0]) {
         // Opening a folder reloads the window, so the wizard is remembered and resumed on activation.
         await context.globalState.update(PENDING_FIRST_RUN_KEY, true);
-        await vscode.commands.executeCommand('vscode.openFolder', folders[0]);
+        try { await vscode.commands.executeCommand('vscode.openFolder', folders[0]); }
+        catch (error) {
+          // The window did not reload, so nothing will resume it: drop the marker.
+          await context.globalState.update(PENDING_FIRST_RUN_KEY, undefined);
+          throw error;
+        }
       }
     }
     return;
@@ -59,6 +64,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
   const intakes = new FmWebIntakeService(project);
   // The starter is the app's identity: it names the saved app, its file and its preview route.
   let starter = pickStarter(options.starter);
+  if (options.starter && !starter) throw new Error('Choose a starter the wizard offers.');
   if (!starter && !options.changeSource) {
     const picked = await vscode.window.showQuickPick(intakeStarters.map((item) => ({ label: item.label, description: item.description, starter: item })), {
       title: 'Create FM Web App · Starter', placeHolder: 'What kind of form are you making?', ignoreFocusOut: true
@@ -135,7 +141,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         canPickMany: true, ignoreFocusOut: true
       });
       if (!fields) return;
-      model = registrationAppFromFields(selected.name, fields.map((item) => item.field), { id: appId, title: starter?.label });
+      model = registrationAppFromFields(selected.name, fields.map((item) => item.field), { id: appId, copy: starter?.copy });
     }
   }
   if (saved && options.changeSource) {

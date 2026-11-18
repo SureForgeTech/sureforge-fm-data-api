@@ -147,7 +147,7 @@ export const SHIPPED_MARKED_HASHES: Record<string, string[]> = {
 
 /** Known generated shared sources (including generated package.json). Keep prior identities when updating. */
 export const SHIPPED_SHARED_HASHES: Record<string, string[]> = {
-  'src/intake-starters.ts': ['1f7bccc0f7dfb6025cc82e44dc86ea5e0a83e660116d09960c93e762fe653b2a', 'bc6791710fae65a0ba5ea6429db6cc8780cc5d8766f6adf048916823eefc037d'],
+  'src/intake-starters.ts': ['1f7bccc0f7dfb6025cc82e44dc86ea5e0a83e660116d09960c93e762fe653b2a', 'bc6791710fae65a0ba5ea6429db6cc8780cc5d8766f6adf048916823eefc037d', '2a464f2ed137dcdc677214245e29d64626e327aa94ea2ab62fec13a325167af2'],
   'src/field-order.ts': ['2c1a5d992d4daf838e2d13c43b1939043a4163eb13af4eae0cbddf6ad27ec966', '3b60a97a6b9b023be8d7e3d86d4c7cc0125e3f6bd9bde2db8ca7706b063e6bfa'],
   'src/layout-schema.ts': ['e7f4b45780facf95f8250a74b4e60afd27c5af455ee015e879fa062e69f0d63b', '5f19d99380319c6c1e1352730784559dbb23ba03da792bcdf9fc7118be024129', '1a1f837967649e78baa192dc0d735e026a1349080d7dfe9000e4aa8d8aa044cd', 'cb6a8e7c5c79fdde431b3e004fb1ae4897ce7a481712370ed545ff5d36ec9a38'],
   'src/ui-renderer.tsx': ['485d4b2022d64ac21ebcd36c58f57792e36b448a7fec9b9a6a2eeb1373a522ab', 'dea92786b52f47ddbd02a1f0b4f34c73155303a9725e06cbcf2a3ade8301e0c7', '72926b784cc27a5d5046b448797b25b80a30f1af8fe12d70ef2d8061b2746728', '083c1a277145bbe9b08e36f5020322dd95d32766ac6c7ae8730a2e392594f082', 'ce2223340e0dd67a0b74e8fe0604d5cbd7f73011728442df09c8566afbf3780a', '9d1998bddce48ddcb138c3d606a30091db89e8c30d5688ed641bbf91de1fded2', 'd261d2c2e95c8414dfa402f90a3169ee4623c0e5dc0281cef7c393229427f230', 'b22bc542cad58058be38eea520684a5e52c5d457b196cfb426123f4bd274cccf', 'f95fe0fdf2e60fb0afb59e2a742f59e4afe3f97c6398cc881f3b4ffc33c64f2b'],

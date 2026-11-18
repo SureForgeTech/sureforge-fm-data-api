@@ -60,6 +60,12 @@ describe('the starter catalogue the first-run wizard offers', () => {
     expect(starterById('other')).toBeUndefined();
     expect(starterById('')).toBeUndefined();
   });
+  it('gives every starter its own copy for a form built from its fields', () => {
+    expect(intakeStarters.map((starter) => starter.copy.title)).toEqual(['Event registration', 'Feedback or request form']);
+    expect(intakeStarters.map((starter) => starter.copy.submitLabel)).toEqual(['Register', 'Send']);
+    expect(intakeStarters.every((starter) => starter.copy.description.length > 0 && starter.copy.successMessage.length > 0)).toBe(true);
+    expect(new Set(intakeStarters.map((starter) => starter.copy.title)).size).toBe(intakeStarters.length);
+  });
   it('gives every starter its own identifier, layout and exact field names', () => {
     const ids = new Set<string>();
     for (const starter of intakeStarters) {

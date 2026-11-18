@@ -7,6 +7,8 @@ export interface IntakeStarter {
   id: string;
   label: string;
   description: string;
+  /** The copy a form built from this starter's fields carries. */
+  copy: { title: string; description: string; submitLabel: string; successMessage: string };
   example: () => { definition: ReturnType<typeof intakeDefinitionSchema.parse>; layout: ReturnType<typeof layoutDefinitionSchema.parse> };
 }
 
@@ -69,8 +71,12 @@ export function feedbackRequestExample() {
 
 /** The starters the first-run wizard offers, in the order it offers them. */
 export const intakeStarters: readonly IntakeStarter[] = [
-  { id: 'event-registration', label: 'Event Registration', description: 'Collect names, email and session choices for an event', example: eventRegistrationExample },
-  { id: 'feedback-request', label: 'Feedback or Request Form', description: 'Collect a message, a topic and contact details', example: feedbackRequestExample }
+  { id: 'event-registration', label: 'Event Registration', description: 'Collect names, email and session choices for an event',
+    copy: { title: 'Event registration', description: 'Register for our event.', submitLabel: 'Register', successMessage: 'Sample registration accepted. No FileMaker record was created.' },
+    example: eventRegistrationExample },
+  { id: 'feedback-request', label: 'Feedback or Request Form', description: 'Collect a message, a topic and contact details',
+    copy: { title: 'Feedback or request form', description: 'Send us feedback or a request.', submitLabel: 'Send', successMessage: 'Sample message accepted. No FileMaker record was created.' },
+    example: feedbackRequestExample }
 ];
 
 /** The starter with this identifier, or undefined when the identifier names no starter. */

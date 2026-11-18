@@ -75,6 +75,36 @@ describe('Create FM Web App production controller', () => {
     expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
   });
 
+  it('gives the same starter the same title on the sample and the FileMaker path', async () => {
+    const { deps } = fixture();
+    pickSequence(['Feedback or Request Form', 'Try sample fields']);
+    await createFmWebApp(deps as never);
+    const sampled = open.mock.calls[0]![1] as ReturnType<typeof feedbackRequestExample>['definition'];
+    expect(sampled.title).toBe('Feedback or request form');
+    open.mockClear();
+    pickSequence(['Feedback or Request Form', 'Use FileMaker fields']);
+    await createFmWebApp(deps as never);
+    const fromFileMaker = open.mock.calls[0]![1] as ReturnType<typeof feedbackRequestExample>['definition'];
+    expect(fromFileMaker.title).toBe('Feedback or request form');
+    expect(fromFileMaker.submitLabel).toBe('Send');
+    expect(fromFileMaker.id).toBe('feedback-request');
+  });
+
+  it('keeps the event registration title on the FileMaker path', async () => {
+    const { deps } = fixture();pickFileMaker();
+    await createFmWebApp(deps as never);
+    const definition = open.mock.calls[0]![1] as ReturnType<typeof eventRegistrationExample>['definition'];
+    expect(definition.title).toBe('Event registration');
+    expect(definition.submitLabel).toBe('Register');
+    expect(definition.id).toBe('event-registration');
+  });
+
+  it('refuses a starter identifier the wizard does not offer', async () => {
+    const { deps } = fixture();
+    await expect(createFmWebApp(deps as never, { starter: 'not-a-starter' })).rejects.toThrow('starter');
+    expect(open).not.toHaveBeenCalled();
+  });
+
   it('offers both starters and uses the chosen starter for the sample app, its file and its preview route', async () => {
     const { deps, project } = fixture();
     pickSequence(['Feedback or Request Form', 'Try sample fields']);

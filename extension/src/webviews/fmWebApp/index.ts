@@ -80,18 +80,18 @@ export function renderAppEditor(webview: vscode.Webview, context: vscode.Extensi
 <meta http-equiv="Content-Security-Policy" content="${buildWebviewCsp(webview, { nonce, allowInlineStyleWithNonce: true })}"/>
 <title>Create FM Web App</title><style nonce="${nonce}">${standardFieldsCss(true)}
 body{max-width:1000px;margin:0 auto;padding:24px}label{display:block;margin-top:12px}input,select,textarea{box-sizing:border-box;max-width:100%;width:100%}input[type=checkbox]{width:auto}fieldset{margin:16px 0;padding:16px;border:1px solid var(--vscode-panel-border)}.actions{display:flex;flex-wrap:wrap;gap:8px;margin:16px 0}.field-title{display:flex;align-items:center;gap:8px}.field-title label{margin:0}.field-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 20px}.wide{grid-column:1/-1}code{white-space:pre-wrap;overflow-wrap:anywhere}button{cursor:pointer}#status{white-space:pre-wrap}#status.error{color:var(--vscode-errorForeground)}@media(max-width:600px){.field-grid{grid-template-columns:1fr}}
-</style></head><body class="fm-page"><h1>Create FM Web App</h1><p>Event registration · Select fields, customize your form, then save and preview.</p><p>Field layout: <strong>${escapeHtml(sourceName)}</strong></p>
+</style></head><body class="fm-page"><h1>Create FM Web App</h1><p>Select fields, customize your form, then save and preview.</p><p>Field layout: <strong>${escapeHtml(sourceName)}</strong></p>
 <p role="note">Save and preview uses sample registrations. Save to FileMaker enables real record creation only after you confirm the connection and layout in VS Code.</p>
 ${draft ? '<p role="note">Review the suggested field mappings and required settings before saving.</p>' : ''}
 ${draft?.unmatched.length ? `<p>Check these requests against your FileMaker fields: ${escapeHtml(draft.unmatched.join(', '))}.</p>` : ''}
-<form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><button type="button" data-action="draft">Draft form from a prompt</button><fieldset><legend>Event and branding</legend>
-${input('title', 'Event title', definition.title, 160)}
+<form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><button type="button" data-action="draft">Draft form from a prompt</button><fieldset><legend>Form and branding</legend>
+${input('title', 'Form title', definition.title, 160)}
 <label for="description">Description</label><textarea id="description" maxlength="2000">${escapeHtml(definition.description)}</textarea>
 <label for="organization">Organization</label><input id="organization" maxlength="120" value="${escapeHtml(definition.branding?.organizationName ?? '')}"/>
 <label for="accent">Accent color</label><input id="accent" type="color" value="${escapeHtml(definition.branding?.accentColor ?? '#215EA6')}"/>
 ${input('submit-label', 'Submit button text', definition.submitLabel, 80)}
 ${input('success-message', 'Success message', definition.successMessage, 1000)}
-</fieldset><h2>Registration fields</h2><p>Uncheck fields to exclude them. Use Move up or Move down to change their order. FileMaker names stay unchanged.</p>
+</fieldset><h2>Form fields</h2><p>Uncheck fields to exclude them. Use Move up or Move down to change their order. FileMaker names stay unchanged.</p>
 <div id="fields">${fields.map((field, index) => `<fieldset class="app-field" data-field="${index}"><legend>${escapeHtml(field.label)}</legend>
 <div class="field-title"><input type="checkbox" id="include-${index}" class="include" ${selected.has(field.id) ? 'checked' : ''}/><label for="include-${index}">Include field</label></div><p>FileMaker field: <code>${escapeHtml(field.fmFieldName)}</code></p>
 <div class="field-grid"><div><label for="label-${index}">Label</label><input id="label-${index}" class="field-label" maxlength="200" required value="${escapeHtml(field.label)}"/></div>
