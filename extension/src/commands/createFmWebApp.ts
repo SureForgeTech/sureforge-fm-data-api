@@ -104,7 +104,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
           : 'Select 1–100 writable registration fields.',
         canPickMany: true, ignoreFocusOut: true
       });
-      if (!fields?.length) return;
+      if (!fields) return;
       model = registrationAppFromFields(selected.name, fields.map((item) => item.field));
     }
   }

@@ -44,9 +44,10 @@ interface Mention {
   candidates: DesignerFieldMetadata[];
 }
 
-function qualifier(value: string): boolean | undefined {
-  if (/^(?:require|required|must collect)$/.test(value)) return true;
-  if (/^(?:optional|optionally)$/.test(value)) return false;
+/** A requirement word, and whether the prompt negated it. "not required" means optional. */
+function qualifier(value: string, negated = false): boolean | undefined {
+  if (/^(?:require|required|must collect)$/.test(value)) return !negated;
+  if (/^(?:optional|optionally)$/.test(value)) return negated;
   return undefined;
 }
 
@@ -83,20 +84,30 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
     draft.fields.push({ field, required });
   };
 
-  // Keep punctuation inside explicitly quoted FileMaker names intact.
-  const clauses = fieldPrompt.match(/(?:["“][^"”\r\n]*["”]|[^"“;.!?,\r\n])+|[;.!?,\r\n]/g) ?? [];
+  // Keep punctuation inside explicitly quoted FileMaker names intact. The closing quote is optional so an
+  // unterminated quote stays in its clause instead of splitting it and losing the instruction before it.
+  const clauses = fieldPrompt.match(/(?:["“][^"”\r\n]*["”]?|[^"“;.!?,\r\n])+|[;.!?,\r\n]/g) ?? [];
   let inherited: boolean | undefined;
   let negated: 'exclude' | 'optional' | undefined;
+  // A coordinated item ("and notes", ", notes") inherits the polarity of the list's anchor. The anchor starts
+  // as the list head and moves to a clause that ends positive, so a negation inside the list does not swallow
+  // a later coordinated request, while an explicit reversal ("but include ...") carries the items after it.
+  let anchorNegated: 'exclude' | 'optional' | undefined;
+  let headPending = true;
   let comma = false;
   for (const raw of clauses) {
     if (/^[;.!?\r\n]$/.test(raw)) {
       inherited = undefined;
       negated = undefined;
       comma = false;
+      anchorNegated = undefined;
+      headPending = true;
       continue;
     }
     if (raw === ',') { comma = true;continue; }
     if (!raw.trim()) continue;
+    // A clause after the head starts from the anchor's polarity; its own directives then adjust it.
+    if (!headPending) negated = anchorNegated;
     const quotes: string[] = [];
     // The marker is outside the output alphabet of words(), so literal input cannot impersonate it.
     const clause = raw.split(/(["“][^"”]+["”])/g).map((part, index) => {
@@ -141,7 +152,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const after = clause.slice(mention.end, mentions.slice(index + 1).find((next) => next.start >= mention.end)?.start).trim();
       const isContinuation = /^and$/.test(before) || (comma && !before);
       // Negation continues through "or collect" and ends at an explicit positive instruction.
-      const directives = /\b(?:(do not|don t|dont|never)(?:\s+(include|add|collect|require|ask for))?|(exclude|omit|without|skip|no(?: need for)?)|(or\s+)?(but|include|add|collect|require|ask for))\b/g;
+      // A bare "not" negates a field ("include email but not phone"). It does not negate a requirement
+      // ("not required", "not strictly required") and it is not an emphatic inclusion ("not only", "not just").
+      const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leaving out|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
       for (const directive of before.matchAll(directives)) {
         if (directive[1] || directive[3]) {
           negated = directive[2] === 'require' ? 'optional' : 'exclude';
@@ -151,9 +164,11 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
           negated = undefined;
         }
       }
-      const prefix = /\b(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before)?.[1];
-      const suffix = /^(?:is|are|as) (required|optional)\b/.exec(after)?.[1];
-      const requirement = qualifier(prefix ?? suffix ?? '');
+      // The head clause's own polarity starts the list's anchor.
+      if (headPending) { anchorNegated = negated; headPending = false; }
+      const prefix = /\b(not\s+(?:\w+\s+)?)?(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before);
+      const suffix = /^(?:is|are|as) (not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
+      const requirement = qualifier((prefix ?? suffix)?.[2] ?? '', Boolean((prefix ?? suffix)?.[1]));
       if (!negated) {
         append(mention, requirement ?? (isContinuation ? inherited : undefined));
       } else if (negated === 'exclude') {
@@ -172,6 +187,8 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       if (negated || requirement === false || (!isContinuation && !prefix)) inherited = undefined;
       else if (prefix) inherited = requirement;
     }
+    // A clause that ends positive becomes the anchor for the items coordinated with it.
+    if (negated === undefined) anchorNegated = undefined;
   }
   return draft;
 }
