@@ -138,6 +138,7 @@ export async function handleProxy(engine, input) {
       const r = await authed('POST', `${L(payload.layout)}/records`, {
         body: { fieldData: payload.fieldData }
       });
+      if (r.drop) return r;
       return done(r, {
         result: {
           recordId: r.json?.response?.recordId,

@@ -2,12 +2,16 @@
 
 ## Unreleased
 
+- Describe a form in Create FM Web App and review suggested FileMaker fields in the visual editor.
+
 **Licence**
 
 - The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.
 - The extension's MIT licence now names SureForgeTech as the copyright holder, and the extension's author is SureForgeTech. The licence terms are unchanged.
 
 **FM Web app creation**
+
+- Create FM Web App now starts with a starter: **Event Registration** or **Feedback or Request Form**. The starter names the saved app, so choosing the same one again reopens it. Sample fields come first, so a first sample receipt needs no connection, no code and no JSON editing. The wizard resumes by itself after you open a folder or add a first connection.
 
 - Save to FileMaker opens a private registration form after confirming the connection, database and layout. Submitting creates a real record with the mapped fields; credentials stay in the extension. Persistent submission tracking prevents the same submission from being dispatched again after a restart or uncertain result. Sample preview remains available.
 

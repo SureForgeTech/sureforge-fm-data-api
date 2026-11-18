@@ -11,9 +11,23 @@ export function writableAppFields(fields: DesignerFieldMetadata[]): DesignerFiel
   });
 }
 
-export function registrationAppFromFields(layoutName: string, fields: DesignerFieldMetadata[]): { definition: IntakeDefinition; layout: LayoutDefinition } {
+export interface RegistrationAppOptions {
+  /** The starter identifier the saved app and its preview route use. */
+  id?: string;
+  /** The title, description and button text the starter's forms carry. */
+  copy?: { title: string; description: string; submitLabel: string; successMessage: string };
+}
+
+/** The copy the event registration starter's forms carry. */
+const EVENT_REGISTRATION_COPY = {
+  title: 'Event registration', description: 'Register for our event.',
+  submitLabel: 'Register', successMessage: 'Sample registration accepted. No FileMaker record was created.'
+};
+
+export function registrationAppFromFields(layoutName: string, fields: DesignerFieldMetadata[], options: RegistrationAppOptions = {}): { definition: IntakeDefinition; layout: LayoutDefinition } {
   if (!fields.length || fields.length > 100 || writableAppFields(fields).length !== fields.length) throw new Error('Choose between 1 and 100 writable, nonglobal fields.');
-  const layout = createBlankLayout('Event registration', layoutName);
+  const copy = options.copy ?? EVENT_REGISTRATION_COPY;
+  const layout = createBlankLayout(copy.title, layoutName);
   layout.canvas.width = 640;
   const inputs = fields.map((field, index) => {
     const control = standardControlFor(field);
@@ -34,9 +48,9 @@ export function registrationAppFromFields(layoutName: string, fields: DesignerFi
     return input;
   });
   layout.canvas.height = 80 * fields.length + 48;
-  const definition = intakeDefinitionSchema.parse({ schemaVersion: 1, id: 'event-registration', environmentId: 'sample',
-    layoutId: layout.id, title: 'Event registration', description: 'Register for our event.',
-    submitLabel: 'Register', successMessage: 'Sample registration accepted. No FileMaker record was created.',
+  const definition = intakeDefinitionSchema.parse({ schemaVersion: 1, id: options.id ?? 'event-registration', environmentId: 'sample',
+    layoutId: layout.id, title: copy.title, description: copy.description,
+    submitLabel: copy.submitLabel, successMessage: copy.successMessage,
     branding: { organizationName: '', accentColor: '#215EA6' }, fields: inputs });
   return { definition, layout };
 }

@@ -1,4 +1,4 @@
-import { CURRENT_LAYOUT_SCHEMA_VERSION, eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { CURRENT_LAYOUT_SCHEMA_VERSION, eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, starterById, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'fs';
 import { createHash, randomUUID } from 'crypto';
 import { lstat, mkdir, open, readdir, realpath, rm, writeFile } from 'fs/promises';
@@ -131,7 +131,7 @@ export class FmWebIntakeService {
     const definition = intakeDefinitionSchema.parse(input);
     const parsedLayout = layoutDefinitionSchema.parse(source);
     const layout = await this.project.prepareLayout?.(parsedLayout) ?? parsedLayout;
-    if (definition.id !== 'event-registration' || definition.environmentId !== 'sample') throw new Error('Unsupported app target.');
+    if (!starterById(definition.id) || definition.environmentId !== 'sample') throw new Error('Unsupported app target.');
     intakeLayout(definition, layout);
     const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${definition.id}.intake.json`));
     const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${layout.id}.layout.json`));
@@ -154,7 +154,7 @@ export class FmWebIntakeService {
   /** Explicit editor saves replace the definition atomically and refuse changes made elsewhere. */
   public async saveApp(input: unknown, revision: string, replacementSource?: unknown): Promise<SavedIntake> {
     const definition = intakeDefinitionSchema.parse(input);
-    const current = await this.loadForEditing('event-registration');
+    const current = await this.loadForEditing(definition.id);
     if (current.revision !== revision) throw new Error('The app changed in another editor. Close this app tab and run Create FM Web App to load those changes.');
     if (definition.id !== current.definition.id || (!replacementSource && definition.layoutId !== current.definition.layoutId)
       || definition.environmentId !== current.definition.environmentId) throw new Error('The editor cannot change the app target.');
@@ -183,7 +183,7 @@ export class FmWebIntakeService {
     const temporary = path.join(path.dirname(target), `.app-${randomUUID()}.tmp`);
     try {
       await writeFile(temporary, bytes, { flag: 'wx', mode: info.mode & 0o777 });
-      if ((await this.loadForEditing('event-registration')).revision !== revision) throw new Error('The app changed during Save. Close this app tab and run Create FM Web App to load those changes.');
+      if ((await this.loadForEditing(current.definition.id)).revision !== revision) throw new Error('The app changed during Save. Close this app tab and run Create FM Web App to load those changes.');
       await this.confined(target);
       if ((await lstat(target)).nlink > 1) throw new Error('The app definition acquired a hard link during Save.');
       await renameReplacing(temporary, target);
