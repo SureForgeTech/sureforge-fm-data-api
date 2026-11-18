@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The FileMaker commands are grouped in the Command Palette under Build a Web App, Connect and Test, Browse Data, Help and Advanced Tools. Command names, keyboard shortcuts and the sidebar are unchanged.
+
 - Event-registration forms can save real records to an explicitly confirmed FileMaker connection through the private extension bridge. Persistent submission tracking prevents automatic retries after an uncertain write; sample preview remains available.
 
 - Create FM Web App is the main guided workflow: choose FileMaker or sample fields, customize an event-registration form without JSON, save and preview, then reopen it to continue editing. Existing commands remain available.

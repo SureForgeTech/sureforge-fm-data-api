@@ -821,251 +821,424 @@
       ],
       "commandPalette": [
         {
+          "command": "filemakerDataApiTools.createFmWebApp",
+          "when": "true",
+          "submenu": "filemaker.buildWebApp"
+        },
+        {
+          "command": "filemakerDataApiTools.buildPortal",
+          "when": "true",
+          "submenu": "filemaker.buildWebApp"
+        },
+        {
           "command": "filemakerDataApiTools.testMyServer",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.connectAndTest"
         },
         {
-          "command": "filemakerDataApiTools.refreshExplorer",
-          "when": "false"
+          "command": "filemakerDataApiTools.openWelcomeWalkthrough",
+          "when": "true",
+          "submenu": "filemaker.help"
         },
         {
-          "command": "filemakerDataApiTools.connect",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.openUserGuide",
+          "when": "true",
+          "submenu": "filemaker.help"
         },
         {
-          "command": "filemakerDataApiTools.disconnect",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.diagnoseConnection",
+          "when": "true",
+          "submenu": "filemaker.connectAndTest"
         },
         {
-          "command": "filemakerDataApiTools.writeAiContext",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.copyConnectionDiagnosis",
+          "when": "true",
+          "submenu": "filemaker.connectAndTest"
+        },
+        {
+          "command": "filemakerDataApiTools.showDiagnostics",
+          "when": "true",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.showEffectiveSettings",
+          "when": "true",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.about",
+          "when": "true",
+          "submenu": "filemaker.help"
+        },
+        {
+          "command": "filemakerDataApiTools.addConnectionProfile",
+          "when": "true",
+          "submenu": "filemaker.connectAndTest"
         },
         {
           "command": "filemakerDataApiTools.editConnectionProfile",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.connectAndTest"
         },
         {
           "command": "filemakerDataApiTools.removeConnectionProfile",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.connectAndTest"
         },
         {
-          "command": "filemakerDataApiTools.selectActiveProfile",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.connect",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.connectAndTest"
+        },
+        {
+          "command": "filemakerDataApiTools.disconnect",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.connectAndTest"
+        },
+        {
+          "command": "filemakerDataApiTools.openConnectionMenu",
+          "when": "true",
+          "submenu": "filemaker.connectAndTest"
         },
         {
           "command": "filemakerDataApiTools.listLayouts",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.selectLayoutForInspector",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.refreshLayoutInspector",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.refreshSchemaCache",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.openScriptRunner",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.copyRequestAsCode",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.openQueryBuilder",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.openLayoutMetadata",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.openRecordViewer",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.openRecordEditor",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.runFindJson",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.getRecordById",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.editRecordById",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.openRecordViewer",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.createRecord",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.openQueryBuilder",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.deleteRecord",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.openLayoutMetadata",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.uploadContainer",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.selectLayoutForInspector",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.batchExportFind",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.refreshLayoutInspector",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.batchUpdateFromFile",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.refreshSchemaCache",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.captureSchemaSnapshot",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.openScriptRunner",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.copyRequestAsCode",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.saveCurrentQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.runSavedQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.openSavedQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.deleteSavedQuery",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.manageSavedQueries",
+          "when": "true",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.exportSavedQueries",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.generateTypesForLayout",
-          "when": "filemaker.hasProfiles"
+          "command": "filemakerDataApiTools.importSavedQueries",
+          "when": "true",
+          "submenu": "filemaker.browseData"
         },
         {
-          "command": "filemakerDataApiTools.generateTypesForAllLayouts",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.generateSnippetsForLayout",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.generateTypeScriptClient",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.initializeFmWebProject",
-          "when": "filemaker.hasProfiles"
-        },
-        {
-          "command": "filemakerDataApiTools.diffSchemaSnapshots",
-          "when": "filemaker.hasSchemaSnapshots"
-        },
-        {
-          "command": "filemakerDataApiTools.diffAgainstLatestSnapshot",
-          "when": "filemaker.hasSchemaSnapshots"
-        },
-        {
-          "command": "filemakerDataApiTools.openSchemaSnapshotJson",
-          "when": "filemaker.hasSchemaSnapshots"
-        },
-        {
-          "command": "filemakerDataApiTools.syncFmWebMetadata",
-          "when": "filemaker.fmWebProjectInitialized"
-        },
-        {
-          "command": "filemakerDataApiTools.openLayoutMode",
-          "when": "filemaker.fmWebProjectInitialized"
-        },
-        {
-          "command": "filemakerDataApiTools.generateFmWebNextApp",
-          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable"
-        },
-        {
-          "command": "filemakerDataApiTools.generateFmWebLayoutPage",
-          "when": "filemaker.fmWebProjectInitialized"
-        },
-        {
-          "command": "filemakerDataApiTools.startFmWebPreviewServer",
-          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable"
-        },
-        {
-          "command": "filemakerDataApiTools.createEnvironmentSet",
-          "when": "filemaker.enterpriseMode"
-        },
-        {
-          "command": "filemakerDataApiTools.compareEnvironments",
-          "when": "filemaker.enterpriseMode"
-        },
-        {
-          "command": "filemakerDataApiTools.diffLayoutAcrossEnvironments",
-          "when": "filemaker.enterpriseMode"
-        },
-        {
-          "command": "filemakerDataApiTools.exportEnvironmentComparisonReport",
-          "when": "filemaker.enterpriseMode"
-        },
-        {
-          "command": "filemakerDataApiTools.openEnvironmentSetJson",
-          "when": "filemaker.enterpriseMode"
+          "command": "filemakerDataApiTools.deleteSavedQuery",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
         },
         {
           "command": "filemakerDataApiTools.showRequestHistory",
-          "when": "filemaker.powerUserMode"
+          "when": "filemaker.powerUserMode",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.refreshExplorer",
+          "when": "false",
+          "submenu": "filemaker.connectAndTest"
+        },
+        {
+          "command": "filemakerDataApiTools.captureSchemaSnapshot",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.diffSchemaSnapshots",
+          "when": "filemaker.hasSchemaSnapshots",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.diffAgainstLatestSnapshot",
+          "when": "filemaker.hasSchemaSnapshots",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.openSchemaSnapshotJson",
+          "when": "filemaker.hasSchemaSnapshots",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.writeAiContext",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.generateTypesForLayout",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.generateTypesForAllLayouts",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.generateSnippetsForLayout",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.generateTypeScriptClient",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.openGeneratedTypesFolder",
+          "when": "true",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.openRecordEditor",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.editRecordById",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.createRecord",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.deleteRecord",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.uploadContainer",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.batchExportFind",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.batchUpdateFromFile",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.cancelJob",
+          "when": "true",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.showJobs",
+          "when": "true",
+          "submenu": "filemaker.browseData"
+        },
+        {
+          "command": "filemakerDataApiTools.createEnvironmentSet",
+          "when": "filemaker.enterpriseMode",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.compareEnvironments",
+          "when": "filemaker.enterpriseMode",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.diffLayoutAcrossEnvironments",
+          "when": "filemaker.enterpriseMode",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.exportEnvironmentComparisonReport",
+          "when": "filemaker.enterpriseMode",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.openEnvironmentSetJson",
+          "when": "filemaker.enterpriseMode",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.openDiagnosticsDashboard",
-          "when": "filemaker.powerUserMode"
+          "when": "filemaker.powerUserMode",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.showCircuitBreakerStatus",
-          "when": "filemaker.powerUserMode"
+          "when": "filemaker.powerUserMode",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.reloadPlugins",
-          "when": "filemaker.powerUserMode"
+          "when": "filemaker.powerUserMode",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.listActivePlugins",
-          "when": "filemaker.powerUserMode"
+          "when": "filemaker.powerUserMode",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.toggleOfflineMode",
+          "when": "true",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.refreshOfflineCache",
+          "when": "true",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.initializeFmWebProject",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.syncFmWebMetadata",
+          "when": "filemaker.fmWebProjectInitialized",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.selectActiveProfile",
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.connectAndTest"
+        },
+        {
+          "command": "filemakerDataApiTools.openLayoutMode",
+          "when": "filemaker.fmWebProjectInitialized",
+          "submenu": "filemaker.buildWebApp"
+        },
+        {
+          "command": "filemakerDataApiTools.generateFmWebNextApp",
+          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable",
+          "submenu": "filemaker.advancedTools"
+        },
+        {
+          "command": "filemakerDataApiTools.generateFmWebLayoutPage",
+          "when": "filemaker.fmWebProjectInitialized",
+          "submenu": "filemaker.buildWebApp"
+        },
+        {
+          "command": "filemakerDataApiTools.startFmWebPreviewServer",
+          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable",
+          "submenu": "filemaker.buildWebApp"
         },
         {
           "command": "filemakerDataApiTools.setAiAccess",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.toggleAiKillSwitch",
-          "when": "filemaker.ai.active"
+          "when": "filemaker.ai.active",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.showAiActivity",
-          "when": "filemaker.ai.active"
+          "when": "filemaker.ai.active",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.newAiSession",
-          "when": "filemaker.ai.active"
+          "when": "filemaker.ai.active",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.toggleAiServer",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
         },
         {
           "command": "filemakerDataApiTools.copyAiMcpConfig",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles",
+          "submenu": "filemaker.advancedTools"
         }
       ]
     },
+    "submenus": [
+      {
+        "id": "filemaker.buildWebApp",
+        "label": "FileMaker: Build a Web App"
+      },
+      {
+        "id": "filemaker.connectAndTest",
+        "label": "FileMaker: Connect and Test"
+      },
+      {
+        "id": "filemaker.browseData",
+        "label": "FileMaker: Browse Data"
+      },
+      {
+        "id": "filemaker.help",
+        "label": "FileMaker: Help"
+      },
+      {
+        "id": "filemaker.advancedTools",
+        "label": "FileMaker: Advanced Tools"
+      }
+    ],
     "configuration": [
       {
         "id": "filemaker.connection",

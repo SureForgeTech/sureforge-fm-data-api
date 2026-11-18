@@ -6,6 +6,8 @@ You can also read the [User Guide on the website](https://sureforgetech.github.i
 
 Command names below are the titles you see in the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows and Linux). Every command starts with `FileMaker:`.
 
+The FileMaker commands are grouped in the Command Palette under five menus: **FileMaker: Build a Web App**, **FileMaker: Connect and Test**, **FileMaker: Browse Data**, **FileMaker: Help** and **FileMaker: Advanced Tools**. Type `FileMaker:` in the palette to see them. Every command keeps its name, its keyboard shortcut and its place in the sidebar, so a shortcut or a button you already use still works.
+
 ## Contents
 
 1. [First run in 10 minutes](#first-run-in-10-minutes)
@@ -60,6 +62,8 @@ Turn off offline mode before running a check. In Restricted Mode, you can check 
 FileMaker screens use the same fonts, buttons and boxed messages, and follow your VS Code theme. Read-only fields keep normal text contrast and have a dashed border and no resize handle. Unavailable controls use dimmer text. Page titles sit above the content panels, and input and button sizes match across screens. Empty status messages stay ready for screen readers to announce the first update. Layout Mode button labels stay readable when you point at them or select them with the keyboard. Expandable headings and separate tabs have the same height and rounded corners as other controls; joined tab strips stay joined. Effective Settings lines up with the other screens, and its Open User Settings and Open Workspace Settings buttons stay on one line. JSON boxes use the editor font. Layout Mode uses these styles around the page you are designing; the page itself keeps its own appearance.
 
 The table lists every extension command. Titles have the **FileMaker:** prefix in VS Code. “Shown” describes palette visibility; “needs” describes additional requirements when you run the command. A profile means a saved connection profile. Server operations also need access to the server and the relevant FileMaker privileges. Feature settings, workspace trust, offline mode and enterprise policy still apply as described in the sections below.
+
+Each command sits in one of the five palette menus listed at the top of this guide: **Build a Web App**, **Connect and Test**, **Browse Data**, **Help** and **Advanced Tools**.
 
 | Title | What it does | When it is available |
 | --- | --- | --- |

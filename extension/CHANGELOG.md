@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+**Command palette**
+
+- The FileMaker commands are grouped in the Command Palette under **FileMaker: Build a Web App**, **FileMaker: Connect and Test**, **FileMaker: Browse Data**, **FileMaker: Help** and **FileMaker: Advanced Tools**. Every command keeps its name, its keyboard shortcut and its place in the sidebar.
+
 **Licence**
 
 - The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.
