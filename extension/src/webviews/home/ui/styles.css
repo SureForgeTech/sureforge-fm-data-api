@@ -50,6 +50,7 @@
   border-radius: 2px;
   padding: 4px 10px;
   cursor: pointer;
+  align-self: flex-start;
 }
 
 .fm-home button:hover {
