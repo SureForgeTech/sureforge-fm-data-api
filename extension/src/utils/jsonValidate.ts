@@ -154,6 +154,31 @@ export function validateDatabaseName(value: string): JsonValidationResult<string
   return validateBasicName(value, 'Database name');
 }
 
+/**
+ * The account name is sent in a Basic authentication header, where a colon separates the name
+ * from the password. A colon in the name would silently change the password the server reads,
+ * so it is refused when the profile is saved rather than at sign-in. A colon in the password
+ * stays valid. Nothing else about the name is changed here: a name that used to save still
+ * saves.
+ */
+export function validateAccountName(value: string): JsonValidationResult<string> {
+  const trimmed = value.trim();
+  // An empty name is allowed: the wizard saves the profile and the sign-in reports the
+  // missing name, as it always has.
+  if (!trimmed) {
+    return { ok: true, value: trimmed };
+  }
+
+  if (trimmed.includes(':')) {
+    return {
+      ok: false,
+      error: 'Username must not contain a colon. A colon separates the username from the password when the extension signs in.'
+    };
+  }
+
+  return { ok: true, value: trimmed };
+}
+
 export function validateRecordId(value: string): JsonValidationResult<string> {
   const trimmed = value.trim();
   if (!trimmed) {

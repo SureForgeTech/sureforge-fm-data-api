@@ -341,7 +341,7 @@ A **connection profile** holds the server address, the database name and how you
 1. Run **FileMaker: Add Connection Profile** (or select the plus icon in the FileMaker sidebar). The connection wizard opens in an editor tab.
 2. Fill in **Profile**: a name such as `Dev Server`.
 3. Choose **Direct** or **Proxy**:
-   - **Direct**: the extension talks straight to the FileMaker Data API. Enter the server URL (for example `https://fm.example.com`), the database name (the file name without `.fmp12`), the account name and the password.
+   - **Direct**: the extension talks straight to the FileMaker Data API. Enter the server URL (for example `https://fm.example.com`), the database name (the file name without `.fmp12`), the account name and the password. The account name cannot contain a colon: it travels with the password in the sign-in request, where a colon separates the two. A colon in the password is fine.
    - **Proxy**: your team runs a middleware service in front of FileMaker. Enter the server URL the proxy talks to, the database name, the proxy endpoint, and the proxy API key if it needs one. The extension never sees the FileMaker credentials in this mode.
 4. Leave **API Base Path** (`/fmi/data`) and **API Version** (`vLatest`) alone unless your administrator says otherwise. They are under the advanced server options.
 5. Select **Test Connection**. A badge shows the result: green for a successful test, red with the error message for a failure, yellow if you changed something since the last test.

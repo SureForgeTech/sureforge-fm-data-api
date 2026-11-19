@@ -6,6 +6,7 @@ import {
   parseFindJson,
   parseOptionalPositiveInteger,
   parseSortJson,
+  validateAccountName,
   validateDatabaseName,
   validateObjectArray,
   validateServerUrl
@@ -53,6 +54,28 @@ describe('validateDatabaseName', () => {
       ok: false,
       error: 'Database name contains invalid control characters.'
     });
+  });
+});
+
+describe('validateAccountName', () => {
+  it('accepts a plain account name and trims surrounding whitespace', () => {
+    expect(validateAccountName(' api_user ')).toEqual({ ok: true, value: 'api_user' });
+  });
+
+  it('allows an empty account name, so the profile can still be saved', () => {
+    expect(validateAccountName('')).toEqual({ ok: true, value: '' });
+  });
+
+  it('rejects a colon, which would separate the name from the password when signing in', () => {
+    expect(validateAccountName('api:user')).toEqual({
+      ok: false,
+      error: 'Username must not contain a colon. A colon separates the username from the password when the extension signs in.'
+    });
+  });
+
+  it('leaves every other name alone, so nothing that used to save stops saving', () => {
+    expect(validateAccountName('a'.repeat(300))).toEqual({ ok: true, value: 'a'.repeat(300) });
+    expect(validateAccountName('api\u0000user')).toEqual({ ok: true, value: 'api\u0000user' });
   });
 });
 
