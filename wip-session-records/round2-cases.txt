@@ -1,0 +1,45 @@
+"Include not only email but also phone."
+  old: {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  new: {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include all the fields, not just email."
+  old: {"fields":[["Email",null]],"unmatched":[]}
+  new: {"fields":[["Email",null]],"unmatched":[]}
+"Include email, not only phone but also notes."
+  old: {"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+  new: {"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, but include email, and notes."
+  old: {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  new: {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone but include email and notes."
+  old: {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  new: {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Include email and not strictly required phone."
+  old: {"fields":[["Email",null],["Phone",true]],"unmatched":[]}
+  new: {"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Make a form that excludes phone and includes email."
+  old: {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  new: {"fields":[["Email",null]],"unmatched":[]}
+"Create a form that omits phone. Include email."
+  old: {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  new: {"fields":[["Email",null]],"unmatched":[]}
+"Draft a registration form leaving out phone, including email."
+  old: {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  new: {"fields":[["Email",null]],"unmatched":[]}
+"Include everything except phone and email."
+  old: {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  new: {"fields":[],"unmatched":[]}
+"Include email but not phone."
+  old: {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  new: {"fields":[["Email",null]],"unmatched":[]}
+"Include email, don't include phone, and notes."
+  old: {"fields":[["Email",null]],"unmatched":[]}
+  new: {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, notes."
+  old: {"fields":[],"unmatched":[]}
+  new: {"fields":[],"unmatched":[]}
+"Exclude phone, company, and notes."
+  old: {"fields":[],"unmatched":[]}
+  new: {"fields":[],"unmatched":[]}
+"Require name, email, and phone."
+  old: {"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+  new: {"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}

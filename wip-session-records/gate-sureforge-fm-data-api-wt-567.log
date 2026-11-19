@@ -1,0 +1,1194 @@
+=== npm-ci ===
+
+> fmweb-ide-monorepo@0.1.0 postinstall
+> node tools/patch-typedoc-glob.mjs
+
+TypeDoc glob traversal is compatible with minimatch 11
+
+added 496 packages, and audited 501 packages in 8s
+
+141 packages are looking for funding
+  run `npm fund` for details
+
+12 high severity vulnerabilities
+
+To address issues that do not require attention, run:
+  npm audit fix
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+=== audit ===
+found 0 vulnerabilities
+=== lint ===
+
+> fmweb-ide-monorepo@0.1.0 lint
+> npm run lint --workspaces --if-present
+
+
+> @fmweb/shared@0.1.0 lint
+> eslint "src/**/*.ts" "src/**/*.tsx" "test/**/*.ts" "test/**/*.tsx" --max-warnings=0
+
+
+> @fmweb/designer-ui@0.1.0 lint
+> eslint "src/**/*.ts" "src/**/*.tsx" --max-warnings=0
+
+
+> @fmweb/runtime-next@0.1.0 lint
+> eslint "app/**/*.{ts,tsx}" "lib/**/*.{ts,tsx}" "next.config.ts" --max-warnings=0
+
+
+> filemaker-data-api-tools@1.9.1 lint
+> eslint "src/**/*.ts" "src/webviews/*/ui/*.js" "test/**/*.ts" "test/mock-server/**/*.mjs" "e2e-ui/**/*.mjs" --max-warnings=0
+
+=== ci-workflow-tests ===
+TAP version 13
+# Subtest: the first-run journey removes its profile before later journeys use the same session
+ok 1 - the first-run journey removes its profile before later journeys use the same session
+  ---
+  duration_ms: 0.868625
+  type: 'test'
+  ...
+# Subtest: the CSV journey answers the format picker before expecting a started job
+ok 2 - the CSV journey answers the format picker before expecting a started job
+  ---
+  duration_ms: 0.990459
+  type: 'test'
+  ...
+# Subtest: the packaged FM Web template contains source and matching hashes, with local state excluded
+ok 3 - the packaged FM Web template contains source and matching hashes, with local state excluded
+  ---
+  duration_ms: 19.225416
+  type: 'test'
+  ...
+# Subtest: a linked source refuses the build without replacing the previous complete template
+ok 4 - a linked source refuses the build without replacing the previous complete template
+  ---
+  duration_ms: 5.931334
+  type: 'test'
+  ...
+# Subtest: a missing required source or a linked output refuses instead of producing a partial kit
+ok 5 - a missing required source or a linked output refuses instead of producing a partial kit
+  ---
+  duration_ms: 4.073209
+  type: 'test'
+  ...
+# Subtest: both CI test jobs run workspace tests after shared is built
+ok 6 - both CI test jobs run workspace tests after shared is built
+  ---
+  duration_ms: 0.173792
+  type: 'test'
+  ...
+# Subtest: the required build-test context gates Windows and Ubuntu checks
+ok 7 - the required build-test context gates Windows and Ubuntu checks
+  ---
+  duration_ms: 5.526833
+  type: 'test'
+  ...
+# Subtest: strict E2E fails instead of skipping when its VSIX prerequisite is absent
+ok 8 - strict E2E fails instead of skipping when its VSIX prerequisite is absent
+  ---
+  duration_ms: 289.662041
+  type: 'test'
+  ...
+# Subtest: strict real VS Code E2E runs weekly, on demand and before release packaging
+ok 9 - strict real VS Code E2E runs weekly, on demand and before release packaging
+  ---
+  duration_ms: 0.207792
+  type: 'test'
+  ...
+# Subtest: the first-run smoke journey repeats in CI on Linux, against the mock only
+ok 10 - the first-run smoke journey repeats in CI on Linux, against the mock only
+  ---
+  duration_ms: 0.306083
+  type: 'test'
+  ...
+# Subtest: the weekly full real-desktop suite still gates the release package
+ok 11 - the weekly full real-desktop suite still gates the release package
+  ---
+  duration_ms: 0.030459
+  type: 'test'
+  ...
+# Subtest: the root lint and coverage gates reach every workspace
+ok 12 - the root lint and coverage gates reach every workspace
+  ---
+  duration_ms: 0.71375
+  type: 'test'
+  ...
+# Subtest: the lint guard accepts a manifest lint script that really runs eslint over files
+ok 13 - the lint guard accepts a manifest lint script that really runs eslint over files
+  ---
+  duration_ms: 0.097792
+  type: 'test'
+  ...
+# Subtest: the lint guard rejects a lint script that only pretends to lint
+ok 14 - the lint guard rejects a lint script that only pretends to lint
+  ---
+  duration_ms: 0.623709
+  type: 'test'
+  ...
+# Subtest: the lint guard rejects a lint run without files, without --max-warnings=0, or without a lint script
+ok 15 - the lint guard rejects a lint run without files, without --max-warnings=0, or without a lint script
+  ---
+  duration_ms: 0.070666
+  type: 'test'
+  ...
+# Subtest: only PR runs cancel predecessors; branch pushes do not duplicate PR runs
+ok 16 - only PR runs cancel predecessors; branch pushes do not duplicate PR runs
+  ---
+  duration_ms: 0.050167
+  type: 'test'
+  ...
+# Subtest: CI checks the mock contract and enforces a 3 MiB VSIX budget
+ok 17 - CI checks the mock contract and enforces a 3 MiB VSIX budget
+  ---
+  duration_ms: 0.067959
+  type: 'test'
+  ...
+# Subtest: runner routing keeps check names; cross-platform uses hosted runners because the repository is public
+ok 18 - runner routing keeps check names; cross-platform uses hosted runners because the repository is public
+  ---
+  duration_ms: 0.025917
+  type: 'test'
+  ...
+# Subtest: both workflows use the trusted composite GitHub CLI action
+ok 19 - both workflows use the trusted composite GitHub CLI action
+  ---
+  duration_ms: 1.597291
+  type: 'test'
+  ...
+# Subtest: Dependabot does not ignore uuid when neither lockfile contains it
+ok 20 - Dependabot does not ignore uuid when neither lockfile contains it
+  ---
+  duration_ms: 2.935125
+  type: 'test'
+  ...
+# Subtest: the secret rotation reminder tests the parser, installs nothing and files issues with narrow permissions
+ok 21 - the secret rotation reminder tests the parser, installs nothing and files issues with narrow permissions
+  ---
+  duration_ms: 1.189
+  type: 'test'
+  ...
+# Subtest: CI runs the rotation calendar tests on every pull request
+ok 22 - CI runs the rotation calendar tests on every pull request
+  ---
+  duration_ms: 0.034667
+  type: 'test'
+  ...
+# Subtest: the parser tests are named one by one, because Node 22 cannot run a directory
+ok 23 - the parser tests are named one by one, because Node 22 cannot run a directory
+  ---
+  duration_ms: 0.874042
+  type: 'test'
+  ...
+# Subtest: the secret rotation reminder stays monthly, dry by default and serialized
+ok 24 - the secret rotation reminder stays monthly, dry by default and serialized
+  ---
+  duration_ms: 0.874334
+  type: 'test'
+  ...
+# Subtest: Open VS X publishing fails closed: environment-gated, read-only, token only in step env
+ok 25 - Open VS X publishing fails closed: environment-gated, read-only, token only in step env
+  ---
+  duration_ms: 0.099125
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 392.983459
+=== script-tests ===
+TAP version 13
+# created the missing label "ops/secret-rotation"
+# the label "ops/secret-rotation" already exists
+# the label "ops/secret-rotation" already exists
+# Subtest: the open issue that tracks the credential is found by its title
+ok 1 - the open issue that tracks the credential is found by its title
+  ---
+  duration_ms: 0.445042
+  type: 'test'
+  ...
+# Subtest: an issue that does not mention the credential is not used
+ok 2 - an issue that does not mention the credential is not used
+  ---
+  duration_ms: 0.101542
+  type: 'test'
+  ...
+# Subtest: the title of a reminder issue names the credential and its due date
+ok 3 - the title of a reminder issue names the credential and its due date
+  ---
+  duration_ms: 0.041416
+  type: 'test'
+  ...
+# Subtest: the body of a new issue holds the checklist and the due date
+ok 4 - the body of a new issue holds the checklist and the due date
+  ---
+  duration_ms: 0.095958
+  type: 'test'
+  ...
+# Subtest: a row without an owner still produces a readable body
+ok 5 - a row without an owner still produces a readable body
+  ---
+  duration_ms: 0.047792
+  type: 'test'
+  ...
+# Subtest: the body of a comment says what is due and where the calendar is
+ok 6 - the body of a comment says what is due and where the calendar is
+  ---
+  duration_ms: 0.056
+  type: 'test'
+  ...
+# Subtest: a credential whose name is the prefix of another one does not match its issue
+ok 7 - a credential whose name is the prefix of another one does not match its issue
+  ---
+  duration_ms: 0.071541
+  type: 'test'
+  ...
+# Subtest: a credential whose name is longer than another one does not match its issue
+ok 8 - a credential whose name is longer than another one does not match its issue
+  ---
+  duration_ms: 0.035459
+  type: 'test'
+  ...
+# Subtest: an issue whose title only mentions the credential in passing is not used
+ok 9 - an issue whose title only mentions the credential in passing is not used
+  ---
+  duration_ms: 0.184208
+  type: 'test'
+  ...
+# Subtest: the match on the title is case sensitive
+ok 10 - the match on the title is case sensitive
+  ---
+  duration_ms: 0.543667
+  type: 'test'
+  ...
+# Subtest: the label is created when it is missing
+ok 11 - the label is created when it is missing
+  ---
+  duration_ms: 0.530708
+  type: 'test'
+  ...
+# Subtest: a label that exists is recognized by its HTTP status, not by its wording
+ok 12 - a label that exists is recognized by its HTTP status, not by its wording
+  ---
+  duration_ms: 0.092667
+  type: 'test'
+  ...
+# Subtest: a label that appears between the listing and the creation does not fail the run
+ok 13 - a label that appears between the listing and the creation does not fail the run
+  ---
+  duration_ms: 0.054791
+  type: 'test'
+  ...
+# Subtest: a label that exists is also recognized by its wording
+ok 14 - a label that exists is also recognized by its wording
+  ---
+  duration_ms: 0.050583
+  type: 'test'
+  ...
+# Subtest: a label that cannot be created still fails the run
+ok 15 - a label that cannot be created still fails the run
+  ---
+  duration_ms: 0.1345
+  type: 'test'
+  ...
+# Subtest: two credentials whose names share a prefix each get their own reminder
+ok 16 - two credentials whose names share a prefix each get their own reminder
+  ---
+  duration_ms: 80.264083
+  type: 'test'
+  ...
+# Subtest: a credential whose name is the prefix of another one does not borrow its issue
+ok 17 - a credential whose name is the prefix of another one does not borrow its issue
+  ---
+  duration_ms: 59.441875
+  type: 'test'
+  ...
+# Subtest: a dry run prints what it would file and files nothing
+ok 18 - a dry run prints what it would file and files nothing
+  ---
+  duration_ms: 39.904125
+  type: 'test'
+  ...
+# Subtest: a run without the dry run opens the issue
+ok 19 - a run without the dry run opens the issue
+  ---
+  duration_ms: 48.659167
+  type: 'test'
+  ...
+# Subtest: the DRY_RUN environment variable has the same effect as the flag
+ok 20 - the DRY_RUN environment variable has the same effect as the flag
+  ---
+  duration_ms: 49.089125
+  type: 'test'
+  ...
+# Subtest: a label that appears between the listing and the creation does not stop the run
+ok 21 - a label that appears between the listing and the creation does not stop the run
+  ---
+  duration_ms: 99.679792
+  type: 'test'
+  ...
+# Subtest: a label that cannot be created fails the run
+ok 22 - a label that cannot be created fails the run
+  ---
+  duration_ms: 72.03675
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is reported and no reminder is filed for it
+ok 23 - a name that appears twice is reported and no reminder is filed for it
+  ---
+  duration_ms: 17.325666
+  type: 'test'
+  ...
+# Subtest: a name that appears twice with an unreadable second date files no reminder
+ok 24 - a name that appears twice with an unreadable second date files no reminder
+  ---
+  duration_ms: 16.269041
+  type: 'test'
+  ...
+# Subtest: an unknown argument is refused
+ok 25 - an unknown argument is refused
+  ---
+  duration_ms: 18.91875
+  type: 'test'
+  ...
+# Subtest: a window that is not a number of days is refused
+ok 26 - a window that is not a number of days is refused
+  ---
+  duration_ms: 15.713709
+  type: 'test'
+  ...
+# Subtest: the help text says how to run the script
+ok 27 - the help text says how to run the script
+  ---
+  duration_ms: 15.984166
+  type: 'test'
+  ...
+# Subtest: the window decides what is due
+ok 28 - the window decides what is due
+  ---
+  duration_ms: 102.311334
+  type: 'test'
+  ...
+# Subtest: a row whose date has passed is flagged as past due
+ok 29 - a row whose date has passed is flagged as past due
+  ---
+  duration_ms: 0.844666
+  type: 'test'
+  ...
+# Subtest: a row that is due within 30 days is flagged as due soon
+ok 30 - a row that is due within 30 days is flagged as due soon
+  ---
+  duration_ms: 0.1415
+  type: 'test'
+  ...
+# Subtest: the 30 day boundary counts as due soon and 31 days does not
+ok 31 - the 30 day boundary counts as due soon and 31 days does not
+  ---
+  duration_ms: 0.126792
+  type: 'test'
+  ...
+# Subtest: a row that is due later is reported as ok and produces no reminder
+ok 32 - a row that is due later is reported as ok and produces no reminder
+  ---
+  duration_ms: 0.163959
+  type: 'test'
+  ...
+# Subtest: a blank or N/A date is tolerated and never produces a reminder
+ok 33 - a blank or N/A date is tolerated and never produces a reminder
+  ---
+  duration_ms: 0.123833
+  type: 'test'
+  ...
+# Subtest: a malformed date is skipped and reported with a reason
+ok 34 - a malformed date is skipped and reported with a reason
+  ---
+  duration_ms: 0.104833
+  type: 'test'
+  ...
+# Subtest: a date that is not a real calendar day is skipped
+ok 35 - a date that is not a real calendar day is skipped
+  ---
+  duration_ms: 0.10025
+  type: 'test'
+  ...
+# Subtest: strict mode throws instead of skipping an unusable row
+ok 36 - strict mode throws instead of skipping an unusable row
+  ---
+  duration_ms: 0.163667
+  type: 'test'
+  ...
+# Subtest: a row with the wrong number of cells is skipped and reported
+ok 37 - a row with the wrong number of cells is skipped and reported
+  ---
+  duration_ms: 0.221875
+  type: 'test'
+  ...
+# Subtest: an empty calendar table is fine
+ok 38 - an empty calendar table is fine
+  ---
+  duration_ms: 0.221625
+  type: 'test'
+  ...
+# Subtest: a missing rotation calendar section is handled without an error
+ok 39 - a missing rotation calendar section is handled without an error
+  ---
+  duration_ms: 0.075333
+  type: 'test'
+  ...
+# Subtest: the comment row that ships in the table is ignored
+ok 40 - the comment row that ships in the table is ignored
+  ---
+  duration_ms: 0.044917
+  type: 'test'
+  ...
+# Subtest: the inventory table is not read as a rotation calendar
+ok 41 - the inventory table is not read as a rotation calendar
+  ---
+  duration_ms: 0.03125
+  type: 'test'
+  ...
+# Subtest: the owner, the notes and the line number are read
+ok 42 - the owner, the notes and the line number are read
+  ---
+  duration_ms: 0.059125
+  type: 'test'
+  ...
+# Subtest: the calendar is read from a file
+ok 43 - the calendar is read from a file
+  ---
+  duration_ms: 0.160667
+  type: 'test'
+  ...
+# Subtest: the real docs/SECRETS.md parses without a skip
+ok 44 - the real docs/SECRETS.md parses without a skip
+  ---
+  duration_ms: 0.340875
+  type: 'test'
+  ...
+# Subtest: a section without a rotation table is reported instead of ignored
+ok 45 - a section without a rotation table is reported instead of ignored
+  ---
+  duration_ms: 0.035708
+  type: 'test'
+  ...
+# Subtest: the within-days window is configurable
+ok 46 - the within-days window is configurable
+  ---
+  duration_ms: 0.060708
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is skipped and reported, and neither row reminds
+ok 47 - a name that appears twice is skipped and reported, and neither row reminds
+  ---
+  duration_ms: 0.05775
+  type: 'test'
+  ...
+# Subtest: only the duplicated name is dropped; the other rows still count
+ok 48 - only the duplicated name is dropped; the other rows still count
+  ---
+  duration_ms: 0.099625
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is a duplicate even when one row has no date
+ok 49 - a name that appears twice is a duplicate even when one row has no date
+  ---
+  duration_ms: 0.039416
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is a duplicate even when the second row has an unreadable date
+ok 50 - a name that appears twice is a duplicate even when the second row has an unreadable date
+  ---
+  duration_ms: 0.050375
+  type: 'test'
+  ...
+# Subtest: the duplicate check runs before the per-row checks
+ok 51 - the duplicate check runs before the per-row checks
+  ---
+  duration_ms: 0.076708
+  type: 'test'
+  ...
+# Subtest: strict mode throws on a duplicated name
+ok 52 - strict mode throws on a duplicated name
+  ---
+  duration_ms: 0.056583
+  type: 'test'
+  ...
+1..52
+# tests 52
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 688.590333
+=== build-shared ===
+
+> @fmweb/shared@0.1.0 build
+> tsc -p tsconfig.json
+
+=== mock-check ===
+
+> filemaker-data-api-tools@1.9.1 mock:check
+> esbuild test/mock-server/client-check.mjs --bundle --platform=node --format=cjs --alias:vscode=./test/mock-server/vscode-stub.mjs --outfile=.mock-check/client-check.cjs --log-level=warning && node .mock-check/client-check.cjs
+
+PASS wrong password gives a readable error 
+PASS login returns a token 
+PASS lists layouts 
+PASS layout fields are extracted 
+PASS page 1 has 20 rows and a found count 
+PASS page 2 follows page 1 with no repeat 
+PASS the last partial page returns the remaining rows 
+PASS a find with no matches returns an empty result 
+PASS "begins with" matches names starting with the text 
+PASS "contains phrase" finds the phrase and not reordered words 
+PASS "between" on a number 
+PASS "is empty" finds blank notes 
+PASS "equals" with @ matches one exact email 
+PASS an omit request removes rows 
+PASS sort descending 
+PASS an expired session is renewed once and the request succeeds 
+PASS five parallel requests after expiry open one session 
+PASS create returns a record id 
+PASS an edit with the loaded modId succeeds and returns the next one 
+PASS a second edit on the old modId is refused (error 306) 
+PASS an edit without a modId still works 
+PASS reading a deleted record gives a readable error 
+PASS lists scripts 
+PASS runs a script and returns its result 
+PASS a script run is one GET to the script endpoint (no record or find request) 
+PASS logout works 
+PASS endpoint: GET productInfo 
+PASS endpoint: GET databases 
+PASS endpoint: GET validateSession 
+PASS endpoint: POST sessions (Basic) 
+PASS endpoint: POST sessions (OAuth headers) 
+PASS endpoint: GET layouts 
+PASS endpoint: GET scripts 
+PASS endpoint: GET layout metadata 
+PASS endpoint: GET records 
+PASS endpoint: POST records 
+PASS endpoint: GET record 
+PASS endpoint: PATCH record 
+PASS endpoint: POST record (duplicate) 
+PASS endpoint: POST _find 
+PASS endpoint: POST container upload 
+PASS endpoint: PATCH globals 
+PASS endpoint: GET script endpoint 
+PASS endpoint: DELETE record 
+PASS endpoint: DELETE record 
+PASS endpoint: DELETE session 
+PASS endpoint: error 952 bad token 
+PASS endpoint: error 212 wrong password 
+PASS endpoint: error 802 unopenable database 
+PASS endpoint: error 105 layout missing 
+PASS endpoint: error 102 field missing 
+PASS endpoint: error 101 record missing 
+PASS endpoint: error 104 script missing 
+PASS endpoint: error 401 no records (HTTP 404) 
+PASS endpoint: error 960 bad parameter 
+PASS endpoint: error 400 empty find 
+PASS endpoint: error 306 modId mismatch 
+PASS endpoint: error 500 date validation 
+PASS endpoint: error 502 number validation 
+PASS endpoint: error 504 unique 
+PASS endpoint: error 506 value list 
+PASS endpoint: error 509 required 
+PASS endpoint: error 201 calculation field 
+PASS endpoint: error 9 insufficient privileges 
+PASS endpoint: error 405 wrong method 
+PASS endpoint: error 415 wrong content type 
+PASS endpoint: token expires after the configured idle time 
+67/67 passed
+=== typecheck ===
+
+> fmweb-ide-monorepo@0.1.0 typecheck
+> npm run typecheck --workspaces --if-present
+
+
+> @fmweb/shared@0.1.0 typecheck
+> tsc -p tsconfig.vitest.json
+
+
+> @fmweb/designer-ui@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> @fmweb/runtime-next@0.1.0 typecheck
+> tsc -p tsconfig.json --noEmit
+
+
+> filemaker-data-api-tools@1.9.1 typecheck
+> tsc -p tsconfig.vitest.json --noEmit && tsc -p tsconfig.query-builder-ui.json --noEmit
+
+=== test-coverage ===
+
+> fmweb-ide-monorepo@0.1.0 test:coverage
+> npm run test:coverage --workspaces --if-present
+
+
+> @fmweb/shared@0.1.0 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-567/shared
+      Coverage enabled with v8
+
+
+ Test Files  7 passed (7)
+      Tests  121 passed (121)
+   Start at  01:36:16
+   Duration  1.78s (environment 63%, import 15%, tests 12%, transform 6%, worker 3%)
+
+Environment  jsdom was created 7 times · 2.46s total, 63% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   96.41 |    89.72 |   97.18 |   97.49 |                   
+ field-order.ts    |     100 |    94.73 |     100 |     100 | 18                
+ ...d-standards.ts |   98.11 |    90.55 |     100 |     100 | ...01,205-208,212 
+ intake.ts         |     100 |    99.23 |     100 |     100 | 90                
+ layout-schema.ts  |   97.59 |     89.7 |     100 |   97.56 | 207,259           
+ record-edit.ts    |   98.11 |    94.83 |     100 |    99.2 | 118               
+ ui-renderer.tsx   |   91.77 |    82.71 |   93.65 |   93.43 | ...51,461,547,595 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 96.41% ( 727/754 )
+Branches     : 89.72% ( 786/876 )
+Functions    : 97.18% ( 138/142 )
+Lines        : 97.49% ( 623/639 )
+================================================================================
+
+> @fmweb/designer-ui@0.1.0 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-567/designer-ui
+      Coverage enabled with v8
+
+
+ Test Files  11 passed (11)
+      Tests  98 passed (98)
+   Start at  01:36:18
+   Duration  3.52s (environment 48%, tests 26%, import 19%, transform 5%, worker 2%)
+
+Environment  jsdom was created 11 times · 3.99s total, 48% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+------------------|---------|----------|---------|---------|--------------------
+File              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s  
+------------------|---------|----------|---------|---------|--------------------
+All files         |   67.94 |    59.19 |   70.56 |   67.02 |                    
+ canvas-engine.ts |   84.77 |    83.67 |    84.5 |   82.46 | ...362-408,425-432 
+ main.tsx         |   62.64 |       52 |   66.22 |   62.44 | ...-2266,2272-2273 
+------------------|---------|----------|---------|---------|--------------------
+
+=============================== Coverage summary ===============================
+Statements   : 67.94% ( 689/1014 )
+Branches     : 59.19% ( 383/647 )
+Functions    : 70.56% ( 211/299 )
+Lines        : 67.02% ( 618/922 )
+================================================================================
+
+> @fmweb/runtime-next@0.1.0 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-567/runtime-next
+      Coverage enabled with v8
+
+
+ Test Files  19 passed (19)
+      Tests  230 passed (230)
+   Start at  01:36:22
+   Duration  1.53s (tests 39%, environment 22%, import 21%, transform 14%, worker 4%)
+
+    Isolate  19 workers spawned · ~80ms startup each (spawn + environment, per file)
+             at least ~427ms faster with isolate: false — reuses workers across files instead of one per file
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   82.64 |    76.66 |   86.62 |   82.08 |                   
+ app               |       0 |      100 |       0 |       0 |                   
+  layout.tsx       |       0 |      100 |       0 |       0 | 5-11              
+  page.tsx         |       0 |      100 |       0 |       0 | 5                 
+ ...bridge/[route] |   89.47 |    89.47 |     100 |   96.55 |                   
+  route.ts         |   89.47 |    89.47 |     100 |   96.55 | 45                
+ app/intake/[id]   |   97.03 |    90.83 |     100 |   98.86 |                   
+  intake-form.tsx  |   96.89 |    90.51 |     100 |   98.79 | 51                
+ app/layouts/[id]  |   77.93 |    70.96 |   80.64 |   78.74 |                   
+  page.tsx         |      75 |       50 |     100 |      75 | 22,49-52,67       
+  ...ut-client.tsx |   78.51 |    73.38 |   78.57 |   79.61 | 58,64,144-188,228 
+ lib               |   78.55 |    71.59 |   86.31 |   78.01 |                   
+  bridge-client.ts |   93.47 |    81.81 |     100 |   93.02 | 98,135,141        
+  ...ke-adapter.ts |   95.91 |    95.83 |   66.66 |     100 | 10,38             
+  ...e-registry.ts |   96.15 |    89.18 |     100 |     100 | 15,26,41          
+  layout-loader.ts |   94.11 |      100 |     100 |   94.11 | 33                
+  ...w-security.ts |     100 |     87.5 |     100 |     100 | 13,23             
+  ...e-behavior.ts |   75.51 |    65.78 |      75 |      75 | ...53,164,207-211 
+  runtime-data.ts  |    59.6 |    44.79 |   76.19 |   59.04 | ...54,366-375,387 
+  ...me-session.ts |   84.28 |    68.62 |   93.33 |   84.05 | ...89,197,206,212 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 82.64% ( 743/899 )
+Branches     : 76.66% ( 506/660 )
+Functions    : 86.62% ( 136/157 )
+Lines        : 82.08% ( 623/759 )
+================================================================================
+
+> filemaker-data-api-tools@1.9.1 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-567/extension
+      Coverage enabled with v8
+
+
+ Test Files  298 passed | 2 skipped (300)
+      Tests  5914 passed | 21 skipped (5935)
+   Start at  01:36:24
+   Duration  46.35s (tests 65%, import 21%, setup 7%, transform 4%, worker 2%)
+
+    Isolate  300 workers spawned · ~51ms startup each (spawn + environment, per file)
+             at least ~5.03s faster with isolate: false — reuses workers across files instead of one per file
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   90.01 |    84.73 |   87.85 |   90.83 |                   
+ src               |   75.35 |    66.99 |   50.73 |   76.99 |                   
+  extension.ts     |   75.35 |    66.99 |   50.73 |   76.99 | ...92-793,819,867 
+ src/about         |     100 |     86.2 |     100 |     100 |                   
+  aboutCommand.ts  |     100 |    85.71 |     100 |     100 | 41-66             
+  aboutInfo.ts     |     100 |       85 |     100 |     100 | 16-17,61,127      
+ src/ai            |   98.88 |    94.46 |     100 |   98.97 |                   
+  aiAudit.ts       |   98.14 |    95.45 |     100 |   97.87 | 55                
+  ...gistration.ts |     100 |    89.65 |     100 |     100 | 21,69             
+  aiSchema.ts      |   92.45 |    91.35 |     100 |      94 | 50,110,113        
+  aiScrub.ts       |     100 |    96.66 |     100 |     100 | 63,70             
+  aiText.ts        |     100 |       95 |     100 |     100 | 27                
+  aiToolService.ts |    99.2 |    93.75 |     100 |    99.2 | 310,350           
+ src/ai/chat       |   97.47 |    83.47 |   97.56 |   97.42 |                   
+  ...articipant.ts |   97.31 |    92.85 |     100 |   97.24 | 262,369,410,431   
+  ...gistration.ts |    92.3 |    66.66 |      75 |    92.3 | 51                
+  chatText.ts      |   98.63 |       75 |     100 |   98.61 | 134               
+ src/ai/mcp        |   96.15 |     92.4 |   94.35 |   97.13 |                   
+  ...Controller.ts |   90.56 |    85.45 |   85.71 |    92.3 | 72-76,211,216-217 
+  aiMcpServer.ts   |   96.51 |    90.47 |   94.73 |   97.32 | ...35,243,266,316 
+  discovery.ts     |   97.61 |    94.18 |     100 |   97.53 | 132-133           
+  runShim.ts       |   98.68 |    97.77 |     100 |     100 | 82                
+  shim.ts          |       0 |      100 |       0 |       0 | 14                
+  socketPath.ts    |   96.66 |     87.5 |    90.9 |   98.21 | 132               
+ src/ai/tools      |    98.2 |     88.3 |     100 |   98.06 |                   
+  errors.ts        |   94.11 |    73.68 |     100 |   94.11 | 42                
+  fields.ts        |   92.85 |     90.9 |     100 |   92.59 | 31,43             
+  reads.ts         |     100 |     92.5 |     100 |     100 | 49-50,103         
+  results.ts       |    98.3 |    89.58 |     100 |   98.14 | 44                
+  writes.ts        |   99.11 |    88.09 |     100 |   99.05 | 83                
+ src/commands      |   81.38 |    74.24 |   79.64 |   82.53 |                   
+  aiContext.ts     |    92.7 |    81.48 |   93.33 |   92.59 | ...42,281,312,371 
+  aiTools.ts       |   96.66 |    79.16 |     100 |   96.66 | 96,173            
+  batch.ts         |   98.56 |    93.16 |     100 |   99.23 | 360               
+  ...uitBreaker.ts |   33.33 |      100 |      50 |   33.33 | 21-30             
+  common.ts        |    97.1 |    91.54 |     100 |   97.05 | 191,196           
+  copyRequest.ts   |   69.56 |    62.65 |   76.92 |   69.56 | ...25,229,240-251 
+  ...teFmWebApp.ts |   84.34 |    76.53 |   89.47 |    87.5 | ...86,145,150-153 
+  ...Connection.ts |   93.33 |    82.14 |     100 |     100 | 42,45,52,64-79    
+  diagnostics.ts   |   66.66 |      100 |      50 |   66.66 | 17                
+  enterprise.ts    |   99.12 |    95.31 |      95 |   99.11 | 52                
+  fmWebProject.ts  |   66.12 |    57.92 |   53.84 |   69.26 | ...91-396,435-440 
+  history.ts       |   16.66 |        0 |   33.33 |   16.66 | 14-43             
+  index.ts         |   59.32 |    51.85 |   53.84 |   59.32 | ...75,481,496-504 
+  jobs.ts          |   71.11 |    78.57 |   83.33 |   88.88 | 17-19             
+  ...tInspector.ts |   14.28 |        0 |   33.33 |   14.28 | 25-46             
+  offline.ts       |   33.33 |       50 |      40 |   33.33 | 37-69             
+  plugins.ts       |   14.28 |        0 |      25 |   14.28 | 14-46             
+  recordEdit.ts    |   60.68 |    65.62 |   57.14 |   60.68 | ...04,318-325,334 
+  savedQueries.ts  |   98.26 |       90 |   93.33 |   98.26 | 137,309           
+  schema.ts        |   39.13 |        0 |   66.66 |   39.13 | 28-58             
+  ...aSnapshots.ts |   99.12 |    92.18 |     100 |   99.11 | 282               
+  ...iagnostics.ts |   87.32 |    38.88 |      80 |    88.4 | 70-76,140-144     
+  testMyServer.ts  |   90.47 |    75.47 |   71.42 |   94.11 | 65,73-75          
+  typeGen.ts       |     100 |    91.66 |     100 |     100 | 98,141-143,197    
+ src/diagnostics   |    73.8 |    54.83 |   73.33 |   73.68 |                   
+  ...sDashboard.ts |   55.17 |    16.66 |      50 |   55.17 | ...29,43-45,62-65 
+  metricsStore.ts  |   83.63 |       64 |   79.16 |    85.1 | ...55-157,173,181 
+ src/enterprise    |   89.18 |     83.4 |   90.29 |   89.68 |                   
+  ...areService.ts |   90.96 |    73.84 |   95.74 |   90.41 | ...06,319,369-374 
+  ...ntSetStore.ts |   81.01 |    73.68 |      72 |   83.33 | ...26-127,138,157 
+  roleGuard.ts     |   91.96 |    91.05 |   96.66 |   92.59 | ...78,359,365,375 
+ src/fmweb         |     100 |    90.74 |     100 |     100 |                   
+  fieldMetadata.ts |     100 |    90.74 |     100 |     100 | 27,36,42          
+ src/offline       |   76.85 |    74.39 |    91.3 |   77.77 |                   
+  ...odeService.ts |   76.85 |    74.39 |    91.3 |   77.77 | ...84,289,316,335 
+ src/performance   |   90.32 |     82.1 |   90.32 |    90.6 |                   
+  ...oncurrency.ts |   85.36 |    76.92 |   88.88 |      85 | ...9-60,84,96,105 
+  ...uitBreaker.ts |    98.3 |    87.87 |     100 |   98.27 | 150               
+  ...erRegistry.ts |   85.45 |     82.6 |      80 |   86.27 | 47,60-64,139-142  
+ src/plugins       |   74.69 |    66.66 |   62.85 |   75.31 |                   
+  ...inRegistry.ts |   74.69 |    66.66 |   62.85 |   75.31 | ...63-365,380-386 
+ src/services      |   90.61 |    85.01 |   89.22 |    91.9 |                   
+  ...xtRenderer.ts |     100 |    98.43 |     100 |     100 | 192               
+  ...textWriter.ts |   93.75 |    94.11 |   82.35 |   93.67 | 112-113,175-180   
+  batchService.ts  |    95.9 |    90.64 |   94.02 |   95.34 | ...42,747,760,776 
+  ...ateLimiter.ts |     100 |    91.17 |     100 |     100 | 137-143           
+  ...ateInspect.ts |   83.78 |    78.78 |   77.77 |   86.11 | 28,59-60,70-71    
+  ...icateTrust.ts |   84.37 |    75.47 |   85.71 |   84.37 | 72,80,86-90       
+  ...iagnostics.ts |   93.35 |    92.12 |      98 |   99.41 | 89                
+  ...idgeServer.ts |      86 |    77.24 |   97.05 |   86.41 | ...21,535,541,546 
+  fmClient.ts      |   91.95 |    88.96 |   94.64 |   92.82 | ...55-557,880,902 
+  fmWebAppModel.ts |     100 |    93.54 |     100 |     100 | 53-54             
+  ...akeService.ts |   89.94 |    79.83 |     100 |   99.31 | 180               
+  ...iewProcess.ts |   90.95 |    85.71 |   87.87 |   97.87 | 108,232,237       
+  ...ectService.ts |      86 |    74.71 |    92.3 |   87.33 | ...46,584-586,606 
+  ...romptDraft.ts |   98.59 |    93.85 |     100 |     100 | ...11,150,178-183 
+  ...ionService.ts |   90.99 |    84.33 |   88.88 |    98.7 | 115               
+  ...eGenerator.ts |   93.97 |    91.01 |   86.53 |   96.03 | ...06,712,724-725 
+  ...FileWriter.ts |   87.69 |    84.48 |      75 |   89.09 | 73-74,79-81,97    
+  historyStore.ts  |   68.75 |     62.5 |      50 |   78.57 | 27-31,52          
+  jobRunner.ts     |   96.15 |    92.06 |    92.3 |   95.87 | 74,161,191,199    
+  ...yTlsNotice.ts |     100 |    83.33 |     100 |     100 | 38                
+  logger.ts        |   85.71 |    76.19 |   81.81 |   85.71 | 48,56,74,95,100   
+  profileStore.ts  |    93.6 |    84.11 |   95.23 |   93.83 | ...58,281,293,297 
+  ...leTemplate.ts |   89.61 |    85.71 |     100 |   89.47 | ...53,164,197,241 
+  proxyClient.ts   |      90 |    80.24 |   94.73 |   89.88 | ...50,281,347,353 
+  ...ditService.ts |   81.25 |       50 |   85.71 |   85.71 | 44,50             
+  requestLimits.ts |      98 |    93.75 |     100 |     100 | 41,87             
+  responseGuard.ts |     100 |    93.84 |     100 |     100 | 32,80-82,130      
+  ...eriesStore.ts |   76.69 |    74.15 |   73.52 |    76.8 | ...51,276,297,372 
+  schemaDiff.ts    |   74.31 |    63.82 |    60.6 |   75.23 | ...04,316,329-334 
+  ...DiffWorker.ts |       0 |        0 |       0 |       0 | 9-31              
+  schemaService.ts |   93.02 |    85.71 |   90.47 |   92.77 | ...47,275,288-292 
+  ...pshotStore.ts |   78.65 |    76.66 |   71.11 |   80.23 | ...61,365,395-396 
+  secretStore.ts   |   90.99 |    80.39 |   89.28 |   95.19 | 158,274-278       
+  ...erSelfTest.ts |   94.17 |    85.32 |   96.96 |   96.17 | ...44,194,196,213 
+  ...TestClient.ts |   94.82 |       80 |   88.88 |   95.74 | 54,56             
+  ...ngsService.ts |   69.28 |    60.82 |   64.44 |   69.33 | ...84-424,433,450 
+  tlsAgent.ts      |   95.71 |     91.4 |     100 |    95.7 | ...90,385,465,598 
+  ...GenService.ts |    94.2 |    81.64 |     100 |   94.96 | ...,981,1017,1021 
+ ...vices/fmClient |   95.08 |    89.45 |   98.71 |   95.56 |                   
+  certificates.ts  |   96.29 |       95 |     100 |   96.29 | 48                
+  containers.ts    |   97.56 |       90 |     100 |   97.56 | 130               
+  metadata.ts      |   86.84 |    84.61 |     100 |   86.84 | 31-36,72,140      
+  recordWrites.ts  |   97.14 |    79.41 |     100 |   97.14 | 42                
+  records.ts       |   95.65 |     88.7 |     100 |   95.16 | 30,49,77          
+  response.ts      |      80 |       75 |     100 |      80 | 18-23             
+  scripts.ts       |    96.9 |     94.8 |     100 |    96.7 | 53,58,118         
+  server.ts        |     100 |    92.85 |     100 |     100 | 46,73             
+  session.ts       |   82.35 |       75 |   85.71 |     100 | 20                
+  transport.ts     |     100 |     92.3 |     100 |     100 | 53,110,134        
+ ...rvices/session |     100 |       85 |     100 |     100 |                   
+  ...kenTracker.ts |     100 |       85 |     100 |     100 | 74-76             
+ src/settings      |   96.76 |    95.04 |   86.66 |   97.63 |                   
+  ...veSettings.ts |   94.52 |     93.6 |   79.31 |    96.4 | ...67,370,415,418 
+  settingPolicy.ts |   98.77 |    95.95 |     100 |   98.72 | 368-369           
+ src/snippets      |      98 |    92.76 |   98.71 |   98.14 |                   
+  deliver.ts       |     100 |    95.55 |     100 |     100 | 59-65             
+  escape.ts        |     100 |    91.66 |     100 |     100 | 65                
+  index.ts         |   93.75 |    88.88 |     100 |   93.75 | 46                
+  ...ationInput.ts |    90.9 |    81.91 |     100 |   90.78 | ...16,122,132-133 
+  operations.ts    |   98.67 |    93.45 |   94.73 |   99.31 | 239               
+ src/utils         |   92.88 |    90.08 |    94.4 |   93.39 |                   
+  atomicExport.ts  |   85.71 |    66.66 |   66.66 |     100 | 16-22             
+  backoff.ts       |   88.88 |    93.33 |      60 |      88 | 45-46,76          
+  bridgePolicy.ts  |     100 |       96 |     100 |     100 | 34                
+  ...inerUpload.ts |   56.25 |    34.78 |    62.5 |   56.25 | ...4,49,70-97,107 
+  ...PortalRows.ts |   86.66 |    79.41 |     100 |    86.2 | ...,93,98,115,139 
+  ...reamWriter.ts |      90 |    92.15 |   93.33 |   94.54 | 32,95,98          
+  ...cateRecord.ts |     100 |    95.45 |     100 |     100 | 26                
+  errorUx.ts       |   88.74 |    91.04 |   92.85 |   88.27 | ...91,216-218,283 
+  exportCsv.ts     |   97.14 |       95 |     100 |   96.87 | 44                
+  exportRecords.ts |     100 |       96 |     100 |     100 | 14                
+  fireAndForget.ts |      75 |      100 |   66.66 |      75 | 43                
+  jsonValidate.ts  |   83.56 |    84.37 |   93.75 |   82.85 | ...73,182,189,211 
+  ...tInspector.ts |   85.18 |    72.22 |     100 |   84.31 | ...48,152,156,160 
+  layoutParser.ts  |   91.48 |    84.61 |     100 |   91.48 | 9,48,52,85        
+  networkErrors.ts |   92.39 |     91.2 |   91.66 |   92.39 | ...43,146-149,372 
+  ...alizeError.ts |   96.13 |    91.43 |     100 |   96.55 | ...69,309,425,432 
+  ...onfinement.ts |   98.33 |    97.91 |     100 |   98.27 | 125               
+  plainText.ts     |     100 |    95.83 |     100 |     100 | 35                
+  portalUtils.ts   |   94.73 |    81.25 |     100 |   94.59 | 25,76             
+  ...ionFailure.ts |   91.89 |    84.21 |   66.66 |   96.42 | 25                
+  redact.ts        |   92.68 |    86.36 |    87.5 |    92.5 | 53,92,96          
+  ...eReplacing.ts |    87.5 |       90 |   33.33 |     100 | 20                
+  scriptParser.ts  |     100 |    93.93 |     100 |     100 | 32,67             
+  tlsProfile.ts    |   97.72 |    96.66 |     100 |   97.67 | 36                
+  ...ListParser.ts |      96 |    81.81 |     100 |      96 | 22                
+ src/views         |   65.68 |    52.94 |   61.64 |   66.02 |                   
+  ...nStatusBar.ts |   69.44 |    58.92 |      80 |   70.58 | 183-235           
+  fmExplorer.ts    |   62.42 |    47.86 |   60.71 |   61.93 | ...61-685,707-712 
+  ...tInspector.ts |   61.17 |    48.64 |      50 |   61.44 | ...69-276,327-358 
+  ...eStatusBar.ts |   76.27 |    66.66 |   72.72 |   78.57 | ...14-116,122-128 
+ ...ebviews/common |   98.09 |    94.11 |     100 |   97.95 |                   
+  dispatch.ts      |   94.44 |    93.33 |     100 |   94.44 | 83                
+  ...Validation.ts |    98.3 |       95 |     100 |   98.18 | 68                
+  panelRestore.ts  |     100 |       50 |     100 |     100 | 60                
+ ...nnectionWizard |   97.78 |    89.24 |     100 |   97.75 |                   
+  certificates.ts  |     100 |    83.92 |     100 |     100 | ...-87,89,110-117 
+  credentials.ts   |    92.3 |    85.18 |     100 |    92.1 | 22,28,108         
+  messages.ts      |     100 |    98.21 |     100 |     100 | 110               
+  save.ts          |   95.31 |    88.88 |     100 |   95.31 | 23-27,178         
+  ...Connection.ts |   97.59 |    86.51 |     100 |   97.56 | 64,186            
+ ...ronmentCompare |   27.27 |       16 |   18.75 |   29.03 |                   
+  index.ts         |   27.27 |       16 |   18.75 |   29.03 | 19,30-36,87-151   
+ ...views/fmWebApp |    94.2 |    83.82 |     100 |   97.87 |                   
+  index.ts         |    94.2 |    83.82 |     100 |   97.87 | 22                
+ ...ews/layoutMode |    93.3 |    85.53 |   90.32 |   93.56 |                   
+  ...rExecution.ts |   79.16 |    71.05 |   66.66 |   78.72 | ...57-165,184-188 
+  panel.ts         |   97.51 |    90.08 |   92.85 |   98.06 | 126-127,154       
+ ...s/queryBuilder |   91.79 |    85.97 |   98.18 |   93.49 |                   
+  find.ts          |   93.75 |    87.14 |     100 |   98.27 | 85                
+  index.ts         |   98.75 |    95.06 |     100 |   99.34 | 300               
+  messages.ts      |   89.77 |    84.78 |     100 |   89.77 | ...55,170,202,208 
+  results.ts       |   73.46 |    66.66 |     100 |   78.04 | ...41,51-52,75-78 
+  savedQueries.ts  |   76.47 |     64.7 |      50 |   76.47 | 9-10,26,58        
+ ...s/recordEditor |    95.2 |    92.36 |      96 |   95.01 |                   
+  index.ts         |    95.2 |    92.36 |      96 |   95.01 | ...1033,1042,1046 
+ ...s/recordViewer |   98.61 |    83.49 |     100 |   99.25 |                   
+  index.ts         |   98.61 |    83.49 |     100 |   99.25 | 157               
+ ...ews/schemaDiff |   98.21 |    94.11 |     100 |   98.14 |                   
+  index.ts         |   98.21 |    94.11 |     100 |   98.14 | 95                
+ ...s/scriptRunner |   87.57 |    88.17 |   86.36 |   87.82 |                   
+  index.ts         |   87.57 |    88.17 |   86.36 |   87.82 | ...94-295,482,541 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 90.01% ( 13751/15277 )
+Branches     : 84.73% ( 9638/11374 )
+Functions    : 87.85% ( 2524/2873 )
+Lines        : 90.83% ( 12820/14113 )
+================================================================================
+=== build ===
+
+> fmweb-ide-monorepo@0.1.0 build
+> npm run build --workspaces --if-present
+
+
+> @fmweb/shared@0.1.0 build
+> tsc -p tsconfig.json
+
+
+> @fmweb/designer-ui@0.1.0 build
+> esbuild src/main.tsx --bundle --platform=browser --format=iife --outfile=dist/index.js --minify --define:process.env.NODE_ENV=\"production\"
+
+
+  dist/index.js   859.5kb
+  dist/index.css    5.5kb
+
+⚡ Done in 30ms
+
+> @fmweb/runtime-next@0.1.0 build
+> tsc -p tsconfig.json --noEmit
+
+
+> filemaker-data-api-tools@1.9.1 build
+> npm run build:designer-ui && npm run clean && npm run bundle:extension && npm run bundle:schema-diff-worker && npm run bundle:ai-mcp-shim && npm run copy:webviews && npm run copy:fmweb-template
+
+
+> filemaker-data-api-tools@1.9.1 build:designer-ui
+> node ./scripts/build-designer-ui-if-available.mjs
+
+
+> @fmweb/designer-ui@0.1.0 build
+> esbuild src/main.tsx --bundle --platform=browser --format=iife --outfile=dist/index.js --minify --define:process.env.NODE_ENV=\"production\"
+
+
+  dist/index.js   859.5kb
+  dist/index.css    5.5kb
+
+⚡ Done in 33ms
+
+> filemaker-data-api-tools@1.9.1 clean
+> rimraf dist
+
+
+> filemaker-data-api-tools@1.9.1 bundle:extension
+> node ./scripts/bundle.mjs extension
+
+
+> filemaker-data-api-tools@1.9.1 bundle:schema-diff-worker
+> node ./scripts/bundle.mjs worker
+
+
+> filemaker-data-api-tools@1.9.1 bundle:ai-mcp-shim
+> node ./scripts/bundle.mjs aiMcpShim
+
+
+> filemaker-data-api-tools@1.9.1 copy:webviews
+> node ./scripts/copy-webviews.mjs
+
+
+> filemaker-data-api-tools@1.9.1 copy:fmweb-template
+> node ./scripts/build-fmweb-template.mjs
+
+Staged 56 FM Web template source files.
+=== test-designer-runtime ===
+
+> @fmweb/designer-ui@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-567/designer-ui
+
+
+ Test Files  11 passed (11)
+      Tests  98 passed (98)
+   Start at  01:37:12
+   Duration  2.64s (environment 50%, tests 29%, import 20%, transform 1%)
+
+Environment  jsdom was created 11 times · 3.33s total, 50% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+
+> @fmweb/runtime-next@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-567/runtime-next
+
+
+ Test Files  19 passed (19)
+      Tests  230 passed (230)
+   Start at  01:37:15
+   Duration  1.55s (tests 46%, import 26%, environment 24%, transform 4%, worker 1%)
+
+    Isolate  19 workers spawned · ~98ms startup each (spawn + environment, per file)
+             at least ~521ms faster with isolate: false — reuses workers across files instead of one per file
+
+=== package-check ===
+
+> fmweb-ide-monorepo@0.1.0 package:check
+> npm run package:check -w extension
+
+
+> filemaker-data-api-tools@1.9.1 package:check
+> npm run notices:check && npm run package:vsix
+
+
+> filemaker-data-api-tools@1.9.1 notices:check
+> node ./scripts/generate-third-party-notices.mjs --check
+
+[notices] THIRD_PARTY_NOTICES.txt is current (31 packages).
+
+> filemaker-data-api-tools@1.9.1 package:vsix
+> node ./scripts/package-vsix.mjs
+
+Executing prepublish script 'npm run vscode:prepublish'...
+
+> filemaker-data-api-tools@1.9.1 vscode:prepublish
+> npm run build
+
+
+> filemaker-data-api-tools@1.9.1 build
+> npm run build:designer-ui && npm run clean && npm run bundle:extension && npm run bundle:schema-diff-worker && npm run bundle:ai-mcp-shim && npm run copy:webviews && npm run copy:fmweb-template
+
+
+> filemaker-data-api-tools@1.9.1 build:designer-ui
+> node ./scripts/build-designer-ui-if-available.mjs
+
+
+> @fmweb/designer-ui@0.1.0 build
+> esbuild src/main.tsx --bundle --platform=browser --format=iife --outfile=dist/index.js --minify --define:process.env.NODE_ENV=\"production\"
+
+
+  dist/index.js   859.5kb
+  dist/index.css    5.5kb
+
+⚡ Done in 39ms
+
+> filemaker-data-api-tools@1.9.1 clean
+> rimraf dist
+
+
+> filemaker-data-api-tools@1.9.1 bundle:extension
+> node ./scripts/bundle.mjs extension
+
+
+> filemaker-data-api-tools@1.9.1 bundle:schema-diff-worker
+> node ./scripts/bundle.mjs worker
+
+
+> filemaker-data-api-tools@1.9.1 bundle:ai-mcp-shim
+> node ./scripts/bundle.mjs aiMcpShim
+
+
+> filemaker-data-api-tools@1.9.1 copy:webviews
+> node ./scripts/copy-webviews.mjs
+
+
+> filemaker-data-api-tools@1.9.1 copy:fmweb-template
+> node ./scripts/build-fmweb-template.mjs
+
+Staged 56 FM Web template source files.
+ INFO  Files included in the VSIX:
+filemaker-data-api-tools-1.9.1.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [11.09 KB]
+   ├─ NOTICE [0.44 KB]
+   ├─ THIRD_PARTY_NOTICES.txt [40.5 KB]
+   ├─ UPGRADE.md [46.4 KB]
+   ├─ changelog.md 
+   ├─ package.json [94.1 KB]
+   ├─ readme.md 
+   ├─ dist/
+   │  ├─ aiMcpShim.js [6.71 KB]
+   │  ├─ extension.js [1.6 MB]
+   │  ├─ schemaDiffWorker.js [2.02 KB]
+   │  ├─ fmweb-template/ (57 files) [281.69 KB]
+   │  └─ webviews/ (29 files) [1.21 MB]
+   ├─ docs/
+   │  ├─ COMPATIBILITY.md [9.86 KB]
+   │  ├─ FAQ.md [15.1 KB]
+   │  ├─ FM_WEB.md [19.47 KB]
+   │  ├─ TROUBLESHOOTING.md [36.87 KB]
+   │  ├─ USER_GUIDE.md [178.55 KB]
+   │  ├─ marketplace/ (12 files) [1.84 MB]
+   │  └─ walkthroughs/ (6 files) [8.91 KB]
+   ├─ examples/
+   │  └─ profile-template.json [0.23 KB]
+   └─ media/
+      └─ filemaker.svg [0.35 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: /workspace/sureforge-fm-data-api-wt-567/artifacts/filemaker-data-api-tools-1.9.1.vsix (123 files, 2.76 MB)
+VSIX artifacts/filemaker-data-api-tools-1.9.1.vsix = 2893359 bytes (budget 3145728)

@@ -1,0 +1,63 @@
+"Require email, don't include phone, notes not required."
+  old: {"title":null,"fields":[["Email",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+"Require email, notes not required."
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+"Require email, notes optional."
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+"Require email, and notes."
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Require email, don't include phone, and notes."
+  old: {"title":null,"fields":[["Email",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Make a name and email form."
+  old: {"title":"Name and email","fields":[],"unmatched":[]}
+  new: {"title":"Name and email","fields":[["Name",null],["Email",null]],"unmatched":[]}
+"Create a name and email form with phone."
+  old: {"title":"Name and email","fields":[["Phone",null]],"unmatched":[]}
+  new: {"title":"Name and email","fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+"Make a form with email."
+  old: {"title":"A","fields":[["Email",null]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Create an A Team form with email."
+  old: {"title":"A Team","fields":[["Email",null]],"unmatched":[]}
+  new: {"title":"A Team","fields":[["Email",null]],"unmatched":[]}
+"Build a The Gala form with email."
+  old: {"title":"The Gala","fields":[["Email",null]],"unmatched":[]}
+  new: {"title":"The Gala","fields":[["Email",null]],"unmatched":[]}
+"Make a registration form."
+  old: {"title":"Registration","fields":[],"unmatched":[]}
+  new: {"title":"Registration","fields":[],"unmatched":[]}
+"Build a workshop registration form. Require attendee name and email, let attendees choose a session, and add an optional accessibility notes field."
+  old: {"title":"Workshop registration","fields":[["Name",true],["Email",true]],"unmatched":["Session","Accessibility notes"]}
+  new: {"title":"Workshop registration","fields":[["Name",true],["Email",true]],"unmatched":["Session","Accessibility notes"]}
+"Draft a form titled \"Badge print\". Include \" Registration::Badge, Display \", \"Count\", and \"Missing\"."
+  old: {"title":"Badge print","fields":[],"unmatched":[" Registration::Badge, Display ","Count","Missing"]}
+  new: {"title":"Badge print","fields":[],"unmatched":[" Registration::Badge, Display ","Count","Missing"]}
+"Include email. Email is required. Include email."
+  old: {"title":null,"fields":[["Email",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",true]],"unmatched":[]}
+"Include email but not phone."
+  old: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email, don't include phone, and notes."
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, but include email, and notes."
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  new: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, notes."
+  old: {"title":null,"fields":[],"unmatched":[]}
+  new: {"title":null,"fields":[],"unmatched":[]}
+"Exclude phone, company, and notes."
+  old: {"title":null,"fields":[],"unmatched":[]}
+  new: {"title":null,"fields":[],"unmatched":[]}
+"Require name, email, and phone."
+  old: {"title":null,"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+  new: {"title":null,"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+"Add optional notes, then session."
+  old: {"title":null,"fields":[["Notes",false]],"unmatched":["Session"]}
+  new: {"title":null,"fields":[["Notes",false]],"unmatched":["Session"]}

@@ -1,0 +1,121 @@
+DIFFERENCES (40):
+[common] "Include email, don't include phone, and notes."
+  before: {"fields":[],"unmatched":["Email"]}
+  after:  {"fields":[["Notes",null]],"unmatched":["Email"]}
+[common] "Include email but not phone."
+  before: {"fields":[["Phone",null]],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[common] "Require name and email, but not phone."
+  before: {"fields":[["Phone",null]],"unmatched":["Attendee name","Email"]}
+  after:  {"fields":[],"unmatched":["Attendee name","Email"]}
+[common] "Include email, not phone."
+  before: {"fields":[["Phone",null]],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[common] "Include email but not required phone."
+  before: {"fields":[["Phone",true]],"unmatched":["Email"]}
+  after:  {"fields":[["Phone",false]],"unmatched":["Email"]}
+[common] "Include email and not strictly required phone."
+  before: {"fields":[["Phone",true]],"unmatched":["Email"]}
+  after:  {"fields":[["Phone",false]],"unmatched":["Email"]}
+[common] "Make a form that excludes phone and includes email."
+  before: {"title":"A","fields":[["Phone",null]],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[common] "Create a form that omits phone. Include email."
+  before: {"title":"A","fields":[["Phone",null]],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[common] "Draft a registration form leaving out phone, including email."
+  before: {"title":"Registration","fields":[["Phone",null]],"unmatched":["Email"]}
+  after:  {"title":"Registration","fields":[],"unmatched":["Email"]}
+[common] "Include everything except phone and email."
+  before: {"fields":[["Phone",null]],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":[]}
+[custom] "Include email, don't include phone, and notes."
+  before: {"fields":[],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":["Email","Notes"]}
+[custom] "Include email but not phone."
+  before: {"fields":[],"unmatched":["Email","Phone"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[custom] "Require name and email, but not phone."
+  before: {"fields":[],"unmatched":["Attendee name","Email","Phone"]}
+  after:  {"fields":[],"unmatched":["Attendee name","Email"]}
+[custom] "Include email, not phone."
+  before: {"fields":[],"unmatched":["Email","Phone"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[custom] "Make a form that excludes phone and includes email."
+  before: {"title":"A","fields":[],"unmatched":["Phone","Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[custom] "Create a form that omits phone. Include email."
+  before: {"title":"A","fields":[],"unmatched":["Phone","Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[custom] "Draft a registration form leaving out phone, including email."
+  before: {"title":"Registration","fields":[],"unmatched":["Phone","Email"]}
+  after:  {"title":"Registration","fields":[],"unmatched":["Email"]}
+[custom] "Include everything except phone and email."
+  before: {"fields":[],"unmatched":["Phone","Email"]}
+  after:  {"fields":[],"unmatched":[]}
+[quoted] "Include email, don't include phone, and notes."
+  before: {"fields":[],"unmatched":["Email"]}
+  after:  {"fields":[],"unmatched":["Email","Notes"]}
+[quoted] "Include email but not phone."
+  before: {"fields":[],"unmatched":["Email","Phone"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[quoted] "Require name and email, but not phone."
+  before: {"fields":[],"unmatched":["Attendee name","Email","Phone"]}
+  after:  {"fields":[],"unmatched":["Attendee name","Email"]}
+[quoted] "Include email, not phone."
+  before: {"fields":[],"unmatched":["Email","Phone"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[quoted] "Make a form that excludes phone and includes email."
+  before: {"title":"A","fields":[],"unmatched":["Phone","Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[quoted] "Create a form that omits phone. Include email."
+  before: {"title":"A","fields":[],"unmatched":["Phone","Email"]}
+  after:  {"fields":[],"unmatched":["Email"]}
+[quoted] "Draft a registration form leaving out phone, including email."
+  before: {"title":"Registration","fields":[],"unmatched":["Phone","Email"]}
+  after:  {"title":"Registration","fields":[],"unmatched":["Email"]}
+[quoted] "Include everything except phone and email."
+  before: {"fields":[],"unmatched":["Phone","Email"]}
+  after:  {"fields":[],"unmatched":[]}
+[simple] "Include email, don't include phone, and notes."
+  before: {"fields":[["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+[simple] "Include email but not phone."
+  before: {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  after:  {"fields":[["Email",null]],"unmatched":[]}
+[simple] "Require name and email, but not phone."
+  before: {"fields":[["Name",true],["Email",true],["Phone",null]],"unmatched":[]}
+  after:  {"fields":[["Name",true],["Email",true]],"unmatched":[]}
+[simple] "Include email, not phone."
+  before: {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  after:  {"fields":[["Email",null]],"unmatched":[]}
+[simple] "Include email. Email is not required."
+  before: {"fields":[["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Email",false]],"unmatched":[]}
+[simple] "Include email but not required phone."
+  before: {"fields":[["Email",null],["Phone",true]],"unmatched":[]}
+  after:  {"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+[simple] "Include email and email is not optional."
+  before: {"fields":[["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Email",true]],"unmatched":[]}
+[simple] "Include email and not strictly required phone."
+  before: {"fields":[["Email",null],["Phone",true]],"unmatched":[]}
+  after:  {"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+[simple] "Include email and email is not optional."
+  before: {"fields":[["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Email",true]],"unmatched":[]}
+[simple] "Make a form that excludes phone and includes email."
+  before: {"title":"A","fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Email",null]],"unmatched":[]}
+[simple] "Create a form that omits phone. Include email."
+  before: {"title":"A","fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Email",null]],"unmatched":[]}
+[simple] "Draft a registration form leaving out phone, including email."
+  before: {"title":"Registration","fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  after:  {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+[simple] "Include everything except phone and email."
+  before: {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  after:  {"fields":[],"unmatched":[]}
+[simple] "Require \"Name and email"
+  before: {"fields":[["Name",null],["Email",null]],"unmatched":[]}
+  after:  {"fields":[["Name",true],["Email",true]],"unmatched":[]}
