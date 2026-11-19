@@ -545,6 +545,8 @@ Run **FileMaker: Get Record by ID** or **FileMaker: Open Record Viewer**, choose
 
 If **Load more** in the Record Viewer fails, the error is shown and the button becomes available to try again. Portal counts supplied only for the first result are not applied to other records in a search or CSV export.
 
+If a script that ran with the record reported an error, the Record Viewer, the Record Editor and **Get Record by ID** say so in a warning. The record still loads; only the script failed.
+
 Record Viewer and Record Editor open container links only when they point at the selected connection's own server. A link to another server is refused.
 
 ### Edit a record

@@ -29,6 +29,7 @@ import {
   showCommandError
 } from './common';
 import { describeScriptErrors } from '../services/responseGuard';
+import { recordWithoutScriptErrors, warnAboutRecordScriptErrors } from '../utils/scriptUx';
 import { ConnectionWizardPanel } from '../webviews/connectionWizard';
 import { QueryBuilderPanel } from '../webviews/queryBuilder';
 import { RecordViewerPanel } from '../webviews/recordViewer';
@@ -444,11 +445,13 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
       }
 
       try {
-        const record = await fmClient.getRecord(profile, layout, recordId);
+        const loaded = await fmClient.getRecord(profile, layout, recordId);
+        // The record is shown now. A script that ran with the read may have reported an error.
+        warnAboutRecordScriptErrors(loaded.scriptErrors);
         await openJsonDocument({
           profile: profile.name,
           layout,
-          record
+          record: recordWithoutScriptErrors(loaded)
         });
       } catch (error) {
         await showCommandError(error, {

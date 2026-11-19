@@ -1,4 +1,4 @@
-import type { ConnectionProfile, PortalPaging, FileMakerRecord, FindRecordsRequest, FindRecordsResult } from '../../types/fm';
+import type { ConnectionProfile, PortalPaging, FileMakerRecord, FindRecordsRequest, FindRecordsResult, LoadedRecord } from '../../types/fm';
 import type { DataApiEnvelope, DataApiListRecordsResponse } from '../../types/dataApi';
 import { isProxyProfile } from '../../types/fm';
 import { FMClientError } from '../errors';
@@ -15,7 +15,7 @@ export async function getRecord(
   layout: string,
   recordId: string,
   control?: ClientRequestControl
-): Promise<FileMakerRecord> {
+): Promise<LoadedRecord> {
   return client.withHistory(
     {
       profileId: profile.id,
@@ -59,7 +59,12 @@ export async function getRecord(
         });
       }
 
-      return withPortalInfo(record, envelope.response.dataInfo, envelope.response.portalDataInfo);
+      return {
+        ...withPortalInfo(record, envelope.response.dataInfo, envelope.response.portalDataInfo),
+        // The read worked; a script that ran with it may still have reported an error. The
+        // caller decides what to show.
+        ...scriptErrorsOf(envelope.response)
+      };
     }
   );
 }

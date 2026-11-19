@@ -408,6 +408,40 @@ describe('registerCoreCommands', () => {
     expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
   });
 
+  it('warns when a script reported an error next to a record that loaded, and keeps the record it opens clean', async () => {
+    const deps = createSelectionDeps();
+    const getRecord = vi.fn().mockResolvedValue({ recordId: '1', fieldData: {}, scriptErrors: [{ phase: 'script', code: '3' }] });
+    Object.assign(deps.fmClient, { getRecord });
+    registerCoreCommands(deps);
+    vi.mocked(vscode.window.showInputBox).mockResolvedValue('1');
+
+    await command('getRecordById')({ profileId: profile.id, layout: 'Contacts' });
+
+    expect(vi.mocked(vscode.window.showWarningMessage).mock.calls.map((call) => String(call[0])).join('\n')).toMatch(
+      /The record loaded, but the script reported error 3/
+    );
+    expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith({
+      language: 'json',
+      content: JSON.stringify({ profile: profile.name, layout: 'Contacts', record: { recordId: '1', fieldData: {} } }, null, 2)
+    });
+  });
+
+  it('says nothing about a record that loaded without a script error', async () => {
+    const deps = createSelectionDeps();
+    const getRecord = vi.fn().mockResolvedValue({ recordId: '1', fieldData: {} });
+    Object.assign(deps.fmClient, { getRecord });
+    registerCoreCommands(deps);
+    vi.mocked(vscode.window.showInputBox).mockResolvedValue('1');
+
+    await command('getRecordById')({ profileId: profile.id, layout: 'Contacts' });
+
+    expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
+    expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith({
+      language: 'json',
+      content: JSON.stringify({ profile: profile.name, layout: 'Contacts', record: { recordId: '1', fieldData: {} } }, null, 2)
+    });
+  });
+
   const panels = [
     { name: 'openRecordViewer', register: registerCoreCommands, panel: RecordViewerPanel },
     { name: 'openRecordEditor', register: registerRecordEditCommands, panel: RecordEditorPanel },
