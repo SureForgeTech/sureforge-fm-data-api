@@ -199,6 +199,24 @@ describe('prompt form suggestions', () => {
     expect(suggestPromptFields('Optional name and email, phone are required.', fields).fields)
       .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: undefined },
         { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Require email, phone and notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true },
+        { field: { name: 'Notes' }, required: true }]);
+  });
+
+  it('keeps a requirement that names one field off the rest of the list', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    // A singular copula names the field it follows, even inside a coordinated list.
+    expect(suggestPromptFields('Include email and phone, email is required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: undefined }]);
+    expect(suggestPromptFields('Include name and email, phone is required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: undefined }, { field: { name: 'Email' }, required: undefined },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Collect name, email, phone is required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: undefined }, { field: { name: 'Email' }, required: undefined },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Include email and phone, email is optional.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: false }, { field: { name: 'Phone' }, required: undefined }]);
   });
 
   it('marks every field of a list when the requirement is stated at the end of the list', () => {
@@ -214,6 +232,9 @@ describe('prompt form suggestions', () => {
       .toEqual([{ field: { name: 'Email' }, required: false }, { field: { name: 'Phone' }, required: false }]);
     expect(suggestPromptFields('Name and email are optional.', fields).fields)
       .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: false }]);
+    expect(suggestPromptFields('Make email, phone and notes required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true },
+        { field: { name: 'Notes' }, required: true }]);
   });
 
   it('still reaches every item of a list after an excluded item was removed from the draft', () => {

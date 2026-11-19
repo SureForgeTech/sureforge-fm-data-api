@@ -102,7 +102,6 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   // can reach the items before it. The items are held by reference, so removing one of them from the
   // draft cannot shift the others.
   let listMembers: { entry: PromptFormDraft['fields'][number]; clause: number; settled: boolean }[] = [];
-  let listSettled = false;
   let clauseIndex = 0;
   let headPending = true;
   let comma = false;
@@ -114,7 +113,6 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       comma = false;
       anchorNegated = undefined;
       listMembers = [];
-      listSettled = false;
       headPending = true;
       continue;
     }
@@ -184,24 +182,29 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const suffix = /^((?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
       const requirement = prefix ? qualifier(prefix[2] ?? '', Boolean(prefix[1]))
         : suffix ? qualifier(suffix[3] ?? '', Boolean(suffix[2])) : undefined;
-      // A requirement stated after the list states the rule for the list it concludes. A copula makes the
-      // subject the whole list ("Name and email are required."); a bare word names the coordinated phrase
-      // before it ("Make email and phone required."); a negation overrides only the item it follows, so
-      // "Require email, notes not required." keeps email required.
-      const copula = !prefix && suffix !== null && /^(?:is|are|as)\s/.test(suffix[0]);
+      // A requirement stated after the list states the rule for its subject. The subject decides how far the
+      // requirement reaches: a plural copula ("Name and email are required.") names the whole list, a bare
+      // word ("email and phone required") names the coordinated phrase before it, and a negation ("notes not
+      // required") or a singular copula ("phone is required") names one field.
+      const copula = !prefix && suffix !== null ? suffix[1] : undefined;
+      const plural = copula !== undefined && /^are\s/.test(copula);
+      const singular = copula !== undefined && /^(?:is|as)\s/.test(copula);
       const negatedQualifier = !prefix && suffix !== null && Boolean(suffix[2]);
-      const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier;
+      const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier && !singular;
       if (!negated) {
         const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
         if (entry) {
           // The coordinated list being read: its items since the list's head.
-          if (!isContinuation || listMembers.length === 0) { listMembers = []; listSettled = false; }
-          listMembers.push({ entry, clause: clauseIndex, settled: listSettled || requirement !== undefined });
-          if (requirement !== undefined) listSettled = true;
+          if (!isContinuation || listMembers.length === 0) listMembers = [];
+          listMembers.push({ entry, clause: clauseIndex, settled: requirement !== undefined });
           if (trailing) {
-            // A copula names the whole list, so the requirement reaches every item of it, unless an earlier
-            // item of the list already stated a requirement of its own.
-            const reachesEarlierClauses = copula && !listMembers.slice(0, -1).some((member) => member.settled);
+            // A plural copula names the whole list, so the requirement reaches the items of the earlier
+            // clauses too, unless one of them already stated a requirement of its own. A bare word names
+            // the coordinated phrase it is joined to, so it reaches the earlier clauses only when the
+            // mention is joined to the list by "and".
+            const reachesEarlierClauses = plural
+              ? !listMembers.slice(0, -1).some((member) => member.settled)
+              : /^and$/.test(before);
             for (const member of listMembers) {
               if (member.clause !== clauseIndex && !reachesEarlierClauses) continue;
               if (member.entry.required === undefined) member.entry.required = requirement;
