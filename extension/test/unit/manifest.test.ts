@@ -30,7 +30,7 @@ describe('extension manifest UX contract', () => {
   it('offers diagnosis and its copy command even before any profile exists', () => {
     for (const name of ['diagnoseConnection', 'copyConnectionDiagnosis']) {
       expect(commandIds.has(id(name))).toBe(true);
-      expect(palette.get(id(name)), name).toBe('true');
+      expect(palette.has(id(name))).toBe(false);
     }
   });
 
@@ -51,7 +51,7 @@ describe('extension manifest UX contract', () => {
   it('keeps primary workflows in the palette once profiles exist', () => {
     const alwaysVisible = ['addConnectionProfile', 'openWelcomeWalkthrough', 'openUserGuide', 'showDiagnostics', 'cancelJob', 'showJobs'];
     for (const name of alwaysVisible) {
-      expect(palette.get(id(name)), name).toBe('true');
+      expect(palette.has(id(name)), name).toBe(false);
     }
 
     const primary = ['connect', 'disconnect', 'openQueryBuilder', 'openRecordViewer', 'openScriptRunner', 'listLayouts'];

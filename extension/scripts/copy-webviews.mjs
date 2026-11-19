@@ -6,7 +6,7 @@ import { build, transform } from 'esbuild';
 
 const extensionDir = path.resolve(import.meta.dirname, '..');
 const outputDir = process.argv[2] ? path.resolve(process.argv[2]) : path.join(extensionDir, 'dist');
-const pages = ['queryBuilder', 'recordViewer', 'scriptRunner', 'schemaDiff', 'recordEditor', 'connectionWizard', 'layoutMode', 'fmWebApp'];
+const pages = ['queryBuilder', 'recordViewer', 'scriptRunner', 'schemaDiff', 'recordEditor', 'connectionWizard', 'layoutMode', 'fmWebApp', 'home'];
 
 // Bundle only the dependency-free presentation module, not React or the layout schema.
 const standards = await build({ entryPoints: [path.resolve(extensionDir, '../shared/src/field-standards.ts')],

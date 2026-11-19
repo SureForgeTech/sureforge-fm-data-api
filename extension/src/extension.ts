@@ -28,6 +28,7 @@ import { registerAiMcpCommands, watchExternalServerSetting } from './commands/ai
 import { AiStatusBar, auditLogPath, registerAiToolCommands } from './commands/aiTools';
 import { registerAiContextCommands } from './commands/aiContext';
 import { registerSchemaSnapshotCommands } from './commands/schemaSnapshots';
+import { registerHomeCommands } from './commands/home';
 import { registerCopyRequestCommands } from './commands/copyRequest';
 import { registerScriptRunnerCommands } from './commands/scriptRunner';
 import { registerTestMyServerCommand } from './commands/testMyServer';
@@ -460,6 +461,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     logger
   });
 
+  const homeDisposables = registerHomeCommands({ context });
+
   const savedQueryDisposables = registerSavedQueriesCommands({
     context,
     profileStore,
@@ -732,6 +735,7 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
     layoutInspectorTree,
     layoutSelectionDisposable,
     ...coreCommandDisposables,
+    ...homeDisposables,
     registerTestMyServerCommand({ context, profileStore, secretStore, settingsService, roleGuard, logger }),
     ...layoutInspectorDisposables,
     ...savedQueryDisposables,

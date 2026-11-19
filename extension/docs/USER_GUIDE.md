@@ -6,7 +6,7 @@ You can also read the [User Guide on the website](https://sureforgetech.github.i
 
 Command names below are the titles you see in the Command Palette (`Cmd+Shift+P` on macOS, `Ctrl+Shift+P` on Windows and Linux). Every command starts with `FileMaker:`.
 
-The FileMaker commands are grouped in the Command Palette under five menus: **FileMaker: Build a Web App**, **FileMaker: Connect and Test**, **FileMaker: Browse Data**, **FileMaker: Help** and **FileMaker: Advanced Tools**. Type `FileMaker:` in the palette to see them. Every command keeps its name, its keyboard shortcut and its place in the sidebar, so a shortcut or a button you already use still works.
+**Start Here** opens the FileMaker home: one panel with the four journeys — **Build a Web App**, **Connect and Test**, **Browse Data** and **Help** — and an **Advanced Tools** section for setup, diagnostics, code generation and the rest. Open it from the Command Palette, from the home button in the Connections panel, or from the link in the sidebar when you have no connections yet. Each button runs the matching command, so nothing is described twice.
 
 ## Contents
 
@@ -63,10 +63,11 @@ FileMaker screens use the same fonts, buttons and boxed messages, and follow you
 
 The table lists every extension command. Titles have the **FileMaker:** prefix in VS Code. “Shown” describes palette visibility; “needs” describes additional requirements when you run the command. A profile means a saved connection profile. Server operations also need access to the server and the relevant FileMaker privileges. Feature settings, workspace trust, offline mode and enterprise policy still apply as described in the sections below.
 
-Each command sits in one of the five palette menus listed at the top of this guide: **Build a Web App**, **Connect and Test**, **Browse Data**, **Help** and **Advanced Tools**.
+The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Connect and Test**, **Browse Data** and **Help**, with the rest under **Advanced Tools**.
 
 | Title | What it does | When it is available |
 | --- | --- | --- |
+| Start Here | Opens the FileMaker home: Build a Web App, Connect and Test, Browse Data, Help, and the advanced tools. | Always shown. |
 | Open Getting Started Walkthrough | Opens the guided setup steps in VS Code. | Always shown. |
 | Open User Guide | Opens this guide in a Markdown preview. | Always shown. |
 | Diagnose Connection | Checks a saved server or a typed address, without signing in, and explains likely fixes. | Always shown; turn off offline mode. Uses saved profiles or an address you type; never reads a workspace template. |

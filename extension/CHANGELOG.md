@@ -2,9 +2,9 @@
 
 ## Unreleased
 
-**Command palette**
+**FileMaker home**
 
-- The FileMaker commands are grouped in the Command Palette under **FileMaker: Build a Web App**, **FileMaker: Connect and Test**, **FileMaker: Browse Data**, **FileMaker: Help** and **FileMaker: Advanced Tools**. Every command keeps its name, its keyboard shortcut and its place in the sidebar.
+- **Start Here** opens a FileMaker home panel with the four journeys — Build a Web App, Connect and Test, Browse Data and Help — and an Advanced Tools section for setup, diagnostics, code generation and the rest. Each button runs the matching command. The home is also a button in the Connections panel and a link in the sidebar.
 
 - Describe a form in Create FM Web App and review suggested FileMaker fields in the visual editor.
 
