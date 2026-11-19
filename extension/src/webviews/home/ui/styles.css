@@ -14,7 +14,7 @@
 }
 
 .fm-home .lead {
-  opacity: 0.8;
+  color: var(--muted);
   margin: 0 0 20px;
 }
 
@@ -25,9 +25,9 @@
   padding: 16px;
 }
 
-.fm-home section > p {
+.fm-home section p {
+  color: var(--muted);
   margin: 0 0 12px;
-  opacity: 0.8;
 }
 
 .fm-home .entry {
@@ -38,8 +38,8 @@
   margin: 0 0 12px;
 }
 
-.fm-home .entry > span {
-  opacity: 0.75;
+.fm-home .entry span {
+  color: var(--muted);
 }
 
 .fm-home button {
@@ -66,6 +66,7 @@
 }
 
 .fm-home .fm-version {
-  opacity: 0.6;
-  margin-top: 24px;
+  margin: 24px 0 0;
+  font-size: 11px;
+  color: var(--muted);
 }

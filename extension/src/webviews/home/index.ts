@@ -51,6 +51,7 @@ export class FileMakerHomePanel {
     const uiBase = vscode.Uri.joinPath(this.context.extensionUri, 'dist', 'webviews', 'home', 'ui');
     const script = webview.asWebviewUri(vscode.Uri.joinPath(uiBase, 'main.js'));
     const style = webview.asWebviewUri(vscode.Uri.joinPath(uiBase, 'styles.css'));
+    const standardsStyle = webview.asWebviewUri(vscode.Uri.joinPath(uiBase, 'fieldStandards.css'));
     return `<!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,6 +59,7 @@ export class FileMakerHomePanel {
 <meta http-equiv="Content-Security-Policy" content="${csp}">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>FileMaker</title>
+<link rel="stylesheet" href="${standardsStyle}" />
 <link rel="stylesheet" href="${style}" />
 </head>
 <body class="fm-page fm-home">
