@@ -113,7 +113,7 @@ describe('live FileMaker registration browser behavior', () => {
     vi.mocked(fetch).mockResolvedValueOnce(Response.json({ status:'accepted',receipt:'fm-real-123' },{status:201}));
     mount('filemaker');expect(host.querySelector('[role="note"]')?.textContent).toContain('creates a real record');
     expect(host.querySelector('button[type="submit"]')?.textContent).toBe('Register');fill();await submit();
-    expect(host.querySelector('[role="status"]')?.textContent).toContain('Registration saved to FileMaker.');
+    expect(host.querySelector('[role="status"]')?.textContent).toContain('Submission saved to FileMaker.');
     expect(host.querySelector('[role="status"]')?.textContent).not.toContain('No FileMaker record was created');
     expect(sessionStorage.getItem(storageKey())).not.toContain('Sample Attendee');
     expect(sessionStorage.getItem(storageKey())).not.toContain('sample@example.test');

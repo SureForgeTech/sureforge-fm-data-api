@@ -42,6 +42,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- The private preview's form talks about the submission you are making rather than about a registration, so a feedback or request form does not read as an event registration.
+
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
 

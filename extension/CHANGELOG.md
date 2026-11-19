@@ -19,6 +19,8 @@
 
 **Local portal sample**
 
+- The private preview's form now talks about the submission you are making, not about a registration, so it reads the same for an event registration form and for a feedback or request form.
+
 - Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.
 
 - Export app scaffold now carries saved forms and source layouts into the generated app. Re-export keeps identical files and asks before replacing changed data, including marked generated layouts.
