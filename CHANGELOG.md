@@ -46,6 +46,8 @@ PR title prefix matches the highest-tier label added:
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
 
+- Drafting a form from a prompt now reads "Do not require phone" as a field of the form that is not required, the same as "not required phone". Before, the field was left out of the form and the request was not reported.
+
 - The private preview's form talks about the submission you are making rather than about a registration, so a feedback or request form does not read as an event registration.
 
 - The connection wizard refuses an account name that contains a colon, because the account name and the password travel together in the sign-in request and a colon would separate them. A colon in the password still works.
