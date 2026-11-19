@@ -200,7 +200,7 @@ describe('offline theme audit regression guards', () => {
   // every theme is still measured the same way.
   it.each(audit.themes)('%s keeps hints distinct and secondary text readable', (theme) => {
     const tokens = themeTokens.get(theme)!;
-    for (const css of [designerCss, ...['connectionWizard','recordEditor','recordViewer','queryBuilder','schemaDiff','scriptRunner'].map(stylesheet)]) {
+    for (const css of [designerCss, ...['connectionWizard','recordEditor','recordViewer','queryBuilder','schemaDiff','scriptRunner','home'].map(stylesheet)]) {
       for (const colors of [tokens, Object.fromEntries(Object.entries(tokens).filter(([key]) => key !== '--vscode-input-placeholderForeground'))]) {
         const excluded: unknown[] = [];
         const pairs = audit.measure(css, fieldFixture, colors, excluded);
@@ -211,6 +211,17 @@ describe('offline theme audit regression guards', () => {
       }
     }
   }, 30_000);
+
+  it.each(audit.themes)('%s keeps the FileMaker home secondary text readable', (theme) => {
+    const tokens = themeTokens.get(theme)!;
+    const home = auditedStyles.find(({ file }) => file.replace(/\\/g, '/').endsWith('/webviews/home/ui/styles.css'))!.css;
+    const body = '<div class="fm-home"><p class="lead">Start here. Everything else is under Advanced Tools.</p>'
+      + '<section><h2>Build a Web App</h2><p>Make a web form that writes to FileMaker.</p>'
+      + '<div class="entry"><button type="button">Create FM Web App</button><span>Choose a starter.</span></div></section></div>';
+    const pairs = audit.measure(home, body, tokens);
+    expect(pairs.length).toBeGreaterThan(0);
+    expect(pairs.filter((pair) => pair.ratio < 4.5)).toEqual([]);
+  });
 
   it('detects placeholder and secondary hierarchy mutations', () => {
     const tokens = audit.tokensFor('light');

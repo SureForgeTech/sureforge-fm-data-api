@@ -4,6 +4,10 @@
 
 - Describe a form in Create FM Web App and review suggested FileMaker fields in the visual editor.
 
+**FileMaker home**
+
+- **Start Here** opens a FileMaker home panel with the four journeys — Build a Web App, Connect and Test, Browse Data and Help — and an Advanced Tools section for setup, diagnostics, code generation and the rest. Each button runs the matching command. The home is also a button in the Connections panel and a link in the sidebar.
+
 **Licence**
 
 - The licence changes from MIT to Apache-2.0, with a NOTICE file. Releases published before this change keep the MIT licence they shipped with; only new releases carry Apache-2.0.

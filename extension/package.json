@@ -62,6 +62,7 @@
     "onWebviewPanel:filemakerEnvironmentCompare",
     "onWebviewPanel:filemakerDiagnosticsDashboard",
     "onWebviewPanel:filemakerEffectiveSettings",
+    "onWebviewPanel:filemakerHome",
     "onChatParticipant:filemaker-data-api-tools.filemaker"
   ],
   "main": "./dist/extension.js",
@@ -124,7 +125,7 @@
     "viewsWelcome": [
       {
         "view": "filemakerExplorer",
-        "contents": "No FileMaker connections yet.\n[Create FM Web App](command:filemakerDataApiTools.createFmWebApp)\n[Add Connection Profile](command:filemakerDataApiTools.addConnectionProfile)\n[Open Walkthrough](command:filemakerDataApiTools.openWelcomeWalkthrough)\n\nYour passwords stay in the OS keychain. Learn more in the [User Guide](command:filemakerDataApiTools.openUserGuide)."
+        "contents": "No FileMaker connections yet.\n[Start Here](command:filemakerDataApiTools.startHere)\n[Create FM Web App](command:filemakerDataApiTools.createFmWebApp)\n[Add Connection Profile](command:filemakerDataApiTools.addConnectionProfile)\n[Open Walkthrough](command:filemakerDataApiTools.openWelcomeWalkthrough)\n\nYour passwords stay in the OS keychain. Learn more in the [User Guide](command:filemakerDataApiTools.openUserGuide)."
       },
       {
         "view": "filemakerLayoutInspector",
@@ -205,6 +206,7 @@
     ],
     "commands": [
       { "command": "filemakerDataApiTools.createFmWebApp", "title": "Create FM Web App", "category": "FileMaker", "icon": "$(new-file)" },
+      { "command": "filemakerDataApiTools.startHere", "title": "Start Here", "category": "FileMaker", "icon": "$(home)" },
       { "command": "filemakerDataApiTools.buildPortal", "title": "Build a Portal", "category": "FileMaker" },
       {
         "command": "filemakerDataApiTools.testMyServer",
@@ -615,6 +617,11 @@
           "command": "filemakerDataApiTools.refreshExplorer",
           "when": "view == filemakerExplorer",
           "group": "navigation@2"
+        },
+        {
+          "command": "filemakerDataApiTools.startHere",
+          "when": "view == filemakerExplorer",
+          "group": "navigation@3"
         },
         {
           "command": "filemakerDataApiTools.selectLayoutForInspector",

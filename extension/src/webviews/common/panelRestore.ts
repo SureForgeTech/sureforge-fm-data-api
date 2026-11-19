@@ -28,7 +28,8 @@ export const RESTORABLE_PANELS: ReadonlyArray<{ viewType: string; reopenWith: st
   { viewType: 'filemakerSchemaDiff', reopenWith: 'FileMaker: Diff Schema Snapshots' },
   { viewType: 'filemakerEnvironmentCompare', reopenWith: 'FileMaker: Compare Environments' },
   { viewType: 'filemakerDiagnosticsDashboard', reopenWith: 'FileMaker: Open Diagnostics Dashboard' },
-  { viewType: 'filemakerEffectiveSettings', reopenWith: 'FileMaker: Show Effective Settings' }
+  { viewType: 'filemakerEffectiveSettings', reopenWith: 'FileMaker: Show Effective Settings' },
+  { viewType: 'filemakerHome', reopenWith: 'FileMaker: Start Here' }
 ];
 
 /**
