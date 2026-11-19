@@ -14,6 +14,8 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
   const canvasHost = React.useRef<HTMLDivElement>(null);
   const summary = React.useRef<HTMLDivElement>(null);
   const locked = status !== 'editing';
+  // The storage key names the duplicate-protection state, so it keeps its name even though the
+  // wording around it no longer says "registration".
   const attemptKey = `fmweb.registration.v1.${definition.id}.${definition.layoutId}`;
   React.useEffect(() => {
     if (mode !== 'filemaker') return;
@@ -28,7 +30,7 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
         setReceipt(value.receipt);setStatus('accepted');
       } else setStatus('uncertain');
     } catch {
-      setErrors([{ code: 'shape', message: 'Registration safety state could not be restored. Enable session storage and ask the app operator to check any earlier submission.' }]);
+      setErrors([{ code: 'shape', message: 'Submission safety state could not be restored. Enable session storage and ask the app operator to check any earlier submission.' }]);
       setStatus('uncertain');busy.current = true;
     }
   }, [mode, attemptKey]);
@@ -48,7 +50,7 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
     try {
       clearAttempt();submissionId.current = undefined;busy.current = false;
       setValues({});setErrors([]);setReceipt('');setStatus('editing');
-    } catch { setErrors([{ code: 'shape', message: 'Enable session storage before starting another registration.' }]); }
+    } catch { setErrors([{ code: 'shape', message: 'Enable session storage before starting another submission.' }]); }
   }
   React.useEffect(() => { if (errors.length) summary.current?.focus(); }, [errors]);
   React.useEffect(() => {
@@ -72,7 +74,7 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
     submissionId.current ??= crypto.randomUUID();
     try { storeAttempt('pending'); }
     catch {
-      setErrors([{ code: 'shape', message: 'Your browser cannot save registration safety state. Enable session storage before submitting.' }]);
+      setErrors([{ code: 'shape', message: 'Your browser cannot save submission safety state. Enable session storage before submitting.' }]);
       busy.current = false;setStatus('editing');return;
     }
     try {
@@ -96,7 +98,7 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
         || (response.status === 503 && body.status === 'capacity')) {
         clearAttempt();if (mode === 'filemaker' && body.status === 'rejected') submissionId.current = undefined;
         setErrors([{ code: 'value', message: body.status === 'capacity'
-          ? mode === 'filemaker' ? 'The registration service reached its safety limit. Keep your values and contact the app operator.' : 'The sample preview reached its limit. Restart the preview to continue.'
+          ? mode === 'filemaker' ? 'The submission service reached its safety limit. Keep your values and contact the app operator.' : 'The sample preview reached its limit. Restart the preview to continue.'
           : 'The submission was not accepted. Review your values and the form definition before trying again.' }]);
         busy.current = false; setStatus('editing');
       } else setStatus('uncertain');
@@ -112,9 +114,9 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
   return <section aria-label={definition.title} style={{ borderTop: `6px solid ${definition.branding?.accentColor ?? '#215EA6'}`, paddingTop: 16 }}>
     {definition.branding?.organizationName ? <p>{definition.branding.organizationName}</p> : null}
     <h1>{definition.title}</h1><p>{definition.description}</p>
-    <p role="note">{mode === 'filemaker' ? 'Live FileMaker registration. Submitting this form creates a real record in the approved FileMaker connection.' : 'Private sample preview. Use invented details. Duplicate protection lasts only while this preview process runs.'}</p>
+    <p role="note">{mode === 'filemaker' ? 'Live FileMaker submission. Submitting this form creates a real record in the approved FileMaker connection.' : 'Private sample preview. Use invented details. Duplicate protection lasts only while this preview process runs.'}</p>
     {errors.length ? <div ref={summary} role="alert" tabIndex={-1}>
-      <h2>Check your registration</h2><ul>{errors.map((error, index) => <li key={index}>
+      <h2>Check your submission</h2><ul>{errors.map((error, index) => <li key={index}>
         {error.fieldId ? <button type="button" onClick={() => focusField(error.fieldId!)}>
           {definition.fields.find((field) => field.id === error.fieldId)?.label}: {error.message}
         </button> : error.message}
@@ -122,7 +124,7 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
     </div> : null}
     <form noValidate onSubmit={submit} aria-busy={status === 'submitting'}>
       <fieldset disabled={locked} style={{ border: 0, padding: 0, margin: 0, minWidth: 0 }}>
-        <legend style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>Registration details</legend>
+        <legend style={{ position: 'absolute', width: 1, height: 1, overflow: 'hidden' }}>Submission details</legend>
         <div ref={canvasHost} style={{ width: '100%' }}>
           <LayoutContainer layout={layout} mode="runtime" runtimeData={{ creating: true, editing: !locked,
             viewport: { width, height: layout.canvas.height },
@@ -141,11 +143,11 @@ export function IntakeForm({ definition, layout, mode = 'sample' }: { definition
       <button type="submit" disabled={locked}>{status === 'submitting' ? 'Submitting…' : mode === 'filemaker' && definition.submitLabel === 'Register with sample data' ? 'Register' : definition.submitLabel}</button>
     </form>
     <div role="status" aria-live="polite">
-      {status === 'accepted' ? <p>{mode === 'filemaker' ? 'Registration saved to FileMaker.' : definition.successMessage} Reference: {receipt}</p> : null}
+      {status === 'accepted' ? <p>{mode === 'filemaker' ? 'Submission saved to FileMaker.' : definition.successMessage} Reference: {receipt}</p> : null}
       {mode === 'filemaker' && status === 'accepted' ? <button type="button" onClick={startAnother}>Register another attendee</button> : null}
       {status === 'uncertain' ? <p>{mode === 'filemaker'
         ? 'The submission outcome is uncertain. Keep this page open and ask the app operator to check FileMaker before submitting again. A record may already exist. Nothing was retried automatically.'
-        : 'The submission outcome is uncertain. Keep this page open. This sample has no outcome lookup; reloading or restarting the preview loses duplicate protection and resubmitting could create another registration. Nothing was retried automatically.'}</p> : null}
+        : 'The submission outcome is uncertain. Keep this page open. This sample has no outcome lookup; reloading or restarting the preview loses duplicate protection and resubmitting could create another submission. Nothing was retried automatically.'}</p> : null}
     </div>
   </section>;
 }

@@ -73,18 +73,20 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
     byName.set(name, matches);
   }
   const concepts = new Map(CONCEPTS.flatMap((concept) => [...concept.phrases, ...concept.names].map((phrase) => [phrase, concept] as const)));
-  const append = (mention: Mention, required?: boolean): void => {
+  const append = (mention: Mention, required?: boolean): PromptFormDraft['fields'][number] | undefined => {
     const field = mention.candidates.length === 1 ? mention.candidates[0] : undefined;
     const existing = field && draft.fields.find((entry) => entry.field.name === field.name);
     if (existing) {
       if (required !== undefined) existing.required = required;
-      return;
+      return existing;
     }
     if (!field || draft.fields.length === 100) {
       if (!draft.unmatched.includes(mention.label)) draft.unmatched.push(mention.label);
-      return;
+      return undefined;
     }
-    draft.fields.push({ field, required });
+    const entry = { field, required };
+    draft.fields.push(entry);
+    return entry;
   };
 
   // Keep punctuation inside explicitly quoted FileMaker names intact. The closing quote is optional so an
@@ -96,6 +98,10 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   // as the list head and moves to a clause that ends positive, so a negation inside the list does not swallow
   // a later coordinated request, while an explicit reversal ("but include ...") carries the items after it.
   let anchorNegated: 'exclude' | 'optional' | undefined;
+  // The coordinated chain being read, so that a requirement stated at the end of the chain can reach
+  // the fields before it. The fields are held by reference, so removing one of them from the draft
+  // cannot shift the others.
+  let chain: { members: PromptFormDraft['fields'][number][]; coordinated: boolean } = { members: [], coordinated: false };
   let headPending = true;
   let comma = false;
   for (const raw of clauses) {
@@ -104,6 +110,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       negated = undefined;
       comma = false;
       anchorNegated = undefined;
+      chain = { members: [], coordinated: false };
       headPending = true;
       continue;
     }
@@ -170,11 +177,37 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // The head clause's own polarity starts the list's anchor.
       if (headPending) { anchorNegated = negated; headPending = false; }
       const prefix = /\b(not\s+(?:\w+\s+)?)?(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before);
-      const suffix = /^(?:(?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
-      const requirement = qualifier((prefix ?? suffix)?.[2] ?? '', Boolean((prefix ?? suffix)?.[1]));
+      const suffix = /^((?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
+      const requirement = prefix ? qualifier(prefix[2] ?? '', Boolean(prefix[1]))
+        : suffix ? qualifier(suffix[3] ?? '', Boolean(suffix[2])) : undefined;
+      // A requirement stated after the list states the rule for its subject. The subject decides how far the
+      // requirement reaches: a plural copula ("Name and email are required.") names the whole list, a bare
+      // word ("email and phone required") names the coordinated phrase before it, and a negation ("notes not
+      // required") or a singular copula ("phone is required") names one field.
+      const copula = !prefix && suffix !== null ? suffix[1] : undefined;
+      const singular = copula !== undefined && /^(?:is|as)\s/.test(copula);
+      const negatedQualifier = !prefix && suffix !== null && Boolean(suffix[2]);
+      const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier && !singular;
       if (!negated) {
-        append(mention, requirement ?? (isContinuation ? inherited : undefined));
+        const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
+        if (entry) {
+          // The coordinated chain: the fields joined by "and" or "as well as", and the fields of a plain
+          // comma-separated list ("name, email, and phone"). An explicit coordinator completes a phrase, so
+          // a comma after one starts a new phrase instead of extending it.
+          const coordinated = /^and$/.test(before) || /^as well as$/.test(before);
+          const joinsChain = coordinated || (comma && !before && !chain.coordinated);
+          if (!joinsChain) chain = { members: [], coordinated: false };
+          chain.members.push(entry);
+          if (coordinated) chain.coordinated = true;
+          if (trailing) {
+            for (const member of chain.members) {
+              if (member.required === undefined) member.required = requirement;
+            }
+          }
+        }
       } else if (negated === 'exclude') {
+        // An excluded field ends the coordinated phrase it belonged to.
+        chain = { members: [], coordinated: false };
         if (mention.candidates.length === 1) {
           const name = mention.candidates[0]!.name;
           draft.fields = draft.fields.filter(({ field }) => field.name !== name);

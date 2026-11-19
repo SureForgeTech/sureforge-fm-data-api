@@ -10,6 +10,8 @@ export async function submitFileMakerRegistration(intakeId: string, submissionId
     endpoint = new URL(environment.FMWEB_BRIDGE_URL ?? '');
     if (endpoint.protocol !== 'http:' || endpoint.hostname !== '127.0.0.1' || !endpoint.port
       || endpoint.username || endpoint.password || endpoint.search || endpoint.hash || endpoint.pathname !== '/fm') return { status: 'rejected' };
+    // The bridge route is a protocol constant shared with the extension's bridge server.
+    // It is not user-visible wording, so it keeps its name.
     endpoint.pathname += '/submitRegistration';
   } catch { return { status: 'rejected' }; }
   const token = environment.FMWEB_BRIDGE_TOKEN;
@@ -26,7 +28,7 @@ export async function submitFileMakerRegistration(intakeId: string, submissionId
     const result = body as Record<string, unknown>;
     if (result.status === 'accepted') return typeof result.receipt === 'string' && /^[a-z0-9-]{1,80}$/i.test(result.receipt)
       ? { status: 'accepted', receipt: result.receipt } : { status: 'uncertain' };
-    if (result.status === 'invalid') return { status: 'invalid', errors: [{ code: 'value', message: 'Check the registration fields before submitting again.' }] };
+    if (result.status === 'invalid') return { status: 'invalid', errors: [{ code: 'value', message: 'Check the form fields before submitting again.' }] };
     if (result.status === 'pending' || result.status === 'uncertain' || result.status === 'rejected'
       || result.status === 'capacity' || result.status === 'conflict') return { status: result.status };
   } catch { /* A timeout or malformed reply cannot establish whether FileMaker committed the write. */ }
