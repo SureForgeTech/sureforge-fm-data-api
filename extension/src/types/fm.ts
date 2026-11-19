@@ -64,6 +64,15 @@ export interface FileMakerRecord {
   [key: string]: unknown;
 }
 
+/**
+ * A single record read. A script that ran with the read may report an error next to the data,
+ * so the read carries the script errors beside the record.
+ */
+export interface LoadedRecord extends FileMakerRecord {
+  /** Script errors reported next to the record (the read itself worked). */
+  scriptErrors?: ScriptErrorReport[];
+}
+
 export interface FindRecordsRequest {
   portal?: PortalPaging;
   script?: string;

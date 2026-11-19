@@ -3,8 +3,8 @@ import { CertificateAdvice } from './fmClient/certificates';
 import { randomUUID } from 'crypto';
 import axios, { type AxiosInstance } from 'axios';
 import type {
-  ConnectionProfile, ContainerUploadFile, EditRecordResult, FileMakerRecord, FindRecordsRequest,
-  FindRecordsResult, RequestHistoryRecorder, RequestMetricsRecorder, RunScriptRequest, RunScriptResult
+  ConnectionProfile, ContainerUploadFile, EditRecordResult, FindRecordsRequest,
+  FindRecordsResult, LoadedRecord, RequestHistoryRecorder, RequestMetricsRecorder, RunScriptRequest, RunScriptResult
 } from '../types/fm';
 import type { DataApiEnvelope, DataApiSessionResponse } from '../types/dataApi';
 import { isProxyProfile } from '../types/fm';
@@ -310,7 +310,7 @@ export class FMClient {
     layout: string,
     recordId: string,
     control?: ClientRequestControl
-  ): Promise<FileMakerRecord> {
+  ): Promise<LoadedRecord> {
     return getRecord(this.context, profile, layout, recordId, control);
   }
 

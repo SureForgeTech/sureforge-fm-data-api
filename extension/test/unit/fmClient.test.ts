@@ -570,6 +570,36 @@ describe('record portal totals', () => {
   });
 });
 
+describe('single-record reads and script errors', () => {
+  it('returns the script errors a read reported next to the record', async () => {
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    const profile = createProfile();
+    await secrets.setSessionToken(profile.id, 'token');
+    const axios = new FakeAxios();
+    axios.request.mockResolvedValue(createAxiosResponse({ data: { response: { data: [{ recordId: '1', fieldData: {} }], scriptError: '3' }, messages: [{ code: '0', message: 'OK' }] } }));
+    const client = new FMClient(secrets, { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }, 1500, axios as never);
+
+    expect(await client.getRecord(profile, ' Contacts ', '1')).toMatchObject({
+      recordId: '1',
+      scriptErrors: [{ phase: 'script', code: '3' }]
+    });
+  });
+
+  it('returns no script errors when the read reported none', async () => {
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    const profile = createProfile();
+    await secrets.setSessionToken(profile.id, 'token');
+    const axios = new FakeAxios();
+    axios.request.mockResolvedValue(createAxiosResponse({ data: { response: { data: [{ recordId: '1', fieldData: {} }], scriptError: '0' }, messages: [{ code: '0', message: 'OK' }] } }));
+    const client = new FMClient(secrets, { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() }, 1500, axios as never);
+
+    const record = await client.getRecord(profile, ' Contacts ', '1');
+
+    expect(record.scriptErrors).toBeUndefined();
+    expect('scriptErrors' in record).toBe(false);
+  });
+});
+
 it.each(['dataInfo', 'response'] as const)('does not copy first-record %s portal counts onto multiple find records', async (where) => {
   const secrets = new SecretStore(new InMemorySecretStorage() as never);
   const profile = createProfile(); await secrets.setSessionToken(profile.id, 'tok');

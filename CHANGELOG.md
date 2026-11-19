@@ -50,6 +50,8 @@ PR title prefix matches the highest-tier label added:
 
 - The connection wizard refuses an account name that contains a colon, because the account name and the password travel together in the sign-in request and a colon would separate them. A colon in the password still works.
 
+- The Record Viewer, the Record Editor and **Get Record by ID** now warn when a script that ran with the record reported an error. The record still loads, as it did before.
+
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
 

@@ -6,6 +6,8 @@
 
 - The connection wizard refuses an account name that contains a colon. The account name travels in the sign-in request, where a colon separates it from the password, so a colon in the name would quietly change the password the server reads. A colon in the password still works.
 
+- The Record Viewer, the Record Editor and **Get Record by ID** now say so when a script that ran with the record reported an error. The record itself still loads, as it did before.
+
 **FileMaker home**
 
 - **Start Here** opens a FileMaker home panel with the four journeys — Build a Web App, Connect and Test, Browse Data and Help — and an Advanced Tools section for setup, diagnostics, code generation and the rest. Each button runs the matching command. The home is also a button in the Connections panel and a link in the sidebar.
