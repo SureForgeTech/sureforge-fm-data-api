@@ -104,4 +104,11 @@ describe('FileMaker home', () => {
     }
     expect(new Set(FILEMAKER_HOME_COMMANDS).size).toBe(FILEMAKER_HOME_COMMANDS.length);
   });
+
+  it('gives every entry a unique id', () => {
+    const ids = [...FILEMAKER_HOME_SECTIONS, ...FILEMAKER_ADVANCED_SECTIONS].flatMap((section) =>
+      section.entries.map((entry) => entry.id)
+    );
+    expect(new Set(ids).size).toBe(ids.length);
+  });
 });

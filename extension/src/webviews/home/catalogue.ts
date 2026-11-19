@@ -1,7 +1,7 @@
 /** The FileMaker home: the journeys a first-time user needs, and the tools for everything else. */
 
 export interface HomeEntry {
-  /** Stable id, used by the webview and by the tests. */
+  /** Stable id, unique across the catalogue. */
   id: string;
   label: string;
   description: string;
@@ -289,8 +289,3 @@ export const FILEMAKER_HOME_COMMANDS: string[] = [
   ...FILEMAKER_HOME_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command)),
   ...FILEMAKER_ADVANCED_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command))
 ];
-
-/** The everyday commands, the ones the home leads to. */
-export const FILEMAKER_EVERYDAY_COMMANDS: string[] = FILEMAKER_HOME_SECTIONS.flatMap((section) =>
-  section.entries.map((entry) => entry.command)
-);
