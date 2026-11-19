@@ -164,6 +164,36 @@ describe('prompt form suggestions', () => {
       .map(({ field }) => field.name)).toEqual(['Email', 'Notes']);
   });
 
+  it('marks every field of a list when the requirement is stated at the end of the list', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Name and email are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: true }, { field: { name: 'Email' }, required: true }]);
+    expect(suggestPromptFields('Name, email, and phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: true }, { field: { name: 'Email' }, required: true },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Make email and phone required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Name and email are optional.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: false }]);
+  });
+
+  it('keeps a requirement at the end of the list off the items it does not cover', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    // A bare "not required" overrides only the item it follows.
+    expect(suggestPromptFields('Require email, notes not required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Notes' }, required: false }]);
+    // A stated requirement settles its list, so the next list is read on its own.
+    expect(suggestPromptFields('Name and email are optional, notes and phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: false },
+        { field: { name: 'Notes' }, required: true }, { field: { name: 'Phone' }, required: true }]);
+    // A requirement for one item leaves the others of its list alone.
+    expect(suggestPromptFields('Include email and phone, only email required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: undefined }]);
+    // A requirement in another sentence does not reach back into the first one.
+    expect(suggestPromptFields('Include email and phone. Phone required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: true }]);
+  });
+
   it('reads an emphatic inclusion as an inclusion', () => {
     const fields = [{ name: 'Email' }, { name: 'Phone' }];
     expect(suggestPromptFields('Include not only email but also phone.', fields).fields

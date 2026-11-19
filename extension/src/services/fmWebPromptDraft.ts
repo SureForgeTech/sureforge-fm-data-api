@@ -73,18 +73,19 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
     byName.set(name, matches);
   }
   const concepts = new Map(CONCEPTS.flatMap((concept) => [...concept.phrases, ...concept.names].map((phrase) => [phrase, concept] as const)));
-  const append = (mention: Mention, required?: boolean): void => {
+  const append = (mention: Mention, required?: boolean): number => {
     const field = mention.candidates.length === 1 ? mention.candidates[0] : undefined;
     const existing = field && draft.fields.find((entry) => entry.field.name === field.name);
     if (existing) {
       if (required !== undefined) existing.required = required;
-      return;
+      return draft.fields.indexOf(existing);
     }
     if (!field || draft.fields.length === 100) {
       if (!draft.unmatched.includes(mention.label)) draft.unmatched.push(mention.label);
-      return;
+      return -1;
     }
     draft.fields.push({ field, required });
+    return draft.fields.length - 1;
   };
 
   // Keep punctuation inside explicitly quoted FileMaker names intact. The closing quote is optional so an
@@ -96,6 +97,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   // as the list head and moves to a clause that ends positive, so a negation inside the list does not swallow
   // a later coordinated request, while an explicit reversal ("but include ...") carries the items after it.
   let anchorNegated: 'exclude' | 'optional' | undefined;
+  // The items of the coordinated list being read, so that a requirement stated at the end of the list
+  // can reach the items before it.
+  let listMembers: number[] = [];
   let headPending = true;
   let comma = false;
   for (const raw of clauses) {
@@ -104,6 +108,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       negated = undefined;
       comma = false;
       anchorNegated = undefined;
+      listMembers = [];
       headPending = true;
       continue;
     }
@@ -172,8 +177,25 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const prefix = /\b(not\s+(?:\w+\s+)?)?(require|required|must collect|optional|optionally)\s*(?:(?:an?|the)\s*)?$/.exec(before);
       const suffix = /^(?:(?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
       const requirement = qualifier((prefix ?? suffix)?.[2] ?? '', Boolean((prefix ?? suffix)?.[1]));
+      // A requirement stated after the list states the rule for the whole list, so it reaches back over the
+      // items before it: "Name and email are required." marks both. It reaches back when the qualifier
+      // carried a copula ("are required", "are optional") or when it is positive; a bare "not required"
+      // overrides only the item it follows, so "Require email, notes not required." keeps email required.
+      const trailing = !prefix && suffix !== null && requirement !== undefined
+        && (requirement === true || /^(?:is|are|as)\s/.test(suffix[0]));
       if (!negated) {
-        append(mention, requirement ?? (isContinuation ? inherited : undefined));
+        const index = append(mention, requirement ?? (isContinuation ? inherited : undefined));
+        if (index >= 0) {
+          // The coordinated list being read: its items since the list's head.
+          if (!isContinuation || listMembers.length === 0) listMembers = [];
+          listMembers.push(index);
+          if (trailing) {
+            for (const member of listMembers) {
+              const entry = draft.fields[member];
+              if (entry && entry.required === undefined) entry.required = requirement;
+            }
+          }
+        }
       } else if (negated === 'exclude') {
         if (mention.candidates.length === 1) {
           const name = mention.candidates[0]!.name;
@@ -184,6 +206,8 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         const existing = draft.fields.find(({ field }) => field.name === mention.candidates[0]!.name);
         if (existing) existing.required = false;
       }
+      // A stated requirement settles the list it was stated for, so the next list starts afresh.
+      if (requirement !== undefined) listMembers = [];
       previousEnd = mention.end;
       comma = false;
       // Only a forward-scoped list requirement carries to the next coordinated item. An exclusion says nothing
