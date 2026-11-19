@@ -192,6 +192,35 @@ describe('prompt form suggestions', () => {
     // A requirement in another sentence does not reach back into the first one.
     expect(suggestPromptFields('Include email and phone. Phone required.', fields).fields)
       .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: true }]);
+    // A later requirement does not reach into an earlier list that already stated its own.
+    expect(suggestPromptFields('Optional name and email, phone required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: undefined },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Optional name and email, phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: undefined },
+        { field: { name: 'Phone' }, required: true }]);
+  });
+
+  it('marks every field of a list when the requirement is stated at the end of the list', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Name and email are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: true }, { field: { name: 'Email' }, required: true }]);
+    expect(suggestPromptFields('Name, email, and phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: true }, { field: { name: 'Email' }, required: true },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Make email and phone required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Make email and phone optional.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: false }, { field: { name: 'Phone' }, required: false }]);
+    expect(suggestPromptFields('Name and email are optional.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: false }]);
+  });
+
+  it('still reaches every item of a list after an excluded item was removed from the draft', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Include name. Add email and phone, exclude name, and notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true },
+        { field: { name: 'Notes' }, required: true }]);
   });
 
   it('reads an emphatic inclusion as an inclusion', () => {
