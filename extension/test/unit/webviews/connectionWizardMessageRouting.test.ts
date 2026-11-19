@@ -175,6 +175,24 @@ describe('Connection Wizard: message routing', () => {
       expect(panel.posted).toContainEqual({ type: 'saveSuccess', message: 'Profile "Production" saved.' });
     });
 
+    it('refuses a "save" whose account name carries a colon', async () => {
+      await panel.send({ type: 'save', payload: { ...form, username: 'api:user' } });
+
+      expect(panel.posted).toContainEqual({
+        type: 'saveError',
+        message: 'Username must not contain a colon. A colon separates the username from the password when the extension signs in.'
+      });
+      expect(panel.profileStore.upsertProfile).not.toHaveBeenCalled();
+      expect(panel.secretStore.setPassword).not.toHaveBeenCalled();
+    });
+
+    it('saves a profile whose password carries a colon', async () => {
+      await panel.send({ type: 'save', payload: { ...form, password: 'se:cret' } });
+
+      expect(panel.secretStore.setPassword).toHaveBeenCalledWith('p1', 'se:cret');
+      expect(panel.posted).toContainEqual({ type: 'saveSuccess', message: 'Profile "Production" saved.' });
+    });
+
     it('refuses a "save" whose form the host cannot use', async () => {
       await panel.send({ type: 'save', payload: { name: 'Production' } });
 

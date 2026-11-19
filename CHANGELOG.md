@@ -48,6 +48,8 @@ PR title prefix matches the highest-tier label added:
 
 - The private preview's form talks about the submission you are making rather than about a registration, so a feedback or request form does not read as an event registration.
 
+- The connection wizard refuses an account name that contains a colon, because the account name and the password travel together in the sign-in request and a colon would separate them. A colon in the password still works.
+
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
 
