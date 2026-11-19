@@ -1,0 +1,5 @@
+H1 startHere registered: true
+H2 createWebviewPanel calls: 1, view type: filemakerHome
+H3 catalogue commands missing in an untrusted workspace: []
+H4 catalogue commands whose handler declares an optional argument: ["filemakerDataApiTools.createFmWebApp","filemakerDataApiTools.addConnectionProfile","filemakerDataApiTools.connect","filemakerDataApiTools.diagnoseConnection","filemakerDataApiTools.openQueryBuilder","filemakerDataApiTools.openRecordViewer","filemakerDataApiTools.openRecordEditor","filemakerDataApiTools.openScriptRunner","filemakerDataApiTools.syncFmWebMetadata","filemakerDataApiTools.generateTypesForLayout","filemakerDataApiTools.generateTypesForAllLayouts","filemakerDataApiTools.generateSnippetsForLayout","filemakerDataApiTools.generateTypeScriptClient","filemakerDataApiTools.captureSchemaSnapshot","filemakerDataApiTools.diffSchemaSnapshots","filemakerDataApiTools.compareEnvironments"]
+H5 catalogue commands hidden from the palette entirely: []

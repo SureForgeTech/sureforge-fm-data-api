@@ -1,0 +1,4 @@
+I1 error messages shown to the user: 0
+I2 information messages shown to the user: 0
+I3 warning messages shown to the user: 0
+I4 unhandled rejections observed: 1 -> Error: command blew up

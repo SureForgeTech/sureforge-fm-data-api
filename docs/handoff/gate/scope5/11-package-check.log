@@ -1,0 +1,98 @@
+
+> fmweb-ide-monorepo@0.1.0 package:check
+> npm run package:check -w extension
+
+
+> filemaker-data-api-tools@1.9.1 package:check
+> npm run notices:check && npm run package:vsix
+
+
+> filemaker-data-api-tools@1.9.1 notices:check
+> node ./scripts/generate-third-party-notices.mjs --check
+
+[notices] THIRD_PARTY_NOTICES.txt is current (31 packages).
+
+> filemaker-data-api-tools@1.9.1 package:vsix
+> node ./scripts/package-vsix.mjs
+
+Executing prepublish script 'npm run vscode:prepublish'...
+
+> filemaker-data-api-tools@1.9.1 vscode:prepublish
+> npm run build
+
+
+> filemaker-data-api-tools@1.9.1 build
+> npm run build:designer-ui && npm run clean && npm run bundle:extension && npm run bundle:schema-diff-worker && npm run bundle:ai-mcp-shim && npm run copy:webviews && npm run copy:fmweb-template
+
+
+> filemaker-data-api-tools@1.9.1 build:designer-ui
+> node ./scripts/build-designer-ui-if-available.mjs
+
+
+> @fmweb/designer-ui@0.1.0 build
+> esbuild src/main.tsx --bundle --platform=browser --format=iife --outfile=dist/index.js --minify --define:process.env.NODE_ENV=\"production\"
+
+
+  dist/index.js   861.7kb
+  dist/index.css    5.5kb
+
+⚡ Done in 19ms
+
+> filemaker-data-api-tools@1.9.1 clean
+> rimraf dist
+
+
+> filemaker-data-api-tools@1.9.1 bundle:extension
+> node ./scripts/bundle.mjs extension
+
+
+> filemaker-data-api-tools@1.9.1 bundle:schema-diff-worker
+> node ./scripts/bundle.mjs worker
+
+
+> filemaker-data-api-tools@1.9.1 bundle:ai-mcp-shim
+> node ./scripts/bundle.mjs aiMcpShim
+
+
+> filemaker-data-api-tools@1.9.1 copy:webviews
+> node ./scripts/copy-webviews.mjs
+
+
+> filemaker-data-api-tools@1.9.1 copy:fmweb-template
+> node ./scripts/build-fmweb-template.mjs
+
+Staged 56 FM Web template source files.
+ INFO  Files included in the VSIX:
+filemaker-data-api-tools-1.9.1.vsix
+├─ [Content_Types].xml 
+├─ extension.vsixmanifest 
+└─ extension/
+   ├─ LICENSE.txt [11.09 KB]
+   ├─ NOTICE [0.44 KB]
+   ├─ THIRD_PARTY_NOTICES.txt [40.5 KB]
+   ├─ UPGRADE.md [46.4 KB]
+   ├─ changelog.md 
+   ├─ package.json [94.1 KB]
+   ├─ readme.md 
+   ├─ dist/
+   │  ├─ aiMcpShim.js [6.71 KB]
+   │  ├─ extension.js [1.6 MB]
+   │  ├─ schemaDiffWorker.js [2.02 KB]
+   │  ├─ fmweb-template/ (57 files) [286.73 KB]
+   │  └─ webviews/ (29 files) [1.22 MB]
+   ├─ docs/
+   │  ├─ COMPATIBILITY.md [9.86 KB]
+   │  ├─ FAQ.md [15.1 KB]
+   │  ├─ FM_WEB.md [19.9 KB]
+   │  ├─ TROUBLESHOOTING.md [36.87 KB]
+   │  ├─ USER_GUIDE.md [179.08 KB]
+   │  ├─ marketplace/ (12 files) [1.84 MB]
+   │  └─ walkthroughs/ (6 files) [9.21 KB]
+   ├─ examples/
+   │  └─ profile-template.json [0.23 KB]
+   └─ media/
+      └─ filemaker.svg [0.35 KB]
+
+=> Run vsce ls --tree to see all included files.
+
+ DONE  Packaged: /workspace/sureforge-fm-data-api-wt-scope/artifacts/filemaker-data-api-tools-1.9.1.vsix (123 files, 2.76 MB)

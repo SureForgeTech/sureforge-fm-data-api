@@ -1,0 +1,12 @@
+01-scripts-test =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/wording/01-scripts-test.log
+02-audit =>	--- exit=0 duration=0s log=/tmp/opencode/fm-2026-11-18/gate/wording/02-audit.log
+03-lint =>	--- exit=0 duration=15s log=/tmp/opencode/fm-2026-11-18/gate/wording/03-lint.log
+04-ci-test =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/wording/04-ci-test.log
+05-build-shared =>	--- exit=0 duration=0s log=/tmp/opencode/fm-2026-11-18/gate/wording/05-build-shared.log
+06-mock-check =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/wording/06-mock-check.log
+07-typecheck =>	--- exit=0 duration=2s log=/tmp/opencode/fm-2026-11-18/gate/wording/07-typecheck.log
+08-test-coverage =>	--- exit=0 duration=73s log=/tmp/opencode/fm-2026-11-18/gate/wording/08-test-coverage.log
+09-build =>	--- exit=0 duration=2s log=/tmp/opencode/fm-2026-11-18/gate/wording/09-build.log
+10-designer-runtime-test =>	--- exit=0 duration=4s log=/tmp/opencode/fm-2026-11-18/gate/wording/10-designer-runtime-test.log
+11-package-check =>	--- exit=0 duration=4s log=/tmp/opencode/fm-2026-11-18/gate/wording/11-package-check.log
+12-vsix-size-budget =>	--- exit=0 duration=0s log=/tmp/opencode/fm-2026-11-18/gate/wording/12-vsix-size-budget.log

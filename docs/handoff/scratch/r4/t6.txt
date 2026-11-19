@@ -1,0 +1,20 @@
+Require email and not strictly required phone.
+  {"f":[["Email",true],["Phone",false]],"u":[]}
+Include email, not strictly required phone.
+  {"f":[["Email",null],["Phone",false]],"u":[]}
+Include email, excludes phone.
+  {"f":[["Email",null]],"u":[]}
+Include email, omits phone.
+  {"f":[["Email",null]],"u":[]}
+Include email, leaving out phone.
+  {"f":[["Email",null]],"u":[]}
+Include email, except phone.
+  {"f":[["Email",null]],"u":[]}
+Include email and not phone.
+  {"f":[["Email",null]],"u":[]}
+Include email. Do not require phone.
+  {"f":[["Email",null]],"u":[]}
+Require email, but optional phone.
+  {"f":[["Email",true],["Phone",false]],"u":[]}
+Make a form with name and email. Leave phone out.
+  {"f":[["Name",null],["Email",null],["Phone",null]],"u":[]}

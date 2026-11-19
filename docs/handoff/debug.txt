@@ -1,0 +1,8 @@
+"Draft a registration form leaving out phone, including email."
+  fields=[["Email",null]] unmatched=[]
+"Draft a registration form leaving out phone, include email."
+  fields=[["Email",null]] unmatched=[]
+"Draft a registration form, leaving out phone, include email."
+  fields=[["Email",null]] unmatched=[]
+"Make a form that excludes phone and includes email."
+  fields=[["Email",null]] unmatched=[]

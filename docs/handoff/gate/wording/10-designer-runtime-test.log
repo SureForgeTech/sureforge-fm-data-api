@@ -1,0 +1,39 @@
+
+> @fmweb/designer-ui@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-wording/designer-ui
+
+
+ Test Files  11 passed (11)
+      Tests  98 passed (98)
+   Start at  16:57:26
+   Duration  2.59s (environment 49%, tests 30%, import 20%, transform 1%)
+
+Environment  jsdom was created 11 times · 3.37s total, 49% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+
+> @fmweb/runtime-next@0.1.0 test
+> vitest run
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-wording/runtime-next
+
+
+ Test Files  19 passed (19)
+      Tests  232 passed (232)
+   Start at  16:57:29
+   Duration  1.69s (tests 47%, import 24%, environment 23%, transform 5%, worker 1%)
+
+    Isolate  19 workers spawned · ~104ms startup each (spawn + environment, per file)
+             at least ~554ms faster with isolate: false — reuses workers across files instead of one per file
+

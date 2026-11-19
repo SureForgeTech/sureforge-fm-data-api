@@ -1,0 +1,5 @@
+J1 button align-self: center
+J2 entry align-items: flex-start
+J3 span align-self: auto
+J4 button background: rgba(0, 0, 0, 0) / color rgb(0, 0, 0)
+J5 shared button rule present: true

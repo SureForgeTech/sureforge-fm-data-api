@@ -1,0 +1,29 @@
+jsdom computed opacity for .lead = 0.8; for .plain = 1; lead color = rgb(97, 97, 97); plain color = rgb(97, 97, 97)
+light: --vscode-foreground=#616161 --vscode-editor-background=#ffffff
+light: base foreground contrast = 6.19
+light: .lead (opacity 0.8) -> rgb(129,129,129) contrast = 3.92 FAIL(<4.5)
+light: .entry > span (opacity 0.75) -> rgb(137,137,137) contrast = 3.52 FAIL(<4.5)
+light: section > p (opacity 0.8) -> rgb(129,129,129) contrast = 3.92 FAIL(<4.5)
+light: .fm-version (opacity 0.6) -> rgb(160,160,160) contrast = 2.61 FAIL(<4.5)
+light: control descriptionForeground 75% mix -> rgb(109,109,109) contrast = 5.17
+dark: --vscode-foreground=#cccccc --vscode-editor-background=#1e1e1e
+dark: base foreground contrast = 10.38
+dark: .lead (opacity 0.8) -> rgb(169,169,169) contrast = 7.11 PASS
+dark: .entry > span (opacity 0.75) -> rgb(161,161,161) contrast = 6.41 PASS
+dark: section > p (opacity 0.8) -> rgb(169,169,169) contrast = 7.11 PASS
+dark: .fm-version (opacity 0.6) -> rgb(134,134,134) contrast = 4.60 PASS
+dark: control descriptionForeground 75% mix -> rgb(204,204,204) contrast = 10.38
+high-contrast: --vscode-foreground=#ffffff --vscode-editor-background=#000000
+high-contrast: base foreground contrast = 21.00
+high-contrast: .lead (opacity 0.8) -> rgb(204,204,204) contrast = 13.08 PASS
+high-contrast: .entry > span (opacity 0.75) -> rgb(191,191,191) contrast = 11.45 PASS
+high-contrast: section > p (opacity 0.8) -> rgb(204,204,204) contrast = 13.08 PASS
+high-contrast: .fm-version (opacity 0.6) -> rgb(153,153,153) contrast = 7.37 PASS
+high-contrast: control descriptionForeground 75% mix -> rgb(255,255,255) contrast = 21.00
+high-contrast-light: --vscode-foreground=#292929 --vscode-editor-background=#ffffff
+high-contrast-light: base foreground contrast = 14.55
+high-contrast-light: .lead (opacity 0.8) -> rgb(84,84,84) contrast = 7.60 PASS
+high-contrast-light: .entry > span (opacity 0.75) -> rgb(95,95,95) contrast = 6.43 PASS
+high-contrast-light: section > p (opacity 0.8) -> rgb(84,84,84) contrast = 7.60 PASS
+high-contrast-light: .fm-version (opacity 0.6) -> rgb(127,127,127) contrast = 4.03 FAIL(<4.5)
+high-contrast-light: control descriptionForeground 75% mix -> rgb(41,41,41) contrast = 14.55

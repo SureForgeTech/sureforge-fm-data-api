@@ -1,0 +1,72 @@
+.fm-home {
+  font-family: var(--vscode-font-family);
+  color: var(--vscode-foreground);
+}
+
+.fm-home h1 {
+  font-size: 20px;
+  margin: 0 0 4px;
+}
+
+.fm-home h2 {
+  font-size: 15px;
+  margin: 0 0 4px;
+}
+
+.fm-home .lead {
+  color: var(--muted);
+  margin: 0 0 20px;
+}
+
+.fm-home section {
+  margin: 0 0 20px;
+  border: 1px solid var(--vscode-panel-border);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.fm-home section p {
+  color: var(--muted);
+  margin: 0 0 12px;
+}
+
+.fm-home .entry {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  margin: 0 0 12px;
+}
+
+.fm-home .entry span {
+  color: var(--muted);
+}
+
+.fm-home button {
+  font: inherit;
+  color: var(--vscode-button-foreground);
+  background: var(--vscode-button-background);
+  border: none;
+  border-radius: 2px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+
+.fm-home button:hover {
+  background: var(--vscode-button-hoverBackground);
+}
+
+.fm-home button:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+.fm-home details summary {
+  cursor: pointer;
+}
+
+.fm-home .fm-version {
+  margin: 24px 0 0;
+  font-size: 11px;
+  color: var(--muted);
+}

@@ -1,0 +1,106 @@
+{
+  "light": {
+    "pairs": [
+      {
+        "selector": "p.lead",
+        "ratio": 6.193
+      },
+      {
+        "selector": "h2.",
+        "ratio": 6.193
+      },
+      {
+        "selector": "p.",
+        "ratio": 6.193
+      },
+      {
+        "selector": "button.",
+        "ratio": 4.511
+      },
+      {
+        "selector": "span.",
+        "ratio": 6.193
+      }
+    ],
+    "below45": 0,
+    "min": 4.511
+  },
+  "dark": {
+    "pairs": [
+      {
+        "selector": "p.lead",
+        "ratio": 10.381
+      },
+      {
+        "selector": "h2.",
+        "ratio": 10.381
+      },
+      {
+        "selector": "p.",
+        "ratio": 10.381
+      },
+      {
+        "selector": "button.",
+        "ratio": 6.396
+      },
+      {
+        "selector": "span.",
+        "ratio": 10.381
+      }
+    ],
+    "below45": 0,
+    "min": 6.396
+  },
+  "high-contrast": {
+    "pairs": [
+      {
+        "selector": "p.lead",
+        "ratio": 21
+      },
+      {
+        "selector": "h2.",
+        "ratio": 21
+      },
+      {
+        "selector": "p.",
+        "ratio": 21
+      },
+      {
+        "selector": "button.",
+        "ratio": 21
+      },
+      {
+        "selector": "span.",
+        "ratio": 21
+      }
+    ],
+    "below45": 0,
+    "min": 21
+  },
+  "high-contrast-light": {
+    "pairs": [
+      {
+        "selector": "p.lead",
+        "ratio": 14.548
+      },
+      {
+        "selector": "h2.",
+        "ratio": 14.548
+      },
+      {
+        "selector": "p.",
+        "ratio": 14.548
+      },
+      {
+        "selector": "button.",
+        "ratio": 8.98
+      },
+      {
+        "selector": "span.",
+        "ratio": 14.548
+      }
+    ],
+    "below45": 0,
+    "min": 8.98
+  }
+}

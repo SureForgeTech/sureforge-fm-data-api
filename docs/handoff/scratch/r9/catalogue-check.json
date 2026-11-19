@@ -1,0 +1,30 @@
+{
+  "catalogueCommandCount": 34,
+  "notRegisteredInSource": [
+    "filemakerDataApiTools.showEffectiveSettings",
+    "filemakerDataApiTools.writeAiContext",
+    "filemakerDataApiTools.batchUpdateFromFile",
+    "filemakerDataApiTools.copyAiMcpConfig",
+    "filemakerDataApiTools.showAiActivity"
+  ],
+  "notContributedInManifest": [],
+  "startHereRegistered": true,
+  "contributedButNotRegistered": [
+    "filemakerDataApiTools.showEffectiveSettings",
+    "filemakerDataApiTools.removeConnectionProfile",
+    "filemakerDataApiTools.selectLayoutForInspector",
+    "filemakerDataApiTools.diffAgainstLatestSnapshot",
+    "filemakerDataApiTools.writeAiContext",
+    "filemakerDataApiTools.uploadContainer",
+    "filemakerDataApiTools.batchUpdateFromFile",
+    "filemakerDataApiTools.diffLayoutAcrossEnvironments",
+    "filemakerDataApiTools.exportEnvironmentComparisonReport",
+    "filemakerDataApiTools.showCircuitBreakerStatus",
+    "filemakerDataApiTools.setAiAccess",
+    "filemakerDataApiTools.toggleAiKillSwitch",
+    "filemakerDataApiTools.showAiActivity",
+    "filemakerDataApiTools.newAiSession",
+    "filemakerDataApiTools.toggleAiServer",
+    "filemakerDataApiTools.copyAiMcpConfig"
+  ]
+}

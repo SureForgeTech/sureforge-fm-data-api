@@ -1,0 +1,100 @@
+"Require name, email, and phone."
+    {"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+"Require name, email and phone."
+    {"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+"Require email and notes."
+    {"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Require email, and notes."
+    {"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Require email, notes."
+    {"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Require email, exclude phone, and notes."
+    {"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Require email, exclude phone, notes."
+    {"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Require email, don't include phone, and notes."
+    {"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Require email, don't include phone, notes."
+    {"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Require email, but exclude phone, and notes."
+    {"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Require email and notes, exclude phone."
+    {"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Require email. Require notes."
+    {"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Require email and optional notes."
+    {"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+"Require email and optional notes and company."
+    {"fields":[["Email",true],["Notes",false],["Company",null]],"unmatched":[]}
+"Include email, phone excluded."
+    {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include email and phone omitted."
+    {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Form with phone excluded."
+    {"fields":[["Phone",null]],"unmatched":[]}
+"Form that leaves out phone."
+    {"fields":[["Phone",null]],"unmatched":[]}
+"Include email, leave out phone."
+    {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include email, left out phone."
+    {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include email, leaving out phone."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Include everything but phone."
+    {"fields":[["Phone",null]],"unmatched":[]}
+"Include all but phone."
+    {"fields":[["Phone",null]],"unmatched":[]}
+"Include everything except phone."
+    {"fields":[],"unmatched":[]}
+"Do not require phone."
+    {"fields":[],"unmatched":[]}
+"Do not require phone and include email."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Include email, do not require phone."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Make phone optional, include email."
+    {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+"Phone optional, include email."
+    {"fields":[["Phone",null],["Email",null]],"unmatched":[]}
+"Phone is optional."
+    {"fields":[["Phone",false]],"unmatched":[]}
+"Include email but not required phone."
+    {"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Include email but not at all required phone."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Include email but not mandatory phone."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Include email but not necessary phone."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Include email but not really required phone."
+    {"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Include email but not strictly required phone."
+    {"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Include email but not required phone and not optional company."
+    {"fields":[["Email",null],["Phone",false],["Company",true]],"unmatched":[]}
+"Include not only email but also phone."
+    {"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Do not only email but also phone."
+    {"fields":[["Phone",null]],"unmatched":[]}
+"Do not just email, include phone."
+    {"fields":[["Phone",null]],"unmatched":[]}
+"Include email, not only phone but also notes."
+    {"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+"Make a form with email."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Create a form with email."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Build a form with email."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Make a registration form."
+    {"fields":[],"unmatched":[]}
+"Create a registration form with email and notes."
+    {"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Make a form for the workshop with email."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Draft a form for the workshop with email."
+    {"fields":[["Email",null]],"unmatched":[]}
+"Make a form."
+    {"fields":[],"unmatched":[]}
+"Create a form."
+    {"fields":[],"unmatched":[]}

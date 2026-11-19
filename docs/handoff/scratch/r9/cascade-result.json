@@ -1,0 +1,54 @@
+{
+  "sharedCssHasAlignSelfCenter": true,
+  "sharedAlignSelfMatches": [
+    "\nbutton, summary.secondary, details.menu > summary { font: inherit; font-weight: 500; border: 1px solid var(--vscode-contrastBorder, transparent); border-radius: var(--fm-control-radius); background: var(--accent); color: var(--accent-text); padding: 5px 12px; min-height: 32px; align-self: center; cursor: pointer; }"
+  ],
+  "after": {
+    "rows": [
+      {
+        "source": "head 40a56eb",
+        "selector": "button",
+        "specificity": "0.0.1",
+        "order": 0,
+        "alignSelf": "center"
+      },
+      {
+        "source": "head 40a56eb",
+        "selector": ".fm-home button",
+        "specificity": "0.1.1",
+        "order": 1,
+        "alignSelf": "flex-start"
+      }
+    ],
+    "winner": {
+      "source": "head 40a56eb",
+      "selector": ".fm-home button",
+      "specificity": "0.1.1",
+      "order": 1,
+      "alignSelf": "flex-start"
+    },
+    "computed": "flex-start"
+  },
+  "before": {
+    "rows": [
+      {
+        "source": "before ee671e9",
+        "selector": "button",
+        "specificity": "0.0.1",
+        "order": 0,
+        "alignSelf": "center"
+      }
+    ],
+    "winner": {
+      "source": "before ee671e9",
+      "selector": "button",
+      "specificity": "0.0.1",
+      "order": 0,
+      "alignSelf": "center"
+    },
+    "computed": "center"
+  },
+  "htmlLength": 8266,
+  "buttonSelectorFound": false,
+  "htmlSnippet": "<body class=\"fm-page fm-home\">\n<h1>FileMaker</h1>\n<p class=\"lead\">Start here. Everything else is under Advanced Tools.</p>\n<section><h2>Build a Web App</h2><p>Make a web form that writes to FileMaker, without editing code or JSON.</p><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.createFmWebApp\">Create FM Web App</button><span>Choose a starter, pick sample data or your own layout, then preview the form.</span></div><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.buildPortal\">Build a Portal</button><span>Create or resume an editable registration form for an existing portal.</span></div></section><section><h2>Connect and Test</h2><p>Re"
+}

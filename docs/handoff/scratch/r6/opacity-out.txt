@@ -1,0 +1,6 @@
+minimal css -> selector=p.lead ratio=3.92 foreground=[129,129,129]
+minimal css -> selector=p.plain ratio=6.19 foreground=[97,97,97]
+resolved css = ".lead { opacity: 0.8; color: #616161; } .plain { color: #616161; }"
+descendant css -> selector=p.lead ratio=6.19 foreground=[97,97,97]
+descendant css -> selector=p.plain ratio=6.19 foreground=[97,97,97]
+resolved descendant css = ".fm-home .lead { opacity: 0.8; color: #616161; } .fm-home .plain { color: #616161; }"

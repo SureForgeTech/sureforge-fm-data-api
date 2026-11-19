@@ -1,0 +1,14 @@
+E0 buttons rendered: 34, catalogue entries: 34
+E1 posted messages: 34, every one {type:'run',command}: true
+E2 executeCommand calls: 34, ids in catalogue order: false
+F1 catalogue commands missing from activate(): []
+F2 contributed commands missing from activate(): []
+F3 registered total: 81, contributed total: 80
+G1 theme=light measured=8 failures=0
+G2 theme=light ratios: h1.=6.19 | p.lead=5.17 | h2.=6.19 | p.=5.17 | button.=4.51 | span.=5.17 | strong.=6.19 | footer.fm-version=5.17
+G1 theme=dark measured=8 failures=0
+G2 theme=dark ratios: h1.=10.38 | p.lead=6.78 | h2.=10.38 | p.=6.78 | button.=6.40 | span.=6.78 | strong.=10.38 | footer.fm-version=6.78
+G1 theme=high-contrast measured=8 failures=0
+G2 theme=high-contrast ratios: h1.=21.00 | p.lead=12.29 | h2.=21.00 | p.=12.29 | button.=21.00 | span.=12.29 | strong.=21.00 | footer.fm-version=12.29
+G1 theme=high-contrast-light measured=8 failures=0
+G2 theme=high-contrast-light ratios: h1.=14.55 | p.lead=7.02 | h2.=14.55 | p.=7.02 | button.=8.98 | span.=7.02 | strong.=14.55 | footer.fm-version=7.02

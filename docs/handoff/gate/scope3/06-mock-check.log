@@ -1,0 +1,72 @@
+
+> filemaker-data-api-tools@1.9.1 mock:check
+> esbuild test/mock-server/client-check.mjs --bundle --platform=node --format=cjs --alias:vscode=./test/mock-server/vscode-stub.mjs --outfile=.mock-check/client-check.cjs --log-level=warning && node .mock-check/client-check.cjs
+
+PASS wrong password gives a readable error 
+PASS login returns a token 
+PASS lists layouts 
+PASS layout fields are extracted 
+PASS page 1 has 20 rows and a found count 
+PASS page 2 follows page 1 with no repeat 
+PASS the last partial page returns the remaining rows 
+PASS a find with no matches returns an empty result 
+PASS "begins with" matches names starting with the text 
+PASS "contains phrase" finds the phrase and not reordered words 
+PASS "between" on a number 
+PASS "is empty" finds blank notes 
+PASS "equals" with @ matches one exact email 
+PASS an omit request removes rows 
+PASS sort descending 
+PASS an expired session is renewed once and the request succeeds 
+PASS five parallel requests after expiry open one session 
+PASS create returns a record id 
+PASS an edit with the loaded modId succeeds and returns the next one 
+PASS a second edit on the old modId is refused (error 306) 
+PASS an edit without a modId still works 
+PASS reading a deleted record gives a readable error 
+PASS lists scripts 
+PASS runs a script and returns its result 
+PASS a script run is one GET to the script endpoint (no record or find request) 
+PASS logout works 
+PASS endpoint: GET productInfo 
+PASS endpoint: GET databases 
+PASS endpoint: GET validateSession 
+PASS endpoint: POST sessions (Basic) 
+PASS endpoint: POST sessions (OAuth headers) 
+PASS endpoint: GET layouts 
+PASS endpoint: GET scripts 
+PASS endpoint: GET layout metadata 
+PASS endpoint: GET records 
+PASS endpoint: POST records 
+PASS endpoint: GET record 
+PASS endpoint: PATCH record 
+PASS endpoint: POST record (duplicate) 
+PASS endpoint: POST _find 
+PASS endpoint: POST container upload 
+PASS endpoint: PATCH globals 
+PASS endpoint: GET script endpoint 
+PASS endpoint: DELETE record 
+PASS endpoint: DELETE record 
+PASS endpoint: DELETE session 
+PASS endpoint: error 952 bad token 
+PASS endpoint: error 212 wrong password 
+PASS endpoint: error 802 unopenable database 
+PASS endpoint: error 105 layout missing 
+PASS endpoint: error 102 field missing 
+PASS endpoint: error 101 record missing 
+PASS endpoint: error 104 script missing 
+PASS endpoint: error 401 no records (HTTP 404) 
+PASS endpoint: error 960 bad parameter 
+PASS endpoint: error 400 empty find 
+PASS endpoint: error 306 modId mismatch 
+PASS endpoint: error 500 date validation 
+PASS endpoint: error 502 number validation 
+PASS endpoint: error 504 unique 
+PASS endpoint: error 506 value list 
+PASS endpoint: error 509 required 
+PASS endpoint: error 201 calculation field 
+PASS endpoint: error 9 insufficient privileges 
+PASS endpoint: error 405 wrong method 
+PASS endpoint: error 415 wrong content type 
+PASS endpoint: token expires after the configured idle time 
+67/67 passed

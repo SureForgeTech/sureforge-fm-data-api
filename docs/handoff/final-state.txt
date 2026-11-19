@@ -1,0 +1,31 @@
+=== git status ===
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+
+=== git stash list ===
+(end stash list)
+
+=== git worktree list ===
+/workspace/sureforge-fm-data-api  9b2b845 [main]
+
+=== git branch -vv ===
+  codex/mock-registration-lost-receipt  76b738d [origin/codex/mock-registration-lost-receipt] Merge origin/main into codex/mock-registration-lost-receipt
+  codex/prompt-form-draft               a6f5f87 [origin/codex/prompt-form-draft] Keep the fields named in a title and read a requirement negation
+  feat/first-run-wizard                 e7740ea [origin/feat/first-run-wizard] docs: name every control the form editor offers
+  fix/prompt-trailing-requirement-scope 17a0e50 [origin/fix/prompt-trailing-requirement-scope] fix: let a plain comma list be one phrase
+  fix/starter-neutral-preview-wording   a093967 [origin/fix/starter-neutral-preview-wording] fix: make the private preview's wording starter-neutral
+* main                                  9b2b845 [origin/main] [minor] Add a FileMaker home that leads to the four journeys (#579)
+
+=== git status --ignored --short ===
+!! designer-ui/coverage/
+!! designer-ui/node_modules/
+!! extension/.mock-check/
+!! extension/node_modules/
+!! node_modules/
+!! runtime-next/coverage/
+!! runtime-next/node_modules/
+!! shared/coverage/
+!! shared/dist/
+!! shared/node_modules/

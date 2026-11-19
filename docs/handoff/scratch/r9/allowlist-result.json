@@ -1,0 +1,6 @@
+{
+  "catalogueCount": 34,
+  "allCatalogueIdsAreExtensionCommands": true,
+  "duplicateCatalogueIds": false,
+  "executeCommandCallsAfterHostileMessages": []
+}

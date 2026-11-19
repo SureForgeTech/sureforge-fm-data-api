@@ -1,0 +1,24 @@
+Make a name and email form.
+  cur  {"t":"Name and email","f":[]}
+  prev {"t":"Name and email","f":[]}
+  alt  {"t":"Name and email","f":[["Name",null],["Email",null]]}
+Create a name and email form with phone.
+  cur  {"t":"Name and email","f":[["Phone",null]]}
+  prev {"t":"Name and email","f":[["Phone",null]]}
+  alt  {"t":"Name and email","f":[["Name",null],["Email",null],["Phone",null]]}
+Make an email form.
+  cur  {"t":"Email","f":[]}
+  prev {"t":"Email","f":[]}
+  alt  {"t":"Email","f":[["Email",null]]}
+Create an A Team form with email.
+  cur  {"f":[["Email",null]]}
+  prev {"t":"A Team","f":[["Email",null]]}
+  alt  {"t":"A Team","f":[["Email",null]]}
+Require email, don't include phone, notes not required.
+  cur  {"f":[["Email",true],["Notes",true]]}
+  prev {"f":[["Email",true],["Notes",null]]}
+  alt  {"f":[["Email",true],["Notes",null]]}
+Require email, notes not required.
+  cur  {"f":[["Email",true],["Notes",true]]}
+  prev {"f":[["Email",true],["Notes",true]]}
+  alt  {"f":[["Email",true],["Notes",true]]}

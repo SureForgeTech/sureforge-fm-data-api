@@ -1,0 +1,12 @@
+01-scripts-test =>	--- exit=0 duration=0s log=/tmp/opencode/fm-2026-11-18/gate/scope3/01-scripts-test.log
+02-audit =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/scope3/02-audit.log
+03-lint =>	--- exit=0 duration=9s log=/tmp/opencode/fm-2026-11-18/gate/scope3/03-lint.log
+04-ci-test =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/scope3/04-ci-test.log
+05-build-shared =>	--- exit=0 duration=0s log=/tmp/opencode/fm-2026-11-18/gate/scope3/05-build-shared.log
+06-mock-check =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/scope3/06-mock-check.log
+07-typecheck =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/scope3/07-typecheck.log
+08-test-coverage =>	--- exit=0 duration=49s log=/tmp/opencode/fm-2026-11-18/gate/scope3/08-test-coverage.log
+09-build =>	--- exit=0 duration=1s log=/tmp/opencode/fm-2026-11-18/gate/scope3/09-build.log
+10-designer-runtime-test =>	--- exit=0 duration=4s log=/tmp/opencode/fm-2026-11-18/gate/scope3/10-designer-runtime-test.log
+11-package-check =>	--- exit=0 duration=2s log=/tmp/opencode/fm-2026-11-18/gate/scope3/11-package-check.log
+12-vsix-size-budget =>	--- exit=0 duration=0s log=/tmp/opencode/fm-2026-11-18/gate/scope3/12-vsix-size-budget.log

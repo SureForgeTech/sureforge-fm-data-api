@@ -1,0 +1,198 @@
+"Include email but not phone."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Require name and email, but not phone."
+    {"title":null,"fields":[["Name",true],["Email",true]],"unmatched":[]}
+"Include email, not phone."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email, don't include phone, and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, notes."
+    {"title":null,"fields":[],"unmatched":[]}
+"Don't include phone, but include email, and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Exclude phone, company, and notes."
+    {"title":null,"fields":[],"unmatched":[]}
+"Include email, exclude phone, and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, and notes."
+    {"title":null,"fields":[],"unmatched":[]}
+"Don't include phone, but include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email, but exclude phone, and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Include email and don't include phone."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Don't include phone and notes."
+    {"title":null,"fields":[],"unmatched":[]}
+"Exclude phone, notes."
+    {"title":null,"fields":[],"unmatched":[]}
+"Require name, email, and phone. Add optional notes, then session."
+    {"title":null,"fields":[["Name",true],["Email",true],["Phone",true],["Notes",false]],"unmatched":["Session"]}
+"Include not only email but also phone."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include all the fields, not just email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email, not only phone but also notes."
+    {"title":null,"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+"Include not merely email but phone."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include not simply email but phone."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include email but not only phone."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include email. Email is not required."
+    {"title":null,"fields":[["Email",false]],"unmatched":[]}
+"Include email but not required phone."
+    {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Include email and email is not optional."
+    {"title":null,"fields":[["Email",true]],"unmatched":[]}
+"Include email and not strictly required phone."
+    {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Include email but not strictly optional phone."
+    {"title":null,"fields":[["Email",null],["Phone",true]],"unmatched":[]}
+"Do not require \"Phone\"."
+    {"title":null,"fields":[],"unmatched":[]}
+"Do not require phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Do not require phone, but include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email, not required phone."
+    {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Include email, phone is not required."
+    {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+"Make a form that excludes phone and includes email."
+    {"title":"A","fields":[["Email",null]],"unmatched":[]}
+"Create a form that omits phone. Include email."
+    {"title":"A","fields":[["Email",null]],"unmatched":[]}
+"Draft a registration form leaving out phone, including email."
+    {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+"Include everything except phone and email."
+    {"title":null,"fields":[],"unmatched":[]}
+"Include email without phone."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email without the phone number."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Skip phone and include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Never collect phone, include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"No need for phone, include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Form excluding phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Form with phone excluded."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+"Form that leaves out phone."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+"Require \"Name and email"
+    {"title":null,"fields":[["Name",true],["Email",true]],"unmatched":[]}
+"Include \"Name and email"
+    {"title":null,"fields":[["Name",null],["Email",null]],"unmatched":[]}
+"Include email and \"Phone"
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Make a form with email and notes."
+    {"title":"A","fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Create a form with email."
+    {"title":"A","fields":[["Email",null]],"unmatched":[]}
+"Build a form for registration."
+    {"title":"A","fields":[],"unmatched":[]}
+"Create a registration form with email."
+    {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+"Make a workshop registration form. Include email."
+    {"title":"Workshop registration","fields":[["Email",null]],"unmatched":[]}
+"Draft a form titled \"Badge print\". Include email."
+    {"title":"Badge print","fields":[["Email",null]],"unmatched":[]}
+"Include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"include email"
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email and email and email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include all fields."
+    {"title":null,"fields":[],"unmatched":[]}
+"Include everything."
+    {"title":null,"fields":[],"unmatched":[]}
+"Include none."
+    {"title":null,"fields":[],"unmatched":[]}
+"Exclude everything."
+    {"title":null,"fields":[],"unmatched":[]}
+"Include email but not phone and not notes."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Do not include email but include phone."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+"Do not include email, but include phone."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+"Do not include email or include phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Do not include email or phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Do not include email, notes."
+    {"title":null,"fields":[],"unmatched":[]}
+"Not email, not phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Email is required. Phone is optional."
+    {"title":null,"fields":[["Email",true],["Phone",false]],"unmatched":[]}
+"Phone is required, email is not required."
+    {"title":null,"fields":[["Phone",true],["Email",false]],"unmatched":[]}
+"Require email and phone, exclude notes."
+    {"title":null,"fields":[["Email",true],["Phone",true]],"unmatched":[]}
+"Include email. Exclude email."
+    {"title":null,"fields":[],"unmatched":[]}
+"Exclude email. Include email."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email and notes and company and phone."
+    {"title":null,"fields":[["Email",null],["Notes",null],["Company",null],["Phone",null]],"unmatched":[]}
+"Add email, add phone."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Include email, add phone, and notes."
+    {"title":null,"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+"Include email, add phone, notes."
+    {"title":null,"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+"include email and require phone and include notes"
+    {"title":null,"fields":[["Email",null],["Phone",true],["Notes",null]],"unmatched":[]}
+"Collect email, including name and company."
+    {"title":null,"fields":[["Email",null],["Name",null],["Company",null]],"unmatched":[]}
+"Include email and require phone, including notes."
+    {"title":null,"fields":[["Email",null],["Phone",true],["Notes",null]],"unmatched":[]}
+"Please include email. Do not include phone."
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include the email field and the phone field."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Email and phone, not notes."
+    {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+"Required: email. Optional: phone."
+    {"title":null,"fields":[["Email",true],["Phone",false]],"unmatched":[]}
+"include email; exclude phone"
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email\nExclude phone"
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email - exclude phone"
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email: exclude phone"
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Include email (exclude phone)"
+    {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Do not include phone, but include email, and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Exclude phone, but include email, and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Exclude phone, but include email and notes."
+    {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Require email, exclude phone, and notes."
+    {"title":null,"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Require email, exclude phone, notes."
+    {"title":null,"fields":[["Email",true],["Notes",null]],"unmatched":[]}
+"Not required phone, include email."
+    {"title":null,"fields":[["Phone",false],["Email",null]],"unmatched":[]}
+"Do not only email but also phone."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+"Include everything but phone."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+"Include all but not phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Everything except phone."
+    {"title":null,"fields":[],"unmatched":[]}
+"Include phone, except email."
+    {"title":null,"fields":[["Phone",null]],"unmatched":[]}

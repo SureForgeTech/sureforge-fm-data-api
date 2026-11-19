@@ -1,0 +1,29 @@
+The prompt parser states a requirement in two places: before the fields it covers ("Require email and phone.") and after them ("Name and email are required."). Only the first form reached back over a list.
+
+A trailing requirement was applied to the **last** mention of a clause alone, so in "Name and email are required." only Email was marked required and Name stayed optional. The same held for "Make email and phone required." and for a comma-separated list, "Name, email, and phone are required.", where only the last field was marked.
+
+The user reviews the field picker and the editor before saving, so the field was still preselected — but the editor's "Required" box was unticked for a field the prompt had explicitly called required. The pull request that introduced the prompt drafting states that it "marks the ones you called required or optional", so the behaviour did not meet its own acceptance criterion.
+
+An independent post-merge audit of `main` rated this a P1. An earlier review of the same code, before it merged, found the same behaviour and rated it P2; both ratings agree it is wrong, and the pull request's stated behaviour settles that it is.
+
+## What this change does
+
+A requirement stated after a list now reaches back over that list:
+
+- "Name and email are required." marks both fields required.
+- "Name, email, and phone are required." marks all three.
+- "Make email and phone required." marks both.
+- "Name and email are optional." marks both optional.
+
+It reaches back when the qualifier carried a copula ("are required", "are optional") or when it is positive. A bare "not required" overrides only the item it follows, so "Require email, notes not required." still leaves Email required and Notes optional. A stated requirement settles the list it was stated for, so "Name and email are optional, notes and phone are required." reads the second list on its own.
+
+A requirement in another sentence does not reach back into the first one: "Include email and phone. Phone required." leaves Email optional.
+
+## What deliberately does not change
+
+- The forward-scoped prefix requirement, the exclusion handling, the list-anchor polarity, the title extraction and the quoted-name matching are untouched.
+- The existing tests for them are unchanged and still pass; the change adds tests.
+
+## How to judge it
+
+The risk in this change is the scope rule itself: a requirement that reaches back too far would mark a field required that the user did not call required. The cases that matter are in the new tests: a bare "not required" stays on the item it follows, a settled list does not bleed into the next list, and a requirement in another sentence does not reach back.

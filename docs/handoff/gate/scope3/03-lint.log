@@ -1,0 +1,20 @@
+
+> fmweb-ide-monorepo@0.1.0 lint
+> npm run lint --workspaces --if-present
+
+
+> @fmweb/shared@0.1.0 lint
+> eslint "src/**/*.ts" "src/**/*.tsx" "test/**/*.ts" "test/**/*.tsx" --max-warnings=0
+
+
+> @fmweb/designer-ui@0.1.0 lint
+> eslint "src/**/*.ts" "src/**/*.tsx" --max-warnings=0
+
+
+> @fmweb/runtime-next@0.1.0 lint
+> eslint "app/**/*.{ts,tsx}" "lib/**/*.{ts,tsx}" "next.config.ts" --max-warnings=0
+
+
+> filemaker-data-api-tools@1.9.1 lint
+> eslint "src/**/*.ts" "src/webviews/*/ui/*.js" "test/**/*.ts" "test/mock-server/**/*.mjs" "e2e-ui/**/*.mjs" --max-warnings=0
+

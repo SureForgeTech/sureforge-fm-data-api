@@ -1,0 +1,388 @@
+DIFF "Require email, notes not required."
+  now: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+DIFF "Require email, don't include phone, notes not required."
+  now: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+DIFF "Require email, notes optional."
+  now: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+DIFF "Make a name and email form."
+  now: {"title":"Name and email","fields":[["Name",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Name and email","fields":[],"unmatched":[]}
+DIFF "Create a name and email form with phone."
+  now: {"title":"Name and email","fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":"Name and email","fields":[["Phone",null]],"unmatched":[]}
+SAME "Make a form with email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+DIFF "Create an A Team form with email."
+  now: {"title":"A Team","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+DIFF "Build a The Gala form with email."
+  now: {"title":"The Gala","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Make an Annual form with email."
+  now: {"title":"Annual","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Annual","fields":[["Email",null]],"unmatched":[]}
+DIFF "Create an email form."
+  now: {"title":"Email","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Email","fields":[],"unmatched":[]}
+DIFF "Name, email and phone required."
+  now: {"title":null,"fields":[["Name",null],["Email",null],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Make name, email and phone required."
+  now: {"title":null,"fields":[["Name",null],["Email",null],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Include name, email and phone required."
+  now: {"title":null,"fields":[["Name",null],["Email",null],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Add name, email, and phone optional."
+  now: {"title":null,"fields":[["Name",null],["Email",null],["Phone",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Require name, email and phone not required."
+  now: {"title":null,"fields":[["Name",true],["Email",true],["Phone",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+DIFF "name, email and phone not required."
+  now: {"title":null,"fields":[["Name",null],["Email",null],["Phone",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Include email, phone required."
+  now: {"title":null,"fields":[["Email",null],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Include email required, phone."
+  now: {"title":null,"fields":[["Email",true],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+DIFF "Include name required email."
+  now: {"title":null,"fields":[["Name",true],["Email",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",true]],"unmatched":[]}
+DIFF "Collect name required documents and email."
+  now: {"title":null,"fields":[["Name",true],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null]],"unmatched":[]}
+DIFF "Add session optional breakouts and email."
+  now: {"title":null,"fields":[["Session",false],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Session",null],["Email",null]],"unmatched":[]}
+DIFF "Include notes required reading and email."
+  now: {"title":null,"fields":[["Notes",true],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",null],["Email",null]],"unmatched":[]}
+SAME "Include email as well as phone."
+  now: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+SAME "Include email as required."
+  now: {"title":null,"fields":[["Email",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true]],"unmatched":[]}
+SAME "Add notes as required."
+  now: {"title":null,"fields":[["Notes",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",true]],"unmatched":[]}
+SAME "Include phone as required by the venue."
+  now: {"title":null,"fields":[["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",true]],"unmatched":[]}
+SAME "Include email as needed and phone."
+  now: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+SAME "Require email, notes, not required."
+  now: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+SAME "Require email, notes, optional."
+  now: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+SAME "Include email, not required."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Include email, is not required."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Require email, phone, not required, and notes."
+  now: {"title":null,"fields":[["Email",true],["Phone",true],["Notes",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Phone",true],["Notes",true]],"unmatched":[]}
+SAME "Notes, not required. Include email."
+  now: {"title":null,"fields":[["Notes",null],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",null],["Email",null]],"unmatched":[]}
+DIFF "Require email, notes not required, and phone."
+  now: {"title":null,"fields":[["Email",true],["Notes",false],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true],["Phone",true]],"unmatched":[]}
+SAME "Require email, phone isn't required."
+  now: {"title":null,"fields":[["Email",true],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Phone",true]],"unmatched":[]}
+SAME "Require email, notes aren't required."
+  now: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+SAME "Include email. Email is not at all required."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Require email, and phone is not at all required."
+  now: {"title":null,"fields":[["Email",true],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Phone",true]],"unmatched":[]}
+SAME "Include email. Email should not be required."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Require name, email and phone should not be required."
+  now: {"title":null,"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",true],["Email",true],["Phone",true]],"unmatched":[]}
+DIFF "Include email not currently required."
+  now: {"title":null,"fields":[["Email",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Include phone not at all required."
+  now: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+SAME "Include email and not at all required phone."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Include email but not the required phone."
+  now: {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+DIFF "Include notes not the required email."
+  now: {"title":null,"fields":[["Notes",false],["Email",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",null],["Email",false]],"unmatched":[]}
+SAME "Do not include the required email."
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "Include email but not a required phone."
+  now: {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",false]],"unmatched":[]}
+SAME "not required phone and email."
+  now: {"title":null,"fields":[["Phone",false],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",false],["Email",null]],"unmatched":[]}
+DIFF "notes not strictly required. Require email."
+  now: {"title":null,"fields":[["Notes",false],["Email",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",null],["Email",true]],"unmatched":[]}
+SAME "Require email, notes are not required."
+  now: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+SAME "Require email, notes is not optional."
+  now: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+DIFF "Make a company picnic registration form. Require name and email."
+  now: {"title":"Company picnic registration","fields":[["Company",null],["Name",true],["Email",true]],"unmatched":[]}
+  old: {"title":"Company picnic registration","fields":[["Name",true],["Email",true]],"unmatched":[]}
+DIFF "Create a session feedback form. Require email."
+  now: {"title":"Session feedback","fields":[["Session",null],["Email",true]],"unmatched":[]}
+  old: {"title":"Session feedback","fields":[["Email",true]],"unmatched":[]}
+DIFF "Make a phone support form. Include name and email."
+  now: {"title":"Phone support","fields":[["Phone",null],["Name",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Phone support","fields":[["Name",null],["Email",null]],"unmatched":[]}
+DIFF "Build an email newsletter form. Include name."
+  now: {"title":"Email newsletter","fields":[["Email",null],["Name",null]],"unmatched":[]}
+  old: {"title":"Email newsletter","fields":[["Name",null]],"unmatched":[]}
+DIFF "Draft a notes form for volunteers. Include email."
+  now: {"title":"Notes","fields":[["Notes",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Notes","fields":[["Email",null]],"unmatched":[]}
+SAME "Make a registration form. Include email and phone."
+  now: {"title":"Registration","fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null],["Phone",null]],"unmatched":[]}
+SAME "Create an event registration form with name and email."
+  now: {"title":"Event registration","fields":[["Name",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Event registration","fields":[["Name",null],["Email",null]],"unmatched":[]}
+SAME "Make a guest registration form with name, email, organization, and optional notes."
+  now: {"title":"Guest registration","fields":[["Name",null],["Email",null],["Company",null],["Notes",false]],"unmatched":[]}
+  old: {"title":"Guest registration","fields":[["Name",null],["Email",null],["Company",null],["Notes",false]],"unmatched":[]}
+SAME "Build a workshop registration form. Require attendee name and email, let attendees choose a session, and add an optional accessibility notes field."
+  now: {"title":"Workshop registration","fields":[["Name",true],["Email",true],["Session",null]],"unmatched":["Accessibility notes"]}
+  old: {"title":"Workshop registration","fields":[["Name",true],["Email",true],["Session",null]],"unmatched":["Accessibility notes"]}
+DIFF "Make email a required form field."
+  now: {"title":"Email a required","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Email a required","fields":[],"unmatched":[]}
+DIFF "Make name required on the form."
+  now: {"title":"Name required on the","fields":[["Name",true]],"unmatched":[]}
+  old: {"title":"Name required on the","fields":[],"unmatched":[]}
+DIFF "Create phone and email form fields."
+  now: {"title":"Phone and email","fields":[["Phone",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Phone and email","fields":[],"unmatched":[]}
+DIFF "Make a required name and email form."
+  now: {"title":"Required name and email","fields":[["Name",true],["Email",true]],"unmatched":[]}
+  old: {"title":"Required name and email","fields":[],"unmatched":[]}
+DIFF "Make an optional notes form."
+  now: {"title":"Optional notes","fields":[["Notes",false]],"unmatched":[]}
+  old: {"title":"Optional notes","fields":[],"unmatched":[]}
+SAME "Make a registration form. Include email."
+  now: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+SAME "Create a registration form. Include email."
+  now: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+SAME "Draft a registration form. Include email."
+  now: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+SAME "Build a registration form. Include email."
+  now: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+SAME "Make a form with email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Don't include phone, but include email, and notes."
+  now: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+SAME "Don't include phone, but include email, notes."
+  now: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+SAME "Don't include phone but include email, and notes."
+  now: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+SAME "Include email, don't include phone, and notes."
+  now: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+SAME "Include email, don't include phone, notes."
+  now: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+SAME "Don't include phone, notes."
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "Don't include phone, include email, notes."
+  now: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+SAME "Don't include phone, but include email, don't include notes, company."
+  now: {"title":null,"fields":[["Email",null],["Company",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Company",null]],"unmatched":[]}
+SAME "Exclude phone, company, and notes."
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "Include email but not phone."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Include not only email but also phone."
+  now: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",null]],"unmatched":[]}
+SAME "Include all the fields, not just email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Include everything except phone and email."
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "Include everything but phone."
+  now: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+SAME "Make a form that excludes phone and includes email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Create a form that omits phone. Include email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Draft a registration form leaving out phone, including email."
+  now: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+SAME "Do not require phone."
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "Require phone. Do not require phone."
+  now: {"title":null,"fields":[["Phone",false]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",false]],"unmatched":[]}
+SAME "Include phone except."
+  now: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+SAME "Add name, email, phone not."
+  now: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",null],["Email",null],["Phone",null]],"unmatched":[]}
+SAME "Include phone not included."
+  now: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+SAME "Add optional name, email, and phone."
+  now: {"title":null,"fields":[["Name",false],["Email",null],["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",false],["Email",null],["Phone",null]],"unmatched":[]}
+SAME "Include optional notes and email."
+  now: {"title":null,"fields":[["Notes",false],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",false],["Email",null]],"unmatched":[]}
+SAME "Require optional notes and email."
+  now: {"title":null,"fields":[["Notes",false],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",false],["Email",null]],"unmatched":[]}
+SAME "Add optional notes, comments, and email."
+  now: {"title":null,"fields":[["Notes",false],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Notes",false],["Email",null]],"unmatched":[]}
+SAME "Include \" Registration::Badge, Display \" and email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[" Registration::Badge, Display "]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[" Registration::Badge, Display "]}
+SAME "Require \"Name and email"
+  now: {"title":null,"fields":[["Name",true],["Email",true]],"unmatched":[]}
+  old: {"title":null,"fields":[["Name",true],["Email",true]],"unmatched":[]}
+SAME "Include email and EmailAddress."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Include photo and count and phone."
+  now: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Phone",null]],"unmatched":[]}
+SAME "Include a company name."
+  now: {"title":null,"fields":[["Company",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Company",null]],"unmatched":[]}
+SAME "Include first name and given name."
+  now: {"title":null,"fields":[],"unmatched":["First name"]}
+  old: {"title":null,"fields":[],"unmatched":["First name"]}
+SAME "Include accessibility notes and notes."
+  now: {"title":null,"fields":[["Notes",null]],"unmatched":["Accessibility notes"]}
+  old: {"title":null,"fields":[["Notes",null]],"unmatched":["Accessibility notes"]}
+SAME "Include the field called \"Email\"."
+  now: {"title":"Email","fields":[],"unmatched":[]}
+  old: {"title":"Email","fields":[],"unmatched":[]}
+SAME "Require the field called \"Phone\"."
+  now: {"title":"Phone","fields":[],"unmatched":[]}
+  old: {"title":"Phone","fields":[],"unmatched":[]}
+SAME "Draft a form titled \"Badge print\". Include \" Registration::Badge, Display \"."
+  now: {"title":"Badge print","fields":[],"unmatched":[" Registration::Badge, Display "]}
+  old: {"title":"Badge print","fields":[],"unmatched":[" Registration::Badge, Display "]}
+SAME "Make a registration form. Include a field called \"Email\"."
+  now: {"title":"Email","fields":[],"unmatched":[]}
+  old: {"title":"Email","fields":[],"unmatched":[]}
+SAME "Include email, not only phone but also notes."
+  now: {"title":null,"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null],["Phone",null],["Notes",null]],"unmatched":[]}
+SAME "Never collect phone, include email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "Skip the phone field and include email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME "No need for phone, include email."
+  now: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Email",null]],"unmatched":[]}
+SAME ""
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  now: {"title":null,"fields":[],"unmatched":[]}
+  old: {"title":null,"fields":[],"unmatched":[]}
+SAME "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+  now: THREW Describe your form in 2,000 characters or fewer.
+  old: THREW Describe your form in 2,000 characters or fewer.
+
+## syntax-word field names
+DIFF "Make a registration form. Include email."
+  now: {"title":"Registration","fields":[["Make",null],["A",null],["Registration",null],["Form",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+DIFF "Create a registration form. Include email."
+  now: {"title":"Registration","fields":[["Create",null],["A",null],["Registration",null],["Form",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+DIFF "Draft a registration form. Include email."
+  now: {"title":"Registration","fields":[["Draft",null],["A",null],["Registration",null],["Form",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+DIFF "Build a registration form. Include email."
+  now: {"title":"Registration","fields":[["Build",null],["A",null],["Registration",null],["Form",null],["Email",null]],"unmatched":[]}
+  old: {"title":"Registration","fields":[["Email",null]],"unmatched":[]}
+SAME "Make a form with email."
+  now: {"title":null,"fields":[["Make",null],["A",null],["Form",null],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Make",null],["A",null],["Form",null],["Email",null]],"unmatched":[]}
+DIFF "Create an A Team form with email."
+  now: {"title":"A Team","fields":[["Create",null],["A",null],["Form",null],["Email",null]],"unmatched":[]}
+  old: {"title":null,"fields":[["Create",null],["A",null],["Form",null],["Email",null]],"unmatched":[]}
+DIFF "Make a name and email form."
+  now: {"title":"Name and email","fields":[["Make",null],["A",null],["Name",null],["Email",null],["Form",null]],"unmatched":[]}
+  old: {"title":"Name and email","fields":[],"unmatched":[]}
+DIFF "Make a company picnic registration form. Require name and email."
+  now: {"title":"Company picnic registration","fields":[["Make",null],["A",null],["Company",null],["Registration",null],["Form",null],["Name",true],["Email",true]],"unmatched":[]}
+  old: {"title":"Company picnic registration","fields":[["Name",true],["Email",true]],"unmatched":[]}
+
+## rich layout
+SAME "Include \" Registration::Badge, Display \". Require email. Include photo, count, total, and global phone."
+  now: {"title":null,"fields":[[" Registration::Badge, Display ",null],["Phone",null]],"unmatched":["Email"]}
+  old: {"title":null,"fields":[[" Registration::Badge, Display ",null],["Phone",null]],"unmatched":["Email"]}
+  sameObjects=true names=[" Registration::Badge, Display ","Phone"]
+SAME "Build a workshop registration form. Require attendee name and email, let attendees choose a session, and add an optional accessibility notes field."
+  now: {"title":"Workshop registration","fields":[["Accessibility_Notes",false]],"unmatched":["Attendee name","Email","Session"]}
+  old: {"title":"Workshop registration","fields":[["Accessibility_Notes",false]],"unmatched":["Attendee name","Email","Session"]}
+  sameObjects=true names=["Accessibility_Notes"]
+SAME "Include first name."
+  now: {"title":null,"fields":[],"unmatched":["First name"]}
+  old: {"title":null,"fields":[],"unmatched":["First name"]}
+  sameObjects=true names=[]
+SAME "Require email and phone. Include notes."
+  now: {"title":null,"fields":[["Phone",true],["Notes",null]],"unmatched":["Email"]}
+  old: {"title":null,"fields":[["Phone",true],["Notes",null]],"unmatched":["Email"]}
+  sameObjects=true names=["Phone","Notes"]
+
+DIFF COUNT 34

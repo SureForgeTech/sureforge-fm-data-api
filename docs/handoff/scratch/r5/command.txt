@@ -1,0 +1,3 @@
+definition [["Email",true],["Notes",true],["Phone",true]]
+title "Event registration"
+picker [["Email",true],["Notes",true],["Phone",true]]

@@ -1,0 +1,109 @@
+{
+  "notes": [
+    {
+      "name": "every catalogue entry renders a button for its command",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "one button per catalogue entry",
+      "ok": true,
+      "detail": {
+        "buttons": 34,
+        "entries": 34
+      }
+    },
+    {
+      "name": "the rendered buttons are exactly the catalogue commands",
+      "ok": true,
+      "detail": [
+        "filemakerDataApiTools.createFmWebApp",
+        "filemakerDataApiTools.buildPortal",
+        "filemakerDataApiTools.addConnectionProfile",
+        "filemakerDataApiTools.connect",
+        "filemakerDataApiTools.diagnoseConnection",
+        "filemakerDataApiTools.testMyServer",
+        "filemakerDataApiTools.openQueryBuilder",
+        "filemakerDataApiTools.openRecordViewer",
+        "filemakerDataApiTools.openRecordEditor",
+        "filemakerDataApiTools.openScriptRunner",
+        "filemakerDataApiTools.openWelcomeWalkthrough",
+        "filemakerDataApiTools.openUserGuide",
+        "filemakerDataApiTools.about",
+        "filemakerDataApiTools.initializeFmWebProject",
+        "filemakerDataApiTools.syncFmWebMetadata",
+        "filemakerDataApiTools.showEffectiveSettings",
+        "filemakerDataApiTools.showDiagnostics",
+        "filemakerDataApiTools.generateTypesForLayout",
+        "filemakerDataApiTools.generateTypesForAllLayouts",
+        "filemakerDataApiTools.generateSnippetsForLayout",
+        "filemakerDataApiTools.generateTypeScriptClient",
+        "filemakerDataApiTools.openGeneratedTypesFolder",
+        "filemakerDataApiTools.writeAiContext",
+        "filemakerDataApiTools.captureSchemaSnapshot",
+        "filemakerDataApiTools.diffSchemaSnapshots",
+        "filemakerDataApiTools.manageSavedQueries",
+        "filemakerDataApiTools.batchExportFind",
+        "filemakerDataApiTools.batchUpdateFromFile",
+        "filemakerDataApiTools.showRequestHistory",
+        "filemakerDataApiTools.toggleOfflineMode",
+        "filemakerDataApiTools.listActivePlugins",
+        "filemakerDataApiTools.compareEnvironments",
+        "filemakerDataApiTools.copyAiMcpConfig",
+        "filemakerDataApiTools.showAiActivity"
+      ]
+    },
+    {
+      "name": "every button posts exactly {type:run, command}",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "the allowlisted command runs with a single argument",
+      "ok": true,
+      "detail": [
+        [
+          "filemakerDataApiTools.createFmWebApp"
+        ]
+      ]
+    },
+    {
+      "name": "extra message fields are not forwarded as command arguments",
+      "ok": true,
+      "detail": [
+        [
+          "filemakerDataApiTools.connect"
+        ]
+      ]
+    },
+    {
+      "name": "no command outside the catalogue is executed",
+      "ok": true,
+      "detail": []
+    },
+    {
+      "name": "the home command itself is not in the allowlist",
+      "ok": true,
+      "detail": 34
+    },
+    {
+      "name": "a second Start Here reveals the open panel",
+      "ok": true,
+      "detail": {
+        "before": 1,
+        "after": 1
+      }
+    },
+    {
+      "name": "the page has a CSP with the script nonce",
+      "ok": true,
+      "detail": "TpuBy9IzaIck0GX5ofKlfZNXzNo3jyxc"
+    },
+    {
+      "name": "the CSP forbids inline script without the nonce",
+      "ok": true,
+      "detail": true
+    }
+  ],
+  "findings": []
+}

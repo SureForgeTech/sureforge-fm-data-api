@@ -1,0 +1,49 @@
+"Require attendee name and email, add an optional session"
+  {"title":null,"fields":[["Name",true],["Email",true],["Session",false]],"unmatched":[]}
+"Require attendee name and email, add optional session, notes not required."
+  {"title":null,"fields":[["Name",true],["Email",true],["Session",false],["Notes",false]],"unmatched":[]}
+"Make a name and email form without phone."
+  {"title":"Name and email","fields":[["Name",null],["Email",null]],"unmatched":[]}
+"Make a name form that does not include email."
+  {"title":"Name","fields":[["Name",null]],"unmatched":[]}
+"Make a company picnic form."
+  {"title":"Company picnic","fields":[["Company",null]],"unmatched":[]}
+"Include notes, not the required email."
+  {"title":null,"fields":[["Notes",null],["Email",false]],"unmatched":[]}
+"Include name not the required email."
+  {"title":null,"fields":[["Name",false],["Email",false]],"unmatched":[]}
+"Add a session required for new volunteers and email."
+  {"title":null,"fields":[["Session",true],["Email",null]],"unmatched":[]}
+"Please add phone optional if they want and email."
+  {"title":null,"fields":[["Phone",false],["Email",null]],"unmatched":[]}
+"Include \"...\" and email."
+  {"title":null,"fields":[["Email",null]],"unmatched":["..."]}
+"Require email, notes not required."
+  {"title":null,"fields":[["Email",true],["Notes",false]],"unmatched":[]}
+"notes not required"
+  {"title":null,"fields":[["Notes",false]],"unmatched":[]}
+"not required notes"
+  {"title":null,"fields":[["Notes",false]],"unmatched":[]}
+"Email is not required."
+  {"title":null,"fields":[["Email",false]],"unmatched":[]}
+"Email isn't required."
+  {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Do not include phone, notes."
+  {"title":null,"fields":[],"unmatched":[]}
+"Include email, don't include phone, and notes."
+  {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Don't include phone, but include email, and notes."
+  {"title":null,"fields":[["Email",null],["Notes",null]],"unmatched":[]}
+"Require email, don't include phone, and notes."
+  {"title":null,"fields":[["Email",true],["Notes",true]],"unmatched":[]}
+"Create an A Team form"
+  {"title":"A Team","fields":[],"unmatched":[]}
+"Make a form."
+  {"title":null,"fields":[],"unmatched":[]}
+"Make the form with email."
+  {"title":null,"fields":[["Email",null]],"unmatched":[]}
+"Build an An Evening form."
+  {"title":"An Evening","fields":[],"unmatched":[]}
+quoted dots {"fields":["..."],"same":true}
+empty selection: Choose between 1 and 100 writable, nonglobal fields.
+spaced {"name":" Email Address ","same":true,"required":true}

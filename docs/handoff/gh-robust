@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# Run a gh command with the current workspace token, retrying while the token file rotates.
+#   gh-robust <gh args...>
+set -u
+for attempt in $(seq 1 12); do
+  TOK=$(cat /var/lib/opencode-github/github.token 2>/dev/null)
+  OUT=$(GH_TOKEN="$TOK" gh "$@" 2>&1)
+  STATUS=$?
+  if [ $STATUS -eq 0 ] && ! printf '%s' "$OUT" | grep -q "Bad credentials"; then
+    printf '%s' "$OUT"
+    exit 0
+  fi
+  sleep 2
+done
+printf '%s' "$OUT"
+exit 1

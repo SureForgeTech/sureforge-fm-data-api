@@ -1,0 +1,13 @@
+EXIT[npm-ci]=0
+EXIT[audit]=0
+EXIT[lint]=0
+EXIT[ci-workflow-tests]=0
+EXIT[script-tests]=0
+EXIT[build-shared]=0
+EXIT[mock-check]=0
+EXIT[typecheck]=0
+EXIT[test-coverage]=0
+EXIT[build]=0
+EXIT[test-designer-runtime]=0
+EXIT[package-check]=0
+EXIT[vsix-size-budget]=0 (2889973 bytes)

@@ -1,0 +1,17 @@
+A1 executeCommand call count: 1
+A1 executeCommand args: ["filemakerDataApiTools.createFmWebApp"]
+A2 rejected commands -> executeCommand calls: 0
+A3 non-run/odd messages -> executeCommand calls: 0
+A4 extra fields ignored, args seen: ["filemakerDataApiTools.createFmWebApp"]
+A5 allowlist size 34, entries 34
+B1 hostile markup present in html: false
+B2 raw attribute break present: false
+B3 all static catalogue values present in the rendered HTML
+C1 createWebviewPanel calls: 1, reveal calls: 2
+C2 createWebviewPanel calls after dispose + reopen: 2
+C3 restore entry: {"viewType":"filemakerHome","reopenWith":"FileMaker: Start Here"}
+C4 createWebviewPanel args: "filemakerHome" "FileMaker" 1 {"enableScripts":true,"retainContextWhenHidden":true,"localResourceRoots":[{"fsPath":"dist/webviews/home/ui"}]}
+C5 csp: default-src 'none'; img-src vscode-resource: data:; style-src vscode-resource:; script-src 'nonce-0CRFkMw0b5UQq7ZDdDmG9nmZ2Z2gca5A'; connect-src vscode-resource:
+D1 catalogue commands not contributed: []
+D2 manifest contributed commands: 80
+D3 keybindings: ["filemakerDataApiTools.openQueryBuilder|ctrl+alt+q|filemaker.hasProfiles","filemakerDataApiTools.openRecordViewer|ctrl+alt+v|filemaker.hasProfiles","filemakerDataApiTools.openScriptRunner|ctrl+alt+e|filemaker.hasProfiles","filemakerDataApiTools.showRequestHistory|ctrl+alt+h|filemaker.powerUserMode","filemakerDataApiTools.openLayoutMode|ctrl+alt+l|filemaker.fmWebProjectInitialized"]

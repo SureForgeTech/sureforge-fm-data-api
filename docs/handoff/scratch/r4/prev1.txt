@@ -1,0 +1,260 @@
+Make a form with email.
+  title="A"
+  fields=[["Email",null]]
+  unmatched=[]
+Create a form
+  title="A"
+  fields=[]
+  unmatched=[]
+Make an email form
+  title="Email"
+  fields=[]
+  unmatched=[]
+Create a form for a conference
+  title="A"
+  fields=[]
+  unmatched=[]
+Build the A Team form with email
+  title="A Team"
+  fields=[["Email",null]]
+  unmatched=[]
+Create a registration form with email
+  title="Registration"
+  fields=[["Email",null]]
+  unmatched=[]
+Build the event signup form with email
+  title="Event signup"
+  fields=[["Email",null]]
+  unmatched=[]
+Create a form for emails
+  title="A"
+  fields=[]
+  unmatched=[]
+Create a form that collects a name
+  title="A"
+  fields=[["Name",null]]
+  unmatched=[]
+Make a form for a registration form
+  title="Form for a registration"
+  fields=[]
+  unmatched=[]
+Build a workshop registration form. Require email.
+  title="Workshop registration"
+  fields=[["Email",true]]
+  unmatched=[]
+Create an event form titled "Gala" with email
+  title="Gala"
+  fields=[["Email",null]]
+  unmatched=[]
+Create The Summit form with email
+  title="Summit"
+  fields=[["Email",null]]
+  unmatched=[]
+Build an attendee form with name
+  title="Attendee"
+  fields=[["Name",null]]
+  unmatched=[]
+Don't include phone, notes.
+  title=undefined
+  fields=[]
+  unmatched=[]
+Include email, don't include phone, and notes.
+  title=undefined
+  fields=[["Email",null],["Notes",null]]
+  unmatched=[]
+Don't include phone, but include email, and notes.
+  title=undefined
+  fields=[["Email",null],["Notes",null]]
+  unmatched=[]
+Require email, don't include phone, and notes.
+  title=undefined
+  fields=[["Email",true],["Notes",null]]
+  unmatched=[]
+Require email, and notes.
+  title=undefined
+  fields=[["Email",true],["Notes",true]]
+  unmatched=[]
+Include email, notes, and not phone.
+  title=undefined
+  fields=[["Email",null],["Notes",null]]
+  unmatched=[]
+Not required phone.
+  title=undefined
+  fields=[["Phone",false]]
+  unmatched=[]
+Phone not required.
+  title=undefined
+  fields=[["Phone",null]]
+  unmatched=[]
+Name is not required, email is required.
+  title=undefined
+  fields=[["Name",false],["Email",true]]
+  unmatched=[]
+Require email. Phone not required and notes.
+  title=undefined
+  fields=[["Email",true],["Phone",null],["Notes",null]]
+  unmatched=[]
+Require email and phone, not notes.
+  title=undefined
+  fields=[["Email",true],["Phone",true]]
+  unmatched=[]
+Require email and phone not notes.
+  title=undefined
+  fields=[["Email",true],["Phone",true]]
+  unmatched=[]
+Require email, but not phone.
+  title=undefined
+  fields=[["Email",true]]
+  unmatched=[]
+Require email, but not phone, and notes.
+  title=undefined
+  fields=[["Email",true],["Notes",null]]
+  unmatched=[]
+Include email, but not phone, and notes.
+  title=undefined
+  fields=[["Email",null],["Notes",null]]
+  unmatched=[]
+Require email and not phone and notes.
+  title=undefined
+  fields=[["Email",true]]
+  unmatched=[]
+Include email and phone except notes.
+  title=undefined
+  fields=[["Email",null],["Phone",null]]
+  unmatched=[]
+Include email, phone except notes.
+  title=undefined
+  fields=[["Email",null],["Phone",null]]
+  unmatched=[]
+Include notes, email, phone. Do not require notes.
+  title=undefined
+  fields=[["Notes",false],["Email",null],["Phone",null]]
+  unmatched=[]
+Include email. Require phone, not email.
+  title=undefined
+  fields=[["Phone",true]]
+  unmatched=[]
+Require email, phone and notes. Make phone optional, and notes.
+  title=undefined
+  fields=[["Email",true],["Phone",true],["Notes",true]]
+  unmatched=[]
+Require email. Optional phone, and notes.
+  title=undefined
+  fields=[["Email",true],["Phone",false],["Notes",null]]
+  unmatched=[]
+Require email, not optional phone, and notes.
+  title=undefined
+  fields=[["Email",true],["Phone",true],["Notes",true]]
+  unmatched=[]
+Include email and phone, but do not require phone, and notes.
+  title=undefined
+  fields=[["Email",null],["Phone",false],["Notes",null]]
+  unmatched=[]
+Require email, don't include phone, and notes, and company.
+  title=undefined
+  fields=[["Email",true],["Notes",null],["Company",null]]
+  unmatched=[]
+Require email, don't include phone, name and notes.
+  title=undefined
+  fields=[["Email",true],["Name",null],["Notes",null]]
+  unmatched=[]
+Require email, don't include phone. Name and notes.
+  title=undefined
+  fields=[["Email",true],["Name",null],["Notes",null]]
+  unmatched=[]
+Require email. Don't include phone, notes.
+  title=undefined
+  fields=[["Email",true]]
+  unmatched=[]
+Require email, phone, excluding notes, and company.
+  title=undefined
+  fields=[["Email",true],["Phone",true],["Company",null]]
+  unmatched=[]
+Require email, omit phone, and company.
+  title=undefined
+  fields=[["Email",true],["Company",null]]
+  unmatched=[]
+Require email and company, but leave out phone and notes.
+  title=undefined
+  fields=[["Email",true],["Company",true],["Phone",null],["Notes",null]]
+  unmatched=[]
+Include email and notes, skip phone.
+  title=undefined
+  fields=[["Email",null],["Notes",null]]
+  unmatched=[]
+Require the email, but not the phone, and notes.
+  title=undefined
+  fields=[["Email",true],["Notes",null]]
+  unmatched=[]
+Require first name, last name and email, except phone.
+  title=undefined
+  fields=[["First Name",true],["Last Name",true],["Email",true]]
+  unmatched=[]
+Include email, not only phone but also notes.
+  title=undefined
+  fields=[["Email",null],["Phone",null],["Notes",null]]
+  unmatched=[]
+Include email, not just phone, and notes.
+  title=undefined
+  fields=[["Email",null],["Phone",null],["Notes",null]]
+  unmatched=[]
+Include Phone. Require Notes, not Email.
+  title=undefined
+  fields=[["Phone",null],["Notes",true]]
+  unmatched=[]
+Require email, then not phone and notes.
+  title=undefined
+  fields=[["Email",true]]
+  unmatched=[]
+Require email but not notes, and phone.
+  title=undefined
+  fields=[["Email",true],["Phone",null]]
+  unmatched=[]
+Require email, but not notes. Phone too.
+  title=undefined
+  fields=[["Email",true],["Phone",null]]
+  unmatched=[]
+Include the session, dietary requirements, and accessibility notes.
+  title=undefined
+  fields=[["Session",null],["Dietary Requirements",null],["Accessibility Notes",null]]
+  unmatched=[]
+Require notes, but not required email, and phone.
+  title=undefined
+  fields=[["Notes",true],["Email",false],["Phone",null]]
+  unmatched=[]
+Include email. Not email. Phone.
+  title=undefined
+  fields=[["Phone",null]]
+  unmatched=[]
+Include email. Do not include email, and notes.
+  title=undefined
+  fields=[]
+  unmatched=[]
+Include everything but phone.
+  title=undefined
+  fields=[["Phone",null]]
+  unmatched=[]
+Count and badge should be excluded. Require email.
+  title=undefined
+  fields=[["Email",true]]
+  unmatched=[]
+Include Count and Badge and email.
+  title=undefined
+  fields=[["Email",null]]
+  unmatched=[]
+Require email, phone, and "Odd Name", not notes.
+  title=undefined
+  fields=[["Email",true],["Phone",true]]
+  unmatched=["Odd Name"]
+Include email, and "Notes", not phone.
+  title=undefined
+  fields=[["Email",null],["Notes",null]]
+  unmatched=[]
+Include name, "Company" and email, but not "Phone.
+  title=undefined
+  fields=[["Name",null],["Company",null],["Email",null]]
+  unmatched=[]
+Require name and email, and not optional phone.
+  title=undefined
+  fields=[["Name",true],["Email",true],["Phone",true]]
+  unmatched=[]

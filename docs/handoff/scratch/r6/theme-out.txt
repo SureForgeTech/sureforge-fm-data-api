@@ -1,0 +1,41 @@
+home stylesheet tokens: ["--vscode-font-family","--vscode-foreground","--vscode-panel-border","--vscode-button-foreground","--vscode-button-background","--vscode-button-hoverBackground","--vscode-focusBorder"]
+resolvedCss missing for light: []
+resolvedCss missing for dark: []
+resolvedCss missing for high-contrast: []
+resolvedCss missing for high-contrast-light: []
+light: selector=h1. ratio=6.19
+light: selector=p.lead ratio=6.19
+light: selector=h2. ratio=6.19
+light: selector=p. ratio=6.19
+light: selector=button. ratio=4.51
+light: selector=span. ratio=6.19
+light: selector=strong. ratio=6.19
+light: selector=footer.fm-version ratio=6.19
+light: presentationFailures = []
+dark: selector=h1. ratio=10.38
+dark: selector=p.lead ratio=10.38
+dark: selector=h2. ratio=10.38
+dark: selector=p. ratio=10.38
+dark: selector=button. ratio=6.40
+dark: selector=span. ratio=10.38
+dark: selector=strong. ratio=10.38
+dark: selector=footer.fm-version ratio=10.38
+dark: presentationFailures = []
+high-contrast: selector=h1. ratio=21.00
+high-contrast: selector=p.lead ratio=21.00
+high-contrast: selector=h2. ratio=21.00
+high-contrast: selector=p. ratio=21.00
+high-contrast: selector=button. ratio=21.00
+high-contrast: selector=span. ratio=21.00
+high-contrast: selector=strong. ratio=21.00
+high-contrast: selector=footer.fm-version ratio=21.00
+high-contrast: presentationFailures = []
+high-contrast-light: selector=h1. ratio=14.55
+high-contrast-light: selector=p.lead ratio=14.55
+high-contrast-light: selector=h2. ratio=14.55
+high-contrast-light: selector=p. ratio=14.55
+high-contrast-light: selector=button. ratio=8.98
+high-contrast-light: selector=span. ratio=14.55
+high-contrast-light: selector=strong. ratio=14.55
+high-contrast-light: selector=footer.fm-version ratio=14.55
+high-contrast-light: presentationFailures = []

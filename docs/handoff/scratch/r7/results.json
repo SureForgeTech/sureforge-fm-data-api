@@ -1,0 +1,1559 @@
+{
+  "contrast": {
+    "light": {
+      "count": 10,
+      "selectors": [
+        "h1.",
+        "p.lead",
+        "h2.",
+        "p.",
+        "button.",
+        "span.",
+        "strong.",
+        "h2.",
+        "p.",
+        "footer.fm-version"
+      ],
+      "failing": [],
+      "pairs": [
+        {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 4.511,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            122,
+            204
+          ]
+        },
+        {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        }
+      ],
+      "byText": {
+        "FileMaker": {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Start here. Everything else is under Advanced Tools.": {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Build a Web App": {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Make a web form that writes to FileMaker.": {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Create FM Web App": {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 4.511,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            122,
+            204
+          ]
+        },
+        "Choose a starter.": {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Advanced Tools": {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Setup": {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 6.193,
+          "foreground": [
+            97,
+            97,
+            97
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Project setup.": {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "FileMaker Data API Tools v1.9.0": {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 5.174,
+          "foreground": [
+            109,
+            109,
+            109
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      "leadDiffersFromHeading": true
+    },
+    "dark": {
+      "count": 10,
+      "selectors": [
+        "h1.",
+        "p.lead",
+        "h2.",
+        "p.",
+        "button.",
+        "span.",
+        "strong.",
+        "h2.",
+        "p.",
+        "footer.fm-version"
+      ],
+      "failing": [],
+      "pairs": [
+        {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 6.396,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            14,
+            99,
+            156
+          ]
+        },
+        {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        }
+      ],
+      "byText": {
+        "FileMaker": {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Start here. Everything else is under Advanced Tools.": {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Build a Web App": {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Make a web form that writes to FileMaker.": {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Create FM Web App": {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 6.396,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            14,
+            99,
+            156
+          ]
+        },
+        "Choose a starter.": {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Advanced Tools": {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Setup": {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 10.381,
+          "foreground": [
+            204,
+            204,
+            204
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "Project setup.": {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        },
+        "FileMaker Data API Tools v1.9.0": {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 6.776,
+          "foreground": [
+            165,
+            165,
+            165
+          ],
+          "background": [
+            30,
+            30,
+            30
+          ]
+        }
+      },
+      "leadDiffersFromHeading": true
+    },
+    "high-contrast": {
+      "count": 10,
+      "selectors": [
+        "h1.",
+        "p.lead",
+        "h2.",
+        "p.",
+        "button.",
+        "span.",
+        "strong.",
+        "h2.",
+        "p.",
+        "footer.fm-version"
+      ],
+      "failing": [],
+      "pairs": [
+        {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        }
+      ],
+      "byText": {
+        "FileMaker": {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Start here. Everything else is under Advanced Tools.": {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Build a Web App": {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Make a web form that writes to FileMaker.": {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Create FM Web App": {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Choose a starter.": {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Advanced Tools": {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Setup": {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 21,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "Project setup.": {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        },
+        "FileMaker Data API Tools v1.9.0": {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 12.294,
+          "foreground": [
+            198,
+            198,
+            198
+          ],
+          "background": [
+            0,
+            0,
+            0
+          ]
+        }
+      },
+      "leadDiffersFromHeading": true
+    },
+    "high-contrast-light": {
+      "count": 10,
+      "selectors": [
+        "h1.",
+        "p.lead",
+        "h2.",
+        "p.",
+        "button.",
+        "span.",
+        "strong.",
+        "h2.",
+        "p.",
+        "footer.fm-version"
+      ],
+      "failing": [],
+      "pairs": [
+        {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 8.98,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            15,
+            74,
+            133
+          ]
+        },
+        {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        }
+      ],
+      "byText": {
+        "FileMaker": {
+          "selector": "h1.",
+          "text": "FileMaker",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Start here. Everything else is under Advanced Tools.": {
+          "selector": "p.lead",
+          "text": "Start here. Everything else is under Advanced Tools.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Build a Web App": {
+          "selector": "h2.",
+          "text": "Build a Web App",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Make a web form that writes to FileMaker.": {
+          "selector": "p.",
+          "text": "Make a web form that writes to FileMaker.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Create FM Web App": {
+          "selector": "button.",
+          "text": "Create FM Web App",
+          "ratio": 8.98,
+          "foreground": [
+            255,
+            255,
+            255
+          ],
+          "background": [
+            15,
+            74,
+            133
+          ]
+        },
+        "Choose a starter.": {
+          "selector": "span.",
+          "text": "Choose a starter.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Advanced Tools": {
+          "selector": "strong.",
+          "text": "Advanced Tools",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Setup": {
+          "selector": "h2.",
+          "text": "Setup",
+          "ratio": 14.548,
+          "foreground": [
+            41,
+            41,
+            41
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "Project setup.": {
+          "selector": "p.",
+          "text": "Project setup.",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        },
+        "FileMaker Data API Tools v1.9.0": {
+          "selector": "footer.fm-version",
+          "text": "FileMaker Data API Tools v1.9.0",
+          "ratio": 7.023,
+          "foreground": [
+            89,
+            89,
+            89
+          ],
+          "background": [
+            255,
+            255,
+            255
+          ]
+        }
+      },
+      "leadDiffersFromHeading": true
+    }
+  },
+  "guard": {
+    "brokenBelow45": [
+      "p.lead 1",
+      "p. 1",
+      "span. 1",
+      "p. 1",
+      "footer.fm-version 1"
+    ],
+    "childCombinatorLeadMatchesHeading": false,
+    "childLeadRatio": 1,
+    "descendantOpacityLeadMatchesHeading": false,
+    "descendantOpacityLeadRatio": 1.823271572384868,
+    "descendantOpacityFooterRatio": 1.823271572384868
+  },
+  "security": {
+    "executed": [
+      [
+        "filemakerDataApiTools.createFmWebApp"
+      ]
+    ],
+    "htmlHasRawScript": false,
+    "htmlHasOnerror": true,
+    "htmlHasRawImg": false,
+    "escapedImg": true,
+    "escapedScript": true,
+    "attributeBreak": false,
+    "csp": "default-src 'none'; img-src vscode-resource: data:; style-src vscode-resource:; script-src 'nonce-BWSzPsSQ0TTo4Xb7EbVnZPQFY1WjbZ3C'; connect-src vscode-resource:",
+    "scriptNonce": true,
+    "linksStandards": true,
+    "standardsBeforeHome": true,
+    "localResourceRoots": [
+      "dist/webviews/home/ui"
+    ],
+    "enableScripts": true,
+    "secondOpenCreatesAnotherPanel": false,
+    "revealCalls": 1,
+    "createCalls": 1
+  },
+  "catalogue": {
+    "entryCount": 34,
+    "unique": 34,
+    "mismatches": [],
+    "missing": [],
+    "notInHome": [
+      {
+        "command": "filemakerDataApiTools.copyConnectionDiagnosis",
+        "title": "Copy Connection Diagnosis for Bug Report",
+        "paletteWhen": "always shown"
+      },
+      {
+        "command": "filemakerDataApiTools.editConnectionProfile",
+        "title": "Edit Connection Profile",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.removeConnectionProfile",
+        "title": "Remove Connection Profile",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.disconnect",
+        "title": "Disconnect",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.openConnectionMenu",
+        "title": "Show Connection Menu",
+        "paletteWhen": "always shown"
+      },
+      {
+        "command": "filemakerDataApiTools.listLayouts",
+        "title": "List Layouts",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.runFindJson",
+        "title": "Run Find (JSON)",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.getRecordById",
+        "title": "Get Record by ID",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.openLayoutMetadata",
+        "title": "Open Layout Metadata",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.selectLayoutForInspector",
+        "title": "Select Layout for Inspector",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.refreshLayoutInspector",
+        "title": "Refresh Layout Inspector",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.refreshSchemaCache",
+        "title": "Refresh Schema Cache",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.copyRequestAsCode",
+        "title": "Copy Request as Code…",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.saveCurrentQuery",
+        "title": "Save Current Query",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.runSavedQuery",
+        "title": "Run Saved Query",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.openSavedQuery",
+        "title": "Open Saved Query",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.exportSavedQueries",
+        "title": "Export Saved Queries (JSON)",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.importSavedQueries",
+        "title": "Import Saved Queries (JSON)",
+        "paletteWhen": "always shown"
+      },
+      {
+        "command": "filemakerDataApiTools.deleteSavedQuery",
+        "title": "Delete Saved Query",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.refreshExplorer",
+        "title": "Refresh Connections",
+        "paletteWhen": "false"
+      },
+      {
+        "command": "filemakerDataApiTools.diffAgainstLatestSnapshot",
+        "title": "Diff Against Latest Snapshot",
+        "paletteWhen": "filemaker.hasSchemaSnapshots"
+      },
+      {
+        "command": "filemakerDataApiTools.openSchemaSnapshotJson",
+        "title": "Open Schema Snapshot JSON",
+        "paletteWhen": "filemaker.hasSchemaSnapshots"
+      },
+      {
+        "command": "filemakerDataApiTools.editRecordById",
+        "title": "Edit Record by ID",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.createRecord",
+        "title": "Create Record",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.deleteRecord",
+        "title": "Delete Record",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.uploadContainer",
+        "title": "Upload to Container",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.cancelJob",
+        "title": "Cancel Job",
+        "paletteWhen": "always shown"
+      },
+      {
+        "command": "filemakerDataApiTools.showJobs",
+        "title": "Show Jobs",
+        "paletteWhen": "always shown"
+      },
+      {
+        "command": "filemakerDataApiTools.createEnvironmentSet",
+        "title": "Create Environment Set",
+        "paletteWhen": "filemaker.enterpriseMode"
+      },
+      {
+        "command": "filemakerDataApiTools.diffLayoutAcrossEnvironments",
+        "title": "Diff Layout Across Environments",
+        "paletteWhen": "filemaker.enterpriseMode"
+      },
+      {
+        "command": "filemakerDataApiTools.exportEnvironmentComparisonReport",
+        "title": "Export Environment Comparison Report",
+        "paletteWhen": "filemaker.enterpriseMode"
+      },
+      {
+        "command": "filemakerDataApiTools.openEnvironmentSetJson",
+        "title": "Open Environment Set JSON",
+        "paletteWhen": "filemaker.enterpriseMode"
+      },
+      {
+        "command": "filemakerDataApiTools.openDiagnosticsDashboard",
+        "title": "Open Diagnostics Dashboard",
+        "paletteWhen": "filemaker.powerUserMode"
+      },
+      {
+        "command": "filemakerDataApiTools.showCircuitBreakerStatus",
+        "title": "Show Circuit Breaker Status",
+        "paletteWhen": "filemaker.powerUserMode"
+      },
+      {
+        "command": "filemakerDataApiTools.reloadPlugins",
+        "title": "Reload Plugins",
+        "paletteWhen": "filemaker.powerUserMode"
+      },
+      {
+        "command": "filemakerDataApiTools.refreshOfflineCache",
+        "title": "Refresh Offline Metadata Cache",
+        "paletteWhen": "always shown"
+      },
+      {
+        "command": "filemakerDataApiTools.selectActiveProfile",
+        "title": "Select Active Profile",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.openLayoutMode",
+        "title": "Open FM Web Layout Mode",
+        "paletteWhen": "filemaker.fmWebProjectInitialized"
+      },
+      {
+        "command": "filemakerDataApiTools.generateFmWebNextApp",
+        "title": "Generate FM Web Next.js App",
+        "paletteWhen": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable"
+      },
+      {
+        "command": "filemakerDataApiTools.generateFmWebLayoutPage",
+        "title": "Generate FM Web Layout Page",
+        "paletteWhen": "filemaker.fmWebProjectInitialized"
+      },
+      {
+        "command": "filemakerDataApiTools.startFmWebPreviewServer",
+        "title": "Start FM Web Preview Server",
+        "paletteWhen": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable"
+      },
+      {
+        "command": "filemakerDataApiTools.setAiAccess",
+        "title": "Set AI Access for Connection",
+        "paletteWhen": "filemaker.hasProfiles"
+      },
+      {
+        "command": "filemakerDataApiTools.toggleAiKillSwitch",
+        "title": "Switch AI Tools Off or On",
+        "paletteWhen": "filemaker.ai.active"
+      },
+      {
+        "command": "filemakerDataApiTools.newAiSession",
+        "title": "Start New AI Session",
+        "paletteWhen": "filemaker.ai.active"
+      },
+      {
+        "command": "filemakerDataApiTools.toggleAiServer",
+        "title": "Start/Stop AI Server for External Tools",
+        "paletteWhen": "filemaker.hasProfiles"
+      }
+    ]
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "body": "<div class=\"fm-home\"><h1>FileMaker</h1><p class=\"lead\">Start here. Everything else is under Advanced Tools.</p><section><h2>Build a Web App</h2><p>Make a web form that writes to FileMaker, without editing code or JSON.</p><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.createFmWebApp\">Create FM Web App</button><span>Choose a starter, pick sample data or your own layout, then preview the form.</span></div></section><section><h2>Connect and Test</h2><p>Reach your FileMaker server and find out why a connection does not work.</p><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.addConnectionProfile\">Add Connection Profile</button><span>Save a server address and let the extension test it before you commit.</span></div></section><section><h2>Browse Data</h2><p>Find, read and change records in the database you connected to.</p><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.openQueryBuilder\">Open Query Builder</button><span>Build a find with a form and open the result in a table.</span></div></section><section><h2>Help</h2><p>Guided setup, the manual, and what the extension is doing.</p><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.openWelcomeWalkthrough\">Open Getting Started Walkthrough</button><span>The guided steps from a fresh install to your first query.</span></div></section><details><summary><strong>Advanced Tools</strong></summary><section><h2>Setup</h2><p>Project setup and the settings that shape what the extension may do.</p><div class=\"entry\"><button type=\"button\" data-command=\"filemakerDataApiTools.initializeFmWebProject\">Initialize FM Web Project</button><span>Create the .fmweb folder in the workspace.</span></div></section></details><footer class=\"fm-version\">FileMaker Data API Tools v1.9.1</footer></div>",
+  "report": {
+    "light": {
+      "measuredPairs": 20,
+      "min": 4.511,
+      "below45": []
+    },
+    "dark": {
+      "measuredPairs": 20,
+      "min": 6.396,
+      "below45": []
+    },
+    "high-contrast": {
+      "measuredPairs": 20,
+      "min": 12.294,
+      "below45": []
+    },
+    "high-contrast-light": {
+      "measuredPairs": 20,
+      "min": 7.023,
+      "below45": []
+    }
+  }
+}

@@ -1,0 +1,13 @@
+A: executeCommand calls after 24 hostile messages = [["filemakerDataApiTools.connect"]]
+B: executeCommand calls = [["filemakerDataApiTools.connect"]]
+C: raw <img> in html = false; raw <script> in html = false; escaped form present = true
+C: allowlist contains hostile value = false
+D: createWebviewPanel calls = 1; reveal calls = 1; reveal arg = [1]
+E: csp = default-src 'none'; img-src vscode-resource: data:; style-src vscode-resource:; script-src 'nonce-z5sxvIZUQpB4GrFdJlmScvJN8Ba4KgT6'; connect-src vscode-resource:
+E: panel options = {"enableScripts":true,"retainContextWhenHidden":true,"localResourceRoots":[{"fsPath":"dist/webviews/home/ui"}]}
+E: first nonce = z5sxvIZUQpB4GrFdJlmScvJN8Ba4KgT6; second nonce = 6BiaNeAR6rfonZyD4lFvPu6WVmRyWtSL; different = true
+F: rendered buttons = 34; allowlist = 34
+F: rendered not on allowlist = []
+F: allowlist without a button = []
+G: DOM data-command = filemakerDataApiTools.createFmWebApp
+H: duplicate ids = []; not contributed = []

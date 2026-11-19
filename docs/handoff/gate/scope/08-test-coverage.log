@@ -1,0 +1,359 @@
+
+> fmweb-ide-monorepo@0.1.0 test:coverage
+> npm run test:coverage --workspaces --if-present
+
+
+> @fmweb/shared@0.1.0 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-scope/shared
+      Coverage enabled with v8
+
+
+ Test Files  7 passed (7)
+      Tests  126 passed (126)
+   Start at  17:05:31
+   Duration  1.64s (environment 63%, import 14%, tests 12%, transform 7%, worker 4%)
+
+Environment  jsdom was created 7 times · 2.15s total, 63% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   96.45 |    89.72 |   97.26 |   97.51 |                   
+ field-order.ts    |     100 |    94.73 |     100 |     100 | 18                
+ ...d-standards.ts |   98.11 |    90.55 |     100 |     100 | ...01,205-208,212 
+ intake.ts         |     100 |    99.23 |     100 |     100 | 90                
+ layout-schema.ts  |   97.59 |     89.7 |     100 |   97.56 | 207,259           
+ record-edit.ts    |   98.11 |    94.83 |     100 |    99.2 | 118               
+ ui-renderer.tsx   |   91.77 |    82.71 |   93.65 |   93.43 | ...51,461,547,595 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 96.45% ( 734/761 )
+Branches     : 89.72% ( 786/876 )
+Functions    : 97.26% ( 142/146 )
+Lines        : 97.51% ( 629/645 )
+================================================================================
+
+> @fmweb/designer-ui@0.1.0 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-scope/designer-ui
+      Coverage enabled with v8
+
+
+ Test Files  11 passed (11)
+      Tests  98 passed (98)
+   Start at  17:05:33
+   Duration  3.31s (environment 44%, tests 28%, import 19%, transform 6%, worker 3%)
+
+Environment  jsdom was created 11 times · 3.37s total, 44% of tracked time
+             create it once per worker with pool: 'vmThreads' (keeps per-file isolation) or isolate: false (shares it across files)
+             learn more: https://vitest.dev/guide/improving-performance#test-environments
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+------------------|---------|----------|---------|---------|--------------------
+File              | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s  
+------------------|---------|----------|---------|---------|--------------------
+All files         |   67.94 |    59.19 |   70.56 |   67.02 |                    
+ canvas-engine.ts |   84.77 |    83.67 |    84.5 |   82.46 | ...362-408,425-432 
+ main.tsx         |   62.64 |       52 |   66.22 |   62.44 | ...-2266,2272-2273 
+------------------|---------|----------|---------|---------|--------------------
+
+=============================== Coverage summary ===============================
+Statements   : 67.94% ( 689/1014 )
+Branches     : 59.19% ( 383/647 )
+Functions    : 70.56% ( 211/299 )
+Lines        : 67.02% ( 618/922 )
+================================================================================
+
+> @fmweb/runtime-next@0.1.0 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-scope/runtime-next
+      Coverage enabled with v8
+
+
+ Test Files  19 passed (19)
+      Tests  232 passed (232)
+   Start at  17:05:36
+   Duration  2.21s (tests 42%, import 23%, environment 18%, transform 14%, worker 4%)
+
+    Isolate  19 workers spawned · ~106ms startup each (spawn + environment, per file)
+             at least ~568ms faster with isolate: false — reuses workers across files instead of one per file
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   82.65 |    76.58 |    86.7 |   82.04 |                   
+ app               |       0 |      100 |       0 |       0 |                   
+  layout.tsx       |       0 |      100 |       0 |       0 | 5-11              
+  page.tsx         |       0 |      100 |       0 |       0 | 5                 
+ ...bridge/[route] |   89.47 |    89.47 |     100 |   96.55 |                   
+  route.ts         |   89.47 |    89.47 |     100 |   96.55 | 45                
+ app/intake/[id]   |   97.03 |    90.83 |     100 |   98.86 |                   
+  intake-form.tsx  |   96.89 |    90.51 |     100 |   98.79 | 51                
+ app/layouts/[id]  |   77.93 |    70.96 |   80.64 |   78.74 |                   
+  page.tsx         |      75 |       50 |     100 |      75 | 22,49-52,67       
+  ...ut-client.tsx |   78.51 |    73.38 |   78.57 |   79.61 | 58,64,144-188,228 
+ lib               |   78.61 |    71.47 |   86.45 |   77.98 |                   
+  bridge-client.ts |   93.47 |    81.81 |     100 |   93.02 | 98,135,141        
+  ...ke-adapter.ts |   95.91 |    95.83 |   66.66 |     100 | 10,38             
+  ...e-registry.ts |   94.82 |    87.17 |     100 |   97.67 | 55                
+  layout-loader.ts |   94.11 |      100 |     100 |   94.11 | 33                
+  ...w-security.ts |     100 |     87.5 |     100 |     100 | 13,23             
+  ...e-behavior.ts |   75.51 |    65.78 |      75 |      75 | ...53,164,207-211 
+  runtime-data.ts  |    59.6 |    44.79 |   76.19 |   59.04 | ...54,366-375,387 
+  ...me-session.ts |   84.28 |    68.62 |   93.33 |   84.05 | ...89,197,206,212 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 82.65% ( 748/905 )
+Branches     : 76.58% ( 507/662 )
+Functions    : 86.7% ( 137/158 )
+Lines        : 82.04% ( 626/763 )
+================================================================================
+
+> filemaker-data-api-tools@1.9.1 test:coverage
+> vitest run --coverage
+
+(!) Your Vite config uses features that are unsupported by `configLoader: 'native'`, which is planned to become the default in a future major version of Vite:
+  - ESM syntax in a file loaded as CommonJS (vitest.config.ts:1:1). Use a `.mjs` extension or set `"type": "module"` in the closest package.json
+Set `VITE_CONFIG_NATIVE_IGNORE_WARNING=true` to suppress this warning.
+
+ RUN  v5.1.0 /workspace/sureforge-fm-data-api-wt-scope/extension
+      Coverage enabled with v8
+
+
+ Test Files  299 passed | 2 skipped (301)
+      Tests  5927 passed | 21 skipped (5948)
+   Start at  17:05:39
+   Duration  54.91s (tests 65%, import 20%, setup 7%, transform 5%, worker 2%)
+
+    Isolate  301 workers spawned · ~59ms startup each (spawn + environment, per file)
+             at least ~5.82s faster with isolate: false — reuses workers across files instead of one per file
+
+[34m % [39m[2mCoverage report from [22m[33mv8[39m
+-------------------|---------|----------|---------|---------|-------------------
+File               | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s 
+-------------------|---------|----------|---------|---------|-------------------
+All files          |   90.05 |    84.73 |   87.89 |   90.86 |                   
+ src               |      75 |    66.66 |   50.73 |    76.6 |                   
+  extension.ts     |      75 |    66.66 |   50.73 |    76.6 | ...99-800,826,874 
+ src/about         |     100 |     86.2 |     100 |     100 |                   
+  aboutCommand.ts  |     100 |    85.71 |     100 |     100 | 41-66             
+  aboutInfo.ts     |     100 |       85 |     100 |     100 | 16-17,61,127      
+ src/ai            |   98.88 |    94.46 |     100 |   98.97 |                   
+  aiAudit.ts       |   98.14 |    95.45 |     100 |   97.87 | 55                
+  ...gistration.ts |     100 |    89.65 |     100 |     100 | 21,69             
+  aiSchema.ts      |   92.45 |    91.35 |     100 |      94 | 50,110,113        
+  aiScrub.ts       |     100 |    96.66 |     100 |     100 | 63,70             
+  aiText.ts        |     100 |       95 |     100 |     100 | 27                
+  aiToolService.ts |    99.2 |    93.75 |     100 |    99.2 | 310,350           
+ src/ai/chat       |   97.47 |    83.47 |   97.56 |   97.42 |                   
+  ...articipant.ts |   97.31 |    92.85 |     100 |   97.24 | 262,369,410,431   
+  ...gistration.ts |    92.3 |    66.66 |      75 |    92.3 | 51                
+  chatText.ts      |   98.63 |       75 |     100 |   98.61 | 134               
+ src/ai/mcp        |   96.15 |     92.4 |   94.35 |   97.13 |                   
+  ...Controller.ts |   90.56 |    85.45 |   85.71 |    92.3 | 72-76,211,216-217 
+  aiMcpServer.ts   |   96.51 |    90.47 |   94.73 |   97.32 | ...35,243,266,316 
+  discovery.ts     |   97.61 |    94.18 |     100 |   97.53 | 132-133           
+  runShim.ts       |   98.68 |    97.77 |     100 |     100 | 82                
+  shim.ts          |       0 |      100 |       0 |       0 | 14                
+  socketPath.ts    |   96.66 |     87.5 |    90.9 |   98.21 | 132               
+ src/ai/tools      |    98.2 |     88.3 |     100 |   98.06 |                   
+  errors.ts        |   94.11 |    73.68 |     100 |   94.11 | 42                
+  fields.ts        |   92.85 |     90.9 |     100 |   92.59 | 31,43             
+  reads.ts         |     100 |     92.5 |     100 |     100 | 49-50,103         
+  results.ts       |    98.3 |    89.58 |     100 |   98.14 | 44                
+  writes.ts        |   99.11 |    88.09 |     100 |   99.05 | 83                
+ src/commands      |   81.75 |    74.18 |   79.79 |   82.83 |                   
+  aiContext.ts     |    92.7 |    81.48 |   93.33 |   92.59 | ...42,281,312,371 
+  aiTools.ts       |   96.66 |    79.16 |     100 |   96.66 | 96,173            
+  batch.ts         |   98.56 |    93.16 |     100 |   99.23 | 360               
+  ...uitBreaker.ts |   33.33 |      100 |      50 |   33.33 | 21-30             
+  common.ts        |    97.1 |    91.54 |     100 |   97.05 | 191,196           
+  copyRequest.ts   |   69.56 |    62.65 |   76.92 |   69.56 | ...25,229,240-251 
+  ...teFmWebApp.ts |   89.47 |     80.5 |   90.47 |   92.55 | ...22,181,186-189 
+  ...Connection.ts |   93.33 |    82.14 |     100 |     100 | 42,45,52,64-79    
+  diagnostics.ts   |   66.66 |      100 |      50 |   66.66 | 17                
+  enterprise.ts    |   99.12 |    95.31 |      95 |   99.11 | 52                
+  fmWebProject.ts  |   66.12 |    56.68 |   53.84 |   69.26 | ...91-396,435-440 
+  history.ts       |   16.66 |        0 |   33.33 |   16.66 | 14-43             
+  index.ts         |   59.32 |       50 |   53.84 |   59.32 | ...76,482,497-505 
+  jobs.ts          |   71.11 |    78.57 |   83.33 |   88.88 | 17-19             
+  ...tInspector.ts |   14.28 |        0 |   33.33 |   14.28 | 25-46             
+  offline.ts       |   33.33 |       50 |      40 |   33.33 | 37-69             
+  plugins.ts       |   14.28 |        0 |      25 |   14.28 | 14-46             
+  recordEdit.ts    |   60.68 |    65.62 |   57.14 |   60.68 | ...04,318-325,334 
+  savedQueries.ts  |   98.26 |       90 |   93.33 |   98.26 | 137,309           
+  schema.ts        |   39.13 |        0 |   66.66 |   39.13 | 28-58             
+  ...aSnapshots.ts |   99.12 |    92.18 |     100 |   99.11 | 282               
+  ...iagnostics.ts |   87.32 |    38.88 |      80 |    88.4 | 70-76,140-144     
+  testMyServer.ts  |   90.47 |    75.47 |   71.42 |   94.11 | 65,73-75          
+  typeGen.ts       |     100 |    91.66 |     100 |     100 | 98,141-143,197    
+ src/diagnostics   |    73.8 |    54.83 |   73.33 |   73.68 |                   
+  ...sDashboard.ts |   55.17 |    16.66 |      50 |   55.17 | ...29,43-45,62-65 
+  metricsStore.ts  |   83.63 |       64 |   79.16 |    85.1 | ...55-157,173,181 
+ src/enterprise    |   89.18 |     83.4 |   90.29 |   89.68 |                   
+  ...areService.ts |   90.96 |    73.84 |   95.74 |   90.41 | ...06,319,369-374 
+  ...ntSetStore.ts |   81.01 |    73.68 |      72 |   83.33 | ...26-127,138,157 
+  roleGuard.ts     |   91.96 |    91.05 |   96.66 |   92.59 | ...78,359,365,375 
+ src/fmweb         |     100 |    90.74 |     100 |     100 |                   
+  fieldMetadata.ts |     100 |    90.74 |     100 |     100 | 27,36,42          
+ src/offline       |   76.85 |    74.39 |    91.3 |   77.77 |                   
+  ...odeService.ts |   76.85 |    74.39 |    91.3 |   77.77 | ...84,289,316,335 
+ src/performance   |   90.32 |     82.1 |   90.32 |    90.6 |                   
+  ...oncurrency.ts |   85.36 |    76.92 |   88.88 |      85 | ...9-60,84,96,105 
+  ...uitBreaker.ts |    98.3 |    87.87 |     100 |   98.27 | 150               
+  ...erRegistry.ts |   85.45 |     82.6 |      80 |   86.27 | 47,60-64,139-142  
+ src/plugins       |   74.69 |    66.66 |   62.85 |   75.31 |                   
+  ...inRegistry.ts |   74.69 |    66.66 |   62.85 |   75.31 | ...63-365,380-386 
+ src/services      |   90.66 |    85.11 |   89.32 |   91.92 |                   
+  ...xtRenderer.ts |     100 |    98.43 |     100 |     100 | 192               
+  ...textWriter.ts |   93.75 |    94.11 |   82.35 |   93.67 | 112-113,175-180   
+  batchService.ts  |    95.9 |    90.64 |   94.02 |   95.34 | ...42,747,760,776 
+  ...ateLimiter.ts |     100 |    91.17 |     100 |     100 | 137-143           
+  ...ateInspect.ts |   83.78 |    78.78 |   77.77 |   86.11 | 28,59-60,70-71    
+  ...icateTrust.ts |   84.37 |    75.47 |   85.71 |   84.37 | 72,80,86-90       
+  ...iagnostics.ts |   93.35 |    92.12 |      98 |   99.41 | 89                
+  ...idgeServer.ts |      86 |    77.24 |   97.05 |   86.41 | ...21,535,541,546 
+  fmClient.ts      |   91.95 |    88.96 |   94.64 |   92.82 | ...55-557,880,902 
+  fmWebAppModel.ts |     100 |    94.02 |     100 |     100 | 67-68             
+  ...akeService.ts |   89.94 |    79.83 |     100 |   99.31 | 180               
+  ...iewProcess.ts |   90.95 |    85.71 |   87.87 |   97.87 | 108,232,237       
+  ...ectService.ts |      86 |    74.71 |    92.3 |   87.33 | ...46,584-586,606 
+  ...romptDraft.ts |   98.72 |    94.73 |     100 |     100 | ...16,155,200-205 
+  ...ionService.ts |   91.89 |    84.33 |     100 |    98.7 | 115               
+  ...eGenerator.ts |   93.97 |    91.01 |   86.53 |   96.03 | ...06,712,724-725 
+  ...FileWriter.ts |   87.69 |    84.48 |      75 |   89.09 | 73-74,79-81,97    
+  historyStore.ts  |   68.75 |     62.5 |      50 |   78.57 | 27-31,52          
+  jobRunner.ts     |   96.15 |    92.06 |    92.3 |   95.87 | 74,161,191,199    
+  ...yTlsNotice.ts |     100 |    83.33 |     100 |     100 | 38                
+  logger.ts        |   85.71 |    76.19 |   81.81 |   85.71 | 48,56,74,95,100   
+  profileStore.ts  |    93.6 |    84.11 |   95.23 |   93.83 | ...58,281,293,297 
+  ...leTemplate.ts |   89.61 |    85.71 |     100 |   89.47 | ...53,164,197,241 
+  proxyClient.ts   |      90 |    80.24 |   94.73 |   89.88 | ...50,281,347,353 
+  ...ditService.ts |   81.25 |       50 |   85.71 |   85.71 | 44,50             
+  requestLimits.ts |      98 |    93.75 |     100 |     100 | 41,87             
+  responseGuard.ts |     100 |    93.84 |     100 |     100 | 32,80-82,130      
+  ...eriesStore.ts |   76.69 |    74.15 |   73.52 |    76.8 | ...51,276,297,372 
+  schemaDiff.ts    |   74.31 |    63.82 |    60.6 |   75.23 | ...04,316,329-334 
+  ...DiffWorker.ts |       0 |        0 |       0 |       0 | 9-31              
+  schemaService.ts |   93.02 |    85.71 |   90.47 |   92.77 | ...47,275,288-292 
+  ...pshotStore.ts |   78.65 |    76.66 |   71.11 |   80.23 | ...61,365,395-396 
+  secretStore.ts   |   90.99 |    80.39 |   89.28 |   95.19 | 158,274-278       
+  ...erSelfTest.ts |   94.17 |    85.32 |   96.96 |   96.17 | ...44,194,196,213 
+  ...TestClient.ts |   94.82 |       80 |   88.88 |   95.74 | 54,56             
+  ...ngsService.ts |   69.28 |    60.82 |   64.44 |   69.33 | ...84-424,433,450 
+  tlsAgent.ts      |   95.71 |     91.4 |     100 |    95.7 | ...90,385,465,598 
+  ...GenService.ts |    94.2 |    81.64 |     100 |   94.96 | ...,981,1017,1021 
+ ...vices/fmClient |   95.08 |    89.45 |   98.71 |   95.56 |                   
+  certificates.ts  |   96.29 |       95 |     100 |   96.29 | 48                
+  containers.ts    |   97.56 |       90 |     100 |   97.56 | 130               
+  metadata.ts      |   86.84 |    84.61 |     100 |   86.84 | 31-36,72,140      
+  recordWrites.ts  |   97.14 |    79.41 |     100 |   97.14 | 42                
+  records.ts       |   95.65 |     88.7 |     100 |   95.16 | 30,49,77          
+  response.ts      |      80 |       75 |     100 |      80 | 18-23             
+  scripts.ts       |    96.9 |     94.8 |     100 |    96.7 | 53,58,118         
+  server.ts        |     100 |    92.85 |     100 |     100 | 46,73             
+  session.ts       |   82.35 |       75 |   85.71 |     100 | 20                
+  transport.ts     |     100 |     92.3 |     100 |     100 | 53,110,134        
+ ...rvices/session |     100 |       85 |     100 |     100 |                   
+  ...kenTracker.ts |     100 |       85 |     100 |     100 | 74-76             
+ src/settings      |   96.76 |    95.04 |   86.66 |   97.63 |                   
+  ...veSettings.ts |   94.52 |     93.6 |   79.31 |    96.4 | ...67,370,415,418 
+  settingPolicy.ts |   98.77 |    95.95 |     100 |   98.72 | 368-369           
+ src/snippets      |      98 |    92.76 |   98.71 |   98.14 |                   
+  deliver.ts       |     100 |    95.55 |     100 |     100 | 59-65             
+  escape.ts        |     100 |    91.66 |     100 |     100 | 65                
+  index.ts         |   93.75 |    88.88 |     100 |   93.75 | 46                
+  ...ationInput.ts |    90.9 |    81.91 |     100 |   90.78 | ...16,122,132-133 
+  operations.ts    |   98.67 |    93.45 |   94.73 |   99.31 | 239               
+ src/utils         |   92.88 |    90.08 |    94.4 |   93.39 |                   
+  atomicExport.ts  |   85.71 |    66.66 |   66.66 |     100 | 16-22             
+  backoff.ts       |   88.88 |    93.33 |      60 |      88 | 45-46,76          
+  bridgePolicy.ts  |     100 |       96 |     100 |     100 | 34                
+  ...inerUpload.ts |   56.25 |    34.78 |    62.5 |   56.25 | ...4,49,70-97,107 
+  ...PortalRows.ts |   86.66 |    79.41 |     100 |    86.2 | ...,93,98,115,139 
+  ...reamWriter.ts |      90 |    92.15 |   93.33 |   94.54 | 32,95,98          
+  ...cateRecord.ts |     100 |    95.45 |     100 |     100 | 26                
+  errorUx.ts       |   88.74 |    91.04 |   92.85 |   88.27 | ...91,216-218,283 
+  exportCsv.ts     |   97.14 |       95 |     100 |   96.87 | 44                
+  exportRecords.ts |     100 |       96 |     100 |     100 | 14                
+  fireAndForget.ts |      75 |      100 |   66.66 |      75 | 43                
+  jsonValidate.ts  |   83.56 |    84.37 |   93.75 |   82.85 | ...73,182,189,211 
+  ...tInspector.ts |   85.18 |    72.22 |     100 |   84.31 | ...48,152,156,160 
+  layoutParser.ts  |   91.48 |    84.61 |     100 |   91.48 | 9,48,52,85        
+  networkErrors.ts |   92.39 |     91.2 |   91.66 |   92.39 | ...43,146-149,372 
+  ...alizeError.ts |   96.13 |    91.43 |     100 |   96.55 | ...69,309,425,432 
+  ...onfinement.ts |   98.33 |    97.91 |     100 |   98.27 | 125               
+  plainText.ts     |     100 |    95.83 |     100 |     100 | 35                
+  portalUtils.ts   |   94.73 |    81.25 |     100 |   94.59 | 25,76             
+  ...ionFailure.ts |   91.89 |    84.21 |   66.66 |   96.42 | 25                
+  redact.ts        |   92.68 |    86.36 |    87.5 |    92.5 | 53,92,96          
+  ...eReplacing.ts |    87.5 |       90 |   33.33 |     100 | 20                
+  scriptParser.ts  |     100 |    93.93 |     100 |     100 | 32,67             
+  tlsProfile.ts    |   97.72 |    96.66 |     100 |   97.67 | 36                
+  ...ListParser.ts |      96 |    81.81 |     100 |      96 | 22                
+ src/views         |   65.68 |    52.94 |   61.64 |   66.02 |                   
+  ...nStatusBar.ts |   69.44 |    58.92 |      80 |   70.58 | 183-235           
+  fmExplorer.ts    |   62.42 |    47.86 |   60.71 |   61.93 | ...61-685,707-712 
+  ...tInspector.ts |   61.17 |    48.64 |      50 |   61.44 | ...69-276,327-358 
+  ...eStatusBar.ts |   76.27 |    66.66 |   72.72 |   78.57 | ...14-116,122-128 
+ ...ebviews/common |   98.09 |    94.11 |     100 |   97.95 |                   
+  dispatch.ts      |   94.44 |    93.33 |     100 |   94.44 | 83                
+  ...Validation.ts |    98.3 |       95 |     100 |   98.18 | 68                
+  panelRestore.ts  |     100 |       50 |     100 |     100 | 60                
+ ...nnectionWizard |   97.78 |    89.24 |     100 |   97.75 |                   
+  certificates.ts  |     100 |    83.92 |     100 |     100 | ...-87,89,110-117 
+  credentials.ts   |    92.3 |    85.18 |     100 |    92.1 | 22,28,108         
+  messages.ts      |     100 |    98.21 |     100 |     100 | 110               
+  save.ts          |   95.31 |    88.88 |     100 |   95.31 | 23-27,178         
+  ...Connection.ts |   97.59 |    86.51 |     100 |   97.56 | 64,186            
+ ...ronmentCompare |   27.27 |       16 |   18.75 |   29.03 |                   
+  index.ts         |   27.27 |       16 |   18.75 |   29.03 | 19,30-36,87-151   
+ ...views/fmWebApp |    94.2 |    83.82 |     100 |   97.87 |                   
+  index.ts         |    94.2 |    83.82 |     100 |   97.87 | 22                
+ ...ews/layoutMode |    93.3 |    85.53 |   90.32 |   93.56 |                   
+  ...rExecution.ts |   79.16 |    71.05 |   66.66 |   78.72 | ...57-165,184-188 
+  panel.ts         |   97.51 |    90.08 |   92.85 |   98.06 | 126-127,154       
+ ...s/queryBuilder |   91.79 |    85.97 |   98.18 |   93.49 |                   
+  find.ts          |   93.75 |    87.14 |     100 |   98.27 | 85                
+  index.ts         |   98.75 |    95.06 |     100 |   99.34 | 300               
+  messages.ts      |   89.77 |    84.78 |     100 |   89.77 | ...55,170,202,208 
+  results.ts       |   73.46 |    66.66 |     100 |   78.04 | ...41,51-52,75-78 
+  savedQueries.ts  |   76.47 |     64.7 |      50 |   76.47 | 9-10,26,58        
+ ...s/recordEditor |    95.2 |    92.36 |      96 |   95.01 |                   
+  index.ts         |    95.2 |    92.36 |      96 |   95.01 | ...1033,1042,1046 
+ ...s/recordViewer |   98.61 |    83.49 |     100 |   99.25 |                   
+  index.ts         |   98.61 |    83.49 |     100 |   99.25 | 157               
+ ...ews/schemaDiff |   98.21 |    94.11 |     100 |   98.14 |                   
+  index.ts         |   98.21 |    94.11 |     100 |   98.14 | 95                
+ ...s/scriptRunner |   87.57 |    88.17 |   86.36 |   87.82 |                   
+  index.ts         |   87.57 |    88.17 |   86.36 |   87.82 | ...94-295,482,541 
+-------------------|---------|----------|---------|---------|-------------------
+
+=============================== Coverage summary ===============================
+Statements   : 90.05% ( 13792/15315 )
+Branches     : 84.73% ( 9683/11428 )
+Functions    : 87.89% ( 2527/2875 )
+Lines        : 90.86% ( 12852/14144 )
+================================================================================
