@@ -68,7 +68,11 @@ describe('prompt form suggestions', () => {
       "Include email but exclude phone and company, and add notes. Don't require session.",
       [{ name: 'Email' }, { name: 'Phone' }, { name: 'Company' }, { name: 'Notes' }, { name: 'Session' }]
     );
-    expect(result.fields.map(({ field }) => field.name)).toEqual(['Email', 'Notes']);
+    // "Don't require session" states that session is not required, so it belongs to the form as
+    // an optional field rather than being left out.
+    expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([
+      ['Email', undefined], ['Notes', undefined], ['Session', false]
+    ]);
     expect(result.unmatched).toEqual([]);
   });
 
@@ -103,11 +107,35 @@ describe('prompt form suggestions', () => {
       .toEqual([{ field: fields[0], required: undefined }, { field: fields[1], required: false }]);
   });
 
-  it('does not remove an included field just because it should not be required', () => {
+  it('keeps a field that should not be required, whether it was included before or named by the requirement alone', () => {
     const fields = [{ name: 'Phone' }];
     expect(suggestPromptFields('Require "Phone". Do not require "Phone".', fields).fields)
       .toEqual([{ field: fields[0], required: false }]);
-    expect(suggestPromptFields('Do not require "Phone".', fields).fields).toEqual([]);
+    // "Do not require X" states that X is not required: the field belongs to the form as an
+    // optional one, the same as the adjective form reads it.
+    expect(suggestPromptFields('Do not require "Phone".', fields).fields)
+      .toEqual([{ field: fields[0], required: false }]);
+  });
+
+  it('reads "do not require X" as an optional field, the same as the adjective form', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    // The two phrasings of the same intent now agree, and the field is no longer dropped.
+    expect(suggestPromptFields('Do not require phone.', fields).fields)
+      .toEqual([{ field: fields[1], required: false }]);
+    expect(suggestPromptFields('Do not require phone.', fields).unmatched).toEqual([]);
+    expect(suggestPromptFields('Include email but not required phone.', fields).fields)
+      .toEqual([{ field: fields[0], required: undefined }, { field: fields[1], required: false }]);
+    // A field the prompt names only by the negation still reaches the form.
+    expect(suggestPromptFields('Do not require phone. Include notes.', [
+      { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }
+    ]).fields.map(({ field, required }) => [field.name, required])).toEqual([
+      ['Phone', false], ['Notes', undefined]
+    ]);
+    // A field the prompt cannot name exactly is left for manual mapping, as in any other
+    // instruction, rather than dropped.
+    const ambiguous = suggestPromptFields('Do not require phone.', [{ name: 'Phone' }, { name: 'Mobile number' }]);
+    expect(ambiguous.fields).toEqual([]);
+    expect(ambiguous.unmatched).toEqual(['Phone']);
   });
 
   it('distinguishes collecting a field from requiring it in a coordinated exclusion', () => {
