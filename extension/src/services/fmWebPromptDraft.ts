@@ -101,7 +101,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   // The coordinated chain being read, so that a requirement stated at the end of the chain can reach
   // the fields before it. The fields are held by reference, so removing one of them from the draft
   // cannot shift the others.
-  let chain: { members: PromptFormDraft['fields'][number][]; commanded: boolean; settled: boolean } = { members: [], commanded: false, settled: false };
+  let chain: { members: PromptFormDraft['fields'][number][]; coordinated: boolean } = { members: [], coordinated: false };
   let headPending = true;
   let comma = false;
   for (const raw of clauses) {
@@ -110,7 +110,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       negated = undefined;
       comma = false;
       anchorNegated = undefined;
-      chain = { members: [], commanded: false, settled: false };
+      chain = { members: [], coordinated: false };
       headPending = true;
       continue;
     }
@@ -165,9 +165,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // A bare "not" negates a field ("include email but not phone"). It does not negate a requirement
       // ("not required", "not strictly required") and it is not an emphatic inclusion ("not only", "not just").
       const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leaving out|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
-      let directiveSeen = false;
       for (const directive of before.matchAll(directives)) {
-        directiveSeen = true;
         if (directive[1] || directive[3]) {
           negated = directive[2] === 'require' ? 'optional' : 'exclude';
         } else if (directive[4] && negated && directive[5] !== 'but') {
@@ -193,15 +191,14 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       if (!negated) {
         const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
         if (entry) {
-          // The coordinated chain: the fields joined by "and", and the fields of a plain comma-separated
-          // list ("name, email, and phone"). A chain that a directive named, or that stated a requirement
-          // of its own, is complete, so a comma starts a new chain instead of extending it.
-          const joinsChain = /^and$/.test(before) || /^as well as$/.test(before)
-            || (comma && !before && !chain.commanded && !chain.settled);
-          if (!joinsChain) chain = { members: [], commanded: false, settled: false };
+          // The coordinated chain: the fields joined by "and" or "as well as", and the fields of a plain
+          // comma-separated list ("name, email, and phone"). An explicit coordinator completes a phrase, so
+          // a comma after one starts a new phrase instead of extending it.
+          const coordinated = /^and$/.test(before) || /^as well as$/.test(before);
+          const joinsChain = coordinated || (comma && !before && !chain.coordinated);
+          if (!joinsChain) chain = { members: [], coordinated: false };
           chain.members.push(entry);
-          if (directiveSeen) chain.commanded = true;
-          if (requirement !== undefined) chain.settled = true;
+          if (coordinated) chain.coordinated = true;
           if (trailing) {
             for (const member of chain.members) {
               if (member.required === undefined) member.required = requirement;
@@ -210,7 +207,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         }
       } else if (negated === 'exclude') {
         // An excluded field ends the coordinated phrase it belonged to.
-        chain = { members: [], commanded: false, settled: false };
+        chain = { members: [], coordinated: false };
         if (mention.candidates.length === 1) {
           const name = mention.candidates[0]!.name;
           draft.fields = draft.fields.filter(({ field }) => field.name !== name);

@@ -186,7 +186,7 @@ describe('prompt form suggestions', () => {
     expect(suggestPromptFields('Optional name and email, phone are required.', fields).fields)
       .toEqual([{ field: { name: 'Name' }, required: false }, { field: { name: 'Email' }, required: undefined },
         { field: { name: 'Phone' }, required: true }]);
-    expect(suggestPromptFields('Require email, phone and notes are required.', fields).fields)
+    expect(suggestPromptFields('Make email, phone and notes required.', fields).fields)
       .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true },
         { field: { name: 'Notes' }, required: true }]);
   });
@@ -247,6 +247,22 @@ describe('prompt form suggestions', () => {
       .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Notes' }, required: true }]);
     expect(suggestPromptFields('Include email and phone, email and notes are required.', fields).fields)
       .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: undefined },
+        { field: { name: 'Notes' }, required: true }]);
+  });
+
+  it('reads a plain comma-separated list as one phrase, even under a directive', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Include email, phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Include name, email, and phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: true }, { field: { name: 'Email' }, required: true },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Include email, phone, and notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true },
+        { field: { name: 'Notes' }, required: true }]);
+    // An explicit coordinator completes the phrase before it, so the list after it is a new one.
+    expect(suggestPromptFields('Include email and phone, notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: undefined },
         { field: { name: 'Notes' }, required: true }]);
   });
 
