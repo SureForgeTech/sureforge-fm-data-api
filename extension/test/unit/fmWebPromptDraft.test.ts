@@ -224,11 +224,36 @@ describe('prompt form suggestions', () => {
         { field: { name: 'Notes' }, required: true }]);
   });
 
-  it('still reaches every item of a list after an excluded item was removed from the draft', () => {
+  it('still reaches every item of a chain after an excluded item was removed from the draft', () => {
     const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    // The exclusion ends the chain it belonged to, so the requirement reaches the fields after it.
     expect(suggestPromptFields('Include name. Add email and phone, exclude name, and notes are required.', fields).fields)
-      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true },
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: undefined },
         { field: { name: 'Notes' }, required: true }]);
+  });
+
+  it('does not reach into the fields a directive named', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }];
+    expect(suggestPromptFields('Include email and phone, notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: undefined },
+        { field: { name: 'Notes' }, required: true }]);
+    expect(suggestPromptFields('Include email and phone, notes are optional.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Phone' }, required: undefined },
+        { field: { name: 'Notes' }, required: false }]);
+    expect(suggestPromptFields('Include name and email, phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Name' }, required: undefined }, { field: { name: 'Email' }, required: undefined },
+        { field: { name: 'Phone' }, required: true }]);
+    expect(suggestPromptFields('Include email, exclude phone, and notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: undefined }, { field: { name: 'Notes' }, required: true }]);
+    expect(suggestPromptFields('Include email and phone, email and notes are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: undefined },
+        { field: { name: 'Notes' }, required: true }]);
+  });
+
+  it('reads a coordinated phrase joined by "as well as" as one chain', () => {
+    const fields = [{ name: 'Name' }, { name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Email as well as phone are required.', fields).fields)
+      .toEqual([{ field: { name: 'Email' }, required: true }, { field: { name: 'Phone' }, required: true }]);
   });
 
   it('reads an emphatic inclusion as an inclusion', () => {

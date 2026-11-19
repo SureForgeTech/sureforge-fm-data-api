@@ -98,21 +98,19 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   // as the list head and moves to a clause that ends positive, so a negation inside the list does not swallow
   // a later coordinated request, while an explicit reversal ("but include ...") carries the items after it.
   let anchorNegated: 'exclude' | 'optional' | undefined;
-  // The items of the coordinated list being read, so that a requirement stated at the end of the list
-  // can reach the items before it. The items are held by reference, so removing one of them from the
-  // draft cannot shift the others.
-  let listMembers: { entry: PromptFormDraft['fields'][number]; clause: number; settled: boolean }[] = [];
-  let clauseIndex = 0;
+  // The coordinated chain being read, so that a requirement stated at the end of the chain can reach
+  // the fields before it. The fields are held by reference, so removing one of them from the draft
+  // cannot shift the others.
+  let chain: { members: PromptFormDraft['fields'][number][]; commanded: boolean; settled: boolean } = { members: [], commanded: false, settled: false };
   let headPending = true;
   let comma = false;
   for (const raw of clauses) {
-    clauseIndex += 1;
     if (/^[;.!?\r\n]$/.test(raw)) {
       inherited = undefined;
       negated = undefined;
       comma = false;
       anchorNegated = undefined;
-      listMembers = [];
+      chain = { members: [], commanded: false, settled: false };
       headPending = true;
       continue;
     }
@@ -167,7 +165,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // A bare "not" negates a field ("include email but not phone"). It does not negate a requirement
       // ("not required", "not strictly required") and it is not an emphatic inclusion ("not only", "not just").
       const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leaving out|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
+      let directiveSeen = false;
       for (const directive of before.matchAll(directives)) {
+        directiveSeen = true;
         if (directive[1] || directive[3]) {
           negated = directive[2] === 'require' ? 'optional' : 'exclude';
         } else if (directive[4] && negated && directive[5] !== 'but') {
@@ -187,31 +187,30 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // word ("email and phone required") names the coordinated phrase before it, and a negation ("notes not
       // required") or a singular copula ("phone is required") names one field.
       const copula = !prefix && suffix !== null ? suffix[1] : undefined;
-      const plural = copula !== undefined && /^are\s/.test(copula);
       const singular = copula !== undefined && /^(?:is|as)\s/.test(copula);
       const negatedQualifier = !prefix && suffix !== null && Boolean(suffix[2]);
       const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier && !singular;
       if (!negated) {
         const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
         if (entry) {
-          // The coordinated list being read: its items since the list's head.
-          if (!isContinuation || listMembers.length === 0) listMembers = [];
-          listMembers.push({ entry, clause: clauseIndex, settled: requirement !== undefined });
+          // The coordinated chain: the fields joined by "and", and the fields of a plain comma-separated
+          // list ("name, email, and phone"). A chain that a directive named, or that stated a requirement
+          // of its own, is complete, so a comma starts a new chain instead of extending it.
+          const joinsChain = /^and$/.test(before) || /^as well as$/.test(before)
+            || (comma && !before && !chain.commanded && !chain.settled);
+          if (!joinsChain) chain = { members: [], commanded: false, settled: false };
+          chain.members.push(entry);
+          if (directiveSeen) chain.commanded = true;
+          if (requirement !== undefined) chain.settled = true;
           if (trailing) {
-            // A plural copula names the whole list, so the requirement reaches the items of the earlier
-            // clauses too, unless one of them already stated a requirement of its own. A bare word names
-            // the coordinated phrase it is joined to, so it reaches the earlier clauses only when the
-            // mention is joined to the list by "and".
-            const reachesEarlierClauses = plural
-              ? !listMembers.slice(0, -1).some((member) => member.settled)
-              : /^and$/.test(before);
-            for (const member of listMembers) {
-              if (member.clause !== clauseIndex && !reachesEarlierClauses) continue;
-              if (member.entry.required === undefined) member.entry.required = requirement;
+            for (const member of chain.members) {
+              if (member.required === undefined) member.required = requirement;
             }
           }
         }
       } else if (negated === 'exclude') {
+        // An excluded field ends the coordinated phrase it belonged to.
+        chain = { members: [], commanded: false, settled: false };
         if (mention.candidates.length === 1) {
           const name = mention.candidates[0]!.name;
           draft.fields = draft.fields.filter(({ field }) => field.name !== name);
