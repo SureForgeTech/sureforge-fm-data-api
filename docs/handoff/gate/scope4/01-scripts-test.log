@@ -1,0 +1,325 @@
+TAP version 13
+# created the missing label "ops/secret-rotation"
+# the label "ops/secret-rotation" already exists
+# the label "ops/secret-rotation" already exists
+# Subtest: the open issue that tracks the credential is found by its title
+ok 1 - the open issue that tracks the credential is found by its title
+  ---
+  duration_ms: 0.43525
+  type: 'test'
+  ...
+# Subtest: an issue that does not mention the credential is not used
+ok 2 - an issue that does not mention the credential is not used
+  ---
+  duration_ms: 0.104041
+  type: 'test'
+  ...
+# Subtest: the title of a reminder issue names the credential and its due date
+ok 3 - the title of a reminder issue names the credential and its due date
+  ---
+  duration_ms: 0.044875
+  type: 'test'
+  ...
+# Subtest: the body of a new issue holds the checklist and the due date
+ok 4 - the body of a new issue holds the checklist and the due date
+  ---
+  duration_ms: 0.108
+  type: 'test'
+  ...
+# Subtest: a row without an owner still produces a readable body
+ok 5 - a row without an owner still produces a readable body
+  ---
+  duration_ms: 0.050958
+  type: 'test'
+  ...
+# Subtest: the body of a comment says what is due and where the calendar is
+ok 6 - the body of a comment says what is due and where the calendar is
+  ---
+  duration_ms: 0.058208
+  type: 'test'
+  ...
+# Subtest: a credential whose name is the prefix of another one does not match its issue
+ok 7 - a credential whose name is the prefix of another one does not match its issue
+  ---
+  duration_ms: 0.074125
+  type: 'test'
+  ...
+# Subtest: a credential whose name is longer than another one does not match its issue
+ok 8 - a credential whose name is longer than another one does not match its issue
+  ---
+  duration_ms: 0.038375
+  type: 'test'
+  ...
+# Subtest: an issue whose title only mentions the credential in passing is not used
+ok 9 - an issue whose title only mentions the credential in passing is not used
+  ---
+  duration_ms: 0.195916
+  type: 'test'
+  ...
+# Subtest: the match on the title is case sensitive
+ok 10 - the match on the title is case sensitive
+  ---
+  duration_ms: 0.282333
+  type: 'test'
+  ...
+# Subtest: the label is created when it is missing
+ok 11 - the label is created when it is missing
+  ---
+  duration_ms: 0.975833
+  type: 'test'
+  ...
+# Subtest: a label that exists is recognized by its HTTP status, not by its wording
+ok 12 - a label that exists is recognized by its HTTP status, not by its wording
+  ---
+  duration_ms: 0.111666
+  type: 'test'
+  ...
+# Subtest: a label that appears between the listing and the creation does not fail the run
+ok 13 - a label that appears between the listing and the creation does not fail the run
+  ---
+  duration_ms: 0.060542
+  type: 'test'
+  ...
+# Subtest: a label that exists is also recognized by its wording
+ok 14 - a label that exists is also recognized by its wording
+  ---
+  duration_ms: 0.056166
+  type: 'test'
+  ...
+# Subtest: a label that cannot be created still fails the run
+ok 15 - a label that cannot be created still fails the run
+  ---
+  duration_ms: 0.1415
+  type: 'test'
+  ...
+# Subtest: two credentials whose names share a prefix each get their own reminder
+ok 16 - two credentials whose names share a prefix each get their own reminder
+  ---
+  duration_ms: 58.415458
+  type: 'test'
+  ...
+# Subtest: a credential whose name is the prefix of another one does not borrow its issue
+ok 17 - a credential whose name is the prefix of another one does not borrow its issue
+  ---
+  duration_ms: 63.82375
+  type: 'test'
+  ...
+# Subtest: a dry run prints what it would file and files nothing
+ok 18 - a dry run prints what it would file and files nothing
+  ---
+  duration_ms: 36.795375
+  type: 'test'
+  ...
+# Subtest: a run without the dry run opens the issue
+ok 19 - a run without the dry run opens the issue
+  ---
+  duration_ms: 50.269708
+  type: 'test'
+  ...
+# Subtest: the DRY_RUN environment variable has the same effect as the flag
+ok 20 - the DRY_RUN environment variable has the same effect as the flag
+  ---
+  duration_ms: 42.42375
+  type: 'test'
+  ...
+# Subtest: a label that appears between the listing and the creation does not stop the run
+ok 21 - a label that appears between the listing and the creation does not stop the run
+  ---
+  duration_ms: 53.954917
+  type: 'test'
+  ...
+# Subtest: a label that cannot be created fails the run
+ok 22 - a label that cannot be created fails the run
+  ---
+  duration_ms: 32.923792
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is reported and no reminder is filed for it
+ok 23 - a name that appears twice is reported and no reminder is filed for it
+  ---
+  duration_ms: 12.998042
+  type: 'test'
+  ...
+# Subtest: a name that appears twice with an unreadable second date files no reminder
+ok 24 - a name that appears twice with an unreadable second date files no reminder
+  ---
+  duration_ms: 12.918625
+  type: 'test'
+  ...
+# Subtest: an unknown argument is refused
+ok 25 - an unknown argument is refused
+  ---
+  duration_ms: 11.395958
+  type: 'test'
+  ...
+# Subtest: a window that is not a number of days is refused
+ok 26 - a window that is not a number of days is refused
+  ---
+  duration_ms: 11.356666
+  type: 'test'
+  ...
+# Subtest: the help text says how to run the script
+ok 27 - the help text says how to run the script
+  ---
+  duration_ms: 12.498708
+  type: 'test'
+  ...
+# Subtest: the window decides what is due
+ok 28 - the window decides what is due
+  ---
+  duration_ms: 69.311667
+  type: 'test'
+  ...
+# Subtest: a row whose date has passed is flagged as past due
+ok 29 - a row whose date has passed is flagged as past due
+  ---
+  duration_ms: 0.8865
+  type: 'test'
+  ...
+# Subtest: a row that is due within 30 days is flagged as due soon
+ok 30 - a row that is due within 30 days is flagged as due soon
+  ---
+  duration_ms: 0.147333
+  type: 'test'
+  ...
+# Subtest: the 30 day boundary counts as due soon and 31 days does not
+ok 31 - the 30 day boundary counts as due soon and 31 days does not
+  ---
+  duration_ms: 0.123959
+  type: 'test'
+  ...
+# Subtest: a row that is due later is reported as ok and produces no reminder
+ok 32 - a row that is due later is reported as ok and produces no reminder
+  ---
+  duration_ms: 0.163833
+  type: 'test'
+  ...
+# Subtest: a blank or N/A date is tolerated and never produces a reminder
+ok 33 - a blank or N/A date is tolerated and never produces a reminder
+  ---
+  duration_ms: 0.122208
+  type: 'test'
+  ...
+# Subtest: a malformed date is skipped and reported with a reason
+ok 34 - a malformed date is skipped and reported with a reason
+  ---
+  duration_ms: 0.096292
+  type: 'test'
+  ...
+# Subtest: a date that is not a real calendar day is skipped
+ok 35 - a date that is not a real calendar day is skipped
+  ---
+  duration_ms: 0.097916
+  type: 'test'
+  ...
+# Subtest: strict mode throws instead of skipping an unusable row
+ok 36 - strict mode throws instead of skipping an unusable row
+  ---
+  duration_ms: 0.672875
+  type: 'test'
+  ...
+# Subtest: a row with the wrong number of cells is skipped and reported
+ok 37 - a row with the wrong number of cells is skipped and reported
+  ---
+  duration_ms: 0.208917
+  type: 'test'
+  ...
+# Subtest: an empty calendar table is fine
+ok 38 - an empty calendar table is fine
+  ---
+  duration_ms: 0.235375
+  type: 'test'
+  ...
+# Subtest: a missing rotation calendar section is handled without an error
+ok 39 - a missing rotation calendar section is handled without an error
+  ---
+  duration_ms: 0.077334
+  type: 'test'
+  ...
+# Subtest: the comment row that ships in the table is ignored
+ok 40 - the comment row that ships in the table is ignored
+  ---
+  duration_ms: 0.044792
+  type: 'test'
+  ...
+# Subtest: the inventory table is not read as a rotation calendar
+ok 41 - the inventory table is not read as a rotation calendar
+  ---
+  duration_ms: 0.030542
+  type: 'test'
+  ...
+# Subtest: the owner, the notes and the line number are read
+ok 42 - the owner, the notes and the line number are read
+  ---
+  duration_ms: 0.05925
+  type: 'test'
+  ...
+# Subtest: the calendar is read from a file
+ok 43 - the calendar is read from a file
+  ---
+  duration_ms: 0.162958
+  type: 'test'
+  ...
+# Subtest: the real docs/SECRETS.md parses without a skip
+ok 44 - the real docs/SECRETS.md parses without a skip
+  ---
+  duration_ms: 0.508167
+  type: 'test'
+  ...
+# Subtest: a section without a rotation table is reported instead of ignored
+ok 45 - a section without a rotation table is reported instead of ignored
+  ---
+  duration_ms: 0.038833
+  type: 'test'
+  ...
+# Subtest: the within-days window is configurable
+ok 46 - the within-days window is configurable
+  ---
+  duration_ms: 0.064417
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is skipped and reported, and neither row reminds
+ok 47 - a name that appears twice is skipped and reported, and neither row reminds
+  ---
+  duration_ms: 0.058958
+  type: 'test'
+  ...
+# Subtest: only the duplicated name is dropped; the other rows still count
+ok 48 - only the duplicated name is dropped; the other rows still count
+  ---
+  duration_ms: 0.096166
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is a duplicate even when one row has no date
+ok 49 - a name that appears twice is a duplicate even when one row has no date
+  ---
+  duration_ms: 0.038459
+  type: 'test'
+  ...
+# Subtest: a name that appears twice is a duplicate even when the second row has an unreadable date
+ok 50 - a name that appears twice is a duplicate even when the second row has an unreadable date
+  ---
+  duration_ms: 0.049375
+  type: 'test'
+  ...
+# Subtest: the duplicate check runs before the per-row checks
+ok 51 - the duplicate check runs before the per-row checks
+  ---
+  duration_ms: 0.041583
+  type: 'test'
+  ...
+# Subtest: strict mode throws on a duplicated name
+ok 52 - strict mode throws on a duplicated name
+  ---
+  duration_ms: 0.053834
+  type: 'test'
+  ...
+1..52
+# tests 52
+# suites 0
+# pass 52
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 502.58625

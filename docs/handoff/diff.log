@@ -1,0 +1,9 @@
+
+ RUN  v5.1.0 /workspace/.fm-scratch
+
+
+ Test Files  1 passed (1)
+      Tests  1 passed (1)
+   Start at  18:56:37
+   Duration  107ms (import 50%, transform 27%, tests 19%, worker 3%)
+
