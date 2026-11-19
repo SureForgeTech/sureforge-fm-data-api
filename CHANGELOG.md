@@ -44,6 +44,8 @@ PR title prefix matches the highest-tier label added:
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
 
+- The private preview's form talks about the submission you are making rather than about a registration, so a feedback or request form does not read as an event registration.
+
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
 
