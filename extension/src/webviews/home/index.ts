@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { versionFooterHtml } from '../../about/runtimeVersion';
 import { buildWebviewCsp, createNonce } from '../common/csp';
 import { toRecord } from '../common/messageValidation';
-import { FILEMAKER_ADVANCED_SECTIONS, FILEMAKER_HOME_COMMANDS, FILEMAKER_HOME_SECTIONS, type HomeSection } from './catalogue';
+import { FILEMAKER_ADVANCED_SECTIONS, FILEMAKER_HOME_COMMANDS, FILEMAKER_HOME_SECTIONS, FILEMAKER_TOOL_SECTIONS, type HomeSection } from './catalogue';
 
 /**
  * The FileMaker home: the four journeys and the advanced tools, each entry running a contributed
@@ -69,6 +69,7 @@ ${renderSections(FILEMAKER_HOME_SECTIONS)}
 <details>
 <summary><strong>Advanced Tools</strong></summary>
 ${renderSections(FILEMAKER_ADVANCED_SECTIONS)}
+${renderSections(FILEMAKER_TOOL_SECTIONS)}
 </details>
 ${versionFooterHtml()}
 <script nonce="${nonce}" src="${script}"></script>

@@ -182,6 +182,9 @@ Each proposal names the acceptance check that would show it worked. None of them
    reachable only from the palette. Adding them to the Advanced Tools sections costs one list each
    and removes the split where the crowded surface is also the only way to reach a capability.
    *Acceptance:* every contributed command appears in the home catalogue, checked by a test.
+   **Done the same day:** pull request #593 added the missing commands, each with the description the
+   User Guide's command table already gives it, and a test now checks that every contributed command
+   is named.
 2. **Give the home a filter.** The home has no search, so it cannot hold 80 entries.
    *Acceptance:* a filter box hides non-matching entries; the panel still runs only allowlisted
    commands.
