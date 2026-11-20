@@ -66,8 +66,43 @@
   cursor: pointer;
 }
 
+.fm-home .fm-home-filter {
+  margin: 0 0 20px;
+}
+
+.fm-home .fm-home-filter label {
+  display: block;
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.fm-home .fm-home-filter input {
+  width: 100%;
+  box-sizing: border-box;
+  font: inherit;
+  color: var(--vscode-input-foreground);
+  background: var(--vscode-input-background);
+  border: 1px solid var(--vscode-input-border, transparent);
+  border-radius: 2px;
+  padding: 4px 8px;
+}
+
+.fm-home .fm-home-filter input:focus-visible {
+  outline: 1px solid var(--vscode-focusBorder);
+  outline-offset: -1px;
+}
+
+.fm-home .fm-home-filter p {
+  color: var(--muted);
+  margin: 6px 0 0;
+}
+
 .fm-home .fm-version {
   margin: 24px 0 0;
   font-size: 11px;
   color: var(--muted);
+}
+
+.fm-home .fm-hidden {
+  display: none;
 }
