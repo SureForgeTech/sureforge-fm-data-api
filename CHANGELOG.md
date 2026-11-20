@@ -72,6 +72,8 @@ PR title prefix matches the highest-tier label added:
 
 - The FileMaker sidebar now says why it could not load layouts, fields or value lists, instead of the same advice for every failure. The reason is the FileMaker error code and what it means, or the kind of connection failure.
 
+- A field in the FileMaker sidebar now says what kind of field it is: calculation, summary, global or container. A calculation, a summary and a container are not written like an ordinary field, so a request that sets one is refused.
+
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
 
