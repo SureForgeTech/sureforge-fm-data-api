@@ -3,7 +3,7 @@ import path from 'path';
 import * as vscode from 'vscode';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileMakerHomePanel } from '../../src/webviews/home';
-import { FILEMAKER_ADVANCED_SECTIONS, FILEMAKER_HOME_COMMANDS, FILEMAKER_HOME_SECTIONS } from '../../src/webviews/home/catalogue';
+import { FILEMAKER_ADVANCED_SECTIONS, FILEMAKER_HOME_COMMANDS, FILEMAKER_HOME_SECTIONS, FILEMAKER_TOOL_SECTIONS } from '../../src/webviews/home/catalogue';
 import { JSDOM, type DomElement } from '../helpers/jsdomPage';
 
 let dispose: () => void;
@@ -75,6 +75,9 @@ describe('FileMaker home', () => {
     for (const section of FILEMAKER_ADVANCED_SECTIONS) {
       expect(webview.html).toContain(section.title);
     }
+    for (const section of FILEMAKER_TOOL_SECTIONS) {
+      expect(webview.html).toContain(section.title);
+    }
     expect(webview.html).toContain('Advanced Tools');
   });
 
@@ -105,8 +108,16 @@ describe('FileMaker home', () => {
     expect(new Set(FILEMAKER_HOME_COMMANDS).size).toBe(FILEMAKER_HOME_COMMANDS.length);
   });
 
+  it('names every command the extension contributes, so the home is a complete launcher', () => {
+    const contributed = manifest.contributes.commands.map(({ command }) => command);
+    for (const command of contributed) {
+      expect(FILEMAKER_HOME_COMMANDS, command).toContain(command);
+    }
+    expect(FILEMAKER_HOME_COMMANDS.length).toBe(contributed.length);
+  });
+
   it('gives every entry a unique id', () => {
-    const ids = [...FILEMAKER_HOME_SECTIONS, ...FILEMAKER_ADVANCED_SECTIONS].flatMap((section) =>
+    const ids = [...FILEMAKER_HOME_SECTIONS, ...FILEMAKER_ADVANCED_SECTIONS, ...FILEMAKER_TOOL_SECTIONS].flatMap((section) =>
       section.entries.map((entry) => entry.id)
     );
     expect(new Set(ids).size).toBe(ids.length);
