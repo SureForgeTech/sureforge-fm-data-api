@@ -491,7 +491,7 @@ When the sidebar cannot load something, the item that failed says why: the FileM
 
 **Layout Inspector** shows the fields, portals, value lists and field validation rules of one layout. Select a layout in Connections, or run **FileMaker: Select Layout for Inspector**.
 
-A field in the sidebar says what kind of field it is next to its type: **calculation**, **summary**, **global** or **container**. A calculation, a summary and a container are not written like an ordinary field, so a request that sets one is refused by FileMaker. A global is written, but its value applies to the whole session. Point at the field to see its type and how many values it holds.
+A field in the sidebar says what kind of field it is next to its type: **calculation**, **summary**, **global** or **container**. A calculation, a summary and a container are not written like an ordinary field, so a request that sets one is refused by FileMaker. A global is written, but its value applies to the whole session. Point at the field to see its type, its kind and how many values it holds.
 
 ![The FileMaker sidebar with a connection, a layout, its fields and the Layout Inspector](./marketplace/explorer.png)
 
