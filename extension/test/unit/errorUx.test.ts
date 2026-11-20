@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 
 import { FMClientError } from '../../src/services/errors';
 import { normalizeError } from '../../src/utils/normalizeError';
-import { renderErrorReport, showErrorWithDetails, toUserErrorMessage } from '../../src/utils/errorUx';
+import { renderErrorReport, showErrorWithDetails, toShortErrorSummary, toUserErrorMessage } from '../../src/utils/errorUx';
 
 describe('showErrorWithDetails', () => {
   beforeEach(() => {
@@ -243,5 +243,75 @@ describe('toUserErrorMessage', () => {
 
   it('uses default fallback', () => {
     expect(toUserErrorMessage(undefined)).toBe('Unexpected error.');
+  });
+});
+
+describe('toShortErrorSummary', () => {
+  it('names the FileMaker code and what it means', () => {
+    const error = new FMClientError('The layout is not available.', { code: '105' });
+
+    expect(toShortErrorSummary(error)).toBe('Layout is missing (code 105)');
+  });
+
+  it('names an unknown FileMaker code without guessing what it means', () => {
+    const error = new FMClientError('Something the server said.', { code: '9999' });
+
+    expect(toShortErrorSummary(error)).toBe('FileMaker error (code 9999)');
+  });
+
+  it('does not say the code twice when the meaning already names it', () => {
+    const error = new FMClientError('Too many sessions.', { code: '956' });
+
+    expect(toShortErrorSummary(error)).toBe(
+      'The maximum number of database or Admin API sessions was exceeded (FileMaker error 956)'
+    );
+  });
+
+  it('names the kind of connection failure and its network code', () => {
+    const refused = {
+      isAxiosError: true,
+      code: 'ECONNREFUSED',
+      message: 'connect ECONNREFUSED',
+      config: { url: 'https://fm.example/fmi/data/vLatest/databases/Contacts/sessions' }
+    };
+    const expired = {
+      isAxiosError: true,
+      code: 'CERT_HAS_EXPIRED',
+      message: 'certificate has expired',
+      config: { url: 'https://fm.example/fmi/data/vLatest/databases/Contacts/sessions' }
+    };
+
+    expect(toShortErrorSummary(refused)).toBe('Connection problem (ECONNREFUSED)');
+    expect(toShortErrorSummary(expired)).toBe('Certificate problem (CERT_HAS_EXPIRED)');
+  });
+
+  it('names the kind of failure and the HTTP status when the server answered with one', () => {
+    const serverError = new FMClientError('FileMaker request failed (GET /layouts).', { status: 502 });
+    const refused = new FMClientError('FileMaker request failed (GET /layouts).', { status: 403 });
+
+    expect(toShortErrorSummary(serverError)).toBe('Server problem (HTTP 502)');
+    expect(toShortErrorSummary(refused)).toBe('Sign-in problem (HTTP 403)');
+  });
+
+  it('names a timeout and a cancellation', () => {
+    const timedOut = new FMClientError('FileMaker request failed (GET /layouts).', { kind: 'timeout' });
+    const cancelled = new FMClientError('Request cancelled.', { kind: 'cancellation' });
+
+    expect(toShortErrorSummary(timedOut)).toBe('Timed out');
+    expect(toShortErrorSummary(cancelled)).toBe('Cancelled');
+  });
+
+  it('keeps the first sentence of a message it cannot classify', () => {
+    expect(toShortErrorSummary(new Error('The layout list is empty. Check the profile.')))
+      .toBe('The layout list is empty');
+  });
+
+  it('falls back when there is no message to show', () => {
+    expect(toShortErrorSummary(undefined, 'Could not read the layouts.')).toBe('Could not read the layouts.');
+  });
+
+  it('does not show a secret that the message carries', () => {
+    expect(toShortErrorSummary(new Error('Request failed: Bearer bearer-secret')))
+      .not.toContain('bearer-secret');
   });
 });
