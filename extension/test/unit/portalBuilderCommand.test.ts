@@ -63,6 +63,7 @@ describe('Build a Portal guided entry', () => {
     vi.mocked(vscode.window.showQuickPick).mockResolvedValue(undefined);await handler()();
     expect(vscode.window.showQuickPick).toHaveBeenCalledWith(expect.arrayContaining([
       expect.objectContaining({ label: 'Event Registration' }),
+      expect.objectContaining({ label: 'Feedback or Request Form' }),
       expect.objectContaining({ label: 'Service Inquiry' }),
       expect.objectContaining({ label: 'Appointment Request' }),
       expect.objectContaining({ label: 'Application' })
@@ -75,6 +76,8 @@ describe('Build a Portal guided entry', () => {
     expect(editable).toHaveBeenCalledWith('service-inquiry');
     pick('preview', 'service-inquiry');await handler()();
     expect(load).toHaveBeenCalledWith('service-inquiry');
+    pick('layout', 'service-inquiry');await handler()();
+    expect(layoutEdit).toHaveBeenCalledWith('service-inquiry');
   });
   it('refuses trust before offering actions or writing files', async () => {
     (vscode.workspace as { isTrusted: boolean }).isTrusted = false;await handler()();
@@ -83,7 +86,7 @@ describe('Build a Portal guided entry', () => {
   it.each(['create', 'edit', 'preview', 'layout', 'export'])('routes %s through saved data or existing commands', async (action) => {
     pick(action);await handler()();
     if (action === 'create') expect(create).toHaveBeenCalledOnce();else if (action === 'layout') expect(layoutEdit).toHaveBeenCalledWith('event-registration');else expect(load).toHaveBeenCalledWith('event-registration');
-    if (action === 'preview') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer');
+    if (action === 'preview') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: 'event-registration' });
     else if (action === 'export') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.generateFmWebNextApp');
     else if (action === 'layout') expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.openLayoutMode', { layoutId: 'source-layout' });
     else expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith(expect.objectContaining({ fsPath: '/workspace/.fmweb/intakes/event-registration.intake.json' }));

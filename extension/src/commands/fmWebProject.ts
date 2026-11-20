@@ -117,7 +117,9 @@ export function registerFmWebProjectCommands(
         if (action.action === 'export') {
           await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
         } else if (action.action === 'preview') {
-          await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer');
+          // The preview opens the app the user picked. Without it the browser lands on the
+          // template's home page, whose links only reach the two starters it knows.
+          await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: starter.id });
         } else {
           await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(saved.definitionPath)));
           void vscode.window.showInformationMessage('Portal saved in .fmweb/intakes. Edit its title, fields or branding, save, then use Build a Portal → Preview saved portal. Existing files are preserved. Only the sample environment is supported.');
