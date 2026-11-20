@@ -319,6 +319,29 @@ describe('prompt form suggestions', () => {
     expect(suggestPromptFields('Include everything except phone and email.', fields).fields).toEqual([]);
   });
 
+  it('reads an exclusion that follows the field it is about', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Include email, phone excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Form with phone excluded.', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Include email, leave out phone.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include email, phone left out.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    // An exclusion further along belongs to the next field, not to this one.
+    expect(suggestPromptFields('Include name but exclude phone.', [{ name: 'Name' }, { name: 'Phone' }]).fields
+      .map(({ field }) => field.name)).toEqual(['Name']);
+  });
+
+  it('reads "everything but X" as an exclusion, the way it reads "everything except X"', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Include everything but phone.', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Include all but phone and email.', fields).fields).toEqual([]);
+    // A plain "but" still reverses the polarity instead.
+    expect(suggestPromptFields("Don't include phone, but include email.", fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+  });
+
   it('keeps the instruction that precedes an unterminated quote', () => {
     const result = suggestPromptFields('Require "Name and email', [{ name: 'Name' }, { name: 'Email' }]);
     expect(result.fields.map(({ field, required }) => [field.name, required])).toEqual([['Name', true], ['Email', true]]);

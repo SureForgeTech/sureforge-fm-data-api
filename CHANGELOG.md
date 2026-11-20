@@ -50,6 +50,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- Drafting a form from a prompt now reads an exclusion that follows the field it is about, so "include email, phone excluded" leaves phone out instead of suggesting it. "Everything but phone" now reads as the exclusion it is, the way "everything except phone" already did, and "leave out", "leaves out" and "left out" leave a field out too.
+
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
 
 - Drafting a form from a prompt now reads "Do not require phone" as a field of the form that is not required, the same as "not required phone". Before, the field was left out of the form and the request was not reported.
