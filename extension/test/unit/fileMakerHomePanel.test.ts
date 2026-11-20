@@ -217,16 +217,13 @@ describe('FileMaker home', () => {
   it('does not match a word that spans the label and the description', () => {
     const { webview } = fixture();
     const { window, document } = browser(webview.html);
-    const first = document.querySelectorAll('.entry')[0];
-    expect(first).toBeDefined();
-    const label = first?.querySelector('button')?.textContent ?? '';
-    const description = first?.querySelector('span')?.textContent ?? '';
-    const across = (label.slice(-3) + description.slice(0, 3)).toLowerCase();
-    expect(across.length).toBe(6);
-    type(window, across);
-    const shown = Array.from(document.querySelectorAll('.entry')).filter(
-      (entry) => !entry.classList.contains('fm-hidden')
-    );
-    expect(shown.length).toBe(0);
+    for (const entry of Array.from(document.querySelectorAll('.entry'))) {
+      const label = entry.querySelector('button')?.textContent ?? '';
+      const description = entry.querySelector('span')?.textContent ?? '';
+      const across = (label.slice(-3) + description.slice(0, 3)).toLowerCase();
+      expect(across.length).toBe(6);
+      type(window, across);
+      expect(entry.classList.contains('fm-hidden'), across).toBe(true);
+    }
   });
 });
