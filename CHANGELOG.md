@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The FileMaker home now has a **Find a command** box. It hides the commands that do not mention what you type, and the section they sit in when nothing is left in it, so the full list of commands is usable.
+
 - Build a Portal now asks which starter the app is for, the same starters Create FM Web App offers, and its create, edit, preview, export and layout actions work on that app. It was fixed to the event registration starter, so a service inquiry, appointment request or application could not be built or resumed with it.
 
 - The FileMaker home now names every command the extension contributes, so the advanced tools are one click away in the home as well as in the Command Palette. The home used to name 34 of the 82 commands, which left 22 of them reachable only from the palette.

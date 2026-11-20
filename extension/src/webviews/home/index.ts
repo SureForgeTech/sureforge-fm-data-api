@@ -65,6 +65,11 @@ export class FileMakerHomePanel {
 <body class="fm-page fm-home">
 <h1>FileMaker</h1>
 <p class="lead">Start here. Everything else is under Advanced Tools.</p>
+<div class="fm-home-filter">
+<label for="fm-home-filter-input">Find a command</label>
+<input id="fm-home-filter-input" type="search" placeholder="Type to narrow the commands" autocomplete="off" />
+<p id="fm-home-no-matches" class="fm-hidden">No command matches that.</p>
+</div>
 ${renderSections(FILEMAKER_HOME_SECTIONS)}
 <details>
 <summary><strong>Advanced Tools</strong></summary>

@@ -63,7 +63,7 @@ FileMaker screens use the same fonts, buttons and boxed messages, and follow you
 
 The table lists every extension command. Titles have the **FileMaker:** prefix in VS Code. “Shown” describes palette visibility; “needs” describes additional requirements when you run the command. A profile means a saved connection profile. Server operations also need access to the server and the relevant FileMaker privileges. Feature settings, workspace trust, offline mode and enterprise policy still apply as described in the sections below.
 
-The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Connect and Test**, **Browse Data** and **Help**, with the rest under **Advanced Tools**.
+The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Connect and Test**, **Browse Data** and **Help**, with the rest under **Advanced Tools**. A **Find a command** box narrows the list to the commands whose name or description mentions what you type.
 
 | Title | What it does | When it is available |
 | --- | --- | --- |
