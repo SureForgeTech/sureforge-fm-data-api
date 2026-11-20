@@ -4,7 +4,7 @@ import * as vscode from 'vscode';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { FileMakerHomePanel } from '../../src/webviews/home';
 import { FILEMAKER_ADVANCED_SECTIONS, FILEMAKER_HOME_COMMANDS, FILEMAKER_HOME_SECTIONS, FILEMAKER_TOOL_SECTIONS } from '../../src/webviews/home/catalogue';
-import { JSDOM, type DomElement } from '../helpers/jsdomPage';
+import { JSDOM, type DomElement, type JsdomWindow } from '../helpers/jsdomPage';
 
 let dispose: () => void;
 let receive: (message: unknown) => void;
@@ -49,6 +49,14 @@ function browser(html: string) {
     document: dom.window.document as typeof dom.window.document & { querySelector(selector: string): DomElement | null },
     sent
   };
+}
+
+/** Types into the home's filter, the way a reader would. */
+function type(window: JsdomWindow, text: string): void {
+  const input = window.document.getElementById('fm-home-filter-input');
+  if (!input) throw new Error('the home has no filter');
+  input.value = text;
+  input.dispatchEvent(new window.Event('input'));
 }
 
 beforeEach(() => {
@@ -121,5 +129,101 @@ describe('FileMaker home', () => {
       section.entries.map((entry) => entry.id)
     );
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it('narrows the commands to the ones that match what was typed', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    const all = Array.from(document.querySelectorAll('.entry'));
+    expect(all.length).toBe(FILEMAKER_HOME_COMMANDS.length);
+
+    type(window, 'schema');
+    const shown = all.filter((entry) => !entry.classList.contains('fm-hidden'));
+    expect(shown.length).toBeGreaterThan(0);
+    expect(shown.length).toBeLessThan(all.length);
+    for (const entry of shown) {
+      expect((entry.textContent ?? '').toLowerCase()).toContain('schema');
+    }
+  });
+
+  it('hides a section that has nothing left in it', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    type(window, 'schema');
+    for (const section of document.querySelectorAll('section')) {
+      const entries = Array.from(section.querySelectorAll('.entry'));
+      const anyShown = entries.some((entry) => !entry.classList.contains('fm-hidden'));
+      expect(section.classList.contains('fm-hidden')).toBe(!anyShown);
+    }
+  });
+
+  it('shows every command again when the filter is cleared', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    type(window, 'schema');
+    type(window, '');
+    const all = Array.from(document.querySelectorAll('.entry'));
+    expect(all.every((entry) => !entry.classList.contains('fm-hidden'))).toBe(true);
+    for (const section of document.querySelectorAll('section')) {
+      expect(section.classList.contains('fm-hidden')).toBe(false);
+    }
+  });
+
+  it('says so when nothing matches', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    const notice = document.getElementById('fm-home-no-matches');
+    expect(notice).not.toBeNull();
+    expect(notice?.classList.contains('fm-hidden')).toBe(true);
+    type(window, 'no such command exists');
+    expect(notice?.classList.contains('fm-hidden')).toBe(false);
+    for (const entry of document.querySelectorAll('.entry')) {
+      expect(entry.classList.contains('fm-hidden')).toBe(true);
+    }
+  });
+
+  it('opens Advanced Tools when the only match is inside it', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    const advanced = document.querySelector('details');
+    expect(advanced?.getAttribute('open')).toBeNull();
+    type(window, 'circuit breaker');
+    const shown = Array.from(document.querySelectorAll('.entry')).filter(
+      (entry) => !entry.classList.contains('fm-hidden')
+    );
+    expect(shown.length).toBeGreaterThan(0);
+    expect(advanced?.getAttribute('open')).not.toBeNull();
+  });
+
+  it('never runs a command while filtering', () => {
+    const { webview } = fixture();
+    const { window, sent } = browser(webview.html);
+    type(window, 'schema');
+    type(window, '');
+    expect(sent).not.toHaveBeenCalled();
+  });
+
+  it('puts Advanced Tools back the way the reader had it when the filter is cleared', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    const advanced = document.querySelector('details');
+    expect(advanced?.getAttribute('open')).toBeNull();
+    type(window, 'circuit breaker');
+    expect(advanced?.getAttribute('open')).not.toBeNull();
+    type(window, '');
+    expect(advanced?.getAttribute('open')).toBeNull();
+  });
+
+  it('does not match a word that spans the label and the description', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    for (const entry of Array.from(document.querySelectorAll('.entry'))) {
+      const label = entry.querySelector('button')?.textContent ?? '';
+      const description = entry.querySelector('span')?.textContent ?? '';
+      const across = (label.slice(-3) + description.slice(0, 3)).toLowerCase();
+      expect(across.length).toBe(6);
+      type(window, across);
+      expect(entry.classList.contains('fm-hidden'), across).toBe(true);
+    }
   });
 });
