@@ -202,4 +202,31 @@ describe('FileMaker home', () => {
     type(window, '');
     expect(sent).not.toHaveBeenCalled();
   });
+
+  it('puts Advanced Tools back the way the reader had it when the filter is cleared', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    const advanced = document.querySelector('details');
+    expect(advanced?.getAttribute('open')).toBeNull();
+    type(window, 'circuit breaker');
+    expect(advanced?.getAttribute('open')).not.toBeNull();
+    type(window, '');
+    expect(advanced?.getAttribute('open')).toBeNull();
+  });
+
+  it('does not match a word that spans the label and the description', () => {
+    const { webview } = fixture();
+    const { window, document } = browser(webview.html);
+    const first = document.querySelectorAll('.entry')[0];
+    expect(first).toBeDefined();
+    const label = first?.querySelector('button')?.textContent ?? '';
+    const description = first?.querySelector('span')?.textContent ?? '';
+    const across = (label.slice(-3) + description.slice(0, 3)).toLowerCase();
+    expect(across.length).toBe(6);
+    type(window, across);
+    const shown = Array.from(document.querySelectorAll('.entry')).filter(
+      (entry) => !entry.classList.contains('fm-hidden')
+    );
+    expect(shown.length).toBe(0);
+  });
 });

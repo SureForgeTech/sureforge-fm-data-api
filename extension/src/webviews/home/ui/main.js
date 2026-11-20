@@ -21,6 +21,10 @@
     inAdvanced: advanced ? advanced.contains(section) : false
   }));
 
+  // The state Advanced Tools was in before the reader started filtering.
+  let advancedWasOpen = advanced ? advanced.open : false;
+  let filtering = false;
+
   const apply = () => {
     const wanted = filter.value.trim().toLowerCase();
     let shown = 0;
@@ -28,7 +32,12 @@
     for (const group of groups) {
       let inSection = 0;
       for (const entry of group.entries) {
-        const text = (entry.textContent || '').toLowerCase();
+        // The label and the description are searched as separate words, so a query cannot match
+        // across the boundary between them.
+        const text = Array.from(entry.children)
+          .map((child) => child.textContent || '')
+          .join(' ')
+          .toLowerCase();
         const matches = wanted === '' || text.includes(wanted);
         entry.classList.toggle('fm-hidden', !matches);
         if (!matches) continue;
@@ -39,8 +48,18 @@
       group.section.classList.toggle('fm-hidden', inSection === 0);
     }
     if (noMatches) noMatches.classList.toggle('fm-hidden', shown > 0);
-    // A match inside Advanced Tools is only reachable when that part of the page is open.
-    if (advanced && wanted !== '') advanced.open = shownInAdvanced > 0;
+    // A match inside Advanced Tools is only reachable when that part of the page is open. When the
+    // query is cleared the page goes back the way the reader had it.
+    if (advanced) {
+      if (wanted === '') {
+        if (filtering) advanced.open = advancedWasOpen;
+        filtering = false;
+      } else {
+        if (!filtering) advancedWasOpen = advanced.open;
+        advanced.open = shownInAdvanced > 0;
+        filtering = true;
+      }
+    }
   };
 
   filter.addEventListener('input', apply);

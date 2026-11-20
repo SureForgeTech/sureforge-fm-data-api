@@ -188,8 +188,8 @@ Each proposal names the acceptance check that would show it worked. None of them
 2. **Give the home a filter.** The home has no search, so it cannot hold 80 entries.
    *Acceptance:* a filter box hides non-matching entries; the panel still runs only allowlisted
    commands.
-   **Done the same day:** pull request #595 added a **Find a command** box that hides the entries that
-   do not match what was typed, and the section they sit in when nothing is left in it.
+   **Done the same day:** the home gained a **Find a command** box that hides the entries that do not
+   match what was typed, and the section they sit in when nothing is left in it.
 3. **Shorten the palette to the everyday set.** With a connection the palette lists 58 flat entries.
    The everyday set is already written down in three places in the repository — the home's four
    journeys, the extension README's "Common commands" table and the walkthrough's six steps — and is 25
