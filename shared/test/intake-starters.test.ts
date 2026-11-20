@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { eventRegistrationExample, feedbackRequestExample, intakeDefinitionSchema, intakeLayout, intakeStarters, migrateIntakeSource, starterById, validateIntakeSubmission } from '../src';
+import { appointmentRequestExample, applicationExample, eventRegistrationExample, feedbackRequestExample, intakeDefinitionSchema, intakeLayout, intakeStarters, migrateIntakeSource, serviceInquiryExample, starterById, validateIntakeSubmission } from '../src';
 describe('reusable portal starter and branding', () => {
   it('migrates legacy sources with a stable reference and exact names', () => {
     const { definition, layout } = eventRegistrationExample();
@@ -49,20 +49,23 @@ describe('reusable portal starter and branding', () => {
 });
 
 describe('the starter catalogue the first-run wizard offers', () => {
-  it('offers an event registration and a feedback or request form', () => {
-    expect(intakeStarters.map((starter) => starter.id)).toEqual(['event-registration', 'feedback-request']);
-    expect(intakeStarters.map((starter) => starter.label)).toEqual(['Event Registration', 'Feedback or Request Form']);
+  it('offers the web activities a FileMaker solution is asked for most', () => {
+    expect(intakeStarters.map((starter) => starter.id)).toEqual(['event-registration', 'feedback-request', 'service-inquiry', 'appointment-request', 'application']);
+    expect(intakeStarters.map((starter) => starter.label)).toEqual(['Event Registration', 'Feedback or Request Form', 'Service Inquiry', 'Appointment Request', 'Application']);
     expect(intakeStarters.every((starter) => starter.description.length > 0)).toBe(true);
   });
   it('resolves a starter by identifier and refuses an unknown one', () => {
     expect(starterById('feedback-request')?.label).toBe('Feedback or Request Form');
     expect(starterById('event-registration')?.label).toBe('Event Registration');
+    expect(starterById('service-inquiry')?.label).toBe('Service Inquiry');
+    expect(starterById('appointment-request')?.label).toBe('Appointment Request');
+    expect(starterById('application')?.label).toBe('Application');
     expect(starterById('other')).toBeUndefined();
     expect(starterById('')).toBeUndefined();
   });
   it('gives every starter its own copy for a form built from its fields', () => {
-    expect(intakeStarters.map((starter) => starter.copy.title)).toEqual(['Event registration', 'Feedback or request form']);
-    expect(intakeStarters.map((starter) => starter.copy.submitLabel)).toEqual(['Register', 'Send']);
+    expect(intakeStarters.map((starter) => starter.copy.title)).toEqual(['Event registration', 'Feedback or request form', 'Service inquiry', 'Appointment request', 'Application']);
+    expect(intakeStarters.map((starter) => starter.copy.submitLabel)).toEqual(['Register', 'Send', 'Send inquiry', 'Request appointment', 'Submit application']);
     expect(intakeStarters.every((starter) => starter.copy.description.length > 0 && starter.copy.successMessage.length > 0)).toBe(true);
     expect(new Set(intakeStarters.map((starter) => starter.copy.title)).size).toBe(intakeStarters.length);
   });
@@ -90,5 +93,28 @@ describe('the starter catalogue the first-run wizard offers', () => {
     expect(validateIntakeSubmission(sample.definition, { name: 'Sample', email: 'sample@example.test', topic: 'General question', message: 'Invented' }).valid).toBe(true);
     expect(validateIntakeSubmission(sample.definition, { name: 'Sample', email: 'sample@example.test', topic: 'General question' }).valid).toBe(false);
     expect(feedbackRequestExample()).toEqual(sample);
+  });
+  it('builds an appointment request that asks for a real date', () => {
+    const sample = appointmentRequestExample();
+    expect(sample.definition.fields.map((field) => field.fmFieldName)).toEqual([' Full Name ', 'Email Address', 'Preferred Date', 'Preferred Time', 'Reason']);
+    expect(sample.definition.fields.find((field) => field.id === 'date')?.kind).toBe('date');
+    expect(sample.layout.fmLayoutName).toBe(' Appointments ');
+    const values = { name: 'Sample', email: 'sample@example.test', date: '2026-11-24', time: 'Morning', reason: 'Invented' };
+    expect(validateIntakeSubmission(sample.definition, values).valid).toBe(true);
+    expect(validateIntakeSubmission(sample.definition, { ...values, date: '2026-11-31' }).valid).toBe(false);
+    expect(validateIntakeSubmission(sample.definition, { ...values, date: 'next Tuesday' }).valid).toBe(false);
+    expect(appointmentRequestExample()).toEqual(sample);
+  });
+  it('builds a service inquiry and an application with their own fields', () => {
+    const inquiry = serviceInquiryExample();
+    expect(inquiry.definition.fields.map((field) => field.fmFieldName)).toEqual([' Full Name ', 'Email Address', 'Service Needed', 'Message']);
+    expect(inquiry.layout.fmLayoutName).toBe(' Inquiries ');
+    expect(validateIntakeSubmission(inquiry.definition, { name: 'Sample', email: 'sample@example.test', service: 'Advice', message: 'Invented' }).valid).toBe(true);
+    const application = applicationExample();
+    expect(application.definition.fields.map((field) => field.fmFieldName)).toEqual([' Full Name ', 'Email Address', 'Role or Program', 'About You']);
+    expect(application.layout.fmLayoutName).toBe(' Applications ');
+    expect(validateIntakeSubmission(application.definition, { name: 'Sample', email: 'sample@example.test', role: 'Support', about: 'Invented' }).valid).toBe(true);
+    expect(serviceInquiryExample()).toEqual(inquiry);
+    expect(applicationExample()).toEqual(application);
   });
 });
