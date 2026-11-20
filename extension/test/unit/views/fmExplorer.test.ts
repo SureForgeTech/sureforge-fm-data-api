@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 
+import { FMClientError } from '../../../src/services/errors';
 import { FMExplorerProvider, FMExplorerItem } from '../../../src/views/fmExplorer';
 
 function createMockDeps() {
@@ -79,13 +80,28 @@ describe('FMExplorerProvider', () => {
       const children = await provider.getChildren(new FMExplorerItem({ kind: 'fieldsRoot', label: 'Fields', profileId: 'p1', layoutName: 'L' }));
       expect(children.map((child) => child.label)).toEqual([label]);
     });
-    it('shows different recovery messages for field and value-list failures', async () => {
+    it('names the failure in each of the field and value-list branches', async () => {
       const { provider, getFields } = setup(undefined);
       getFields.mockRejectedValue(new Error('offline'));
       for (const [kind, label] of [['fieldsRoot', 'Failed to load fields'], ['valueListsRoot', 'Failed to load value lists']] as const) {
         const children = await provider.getChildren(new FMExplorerItem({ kind, label: 'Group', profileId: 'p1', layoutName: 'L' }));
         expect(children.map((child) => child.label)).toEqual([label]);
       }
+    });
+    it('says why a field list or value list could not be loaded', async () => {
+      const { provider, getFields } = setup(undefined);
+      getFields.mockRejectedValue(new FMClientError('The layout is not available.', { code: '105' }));
+      for (const kind of ['fieldsRoot', 'valueListsRoot'] as const) {
+        const children = await provider.getChildren(new FMExplorerItem({ kind, label: 'Group', profileId: 'p1', layoutName: 'L' }));
+        expect(children[0]?.description).toBe('Layout is missing (code 105)');
+        expect(children[0]?.tooltip).toContain('output channel');
+      }
+    });
+    it('writes the value-list failure to the output channel', async () => {
+      const { deps, provider, getFields } = setup(undefined);
+      getFields.mockRejectedValue(new Error('offline'));
+      await provider.getChildren(new FMExplorerItem({ kind: 'valueListsRoot', label: 'Group', profileId: 'p1', layoutName: 'L' }));
+      expect(deps.logger.warn).toHaveBeenCalledWith('Failed to load value lists for layout.', expect.objectContaining({ layoutName: 'L' }));
     });
   });
 
@@ -204,6 +220,22 @@ describe('FMExplorerProvider', () => {
 
       const children = await provider.getChildren(profileItem);
       expect(children.length).toBeGreaterThan(0);
+    });
+
+    it('says why the layouts could not be loaded', async () => {
+      const deps = createMockDeps();
+      deps.fmClient.hasSession.mockReturnValue(true);
+      deps.fmClient.listLayouts.mockRejectedValue(new FMClientError('Not allowed.', { code: '9' }));
+      deps.profileStore.getProfile.mockResolvedValue({ id: 'p1' });
+      const provider = createProvider(deps);
+
+      const children = await provider.getChildren(
+        new FMExplorerItem({ kind: 'profile', label: 'Test', profileId: 'p1', collapsibleState: 1 })
+      );
+
+      const failure = children.find((child) => child.label === 'Failed to load layouts');
+      expect(failure?.description).toBe('Insufficient privileges (code 9)');
+      expect(failure?.tooltip).toContain('output channel');
     });
   });
 

@@ -54,6 +54,8 @@ PR title prefix matches the highest-tier label added:
 
 - The Record Viewer, the Record Editor and **Get Record by ID** now warn when a script that ran with the record reported an error. The record still loads, as it did before.
 
+- The FileMaker sidebar now says why it could not load layouts, fields or value lists, instead of the same advice for every failure. The reason is the FileMaker error code and what it means, or the kind of connection failure.
+
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
 

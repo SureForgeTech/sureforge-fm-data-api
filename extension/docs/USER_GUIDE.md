@@ -485,6 +485,8 @@ Connections
 
 Right-click a layout for the common actions: open the Query Builder, open or edit a record, run a script, capture or diff a schema snapshot, generate types, batch export, batch update, upload to a container. Right-click a profile to connect, edit, remove or generate types for all layouts.
 
+When the sidebar cannot load something, the item that failed says why: the FileMaker error code and what it means, or the kind of connection failure. Hover over it for the full reason, the next step, and a pointer to the Output channel, where the detail is written.
+
 **Layout Inspector** shows the fields, portals, value lists and field validation rules of one layout. Select a layout in Connections, or run **FileMaker: Select Layout for Inspector**.
 
 ![The FileMaker sidebar with a connection, a layout, its fields and the Layout Inspector](./marketplace/explorer.png)

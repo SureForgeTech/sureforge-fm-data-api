@@ -11,6 +11,7 @@ import type { SavedQueriesStore } from '../services/savedQueriesStore';
 import type { SchemaService } from '../services/schemaService';
 import type { SchemaSnapshotStore } from '../services/schemaSnapshotStore';
 import type { ConnectionProfile, FileMakerFieldMetadata, JobRuntimeState } from '../types/fm';
+import { toShortErrorSummary, toUserErrorMessage } from '../utils/errorUx';
 import { extractValueLists } from '../utils/valueListParser';
 import { describeTlsSettings } from '../utils/tlsProfile';
 
@@ -436,7 +437,8 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
         new FMExplorerItem({
           kind: 'placeholder',
           label: 'Failed to load layouts',
-          description: 'Use FileMaker: Connect, then refresh explorer.',
+          description: toShortErrorSummary(error),
+          tooltip: failureTooltip(error, 'Use FileMaker: Connect, then refresh explorer.'),
           iconPath: new vscode.ThemeIcon('error')
         })
       );
@@ -635,7 +637,8 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
         new FMExplorerItem({
           kind: 'placeholder',
           label: 'Failed to load fields',
-          description: 'Use FileMaker: Refresh Schema Cache and try again.',
+          description: toShortErrorSummary(error),
+          tooltip: failureTooltip(error, 'Use FileMaker: Refresh Schema Cache and try again.'),
           iconPath: new vscode.ThemeIcon('error')
         })
       ];
@@ -692,11 +695,19 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
             iconPath: new vscode.ThemeIcon('list-unordered')
           })
       );
-    } catch {
+    } catch (error) {
+      this.logger.warn('Failed to load value lists for layout.', {
+        profileId,
+        layoutName,
+        error
+      });
+
       return [
         new FMExplorerItem({
           kind: 'placeholder',
           label: 'Failed to load value lists',
+          description: toShortErrorSummary(error),
+          tooltip: failureTooltip(error, 'Use FileMaker: Refresh Schema Cache and try again.'),
           iconPath: new vscode.ThemeIcon('error')
         })
       ];
@@ -711,6 +722,18 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
 
     return this.profileStore.getProfile(profileId);
   }
+}
+
+/**
+ * What a tree item says when it could not be filled: the reason, the next step, and where the
+ * rest of the detail is.
+ */
+function failureTooltip(error: unknown, nextStep: string): string {
+  return [
+    toUserErrorMessage(error, 'Unknown error.'),
+    nextStep,
+    'The full reason is in the FileMaker Data API Tools output channel.'
+  ].join('\n\n');
 }
 
 function toFieldTreeItem(

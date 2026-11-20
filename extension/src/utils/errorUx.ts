@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import type { NormalizedError, RequestChainEntry } from '../types/errors';
+import type { NormalizedError, NormalizedErrorKind, RequestChainEntry } from '../types/errors';
+import { getFileMakerErrorInfo } from './fileMakerCodes';
 import { isTrustableCertificateCode } from './networkErrors';
 import { errorMessageText } from './plainText';
 import { normalizeError } from './normalizeError';
@@ -236,6 +237,67 @@ export const showCommandError = showErrorWithDetails;
 
 export function toUserErrorMessage(error: unknown, fallbackMessage = 'Unexpected error.'): string {
   return displayErrorMessage(normalizeError(error, { fallbackMessage }).message);
+}
+
+/**
+ * One short line for a place with room for a sentence: what went wrong and the code that
+ * identifies it, so a failure can be understood where it happens instead of only in the log.
+ */
+export function toShortErrorSummary(error: unknown, fallbackMessage = 'Unknown error.'): string {
+  const normalized = normalizeError(error, { fallbackMessage });
+  // Only a FileMaker code is shown as a code. The extension's own names for a failure
+  // (SCRIPT_CANCELLED, PROXY_UNREACHABLE, ...) are not; the network code, the kind or the
+  // message is shown instead.
+  const code = normalized.code !== undefined && /^-?\d+$/.test(normalized.code) ? normalized.code : undefined;
+  const info = code === undefined ? undefined : getFileMakerErrorInfo(code);
+  if (info) {
+    const meaning = info.meaning.replace(/\.$/, '');
+    // Some meanings already name the code; saying it twice reads badly.
+    return meaning.includes(code!) ? meaning : `${meaning} (code ${code})`;
+  }
+  if (code !== undefined) {
+    return `FileMaker error (code ${code})`;
+  }
+  if (normalized.networkCode) {
+    return `${errorKindText(normalized.kind)} (${normalized.networkCode})`;
+  }
+  if (normalized.status !== undefined) {
+    return `${errorKindText(normalized.kind)} (HTTP ${normalized.status})`;
+  }
+  if (normalized.kind !== 'unknown') {
+    return errorKindText(normalized.kind);
+  }
+  // Nothing classifies the failure, so the message is the only description there is.
+  return firstSentence(displayErrorMessage(normalized.message)) || errorKindText(normalized.kind);
+}
+
+/** The kind of failure in words a developer can act on. */
+function errorKindText(kind: NormalizedErrorKind): string {
+  switch (kind) {
+    case 'auth':
+      return 'Sign-in problem';
+    case 'network':
+      return 'Connection problem';
+    case 'validation':
+      return 'Request problem';
+    case 'server':
+      return 'Server problem';
+    case 'timeout':
+      return 'Timed out';
+    case 'cancellation':
+      return 'Cancelled';
+    case 'certificate':
+      return 'Certificate problem';
+    default:
+      return 'Unknown error';
+  }
+}
+
+/** The first sentence of a message, for a place with room for one line. */
+function firstSentence(value: string): string {
+  const text = value.trim();
+  const stop = text.search(/\.\s/);
+  return (stop > 0 ? text.slice(0, stop) : text).trim();
 }
 
 interface RenderErrorReportOptions {
