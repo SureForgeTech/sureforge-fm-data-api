@@ -73,6 +73,7 @@ The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Co
 | Diagnose Connection | Checks a saved server or a typed address, without signing in, and explains likely fixes. | Always shown; turn off offline mode. Uses saved profiles or an address you type; never reads a workspace template. |
 | Copy Connection Diagnosis for Bug Report | Copies the latest connection diagnosis, with a choice to hide the server address. | Always shown; run Diagnose Connection first. |
 | Copy Field Name | Copies the exact FileMaker name of a field in the sidebar to the clipboard. | Right-click a field in the FileMaker sidebar; hidden from the Command Palette. |
+| Copy Layout Name | Copies the exact FileMaker name of a layout in the sidebar to the clipboard. | Right-click a layout in the FileMaker sidebar; hidden from the Command Palette. |
 | Test My Server | Reads a record, checks the connection and opens a report you can share. | Shown with a profile; needs an active connection and offline mode off. Optional writes and scripts also need trust, permission and their feature switches. |
 | Show Diagnostics | Opens a redacted report of the extension, settings and connections. | Always shown. |
 | Show Effective Settings | Shows the settings in effect and where their values come from, aligned with other screens, with single-line buttons to open User or Workspace Settings. | Always shown. |
@@ -484,7 +485,7 @@ Connections
     Saved Queries
 ```
 
-Right-click a layout for the common actions: open the Query Builder, open or edit a record, run a script, capture or diff a schema snapshot, generate types, batch export, batch update, upload to a container. Right-click a profile to connect, edit, remove or generate types for all layouts. Right-click a field to copy its exact FileMaker name to the clipboard, ready to paste into a request or a script.
+Right-click a layout for the common actions: open the Query Builder, open or edit a record, run a script, capture or diff a schema snapshot, generate types, batch export, batch update, upload to a container. Right-click a profile to connect, edit, remove or generate types for all layouts. The right-click menu of a field or a layout copies its exact FileMaker name to the clipboard, ready to paste into a request or a script.
 
 When the sidebar cannot load something, the item that failed says why: the FileMaker error code and what it means, or the kind of connection failure. Hover over it for the full reason, the next step, and a pointer to the Output channel, where the detail is written.
 
