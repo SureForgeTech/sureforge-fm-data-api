@@ -1,4 +1,4 @@
-import { CURRENT_LAYOUT_SCHEMA_VERSION, eventRegistrationExample, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, starterById, type IntakeDefinition, type LayoutDefinition } from '@fmweb/shared';
+import { CURRENT_LAYOUT_SCHEMA_VERSION, intakeDefinitionSchema, intakeLayout, layoutDefinitionSchema, migrateLayoutDefinition, migrateIntakeSource, starterById, type IntakeDefinition, type IntakeStarter, type LayoutDefinition } from '@fmweb/shared';
 import { constants } from 'fs';
 import { createHash, randomUUID } from 'crypto';
 import { lstat, mkdir, open, readdir, realpath, rm, writeFile } from 'fs/promises';
@@ -55,8 +55,13 @@ export class FmWebIntakeService {
   }
 
   public async ensureEventStarter(): Promise<SavedIntake> {
+    return this.ensureStarter(starterById('event-registration')!);
+  }
+
+  /** Write the starter's own files, so a user can build the form their activity needs. */
+  public async ensureStarter(starter: IntakeStarter): Promise<SavedIntake> {
     // Check trust and paths before any project mutation.
-    const { definition, layout } = eventRegistrationExample();
+    const { definition, layout } = starter.example();
     const definitionPath = await this.confined(path.join(this.project.getProjectRoot(), 'intakes', `${definition.id}.intake.json`));
     const layoutPath = await this.confined(path.join(this.project.getLayoutsDirPath(), `${layout.id}.layout.json`));
     await this.project.ensureProjectInitialized();
