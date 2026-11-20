@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Create FM Web App offers three more starters — Service Inquiry, Appointment Request and Application — beside Event Registration and Feedback or Request Form. Each one starts with invented sample data, so it opens in the visual editor and previews without a FileMaker connection, and each asks for the fields its activity needs.
+
 - Describe a form in Create FM Web App and review suggested FileMaker fields in the visual editor.
 
 - The connection wizard refuses an account name that contains a colon. The account name travels in the sign-in request, where a colon separates it from the password, so a colon in the name would quietly change the password the server reads. A colon in the password still works.

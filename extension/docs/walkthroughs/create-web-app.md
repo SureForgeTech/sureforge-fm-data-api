@@ -2,7 +2,7 @@
 
 Run **FileMaker: Create FM Web App**, or use the new-file button above Connections. If no folder is open yet, the wizard offers to open one and picks up where it left off afterwards.
 
-Choose a starter, **Event Registration** or **Feedback or Request Form**. The starter names the saved app, so choosing the same starter again reopens it instead of starting over.
+Choose a starter: **Event Registration**, **Feedback or Request Form**, **Service Inquiry**, **Appointment Request** or **Application**. The starter names the saved app, so choosing the same starter again reopens it instead of starting over.
 
 Choose **Try sample fields** to start with invented data and no connection, or **Use FileMaker fields** from a saved connection and layout. Select the fields, then edit the title, branding, labels, required rules and choices in the form editor. Use Move up and Move down to arrange fields.
 

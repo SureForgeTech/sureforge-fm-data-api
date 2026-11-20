@@ -4,7 +4,7 @@
 
 For Claris FileMaker Server (Data API). FileMaker Cloud sign-in with a Claris ID is not supported yet, and Cloud has not been tried.
 
-Create an FM Web app from FileMaker fields, customize an event-registration form without editing JSON, and preview it privately in your browser. Choose sample preview or explicitly confirm **Save to FileMaker** to save real registrations through the extension; credentials stay out of the browser. Connection, query, schema, record and export tools remain available in VS Code.
+Create an FM Web app from FileMaker fields, customize an event-registration, feedback, inquiry, appointment or application form without editing JSON, and preview it privately in your browser. Choose sample preview or explicitly confirm **Save to FileMaker** to save real registrations through the extension; credentials stay out of the browser. Connection, query, schema, record and export tools remain available in VS Code.
 
 ![Connect to a FileMaker server and run a find request in under 10 seconds.](docs/marketplace/connection-wizard.gif)
 
