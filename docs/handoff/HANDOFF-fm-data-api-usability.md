@@ -17,8 +17,12 @@ recorded below.
 | --- | --- | --- | --- | --- |
 | #590 | Service Inquiry, Appointment Request and Application starters | `909cdb1` | `de11fe2` | MERGEABLE, no P0/P1/P2 (2 rounds, Kimi K2.8) |
 | #591 | `docs/UX_INVENTORY.md` — the entry-point inventory and the proposed primary journey | `32af6cc` | `2da6e48` | MERGEABLE, no P0/P1/P2/P3 (3 rounds, Kimi K2.8) |
+| #592 | the prompt drafting parser reads an exclusion that follows the field, and "everything but X" | `e54afbd` | `6f2f992` | MERGEABLE, no P0/P1 (3 rounds, Kimi K2.8) |
 
-`main` is `32af6cc`. The repository's full twelve-step Node gate passed on every head this session
+`main` is `e54afbd`. #592 closes issue #573: an exclusion that follows the field now applies to it
+("include email, phone excluded" no longer suggests phone), "everything but X" and "all of them but X"
+are read as exclusions, and the vocabulary covers "leave out", "leaves out" and "left out". The third
+gap of the issue, "Do not require X", already read correctly and is unchanged. The repository's full twelve-step Node gate passed on every head this session
 shipped: `npm ci`, `npm audit --omit=dev --audit-level=high`, lint, the workflow regression tests, the
 shared build, the mock contract check, typecheck, `npm run test:coverage` (5,980 passed, 21 skipped),
 the build, the designer and runtime tests, the packaging check and the VSIX size budget. The
@@ -76,11 +80,13 @@ every command a one-line description and its visibility, so the home's catalogue
    the guide's visibility column follows, and a test pins the contract — every contributed command is
    named in the home, every command outside the everyday set is behind the lever, and the everyday set
    covers the home's journeys, the README's common table and the walkthrough.
-3. **#573** — the prompt-drafting parser gaps: an exclusion that follows the field is ignored, "everything
-   but X" reads as an inclusion, and "Do not require X." drops the field without reporting it. Each
-   needs a decision about the intended meaning, which the issue says belongs to the parser's author.
-   The decisions look like: "everything but X" is an exclusion, "but include Y" is a reversal; "do not
-   require X" means X is in the form and is not required.
+3. **#573 is closed** by #592. Three readings are still open, and the reviewer recorded them:
+   - the quantifier rule also fires under a "keep", "save" or "with" head, so "Keep everything but
+     phone" leaves the draft empty. The suggested fix was not taken, because it would make that prompt
+     suggest phone again; the pull request says why;
+   - "all of the fields but phone" is not read as an exclusion, and the trailing exclusion after a
+     comma ("include email, phone, excluded") is not read either;
+   - "leaving phone out" is not read, because the vocabulary keeps the multiword forms only.
 
 ## Branch, latest commit, pull request
 
