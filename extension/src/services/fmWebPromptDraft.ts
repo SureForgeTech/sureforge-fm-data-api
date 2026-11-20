@@ -46,11 +46,12 @@ interface Mention {
 
 /**
  * The words that leave a field out when they follow it: "phone excluded", "phone is excluded" and
- * "phone left out" all say the same thing. The exclusion has to sit right after the field, because
- * an exclusion further along belongs to the next field: in "include name but exclude phone", the
- * exclusion is about phone, not about name.
+ * "phone left out" all say the same thing. Only the forms that come after their object are here.
+ * The words that come before it - "without", "no", "omit", "skip" - are read from the text before
+ * the field instead, because in "include email without phone" the "without" belongs to phone, and
+ * reading it as if it followed email would drop email as well.
  */
-const EXCLUSION_AFTER = /^\s*(?:(?:is|are|was|were|to be)\s+)?(?:exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leav(?:e|es|ed|ing)|left|except)\b/;
+const EXCLUSION_AFTER = /^\s*(?:(?:is|are|was|were|to be)\s+)?(?:exclud(?:ed|es|ing)|omit(?:ted|ts|ting)|left out)\b/;
 
 /** A requirement word, and whether the prompt negated it. "not required" means optional. */
 function qualifier(value: string, negated = false): boolean | undefined {
@@ -172,7 +173,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // Negation continues through "or collect" and ends at an explicit positive instruction.
       // A bare "not" negates a field ("include email but not phone"). It does not negate a requirement
       // ("not required", "not strictly required") and it is not an emphatic inclusion ("not only", "not just").
-      const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leav(?:e|es|ed|ing)|left|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
+      const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leav(?:e|es|ing) out|left out|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
       for (const directive of before.matchAll(directives)) {
         if (directive[1] || directive[3]) {
           negated = directive[2] === 'require' ? 'optional' : 'exclude';
@@ -180,9 +181,11 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
           negated = directive[5] === 'require' ? 'optional' : 'exclude';
         } else {
           // "everything but phone" is the same request as "everything except phone": the word before
-          // the "but" says that the items are all of them, so what follows is left out. A plain
-          // "but" reverses the polarity instead.
-          negated = directive[5] === 'but' && /\b(?:everything|all)\b/.test(before.slice(0, directive.index))
+          // the "but" says that the items are all of them, so what follows is left out. The word
+          // has to sit right before the "but", because "all" also begins a partitive phrase - "for
+          // all attendees" - that says nothing about what follows. A plain "but" reverses the
+          // polarity instead.
+          negated = directive[5] === 'but' && /\b(?:everything|all)\s*$/.test(before.slice(0, directive.index))
             ? 'exclude' : undefined;
         }
       }
