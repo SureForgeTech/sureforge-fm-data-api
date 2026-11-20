@@ -49,17 +49,22 @@ entry is always visible. Counting the manifest's clauses gives:
 | One connection and `filemaker.advanced.powerUserMode` | 63 |
 | One connection, power-user mode and saved schema snapshots | 66 |
 
-Every one of them is a flat `FileMaker: …` entry. **VS Code cannot group the Command Palette**: the
+Every one of them is a flat `FileMaker: …` entry, apart from three that are hidden from the palette
+on purpose. **VS Code cannot group the Command Palette**: the
 menu is registered with `supportsSubmenus: false`, so a `submenu` on a `commandPalette` entry is
 dropped. The only levers are `when` clauses or fewer commands.
 
 ### The home panel does not cover what it claims to
 
 The FileMaker home is the curated launcher, and its own lead text says "Everything else is under
-Advanced Tools". Its catalogue names **34 of the 82 commands**. The other **48 are reachable only
-from the Command Palette** — the overloaded surface is also the only way to reach 48 capabilities.
-To reproduce, compare `contributes.commands` with the `command:` values in
-`extension/src/webviews/home/catalogue.ts`.
+Advanced Tools". Its catalogue names **34 of the 82 commands**. The other **48 are not named in it**,
+and they are not all in the same place: 26 of them are reachable from the sidebar's context menus,
+the sidebar's title buttons or a keybinding, 3 are hidden from the palette altogether
+(`Copy Layout Name`, `Copy Field Name` and `Refresh Connections` carry `when: false`), and **22 are
+reachable only from the Command Palette**. The crowded surface is the only way to reach 22
+capabilities. To reproduce, compare `contributes.commands` with the `command:` values in
+`extension/src/webviews/home/catalogue.ts`, then with the `view/item/context`, `view/title` and
+`keybindings` contributions and the `when` clauses in `menus.commandPalette`.
 
 ### The home has no search
 
@@ -114,6 +119,28 @@ which is the shortest route to a working result.
 - Sixty per cent of the commands are only meaningful once a connection exists, but the palette shows
   them on the same flat list as the four that matter on day one.
 
+### What each step of the journey is made of
+
+The roadmap asks the assessment to map the journey onto the code that exists, so the proposals below
+are about wiring rather than about new machinery.
+
+| Step | Where it lives |
+| --- | --- |
+| Connect | `extension/src/services/profileStore.ts` for the saved profiles, `extension/src/services/secretStore.ts` for the keychain, `extension/src/webviews/connectionWizard/` for the wizard that tests the server before saving it |
+| Build | `shared/src/intake.ts` for the definition and its validation, `shared/src/intake-starters.ts` for the starters, `extension/src/services/fmWebAppModel.ts` for the app model, `extension/src/webviews/fmWebApp/` for the visual editor |
+| Preview and test | `extension/src/services/fmWebRuntimeGenerator.ts` for the generated app, `runtime-next/` for the Next.js runtime it generates, `extension/src/services/fmWebPreviewProcess.ts` for the private preview server, `extension/src/services/fmBridgeServer.ts` for the local bridge that writes a confirmed submission to FileMaker |
+| Publish or manage | `extension/src/services/fmWebIntakeService.ts` and `extension/src/services/fmWebProjectService.ts` keep the saved app and the project; there is no publishing step |
+| The other designer | `designer-ui/` is the Layout Mode canvas, which places fields from a synced layout for an FM Web project. The intake form editor in `extension/src/webviews/fmWebApp/` is a separate, simpler surface, and the two do not share a renderer |
+
+**Packaged-extension constraints.** A VSIX build carries a copy of the runtime and the shared
+sources, staged by `extension/scripts/build-fmweb-template.mjs`, so the generated app and the private
+preview work without a repository checkout. The extension only replaces a copy it shipped, byte for
+byte: the hashes of every shared version it shipped are kept in
+`extension/src/services/fmWebRuntimeGenerator.ts`, so changing a shared source changes its hash and
+the template test refuses the change until the new hash is recorded and the older ones are kept.
+The preview is private and the runtime never depends on a running VS Code window for a public
+deployment.
+
 ## What this extension covers of what Claris Studio did
 
 Claris Studio is the FileMaker development environment: it edits scripts and layouts, changes the
@@ -143,16 +170,17 @@ reaches past the Data API and into what Studio users built by hand.
 
 Each proposal names the acceptance check that would show it worked. None of them is authorised yet.
 
-1. **Make the home the complete launcher.** The home names 34 of 82 commands; the other 48 are
-   palette-only. Adding them to the Advanced Tools sections costs one list each and removes the
-   split where the crowded surface is also the only way to reach a capability.
+1. **Make the home the complete launcher.** The home names 34 of 82 commands; 22 of the rest are
+   reachable only from the palette. Adding them to the Advanced Tools sections costs one list each
+   and removes the split where the crowded surface is also the only way to reach a capability.
    *Acceptance:* every contributed command appears in the home catalogue, checked by a test.
 2. **Give the home a filter.** The home has no search, so it cannot hold 80 entries.
    *Acceptance:* a filter box hides non-matching entries; the panel still runs only allowlisted
    commands.
 3. **Shorten the palette to the everyday set.** With a connection the palette lists 58 flat entries.
-   The everyday set is already written down twice in the repository — the home's four journeys, the
-   README's "Common commands" table, and the walkthrough's six steps — and is 25 commands. The rest
+   The everyday set is already written down in three places in the repository — the home's four
+   journeys, the README's "Common commands" table and the walkthrough's six steps — and is 25
+   commands. The rest
    stay available in the home and in the palette when `filemaker.advanced.powerUserMode` is on, so no
    capability is removed, only moved.
    *Acceptance:* a connected user sees the everyday set in the palette; the rest are behind the
