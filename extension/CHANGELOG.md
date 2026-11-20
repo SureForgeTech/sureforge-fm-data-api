@@ -12,7 +12,7 @@
 
 - Right-click a field in the FileMaker sidebar and choose **Copy Field Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
-- Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard.
+- Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
 **FileMaker home**
 
