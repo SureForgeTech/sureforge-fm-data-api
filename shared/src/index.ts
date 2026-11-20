@@ -25,4 +25,4 @@ export type { StandardFieldMetadata, StandardControlKind } from './field-standar
 export * from './record-edit';
 
 export * from './intake';
-export { eventRegistrationExample, feedbackRequestExample, intakeStarters, starterById, type IntakeStarter } from './intake-starters';
+export { applicationExample, appointmentRequestExample, eventRegistrationExample, feedbackRequestExample, intakeStarters, serviceInquiryExample, starterById, type IntakeStarter } from './intake-starters';
