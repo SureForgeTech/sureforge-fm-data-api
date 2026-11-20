@@ -72,6 +72,70 @@ export function feedbackRequestExample() {
   return { definition, layout: intakeLayout(definition, layout) };
 }
 
+/** Entirely synthetic: no saved profile, server address or customer data is used. */
+export function serviceInquiryExample() {
+  const definition = intakeDefinitionSchema.parse({
+    schemaVersion: 1, id: 'service-inquiry', environmentId: 'sample',
+    layoutId: 'a3333333-3333-4333-8333-333333333333',
+    title: 'Service inquiry',
+    branding: { organizationName: 'Your organization', accentColor: '#215EA6' },
+    description: 'Try a service inquiry form with sample data. This private preview does not contact a FileMaker server.',
+    submitLabel: 'Send inquiry with sample data',
+    successMessage: 'Sample inquiry accepted. No FileMaker record was created.',
+    fields: [
+      { id: 'name', fmFieldName: ' Full Name ', label: 'Your name', kind: 'text', required: true, maxLength: 120 },
+      { id: 'email', fmFieldName: 'Email Address', label: 'Email address', kind: 'email', required: true, maxLength: 254 },
+      { id: 'service', fmFieldName: 'Service Needed', label: 'What do you need?', kind: 'select', required: true, options: ['Advice', 'A quote', 'On-site work'], maxLength: 40 },
+      { id: 'message', fmFieldName: 'Message', label: 'Tell us what you need', kind: 'textarea', required: true, helpText: 'Use invented information in this sample.', maxLength: 2000 }
+    ]
+  });
+  const layout = starterLayout(definition, 'Inquiry', ' Inquiries ');
+  return { definition, layout: intakeLayout(definition, layout) };
+}
+
+/** Entirely synthetic: no saved profile, server address or customer data is used. */
+export function appointmentRequestExample() {
+  const definition = intakeDefinitionSchema.parse({
+    schemaVersion: 1, id: 'appointment-request', environmentId: 'sample',
+    layoutId: 'a4444444-4444-4444-8444-444444444444',
+    title: 'Appointment request',
+    branding: { organizationName: 'Your organization', accentColor: '#215EA6' },
+    description: 'Try an appointment request form with sample data. This private preview does not contact a FileMaker server.',
+    submitLabel: 'Request with sample data',
+    successMessage: 'Sample appointment request accepted. No FileMaker record was created.',
+    fields: [
+      { id: 'name', fmFieldName: ' Full Name ', label: 'Your name', kind: 'text', required: true, maxLength: 120 },
+      { id: 'email', fmFieldName: 'Email Address', label: 'Email address', kind: 'email', required: true, maxLength: 254 },
+      { id: 'date', fmFieldName: 'Preferred Date', label: 'Which day?', kind: 'date', required: true, maxLength: 10, helpText: 'Use a date in YYYY-MM-DD format.' },
+      { id: 'time', fmFieldName: 'Preferred Time', label: 'What time of day?', kind: 'select', required: true, options: ['Morning', 'Afternoon', 'Evening'], maxLength: 20 },
+      { id: 'reason', fmFieldName: 'Reason', label: 'What is it about?', kind: 'textarea', required: false, maxLength: 1000 }
+    ]
+  });
+  const layout = starterLayout(definition, 'Appointment', ' Appointments ');
+  return { definition, layout: intakeLayout(definition, layout) };
+}
+
+/** Entirely synthetic: no saved profile, server address or customer data is used. */
+export function applicationExample() {
+  const definition = intakeDefinitionSchema.parse({
+    schemaVersion: 1, id: 'application', environmentId: 'sample',
+    layoutId: 'a5555555-5555-4555-8555-555555555555',
+    title: 'Application',
+    branding: { organizationName: 'Your organization', accentColor: '#215EA6' },
+    description: 'Try an application form with sample data. This private preview does not contact a FileMaker server.',
+    submitLabel: 'Submit with sample data',
+    successMessage: 'Sample application accepted. No FileMaker record was created.',
+    fields: [
+      { id: 'name', fmFieldName: ' Full Name ', label: 'Your name', kind: 'text', required: true, maxLength: 120 },
+      { id: 'email', fmFieldName: 'Email Address', label: 'Email address', kind: 'email', required: true, maxLength: 254 },
+      { id: 'role', fmFieldName: 'Role or Program', label: 'What are you applying for?', kind: 'text', required: true, maxLength: 120 },
+      { id: 'about', fmFieldName: 'About You', label: 'Why are you a good fit?', kind: 'textarea', required: true, helpText: 'Use invented information in this sample.', maxLength: 2000 }
+    ]
+  });
+  const layout = starterLayout(definition, 'Application', ' Applications ');
+  return { definition, layout: intakeLayout(definition, layout) };
+}
+
 /** The starters the first-run wizard offers, in the order it offers them. */
 export const intakeStarters: readonly IntakeStarter[] = [
   { id: 'event-registration', label: 'Event Registration', description: 'Collect names, email and session choices for an event',
@@ -79,7 +143,16 @@ export const intakeStarters: readonly IntakeStarter[] = [
     example: eventRegistrationExample },
   { id: 'feedback-request', label: 'Feedback or Request Form', description: 'Collect a message, a topic and contact details',
     copy: { title: 'Feedback or request form', description: 'Send us feedback or a request.', submitLabel: 'Send', successMessage: 'Sample message accepted. No FileMaker record was created.' },
-    example: feedbackRequestExample }
+    example: feedbackRequestExample },
+  { id: 'service-inquiry', label: 'Service Inquiry', description: 'Collect a request for a service, with contact details',
+    copy: { title: 'Service inquiry', description: 'Tell us what you need.', submitLabel: 'Send inquiry', successMessage: 'Sample inquiry accepted. No FileMaker record was created.' },
+    example: serviceInquiryExample },
+  { id: 'appointment-request', label: 'Appointment Request', description: 'Collect a preferred date and time, with contact details',
+    copy: { title: 'Appointment request', description: 'Ask for an appointment.', submitLabel: 'Request appointment', successMessage: 'Sample appointment request accepted. No FileMaker record was created.' },
+    example: appointmentRequestExample },
+  { id: 'application', label: 'Application', description: 'Collect an application, with contact details and a short statement',
+    copy: { title: 'Application', description: 'Apply.', submitLabel: 'Submit application', successMessage: 'Sample application accepted. No FileMaker record was created.' },
+    example: applicationExample }
 ];
 
 /** The starter with this identifier, or undefined when the identifier names no starter. */
