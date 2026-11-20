@@ -748,8 +748,9 @@ function toFieldTreeItem(
     descriptionParts.push(field.result);
   }
 
-  // A calculation, a summary, a global and a container cannot be written like an ordinary
-  // field, so the kind is shown with the field. The same table names the kind elsewhere.
+  // A calculation, a summary and a container cannot be written like an ordinary field, and a
+  // global applies to the whole session, so the kind is shown with the field. The same table
+  // names the kind elsewhere.
   const kind = layoutFieldKind(field);
   const sameAsResult = kind === fieldType(field.result);
   if (kind !== 'normal' && !sameAsResult) {
