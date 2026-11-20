@@ -17,4 +17,6 @@ Intake date fields explicitly use YYYY-MM-DD in both the renderer instruction an
 Intake views opt into visible accessible labels, help text, required-state announcements and field-associated validation errors. Existing record views retain their current accessible names unless they explicitly opt in.
 
 
+Implementation follow-through (2026-11-20): the Build a Portal entry asks which starter the app is for, the same starters Create FM Web App offers, and its create, edit, preview, export and layout actions work on that app. It was fixed to the event registration starter before that.
+
 Implementation follow-through (2026-11-16): the additive Build a Portal entry reuses the project service, existing Layout Mode command, existing private preview command, shared starter and renderer. It resumes user-owned intake/layout files, snapshots validated definitions into the isolated preview, and supports title/label/help/required settings and constrained branding. This is an editor-assisted JSON workflow rather than a new visual form designer; no developer usability study or live FileMaker submission is claimed.
