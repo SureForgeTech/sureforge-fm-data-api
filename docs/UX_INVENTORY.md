@@ -5,9 +5,13 @@ asks for as "the first bounded task": what entry points the extension actually h
 a user can see at once, which of them overlap, and which journey a first-time user should be able to
 finish without learning the rest.
 
-Every number below is measured from the manifest and the sources at that revision, and each one says
-how to reproduce it. Nothing here is a target or a forecast; the proposals at the end are the
-decisions this inventory is asking for.
+Every number below is measured from the manifest and the sources at `ab3077a`, and each one says how
+to reproduce it. One thing changed while it was being written: the starter set grew from two to five
+on the same day, in pull request #590, which is proposal 4 below. Nothing else in the extension
+changed.
+
+Nothing here is a target or a forecast; the proposals at the end are the decisions this inventory is
+asking for.
 
 ## What a new user meets
 
@@ -101,7 +105,8 @@ first three, in pieces:
    skipped; a workspace can make a successful test mandatory with
    `filemaker.connectionWizard.requireTestBeforeSave`. *Present and good.*
 2. **Build** — Create FM Web App offers a starter, then where the fields come from (sample fields, a
-   FileMaker layout, or a prompt), then a visual editor. *Present; the starter set is two entries.*
+   FileMaker layout, or a prompt), then a visual editor. *Present; the starter set was two entries
+   when this was measured, and is five now.*
 3. **Preview and test** — a private browser preview with invented data, or a confirmed FileMaker
    save. *Present.*
 4. **Publish or manage** — absent. The preview is private by design and the roadmap lists public
@@ -188,9 +193,10 @@ Each proposal names the acceptance check that would show it worked. None of them
    capability is removed, only moved.
    *Acceptance:* a connected user sees the everyday set in the palette; the rest are behind the
    existing power-user setting; every command still runs.
-4. **Grow the starter set.** The wizard offers two starters. The roadmap's first phase names
-   "service inquiries, applications and appointment requests" as the next expansion, and those are the
-   web activities a FileMaker solution is asked for most often.
+4. **Grow the starter set.** The wizard offered two starters when this was measured. The roadmap's
+   first phase names "service inquiries, applications and appointment requests" as the next expansion,
+   and those are the web activities a FileMaker solution is asked for most often. **Done the same
+   day:** pull request #590 added Service Inquiry, Appointment Request and Application.
    *Acceptance:* each starter is entirely synthetic, opens the visual editor and previews without a
    connection.
 5. **Give the publish step a name.** "Publish" does not exist as a command, so a user who has built
