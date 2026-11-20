@@ -362,6 +362,8 @@ describe('prompt form suggestions', () => {
     const fields = [{ name: 'Email' }, { name: 'Phone' }];
     expect(suggestPromptFields('Include everything but phone.', fields).fields).toEqual([]);
     expect(suggestPromptFields('Include all but phone and email.', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Include all of them but phone.', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Require all fields but phone.', fields).fields).toEqual([]);
 
     // A plain "but" still reverses the polarity instead.
     expect(suggestPromptFields("Don't include phone, but include email.", fields).fields

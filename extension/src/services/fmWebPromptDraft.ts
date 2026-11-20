@@ -51,7 +51,14 @@ interface Mention {
  * the field instead, because in "include email without phone" the "without" belongs to phone, and
  * reading it as if it followed email would drop email as well.
  */
-const EXCLUSION_AFTER = /^\s*(?:(?:is|are|was|were|to be)\s+)?(?:exclud(?:ed|es|ing)|omit(?:ted|ts|ting)|left out)\b/;
+const EXCLUSION_AFTER = /^\s*(?:(?:is|are|was|were|to be)\s+)?(?:excluded|omitted|skipped|left out)\b/;
+
+/**
+ * The words that say the list is complete, so that what follows a "but" is left out: "everything",
+ * "all", "all of them", "all fields". The word has to sit right before the "but", because "all" also
+ * begins a partitive phrase - "for all attendees" - that says nothing about what follows.
+ */
+const QUANTIFIER = /\b(?:everything|all(?:\s+of\s+(?:them|it))?(?:\s+(?:the\s+)?(?:fields|field))?)\s*$/;
 
 /** A requirement word, and whether the prompt negated it. "not required" means optional. */
 function qualifier(value: string, negated = false): boolean | undefined {
@@ -180,12 +187,16 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         } else if (directive[4] && negated && directive[5] !== 'but') {
           negated = directive[5] === 'require' ? 'optional' : 'exclude';
         } else {
-          // "everything but phone" is the same request as "everything except phone": the word before
-          // the "but" says that the items are all of them, so what follows is left out. The word
-          // has to sit right before the "but", because "all" also begins a partitive phrase - "for
-          // all attendees" - that says nothing about what follows. A plain "but" reverses the
-          // polarity instead.
-          negated = directive[5] === 'but' && /\b(?:everything|all)\s*$/.test(before.slice(0, directive.index))
+          // "everything but phone" is the same request as "everything except phone": the words before
+          // the "but" say that the items are all of them, so what follows is left out. The quantifier
+          // has to sit right before the "but", because "all" also begins a partitive phrase - "for all
+          // attendees" - that says nothing about what follows. A requirement after the "but" says the
+          // items are still wanted, one way or another: "all the fields but keep email optional".
+          // A plain "but" reverses the polarity instead.
+          const rest = before.slice(directive.index + directive[0].length).trim();
+          negated = directive[5] === 'but'
+            && !/\b(?:required|optional)\b/.test(`${rest} ${after}`)
+            && QUANTIFIER.test(before.slice(0, directive.index))
             ? 'exclude' : undefined;
         }
       }
