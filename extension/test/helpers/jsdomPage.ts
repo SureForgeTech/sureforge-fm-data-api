@@ -12,6 +12,7 @@ export interface DomElement {
   checked: boolean;
   disabled: boolean;
   classList: { contains(token: string): boolean };
+  dispatchEvent(event: unknown): boolean;
   click(): void;
   contains(other: unknown): boolean;
   querySelectorAll(selector: string): DomElement[];
