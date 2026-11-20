@@ -670,7 +670,7 @@ An omit request with a criterion can be used on its own. Verified on a real serv
 
 1. Run **FileMaker: Open Script Runner** (or use a layout's right-click menu).
 2. Choose a profile and a layout. FileMaker runs scripts in the context of a layout.
-3. Type the script name exactly as it appears in FileMaker. Add a record ID and a parameter if the script needs them. **Build Parameter** helps you assemble a JSON parameter.
+3. Type the script name exactly as it appears in FileMaker. The box suggests the scripts the server lists for that profile, so the exact name can be picked instead of typed; a name that is not in the list still runs. Add a record ID and a parameter if the script needs them. **Build Parameter** helps you assemble a JSON parameter.
 4. Select **Run Script**. The result appears below. Under **Copy request** the same formats as in the Query Builder copy the request without running it (see [Copy a request as code](#copy-a-request-as-code)).
 
 **What is sent.** The script runs with the request the Claris Data API Guide documents for it: a `GET` of `.../layouts/<layout>/script/<script>?script.param=<parameter>`. It is one request and it reads no record. The script name, layout name and parameter are percent-encoded exactly (a space is `%20`, never `+`; accented letters, `|`, `&` and `/` arrive as typed). The answer carries the script's error number and, if the script exits with a result, that result; if a record or find was part of the request, its data is not shown.

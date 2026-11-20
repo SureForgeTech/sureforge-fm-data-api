@@ -14,6 +14,8 @@
 
 - Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
+- The Script Runner suggests the scripts the server lists, so the exact script name can be picked instead of typed. The name that runs is still the one in the box.
+
 **FileMaker home**
 
 - **Start Here** opens a FileMaker home panel with the four journeys — Build a Web App, Connect and Test, Browse Data and Help — and an Advanced Tools section for setup, diagnostics, code generation and the rest. Each button runs the matching command. The home is also a button in the Connections panel and a link in the sidebar.

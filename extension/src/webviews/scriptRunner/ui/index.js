@@ -6,6 +6,7 @@ const state = {
   activeProfileId: undefined,
   defaults: undefined,
   layoutsByProfile: new Map(),
+  scriptsByProfile: new Map(),
   scriptRunnerEnabled: true,
   includeAuthByDefault: false,
   parameterBuilderEnabled: true
@@ -17,6 +18,7 @@ const profileSelect = document.getElementById('profileSelect');
 const layoutSelect = document.getElementById('layoutSelect');
 const recordIdInput = document.getElementById('recordIdInput');
 const scriptNameInput = document.getElementById('scriptNameInput');
+const scriptNameList = document.getElementById('scriptNameList');
 const scriptParamInput = document.getElementById('scriptParamInput');
 const buildParameterButton = document.getElementById('buildParameterButton');
 const parameterBuilderPanel = document.getElementById('parameterBuilderPanel');
@@ -57,6 +59,9 @@ window.addEventListener('message', (event) => {
     case 'layoutsLoaded':
       applyLayouts(message.payload);
       break;
+    case 'scriptsLoaded':
+      applyScripts(message.payload);
+      break;
     case 'scriptResult':
       setRunning(false);
       renderResult(message.payload);
@@ -78,6 +83,7 @@ window.addEventListener('message', (event) => {
 
 profileSelect.addEventListener('change', () => {
   requestLayouts(profileSelect.value);
+  requestScripts(profileSelect.value);
 });
 
 buildParameterButton.addEventListener('click', () => {
@@ -209,6 +215,7 @@ function renderProfiles() {
 
   profileSelect.value = selectedProfileId;
   requestLayouts(selectedProfileId, state.defaults && state.defaults.layout);
+  requestScripts(selectedProfileId);
 }
 
 function requestLayouts(profileId, preferredLayout) {
@@ -227,6 +234,56 @@ function requestLayouts(profileId, preferredLayout) {
     type: 'loadLayouts',
     profileId
   });
+}
+
+function requestScripts(profileId) {
+  if (!profileId) {
+    return;
+  }
+
+  const cached = state.scriptsByProfile.get(profileId);
+  if (cached && cached.length > 0) {
+    renderScripts(cached);
+    return;
+  }
+
+  // The names of the profile left behind must not stay under the box: they belong to another
+  // server, and picking one would run that name against the profile that is selected.
+  renderScripts([]);
+  vscode.postMessage({ type: 'loadScripts', profileId });
+}
+
+function applyScripts(payload) {
+  if (!payload || typeof payload.profileId !== 'string' || !Array.isArray(payload.scripts)) {
+    return;
+  }
+
+  // Only a name is a name: anything else in the list is not a script.
+  const scripts = payload.scripts.filter((script) => typeof script === 'string');
+  state.scriptsByProfile.set(payload.profileId, scripts);
+
+  if (profileSelect.value !== payload.profileId) {
+    return;
+  }
+
+  renderScripts(scripts);
+}
+
+function renderScripts(scripts) {
+  if (!scriptNameList) {
+    return;
+  }
+
+  // The list only suggests names; the name that runs is the one in the box, exactly as typed.
+  // The options are added one by one: a file with tens of thousands of scripts must not
+  // overflow the call that replaces them.
+  const options = document.createDocumentFragment();
+  for (const script of scripts) {
+    const option = document.createElement('option');
+    option.value = script;
+    options.appendChild(option);
+  }
+  scriptNameList.replaceChildren(options);
 }
 
 function applyLayouts(payload) {

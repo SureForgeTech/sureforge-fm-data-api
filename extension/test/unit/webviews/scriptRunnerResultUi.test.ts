@@ -47,6 +47,151 @@ function open(runScript: ReturnType<typeof vi.fn>) {
   return { html, posted, run };
 }
 
+describe('Script Runner: the scripts the server lists', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
+  });
+
+  it('asks the host for the scripts of the profile and suggests them under the name box', async () => {
+    const { html } = open(vi.fn());
+    const page = loadPage(html, uiSource);
+
+    page.send({
+      type: 'init',
+      payload: {
+        profiles: [{ id: 'p1', name: 'Dev', database: 'Sales', authMode: 'direct' }],
+        activeProfileId: 'p1',
+        defaults: undefined,
+        scriptRunnerEnabled: true,
+        includeAuthByDefault: false,
+        parameterBuilderEnabled: true
+      }
+    });
+
+    await vi.waitFor(() => expect(page.posted.some((message) => message.type === 'loadScripts')).toBe(true));
+
+    page.send({ type: 'scriptsLoaded', payload: { profileId: 'p1', scripts: ['Send Welcome', 'Close Order'] } });
+
+    const options = Array.from(page.document.querySelectorAll('#scriptNameList option')).map((option) => option.getAttribute('value'));
+    expect(options).toEqual(['Send Welcome', 'Close Order']);
+    // The list only suggests: the name that runs is the one in the box, exactly as typed.
+    expect((page.document.getElementById('scriptNameInput') as { value: string }).value).toBe('');
+  });
+});
+
+describe('Script Runner: the scripts of the profile that is selected', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
+  });
+
+  it('shows the names of the profile that is selected, and not the ones left behind', async () => {
+    const { html } = open(vi.fn());
+    const page = loadPage(html, uiSource);
+    const init = {
+      type: 'init',
+      payload: {
+        profiles: [
+          { id: 'p1', name: 'Dev', database: 'Sales', authMode: 'direct' },
+          { id: 'p2', name: 'Prod', database: 'Sales', authMode: 'direct' }
+        ],
+        activeProfileId: 'p1',
+        defaults: undefined,
+        scriptRunnerEnabled: true,
+        includeAuthByDefault: false,
+        parameterBuilderEnabled: true
+      }
+    };
+
+    page.send(init);
+    await vi.waitFor(() => expect(page.posted.some((message) => message.type === 'loadScripts')).toBe(true));
+    page.send({ type: 'scriptsLoaded', payload: { profileId: 'p1', scripts: ['Alpha One'] } });
+    expect(suggestions(page)).toEqual(['Alpha One']);
+
+    // Another profile: its names replace the ones of the profile left behind.
+    chooseProfile(page, 'p2');
+    await vi.waitFor(() => expect(page.posted.filter((message) => message.type === 'loadScripts').length).toBe(2));
+    expect(suggestions(page)).toEqual([]);
+    page.send({ type: 'scriptsLoaded', payload: { profileId: 'p2', scripts: ['Beta Two'] } });
+    expect(suggestions(page)).toEqual(['Beta Two']);
+
+    // Back to the first profile: its own names come back, not the ones of the second.
+    chooseProfile(page, 'p1');
+    await vi.waitFor(() => expect(suggestions(page)).toEqual(['Alpha One']));
+    // The list of a profile is read once.
+    expect(page.posted.filter((message) => message.type === 'loadScripts').length).toBe(2);
+  });
+});
+
+describe('Script Runner: a long list of script names', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
+  });
+
+  // The list of a file with more scripts than the engine can take in one call is the case this
+  // protects: the options are built in a fragment, not spread into one call. The timeout is
+  // generous because the list is large.
+  it('offers every name of a file with very many scripts, and does not throw', { timeout: 60_000 }, async () => {
+    const { html } = open(vi.fn());
+    const page = loadPage(html, uiSource);
+    const many = Array.from({ length: 70_000 }, (_, index) => `Script ${index}`);
+
+    page.send({
+      type: 'init',
+      payload: {
+        profiles: [{ id: 'p1', name: 'Dev', database: 'Sales', authMode: 'direct' }],
+        activeProfileId: 'p1',
+        defaults: undefined,
+        scriptRunnerEnabled: true,
+        includeAuthByDefault: false,
+        parameterBuilderEnabled: true
+      }
+    });
+    await vi.waitFor(() => expect(page.posted.some((message) => message.type === 'loadScripts')).toBe(true));
+
+    page.send({ type: 'scriptsLoaded', payload: { profileId: 'p1', scripts: many } });
+
+    expect(suggestions(page)).toHaveLength(70_000);
+    expect(suggestions(page)[0]).toBe('Script 0');
+  });
+
+  it('offers only names, and ignores anything else in the list', async () => {
+    const { html } = open(vi.fn());
+    const page = loadPage(html, uiSource);
+
+    page.send({
+      type: 'init',
+      payload: {
+        profiles: [{ id: 'p1', name: 'Dev', database: 'Sales', authMode: 'direct' }],
+        activeProfileId: 'p1',
+        defaults: undefined,
+        scriptRunnerEnabled: true,
+        includeAuthByDefault: false,
+        parameterBuilderEnabled: true
+      }
+    });
+    await vi.waitFor(() => expect(page.posted.some((message) => message.type === 'loadScripts')).toBe(true));
+
+    page.send({ type: 'scriptsLoaded', payload: { profileId: 'p1', scripts: ['Real Script', null, 42, { name: 'Object' }] } });
+
+    expect(suggestions(page)).toEqual(['Real Script']);
+  });
+});
+
+function suggestions(page: { document: { querySelectorAll: (selector: string) => ArrayLike<{ getAttribute: (name: string) => string | null }> } }): Array<string | null> {
+  return Array.from(page.document.querySelectorAll('#scriptNameList option')).map((option) => option.getAttribute('value'));
+}
+
+/** Picks another profile in the panel, the way a user does. */
+function chooseProfile(page: { document: { getElementById: (id: string) => unknown }; window: unknown }, profileId: string): void {
+  const select = page.document.getElementById('profileSelect') as { value: string; dispatchEvent: (event: unknown) => void };
+  select.value = profileId;
+  const Event = (page.window as { Event: new (type: string) => unknown }).Event;
+  select.dispatchEvent(new Event('change'));
+}
+
 describe('Script Runner: a script that ran but reported an error', () => {
   beforeEach(() => {
     vi.clearAllMocks();

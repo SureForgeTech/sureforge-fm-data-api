@@ -43,6 +43,7 @@ const UNTRUSTED_RUNNER_MESSAGE =
 type IncomingMessage =
   | { type: 'ready' }
   | { type: 'loadLayouts'; profileId: string }
+  | { type: 'loadScripts'; profileId: string }
   | { type: 'runScript'; payload: RunScriptPayload }
   | { type: 'copyCurl'; payload: CopySnippetPayload }
   | { type: 'copyFetch'; payload: CopySnippetPayload }
@@ -154,6 +155,9 @@ export class ScriptRunnerPanel {
         case 'loadLayouts':
           await this.loadLayouts(message.profileId);
           break;
+        case 'loadScripts':
+          await this.loadScripts(message.profileId);
+          break;
         case 'runScript':
           await this.runScript(message.payload);
           break;
@@ -195,6 +199,51 @@ export class ScriptRunnerPanel {
     });
 
     this.pendingDefaults = undefined;
+  }
+
+  /**
+   * The scripts the server lists, so the name can be picked instead of typed. The list is a
+   * help: a name that is not in it still runs, because the script list is not a complete
+   * picture of what the account may run.
+   */
+  private async loadScripts(profileId: string): Promise<void> {
+    const configuration = vscode.workspace.getConfiguration('filemaker');
+    if (!isFeatureEnabled(configuration, 'features.scriptRunner.enabled') || isOfflineModeOn(configuration)) {
+      // Nothing can be run and nothing should be read, so no list is fetched. The name can
+      // still be typed.
+      await this.panel.webview.postMessage({
+        type: 'scriptsLoaded',
+        payload: {
+          profileId,
+          scripts: []
+        }
+      });
+      return;
+    }
+
+    const profile = await this.profileStore.getProfile(profileId);
+
+    if (!profile) {
+      await this.postError('Connection profile not found.');
+      return;
+    }
+
+    try {
+      const scripts = await this.fmClient.listScripts(profile);
+      await this.panel.webview.postMessage({
+        type: 'scriptsLoaded',
+        payload: {
+          profileId,
+          scripts
+        }
+      });
+    } catch (error) {
+      // The name can still be typed, so the list failing is not a failure of the panel.
+      this.logger.warn('Could not list the scripts of a profile for the script runner.', {
+        profileId,
+        error
+      });
+    }
   }
 
   private async loadLayouts(profileId: string): Promise<void> {
@@ -338,6 +387,13 @@ export class ScriptRunnerPanel {
       };
     }
 
+    if (value.type === 'loadScripts' && profileId) {
+      return {
+        type: 'loadScripts',
+        profileId
+      };
+    }
+
     if (value.type === 'runScript') {
       const payload = parseRunPayload(value.payload);
       if (!payload) {
@@ -417,7 +473,8 @@ export class ScriptRunnerPanel {
       </div>
       <div class="row">
         <label for="scriptNameInput">Script Name</label>
-        <input id="scriptNameInput" type="text" placeholder="MyScript" />
+        <input id="scriptNameInput" type="text" placeholder="MyScript" list="scriptNameList" />
+        <datalist id="scriptNameList"></datalist>
       </div>
       <div class="row">
         <label for="scriptParamInput">Script Parameter (optional)</label>

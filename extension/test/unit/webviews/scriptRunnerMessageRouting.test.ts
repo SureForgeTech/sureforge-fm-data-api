@@ -45,6 +45,7 @@ function open() {
 
   const fmClient = {
     listLayouts: vi.fn(async () => ['Contacts']),
+    listScripts: vi.fn(async () => ['Send Welcome']),
     runScript: vi.fn(async () => ({ response: { scriptResult: 'done' }, messages: [{ code: '0', message: 'OK' }] }))
   };
   const profileStore = {
@@ -79,6 +80,11 @@ describe('Script Runner: message routing', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // The panel reads the feature switch and offline mode from the settings; every test starts
+    // from the defaults, so a test that changes them does not change the next one.
+    vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({
+      get: (_key: string, fallback?: unknown) => fallback
+    } as never);
     (vscode.workspace as unknown as { isTrusted: boolean }).isTrusted = true;
     panel = open();
   });
@@ -120,6 +126,16 @@ describe('Script Runner: message routing', () => {
       await panel.send({ type: 'loadLayouts', profileId: 'p1' });
       expect(panel.fmClient.listLayouts).toHaveBeenCalledWith(profile);
       expect(panel.posted).toContainEqual({ type: 'layoutsLoaded', payload: { profileId: 'p1', layouts: ['Contacts'] } });
+    });
+
+    it('answers "loadScripts" with the scripts of that profile', async () => {
+      await panel.send({ type: 'loadScripts', profileId: 'p1' });
+
+      expect(panel.fmClient.listScripts).toHaveBeenCalledWith(profile);
+      expect(panel.posted).toContainEqual({
+        type: 'scriptsLoaded',
+        payload: { profileId: 'p1', scripts: ['Send Welcome'] }
+      });
     });
 
     it('answers "runScript" with the result of the script', async () => {
@@ -170,6 +186,13 @@ describe('Script Runner: message routing', () => {
       expect(panel.fmClient.runScript).not.toHaveBeenCalled();
     });
 
+    it('ignores "loadScripts" without a profile id', async () => {
+      await panel.send({ type: 'loadScripts' });
+
+      expect(panel.fmClient.listScripts).not.toHaveBeenCalled();
+      expect(panel.posted).toEqual([]);
+    });
+
     it('ignores "loadLayouts" without a profile id', async () => {
       await panel.send({ type: 'loadLayouts' });
       await panel.send({ type: 'loadLayouts', profileId: 42 });
@@ -196,6 +219,46 @@ describe('Script Runner: message routing', () => {
       await panel.send({ type: 'loadLayouts', profileId: 'gone' });
       expect(panel.posted).toContainEqual({ type: 'error', message: 'Connection profile not found.' });
       expect(panel.fmClient.listLayouts).not.toHaveBeenCalled();
+    });
+
+    it('reads no scripts when the runner is switched off, and offers none', async () => {
+      vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({
+        get: (key: string, fallback?: unknown) => (key === 'features.scriptRunner.enabled' ? false : fallback)
+      } as never);
+
+      await panel.send({ type: 'loadScripts', profileId: 'p1' });
+
+      expect(panel.fmClient.listScripts).not.toHaveBeenCalled();
+      expect(panel.posted).toContainEqual({
+        type: 'scriptsLoaded',
+        payload: { profileId: 'p1', scripts: [] }
+      });
+    });
+
+    it('reads no scripts in offline mode, and offers none', async () => {
+      vi.mocked(vscode.workspace.getConfiguration).mockReturnValue({
+        get: (key: string, fallback?: unknown) => (key === 'offline.mode' ? true : fallback)
+      } as never);
+
+      await panel.send({ type: 'loadScripts', profileId: 'p1' });
+
+      expect(panel.fmClient.listScripts).not.toHaveBeenCalled();
+      expect(panel.posted).toContainEqual({
+        type: 'scriptsLoaded',
+        payload: { profileId: 'p1', scripts: [] }
+      });
+    });
+
+    it('logs a script list that cannot be read, and does not fail the panel', async () => {
+      panel.fmClient.listScripts.mockRejectedValueOnce(new Error('scripts unavailable'));
+
+      await panel.send({ type: 'loadScripts', profileId: 'p1' });
+
+      expect(panel.logger.warn).toHaveBeenCalledWith(
+        'Could not list the scripts of a profile for the script runner.',
+        expect.objectContaining({ profileId: 'p1' })
+      );
+      expect(panel.posted).not.toContainEqual(expect.objectContaining({ type: 'error' }));
     });
 
     it('reports layouts that cannot be listed', async () => {
