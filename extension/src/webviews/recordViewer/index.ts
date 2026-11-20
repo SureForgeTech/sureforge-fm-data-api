@@ -6,6 +6,7 @@ import type { FMClient } from '../../services/fmClient';
 import type { Logger } from '../../services/logger';
 import type { ProfileStore } from '../../services/profileStore';
 import type { FileMakerRecord } from '../../types/fm';
+import { recordWithoutScriptErrors, warnAboutRecordScriptErrors } from '../../utils/scriptUx';
 import { buildWebviewCsp, createNonce, profileImageSources, serverOrigin } from '../common/csp';
 import { guardDispatch, requestType } from '../common/dispatch';
 import { getStringField, toRecord } from '../common/messageValidation';
@@ -226,12 +227,15 @@ export class RecordViewerPanel {
         presentation
       ]);
       if (loadVersion !== this.recordLoadVersion) return;
-      let record = loadedRecord;
+      // The record is what the page shows and what Export writes. The script errors travel
+      // beside it in a warning, not inside it.
+      const scriptErrors = loadedRecord.scriptErrors;
+      let record = recordWithoutScriptErrors(loadedRecord);
       const previous = this.lastRecord;
       if (payload.portal && previous?.profileId === payload.profileId && previous.layout === payload.layout && previous.record.recordId === payload.recordId) {
         const portalName = payload.portal;
         record = {
-          ...loadedRecord,
+          ...record,
           portalData: {
             ...previous.record.portalData,
             ...(Object.hasOwn(loadedRecord.portalData ?? {}, portalName)
@@ -248,6 +252,9 @@ export class RecordViewerPanel {
         layout: payload.layout,
         record
       };
+
+      // A script that ran with the read may have reported an error; the record still loaded.
+      warnAboutRecordScriptErrors(scriptErrors);
 
       await this.panel.webview.postMessage({
         type: 'recordLoaded',

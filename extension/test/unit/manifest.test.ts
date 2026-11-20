@@ -73,6 +73,12 @@ describe('extension manifest UX contract', () => {
     }
   });
 
+  it('keeps the commands that only work on a sidebar item out of the Command Palette', () => {
+    for (const name of ['refreshExplorer', 'copyFieldName', 'copyLayoutName']) {
+      expect(palette.get(id(name)), name).toBe('false');
+    }
+  });
+
   it('only references contributed commands from menus and keybindings', () => {
     for (const [menu, entries] of Object.entries(menus)) {
       for (const entry of entries) {

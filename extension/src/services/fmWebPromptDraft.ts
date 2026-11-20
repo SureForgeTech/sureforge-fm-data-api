@@ -213,9 +213,11 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
           draft.fields = draft.fields.filter(({ field }) => field.name !== name);
         }
         draft.unmatched = draft.unmatched.filter((label) => label !== mention.label);
-      } else if (mention.candidates.length === 1) {
-        const existing = draft.fields.find(({ field }) => field.name === mention.candidates[0]!.name);
-        if (existing) existing.required = false;
+      } else {
+        // "Do not require phone" states that phone is not required, so the field belongs to the
+        // form as an optional one. That is the same reading the adjective form gives ("not
+        // required phone"), and the field was dropped before, so the request disappeared.
+        append(mention, false);
       }
       previousEnd = mention.end;
       comma = false;

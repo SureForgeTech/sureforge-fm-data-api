@@ -388,6 +388,130 @@ describe('registerCoreCommands', () => {
     expect(prompts[3]?.validateInput?.('1.5')).toContain('must be at least 1');
   });
 
+  it('copies the exact field name of a sidebar field to the clipboard', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: 'Customer ID', layoutName: 'Contacts' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('Customer ID');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard: Customer ID'
+    );
+  });
+
+  it('keeps the name exactly, with its spaces and its case', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: '  Notes  ' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('  Notes  ');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard:   Notes  '
+    );
+  });
+
+  it('shows the name on one line without changing what it copies', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: 'Name\nWith\nNewlines' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('Name\nWith\nNewlines');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard: Name With Newlines'
+    );
+  });
+
+  it('keeps a long name whole in the clipboard and bounds the message', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+    const longName = 'A'.repeat(500);
+
+    await command('copyFieldName')({ fieldName: longName });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith(longName);
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      `Copied field name to clipboard: ${'A'.repeat(120)}…`
+    );
+  });
+
+  it('does not turn a name into a link in the message, and still shows it', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: '[Copy the field](https://example.invalid/paste)' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('[Copy the field](https://example.invalid/paste)');
+    const message = vi.mocked(vscode.window.showInformationMessage).mock.calls.map((call) => String(call[0])).join('\n');
+    expect(message).not.toMatch(/\]\(/);
+    expect(message).toContain('Copy the field');
+  });
+
+  it('puts a line separator on one line in the message', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: 'Name\u2028With\u2029Separators' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('Name\u2028With\u2029Separators');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard: Name With Separators'
+    );
+  });
+
+  it('cuts a long name on a character boundary', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+    const name = 'B'.repeat(119) + '\u{1F98A}' + 'C'.repeat(10);
+
+    await command('copyFieldName')({ fieldName: name });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith(name);
+    const message = String(vi.mocked(vscode.window.showInformationMessage).mock.calls.at(-1)?.[0]);
+    expect(message).toBe(`Copied field name to clipboard: ${'B'.repeat(119)}…`);
+    expect(message).not.toMatch(/[\uD800-\uDFFF]/);
+  });
+
+  it('says what to do when no field was chosen', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({});
+    await command('copyFieldName')(undefined);
+
+    expect(vscode.env.clipboard.writeText).not.toHaveBeenCalled();
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Choose a field in the FileMaker sidebar to copy its name.'
+    );
+  });
+
+  it('copies the exact layout name of a sidebar layout to the clipboard', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyLayoutName')({ layoutName: ' Order Details ', profileId: 'p1' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith(' Order Details ');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied layout name to clipboard:  Order Details '
+    );
+  });
+
+  it('says what to do when no layout was chosen', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyLayoutName')({});
+    await command('copyLayoutName')(undefined);
+
+    expect(vscode.env.clipboard.writeText).not.toHaveBeenCalled();
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Choose a layout in the FileMaker sidebar to copy its name.'
+    );
+  });
+
   it('warns when a script reported an error next to a find that worked, and stays quiet otherwise', async () => {
     const deps = createSelectionDeps();
     registerCoreCommands(deps);
@@ -406,6 +530,40 @@ describe('registerCoreCommands', () => {
     answers();
     await command('runFindJson')({ profileId: profile.id, layout: 'Contacts' });
     expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
+  });
+
+  it('warns when a script reported an error next to a record that loaded, and keeps the record it opens clean', async () => {
+    const deps = createSelectionDeps();
+    const getRecord = vi.fn().mockResolvedValue({ recordId: '1', fieldData: {}, scriptErrors: [{ phase: 'script', code: '3' }] });
+    Object.assign(deps.fmClient, { getRecord });
+    registerCoreCommands(deps);
+    vi.mocked(vscode.window.showInputBox).mockResolvedValue('1');
+
+    await command('getRecordById')({ profileId: profile.id, layout: 'Contacts' });
+
+    expect(vi.mocked(vscode.window.showWarningMessage).mock.calls.map((call) => String(call[0])).join('\n')).toMatch(
+      /The record loaded, but the script reported error 3/
+    );
+    expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith({
+      language: 'json',
+      content: JSON.stringify({ profile: profile.name, layout: 'Contacts', record: { recordId: '1', fieldData: {} } }, null, 2)
+    });
+  });
+
+  it('says nothing about a record that loaded without a script error', async () => {
+    const deps = createSelectionDeps();
+    const getRecord = vi.fn().mockResolvedValue({ recordId: '1', fieldData: {} });
+    Object.assign(deps.fmClient, { getRecord });
+    registerCoreCommands(deps);
+    vi.mocked(vscode.window.showInputBox).mockResolvedValue('1');
+
+    await command('getRecordById')({ profileId: profile.id, layout: 'Contacts' });
+
+    expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
+    expect(vscode.workspace.openTextDocument).toHaveBeenCalledWith({
+      language: 'json',
+      content: JSON.stringify({ profile: profile.name, layout: 'Contacts', record: { recordId: '1', fieldData: {} } }, null, 2)
+    });
   });
 
   const panels = [

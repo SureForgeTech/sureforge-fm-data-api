@@ -15,6 +15,7 @@ import { extractPortalSpecs, sanitizeCreatePortalData, stripPortalPrefix, type C
 import { buildWebviewCsp, createNonce, profileImageSources, serverOrigin } from '../common/csp';
 import { guardDispatch, requestType } from '../common/dispatch';
 import { getStringField, toRecord } from '../common/messageValidation';
+import { recordWithoutScriptErrors, warnAboutRecordScriptErrors } from '../../utils/scriptUx';
 import {
   deliverSnippet,
   parseRecordRequestPayload,
@@ -323,7 +324,8 @@ export class RecordEditorPanel {
     }
 
     try {
-      const record = await this.fmClient.getRecord(profile, payload.layout, payload.recordId);
+      const loaded = await this.fmClient.getRecord(profile, payload.layout, payload.recordId);
+      const record = recordWithoutScriptErrors(loaded);
 
       const schema = await this.schemaService.getFields(profile, payload.layout);
       this.fieldsByLayout.set(this.layoutKey(payload.profileId, payload.layout), schema.fields);
@@ -336,6 +338,9 @@ export class RecordEditorPanel {
         layout: payload.layout,
         record
       };
+
+      // The record is shown now. A script that ran with the read may have reported an error.
+      warnAboutRecordScriptErrors(loaded.scriptErrors);
 
       await this.panel.webview.postMessage({
         type: 'recordLoaded',
@@ -482,7 +487,10 @@ export class RecordEditorPanel {
       warnAboutScriptErrors('Record saved', saveResult);
 
       try {
-        const refreshedRecord = await this.fmClient.getRecord(profile, payload.layout, payload.recordId);
+        const refreshed = await this.fmClient.getRecord(profile, payload.layout, payload.recordId);
+        // The save above already warned about the scripts that ran with the write, so the
+        // re-read only keeps its script errors out of the record the page shows.
+        const refreshedRecord = recordWithoutScriptErrors(refreshed);
         this.loadedRecord = {
           profileId: payload.profileId,
           layout: payload.layout,

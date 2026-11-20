@@ -24,6 +24,12 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- Create FM Web App offers three more starters — Service Inquiry, Appointment Request and Application — beside Event Registration and Feedback or Request Form. Each one is entirely synthetic, so it opens in the visual editor and previews with invented data without a FileMaker connection.
+
+- Right-click a field in the FileMaker sidebar and choose **Copy Field Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
+
+- Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
+
 - Start Here opens a FileMaker home with the four journeys — Build a Web App, Connect and Test, Browse Data and Help — and an Advanced Tools section for the rest. Each button runs the matching command.
 
 - Create FM Web App starts with a starter: Event Registration or Feedback or Request Form. The starter names the saved app, so choosing the same one again reopens it. Sample fields come first, the wizard resumes by itself after you open a folder or add a first connection, and the sample receipt needs no credentials, code or JSON.
@@ -46,7 +52,15 @@ PR title prefix matches the highest-tier label added:
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
 
+- Drafting a form from a prompt now reads "Do not require phone" as a field of the form that is not required, the same as "not required phone". Before, the field was left out of the form and the request was not reported.
+
 - The private preview's form talks about the submission you are making rather than about a registration, so a feedback or request form does not read as an event registration.
+
+- The connection wizard refuses an account name that contains a colon, because the account name and the password travel together in the sign-in request and a colon would separate them. A colon in the password still works.
+
+- The Record Viewer, the Record Editor and **Get Record by ID** now warn when a script that ran with the record reported an error. The record still loads, as it did before.
+
+- The FileMaker sidebar now says why it could not load layouts, fields or value lists, instead of the same advice for every failure. The reason is the FileMaker error code and what it means, or the kind of connection failure.
 
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 

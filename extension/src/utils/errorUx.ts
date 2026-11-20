@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
-import type { NormalizedError, RequestChainEntry } from '../types/errors';
+import type { NormalizedError, NormalizedErrorKind, RequestChainEntry } from '../types/errors';
+import { getFileMakerErrorInfo } from './fileMakerCodes';
 import { isTrustableCertificateCode } from './networkErrors';
 import { errorMessageText } from './plainText';
 import { normalizeError } from './normalizeError';
@@ -238,6 +239,84 @@ export function toUserErrorMessage(error: unknown, fallbackMessage = 'Unexpected
   return displayErrorMessage(normalizeError(error, { fallbackMessage }).message);
 }
 
+/**
+ * A bounded, single line for a notification that shows a name the user chose to copy. The name
+ * keeps its spaces and its case, because that is what the copy holds; control characters and
+ * line separators are replaced, and link syntax is broken, so that a name cannot break the
+ * message it is shown in.
+ */
+export function notificationText(value: string, maxChars = 120): string {
+  const text = breakLinkSyntax(value.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/gu, ' '));
+  if (text.length <= maxChars) {
+    return text;
+  }
+
+  // Cut on a character boundary, so a symbol is never split in half.
+  const cut = text.slice(0, maxChars);
+  return `${/[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut}…`;
+}
+
+/**
+ * One short line for a place with room for a sentence: what went wrong and the code that
+ * identifies it, so a failure can be understood where it happens instead of only in the log.
+ */
+export function toShortErrorSummary(error: unknown, fallbackMessage = 'Unknown error.'): string {
+  const normalized = normalizeError(error, { fallbackMessage });
+  // Only a FileMaker code is shown as a code. The extension's own names for a failure
+  // (SCRIPT_CANCELLED, PROXY_UNREACHABLE, ...) are not; the network code, the kind or the
+  // message is shown instead.
+  const code = normalized.code !== undefined && /^-?\d+$/.test(normalized.code) ? normalized.code : undefined;
+  const info = code === undefined ? undefined : getFileMakerErrorInfo(code);
+  if (info) {
+    const meaning = info.meaning.replace(/\.$/, '');
+    // Some meanings already name the code; saying it twice reads badly.
+    return meaning.includes(code!) ? meaning : `${meaning} (code ${code})`;
+  }
+  if (code !== undefined) {
+    return `FileMaker error (code ${code})`;
+  }
+  if (normalized.networkCode) {
+    return `${errorKindText(normalized.kind)} (${normalized.networkCode})`;
+  }
+  if (normalized.status !== undefined) {
+    return `${errorKindText(normalized.kind)} (HTTP ${normalized.status})`;
+  }
+  if (normalized.kind !== 'unknown') {
+    return errorKindText(normalized.kind);
+  }
+  // Nothing classifies the failure, so the message is the only description there is.
+  return firstSentence(displayErrorMessage(normalized.message)) || errorKindText(normalized.kind);
+}
+
+/** The kind of failure in words a developer can act on. */
+function errorKindText(kind: NormalizedErrorKind): string {
+  switch (kind) {
+    case 'auth':
+      return 'Sign-in problem';
+    case 'network':
+      return 'Connection problem';
+    case 'validation':
+      return 'Request problem';
+    case 'server':
+      return 'Server problem';
+    case 'timeout':
+      return 'Timed out';
+    case 'cancellation':
+      return 'Cancelled';
+    case 'certificate':
+      return 'Certificate problem';
+    default:
+      return 'Unknown error';
+  }
+}
+
+/** The first sentence of a message, for a place with room for one line. */
+function firstSentence(value: string): string {
+  const text = value.trim();
+  const stop = text.search(/\.\s/);
+  return (stop > 0 ? text.slice(0, stop) : text).trim();
+}
+
 interface RenderErrorReportOptions {
   /** Override the generated-at timestamp. Useful for deterministic tests. */
   generatedAt?: Date;
@@ -371,12 +450,18 @@ function displayErrorMessage(value: string): string {
   // Notifications are plain text; break link syntax without adding visible escape characters.
   // A bare address from a server must not become a clickable link either: a space after the
   // scheme ("https: //host") keeps it readable but stops it being recognised as a link.
-  return errorMessageText(
-    errorMessageText(value)
-      .replace(/\]\(/g, '] (')
-      .replace(/\b([a-z][a-z0-9+.-]*):(?=\/\/)/gi, '$1: ')
-      .replace(/\bwww\.(?=\S)/gi, 'www. ')
-  );
+  return errorMessageText(breakLinkSyntax(errorMessageText(value)));
+}
+
+/**
+ * Break the link syntax in text that goes into a notification, without adding visible escape
+ * characters. A bare address from a server must not become a clickable link either.
+ */
+function breakLinkSyntax(value: string): string {
+  return value
+    .replace(/\]\(/g, '] (')
+    .replace(/\b([a-z][a-z0-9+.-]*):(?=\/\/)/gi, '$1: ')
+    .replace(/\bwww\.(?=\S)/gi, 'www. ');
 }
 
 function markdownErrorMessage(value: string): string {

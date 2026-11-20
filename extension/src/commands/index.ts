@@ -21,6 +21,7 @@ import {
 } from '../utils/jsonValidate';
 import {
   openJsonDocument,
+  parseFieldNameArg,
   parseLayoutArg,
   parseRecordIdArg,
   promptForLayout,
@@ -29,6 +30,8 @@ import {
   showCommandError
 } from './common';
 import { describeScriptErrors } from '../services/responseGuard';
+import { notificationText } from '../utils/errorUx';
+import { recordWithoutScriptErrors, warnAboutRecordScriptErrors } from '../utils/scriptUx';
 import { ConnectionWizardPanel } from '../webviews/connectionWizard';
 import { QueryBuilderPanel } from '../webviews/queryBuilder';
 import { RecordViewerPanel } from '../webviews/recordViewer';
@@ -334,6 +337,28 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
       }
     }),
 
+    vscode.commands.registerCommand('filemakerDataApiTools.copyFieldName', async (arg: unknown) => {
+      const fieldName = parseFieldNameArg(arg);
+      if (!fieldName) {
+        await vscode.window.showWarningMessage('Choose a field in the FileMaker sidebar to copy its name.');
+        return;
+      }
+
+      await vscode.env.clipboard.writeText(fieldName);
+      void vscode.window.showInformationMessage(`Copied field name to clipboard: ${notificationText(fieldName)}`);
+    }),
+
+    vscode.commands.registerCommand('filemakerDataApiTools.copyLayoutName', async (arg: unknown) => {
+      const layoutName = parseLayoutArg(arg).layout;
+      if (!layoutName) {
+        await vscode.window.showWarningMessage('Choose a layout in the FileMaker sidebar to copy its name.');
+        return;
+      }
+
+      await vscode.env.clipboard.writeText(layoutName);
+      void vscode.window.showInformationMessage(`Copied layout name to clipboard: ${notificationText(layoutName)}`);
+    }),
+
     vscode.commands.registerCommand('filemakerDataApiTools.runFindJson', async (arg: unknown) => {
       const selection = await resolveLayoutContext(arg, profileStore, fmClient);
       if (!selection) {
@@ -444,11 +469,13 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
       }
 
       try {
-        const record = await fmClient.getRecord(profile, layout, recordId);
+        const loaded = await fmClient.getRecord(profile, layout, recordId);
+        // The record is shown now. A script that ran with the read may have reported an error.
+        warnAboutRecordScriptErrors(loaded.scriptErrors);
         await openJsonDocument({
           profile: profile.name,
           layout,
-          record
+          record: recordWithoutScriptErrors(loaded)
         });
       } catch (error) {
         await showCommandError(error, {

@@ -2,7 +2,19 @@
 
 ## Unreleased
 
+- Create FM Web App offers three more starters — Service Inquiry, Appointment Request and Application — beside Event Registration and Feedback or Request Form. Each one starts with invented sample data, so it opens in the visual editor and previews without a FileMaker connection, and each asks for the fields its activity needs.
+
 - Describe a form in Create FM Web App and review suggested FileMaker fields in the visual editor.
+
+- The connection wizard refuses an account name that contains a colon. The account name travels in the sign-in request, where a colon separates it from the password, so a colon in the name would quietly change the password the server reads. A colon in the password still works.
+
+- The Record Viewer, the Record Editor and **Get Record by ID** now say so when a script that ran with the record reported an error. The record itself still loads, as it did before.
+
+- The FileMaker sidebar now says why it could not load layouts, fields or value lists, instead of the same advice for every failure. The reason is the FileMaker error code and what it means, or the kind of connection failure.
+
+- Right-click a field in the FileMaker sidebar and choose **Copy Field Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
+
+- Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
 **FileMaker home**
 
@@ -16,6 +28,8 @@
 **FM Web app creation**
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
+
+- Drafting a form from a prompt now reads "Do not require phone" as a field of the form that is not required, the same as "not required phone". Before, the field was left out of the form and the request was not reported.
 
 - Create FM Web App now starts with a starter: **Event Registration** or **Feedback or Request Form**. The starter names the saved app, so choosing the same one again reopens it. Sample fields come first, so a first sample receipt needs no connection, no code and no JSON editing. The wizard resumes by itself after you open a folder or add a first connection.
 

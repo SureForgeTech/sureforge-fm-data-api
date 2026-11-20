@@ -241,6 +241,36 @@ describe('Record Editor: message routing', () => {
     });
   });
 
+  describe('a script that reported an error with the record', () => {
+    const withScriptError = { ...loadedRecord, scriptErrors: [{ phase: 'script' as const, code: '3' }] };
+
+    beforeEach(() => {
+      panel.close();
+      panel = open({ getRecord: async () => withScriptError });
+    });
+
+    it('warns that the record loaded but a script reported an error', async () => {
+      await panel.send({ type: 'loadRecord', payload: { profileId: 'p1', layout: 'Contacts', recordId: '7' } });
+
+      expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+        'The record loaded, but the script reported error 3 (Command is unavailable (for example, wrong operating system or mode)).'
+      );
+    });
+
+    it('keeps the script errors out of the record it posts', async () => {
+      await panel.send({ type: 'loadRecord', payload: { profileId: 'p1', layout: 'Contacts', recordId: '7' } });
+
+      expect(panel.posted).toContainEqual(
+        expect.objectContaining({
+          type: 'recordLoaded',
+          payload: expect.objectContaining({
+            record: loadedRecord
+          })
+        })
+      );
+    });
+  });
+
   describe('the writes reach FileMaker only after the user agrees', () => {
     it('answers "saveRecord" with the saved record and the refreshed one', async () => {
       await panel.send({ type: 'loadRecord', payload: { profileId: 'p1', layout: 'Contacts', recordId: '7' } });

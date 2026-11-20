@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import type { ConnectionProfile } from '../../types/fm';
-import { validateDatabaseName, validateServerUrl } from '../../utils/jsonValidate';
+import { validateAccountName, validateDatabaseName, validateServerUrl } from '../../utils/jsonValidate';
 import { toUserErrorMessage } from '../../utils/errorUx';
 import type { WizardFormData } from './types';
 import type { WizardContext } from './context';
@@ -25,6 +25,21 @@ export async function handleSave(ctx: WizardContext, data: WizardFormData): Prom
         message: dbValidation.error ?? 'Invalid database name.'
       });
       return;
+    }
+
+    // The account name travels in a Basic authentication header, so a colon in it would change
+    // the password the server reads. Only a direct profile sends one.
+    let accountName: string | undefined;
+    if (data.authMode === 'direct') {
+      const accountValidation = validateAccountName(data.username ?? '');
+      if (!accountValidation.ok) {
+        await ctx.panel.webview.postMessage({
+          type: 'saveError',
+          message: accountValidation.error ?? 'Invalid username.'
+        });
+        return;
+      }
+      accountName = accountValidation.value;
     }
 
     let proxyEndpoint: string | undefined;
@@ -92,7 +107,7 @@ export async function handleSave(ctx: WizardContext, data: WizardFormData): Prom
     }
 
     if (data.authMode === 'direct') {
-      profile.username = data.username?.trim();
+      profile.username = accountName;
     } else {
       profile.proxyEndpoint = proxyEndpoint;
     }
