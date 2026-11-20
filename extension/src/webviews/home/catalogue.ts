@@ -32,7 +32,7 @@ export const FILEMAKER_HOME_SECTIONS: HomeSection[] = [
       {
         id: 'build-portal',
         label: 'Build a Portal',
-        description: 'Create or resume an editable registration form for an existing portal.',
+        description: 'Create or resume an editable starter app, with mapping, layout and preview actions.',
         command: 'filemakerDataApiTools.buildPortal'
       }
     ]

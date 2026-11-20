@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Build a Portal now asks which starter the app is for, the same starters Create FM Web App offers, and its create, edit, preview, export and layout actions work on that app. It was fixed to the event registration starter, so a service inquiry, appointment request or application could not be built or resumed with it.
+
 - Drafting a form from a prompt now reads an exclusion that follows the field it is about, so "include email, phone excluded" leaves phone out instead of suggesting it. "Everything but phone" now reads as the exclusion it is, the way "everything except phone" already did, and "leave out", "leaves out" and "left out" leave a field out too.
 
 - Create FM Web App offers three more starters — Service Inquiry, Appointment Request and Application — beside Event Registration and Feedback or Request Form. Each one starts with invented sample data, so it opens in the visual editor and previews without a FileMaker connection, and each asks for the fields its activity needs.

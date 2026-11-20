@@ -1,4 +1,4 @@
-import { intakeDefinitionSchema, layoutDefinitionSchema, stableRecordStringify } from '@fmweb/shared';
+import { intakeDefinitionSchema, intakeStarters, layoutDefinitionSchema, stableRecordStringify } from '@fmweb/shared';
 import { FmWebRegistrationService } from '../services/fmWebRegistrationService';
 import { designerLayoutMetadata } from '../fmweb/fieldMetadata';
 import { writableAppFields } from '../services/fmWebAppModel';
@@ -71,8 +71,14 @@ export function registerFmWebProjectCommands(
         void vscode.window.showWarningMessage('Workspace trust is required to build a portal.'); return;
       }
       try {
+        // The starter names the app, so it comes first, the way the wizard asks for it.
+        const picked = await vscode.window.showQuickPick(
+          intakeStarters.map((item) => ({ label: item.label, description: item.description, starter: item })),
+          { title: 'Build a Portal · Starter', placeHolder: 'What kind of form are you making?', ignoreFocusOut: true });
+        if (!picked) return;
+        const starter = picked.starter;
         const action = await vscode.window.showQuickPick([
-          { label: 'Create or resume event registration', action: 'create', description: 'Sample data; no connection needed' },
+          { label: 'Create or resume the app', action: 'create', description: 'Sample data; no connection needed' },
           { label: 'Edit form and exact field mappings', action: 'edit', description: 'Title, labels, help, required fields and branding' },
           { label: 'Preview saved portal', action: 'preview', description: 'Validate definitions, then start the private sample preview' },
           { label: 'Export app scaffold', action: 'export', description: 'Generate the runtime with saved forms and layouts; preserves edits' },
@@ -80,17 +86,17 @@ export function registerFmWebProjectCommands(
         ], { title: 'Build a Portal', placeHolder: 'Create → edit → preview → submit with invented details' });
         if (!action) return;
         const openDefinition = async (): Promise<void> => {
-          const file = await intakes.definitionPathForEdit('event-registration');
+          const file = await intakes.definitionPathForEdit(starter.id);
           await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(file)));
         };
         if (action.action === 'edit') {
           await openDefinition();
-          try { await intakes.load('event-registration'); }
+          try { await intakes.load(starter.id); }
           catch { void vscode.window.showWarningMessage('The saved portal definition is open for repair. Its schema, sample environment or source mappings are invalid; preview remains unavailable until they are valid.'); }
           return;
         }
         if (action.action === 'layout') {
-          const source = await intakes.layoutForEdit('event-registration');
+          const source = await intakes.layoutForEdit(starter.id);
           if (source.valid) await vscode.commands.executeCommand('filemakerDataApiTools.openLayoutMode', { layoutId: source.id });
           else {
             await vscode.window.showTextDocument(await vscode.workspace.openTextDocument(vscode.Uri.file(source.filePath)));
@@ -100,14 +106,14 @@ export function registerFmWebProjectCommands(
         }
         let saved;
         if (action.action === 'create') {
-          try { saved = await intakes.ensureEventStarter(); }
+          try { saved = await intakes.ensureStarter(starter); }
           catch (error) {
             // A typo must not lock the user out of the very file they need to repair.
             try { await openDefinition(); } catch { throw error; }
             void vscode.window.showWarningMessage('Your existing portal definition was preserved and opened for repair. Check its schema, sample environment and source layout mappings, then resume the starter.');
             return;
           }
-        } else saved = await intakes.load('event-registration');
+        } else saved = await intakes.load(starter.id);
         if (action.action === 'export') {
           await vscode.commands.executeCommand('filemakerDataApiTools.generateFmWebNextApp');
         } else if (action.action === 'preview') {
