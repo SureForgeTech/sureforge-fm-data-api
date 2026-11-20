@@ -12,6 +12,7 @@ import type { SchemaService } from '../services/schemaService';
 import type { SchemaSnapshotStore } from '../services/schemaSnapshotStore';
 import type { ConnectionProfile, FileMakerFieldMetadata, JobRuntimeState } from '../types/fm';
 import { toShortErrorSummary, toUserErrorMessage } from '../utils/errorUx';
+import { fieldType, layoutFieldKind } from '@fmweb/shared/dist/record-edit';
 import { extractValueLists } from '../utils/valueListParser';
 import { describeTlsSettings } from '../utils/tlsProfile';
 
@@ -747,6 +748,14 @@ function toFieldTreeItem(
     descriptionParts.push(field.result);
   }
 
+  // A calculation, a summary, a global and a container cannot be written like an ordinary
+  // field, so the kind is shown with the field. The same table names the kind elsewhere.
+  const kind = layoutFieldKind(field);
+  const sameAsResult = kind === fieldType(field.result);
+  if (kind !== 'normal' && !sameAsResult) {
+    descriptionParts.push(kind);
+  }
+
   if (typeof field.repetitions === 'number') {
     descriptionParts.push(`x${field.repetitions}`);
   }
@@ -754,6 +763,7 @@ function toFieldTreeItem(
   const tooltip = [
     `Field: ${field.name}`,
     field.result ? `Type: ${field.result}` : undefined,
+    kind !== 'normal' && !sameAsResult ? `Kind: ${kind}` : undefined,
     typeof field.repetitions === 'number' ? `Repetitions: ${field.repetitions}` : undefined,
     field.validation ? `Validation: ${JSON.stringify(field.validation)}` : undefined
   ]

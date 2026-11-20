@@ -72,6 +72,39 @@ describe('FMExplorerProvider', () => {
       expect(children).toHaveLength(1);
       expect(children[0]).toMatchObject({ label: ' Name ', fieldName: ' Name ', description: 'text • x3', tooltip: expect.stringContaining('Validation: {"required":true}') });
     });
+    it('says what kind of field it is, so a calculation is not mistaken for an ordinary field', async () => {
+      const { provider } = setup({ supported: true, fields: [
+        { name: 'Name', result: 'text', type: 'normal' },
+        { name: 'Total', result: 'number', type: 'calculation' },
+        { name: 'Count', result: 'number', type: 'summary' },
+        { name: 'Session', result: 'text', type: 'normal', global: true },
+        { name: 'Avatar', result: 'container', type: 'normal' }
+      ] });
+      const children = await provider.getChildren(new FMExplorerItem({ kind: 'fieldsRoot', label: 'Fields', profileId: 'p1', layoutName: 'L' }));
+
+      expect(children.map((child) => [child.label, child.description])).toEqual([
+        ['Name', 'text'],
+        ['Total', 'number • calculation'],
+        ['Count', 'number • summary'],
+        ['Session', 'text • global'],
+        ['Avatar', 'container']
+      ]);
+      expect(children[1]?.tooltip).toContain('Kind: calculation');
+      // A normal field says nothing about its kind, and a container does not repeat its type.
+      expect(children[0]?.tooltip).not.toContain('Kind:');
+      expect(children[4]?.tooltip).not.toContain('Kind:');
+    });
+
+    it('does not say the kind twice when the server writes it in another case', async () => {
+      const { provider } = setup({ supported: true, fields: [
+        { name: 'Avatar', result: 'Container', type: 'normal' }
+      ] });
+      const children = await provider.getChildren(new FMExplorerItem({ kind: 'fieldsRoot', label: 'Fields', profileId: 'p1', layoutName: 'L' }));
+
+      expect(children[0]?.description).toBe('Container');
+      expect(children[0]?.tooltip).not.toContain('Kind:');
+    });
+
     it.each([
       [{ supported: false, fields: [] }, 'Metadata not supported on this server/profile.'],
       [{ supported: true, fields: [], message: 'No fields on layout' }, 'No field metadata found']

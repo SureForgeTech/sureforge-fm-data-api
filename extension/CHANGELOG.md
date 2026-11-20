@@ -10,6 +10,8 @@
 
 - The FileMaker sidebar now says why it could not load layouts, fields or value lists, instead of the same advice for every failure. The reason is the FileMaker error code and what it means, or the kind of connection failure.
 
+- A field in the FileMaker sidebar now says what kind of field it is: calculation, summary, global or container. A calculation, a summary and a container are not written like an ordinary field, so a request that sets one is refused.
+
 - Right-click a field in the FileMaker sidebar and choose **Copy Field Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
 - Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
