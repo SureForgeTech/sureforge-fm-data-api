@@ -151,7 +151,7 @@ export const intakeStarters: readonly IntakeStarter[] = [
     copy: { title: 'Appointment request', description: 'Ask for an appointment.', submitLabel: 'Request appointment', successMessage: 'Sample appointment request accepted. No FileMaker record was created.' },
     example: appointmentRequestExample },
   { id: 'application', label: 'Application', description: 'Collect an application, with contact details and a short statement',
-    copy: { title: 'Application', description: 'Apply.', submitLabel: 'Submit application', successMessage: 'Sample application accepted. No FileMaker record was created.' },
+    copy: { title: 'Application', description: 'Tell us why you are applying.', submitLabel: 'Submit application', successMessage: 'Sample application accepted. No FileMaker record was created.' },
     example: applicationExample }
 ];
 
