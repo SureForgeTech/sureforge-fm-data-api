@@ -97,7 +97,9 @@ portal or website, preview and test it, and publish or manage it. The extension 
 first three, in pieces:
 
 1. **Connect** — Add Connection Profile tests the server before saving it, and the password stays in
-   the OS keychain. *Present and good.*
+   the OS keychain. The test is offered by default and the default policy only warns when it was
+   skipped; a workspace can make a successful test mandatory with
+   `filemaker.connectionWizard.requireTestBeforeSave`. *Present and good.*
 2. **Build** — Create FM Web App offers a starter, then where the fields come from (sample fields, a
    FileMaker layout, or a prompt), then a visual editor. *Present; the starter set is two entries.*
 3. **Preview and test** — a private browser preview with invented data, or a confirmed FileMaker
@@ -116,8 +118,9 @@ which is the shortest route to a working result.
   resumes), but the recovery is invisible until it happens.
 - The prompt-drafting route and the FileMaker-fields route sit in one list, so a user who wants a
   form for a colleague has to read both options to know which is which.
-- Sixty per cent of the commands are only meaningful once a connection exists, but the palette shows
-  them on the same flat list as the four that matter on day one.
+- The commands that only mean something once a connection exists — 39 of the 82, gated on
+  `filemaker.hasProfiles` — are on the same flat list as the four that matter on day one. To
+  reproduce: count the `menus.commandPalette` entries whose `when` is `filemaker.hasProfiles`.
 
 ### What each step of the journey is made of
 
@@ -126,7 +129,7 @@ are about wiring rather than about new machinery.
 
 | Step | Where it lives |
 | --- | --- |
-| Connect | `extension/src/services/profileStore.ts` for the saved profiles, `extension/src/services/secretStore.ts` for the keychain, `extension/src/webviews/connectionWizard/` for the wizard that tests the server before saving it |
+| Connect | `extension/src/services/profileStore.ts` for the saved profiles, `extension/src/services/secretStore.ts` for the keychain, `extension/src/webviews/connectionWizard/` for the wizard that offers to test the server before saving it |
 | Build | `shared/src/intake.ts` for the definition and its validation, `shared/src/intake-starters.ts` for the starters, `extension/src/services/fmWebAppModel.ts` for the app model, `extension/src/webviews/fmWebApp/` for the visual editor |
 | Preview and test | `extension/src/services/fmWebRuntimeGenerator.ts` for the generated app, `runtime-next/` for the Next.js runtime it generates, `extension/src/services/fmWebPreviewProcess.ts` for the private preview server, `extension/src/services/fmBridgeServer.ts` for the local bridge that writes a confirmed submission to FileMaker |
 | Publish or manage | `extension/src/services/fmWebIntakeService.ts` and `extension/src/services/fmWebProjectService.ts` keep the saved app and the project; there is no publishing step |
@@ -179,7 +182,7 @@ Each proposal names the acceptance check that would show it worked. None of them
    commands.
 3. **Shorten the palette to the everyday set.** With a connection the palette lists 58 flat entries.
    The everyday set is already written down in three places in the repository — the home's four
-   journeys, the README's "Common commands" table and the walkthrough's six steps — and is 25
+   journeys, the extension README's "Common commands" table and the walkthrough's six steps — and is 25
    commands. The rest
    stay available in the home and in the palette when `filemaker.advanced.powerUserMode` is on, so no
    capability is removed, only moved.
