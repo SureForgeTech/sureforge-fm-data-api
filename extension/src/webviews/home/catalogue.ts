@@ -290,7 +290,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'connections',
     title: 'Connections',
-    description: 'The tools for this part of the work.',
+    description: 'The connections you have, and what to do with each of them.',
     entries: [
       {
         id: 'copy-connection-diagnosis',
@@ -333,7 +333,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'records-and-queries',
     title: 'Records and queries',
-    description: 'The tools for this part of the work.',
+    description: 'Find, read and change records, and keep the queries you use.',
     entries: [
       {
         id: 'cancel-job',
@@ -436,7 +436,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'schema-and-layouts',
     title: 'Schema and layouts',
-    description: 'The tools for this part of the work.',
+    description: 'What a layout holds, and what the schema cache knows about it.',
     entries: [
       {
         id: 'diff-against-latest-snapshot',
@@ -485,7 +485,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'fm-web-projects',
     title: 'FM Web projects',
-    description: 'The tools for this part of the work.',
+    description: 'The project that holds the web app, its layouts and its preview.',
     entries: [
       {
         id: 'generate-fm-web-layout-page',
@@ -516,7 +516,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'environments',
     title: 'Environments',
-    description: 'The tools for this part of the work.',
+    description: 'Group profiles and compare what the same layout looks like in each.',
     entries: [
       {
         id: 'create-environment-set',
@@ -547,7 +547,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'ai-and-external-tools',
     title: 'AI and external tools',
-    description: 'The tools for this part of the work.',
+    description: 'What the AI tools may do, and how an outside tool reaches them.',
     entries: [
       {
         id: 'set-ai-access',
@@ -578,7 +578,7 @@ export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
   {
     id: 'platform-and-diagnostics',
     title: 'Platform and diagnostics',
-    description: 'The tools for this part of the work.',
+    description: 'What the extension is doing, and the diagnostics it keeps.',
     entries: [
       {
         id: 'copy-field-name',
