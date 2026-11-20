@@ -21,6 +21,7 @@ import {
 } from '../utils/jsonValidate';
 import {
   openJsonDocument,
+  parseFieldNameArg,
   parseLayoutArg,
   parseRecordIdArg,
   promptForLayout,
@@ -29,6 +30,7 @@ import {
   showCommandError
 } from './common';
 import { describeScriptErrors } from '../services/responseGuard';
+import { notificationText } from '../utils/errorUx';
 import { recordWithoutScriptErrors, warnAboutRecordScriptErrors } from '../utils/scriptUx';
 import { ConnectionWizardPanel } from '../webviews/connectionWizard';
 import { QueryBuilderPanel } from '../webviews/queryBuilder';
@@ -333,6 +335,17 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
           logMessage: 'List layouts command failed.'
         });
       }
+    }),
+
+    vscode.commands.registerCommand('filemakerDataApiTools.copyFieldName', async (arg: unknown) => {
+      const fieldName = parseFieldNameArg(arg);
+      if (!fieldName) {
+        await vscode.window.showWarningMessage('Choose a field in the FileMaker sidebar to copy its name.');
+        return;
+      }
+
+      await vscode.env.clipboard.writeText(fieldName);
+      void vscode.window.showInformationMessage(`Copied field name to clipboard: ${notificationText(fieldName)}`);
     }),
 
     vscode.commands.registerCommand('filemakerDataApiTools.runFindJson', async (arg: unknown) => {
