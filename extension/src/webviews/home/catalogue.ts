@@ -284,8 +284,351 @@ export const FILEMAKER_ADVANCED_SECTIONS: HomeSection[] = [
   }
 ];
 
+
+/** The commands the everyday journeys do not cover, so the home is a complete launcher. */
+export const FILEMAKER_TOOL_SECTIONS: HomeSection[] = [
+  {
+    id: 'connections',
+    title: 'Connections',
+    description: 'The connections you have, and what to do with each of them.',
+    entries: [
+      {
+        id: 'copy-connection-diagnosis',
+        label: 'Copy Connection Diagnosis for Bug Report',
+        description: 'Copies the latest connection diagnosis, with a choice to hide the server address.',
+        command: 'filemakerDataApiTools.copyConnectionDiagnosis'
+      },
+      {
+        id: 'disconnect',
+        label: 'Disconnect',
+        description: 'Ends a profile\'s session and clears it as active if selected.',
+        command: 'filemakerDataApiTools.disconnect'
+      },
+      {
+        id: 'edit-connection-profile',
+        label: 'Edit Connection Profile',
+        description: 'Opens a saved profile in the connection wizard, where you can trust or forget a certificate without changing a VS Code setting.',
+        command: 'filemakerDataApiTools.editConnectionProfile'
+      },
+      {
+        id: 'remove-connection-profile',
+        label: 'Remove Connection Profile',
+        description: 'Removes a profile, its saved queries and secrets after confirmation.',
+        command: 'filemakerDataApiTools.removeConnectionProfile'
+      },
+      {
+        id: 'select-active-profile',
+        label: 'Select Active Profile',
+        description: 'Selects the active profile and, in a trusted folder, saves it to the FM Web project (creating the project if needed).',
+        command: 'filemakerDataApiTools.selectActiveProfile'
+      },
+      {
+        id: 'open-connection-menu',
+        label: 'Show Connection Menu',
+        description: 'Offers connection actions from the status bar menu.',
+        command: 'filemakerDataApiTools.openConnectionMenu'
+      }
+    ]
+  },
+  {
+    id: 'records-and-queries',
+    title: 'Records and queries',
+    description: 'Find, read and change records, and keep the queries you use.',
+    entries: [
+      {
+        id: 'cancel-job',
+        label: 'Cancel Job',
+        description: 'Stops sending new work for a running job, waits for pending requests and keeps partial results.',
+        command: 'filemakerDataApiTools.cancelJob'
+      },
+      {
+        id: 'copy-request-as-code',
+        label: 'Copy Request as Code…',
+        description: 'Copies a chosen request as curl, fetch, HTTP, Postman or TypeScript.',
+        command: 'filemakerDataApiTools.copyRequestAsCode'
+      },
+      {
+        id: 'create-record',
+        label: 'Create Record',
+        description: 'Opens the editor in create mode, loads the layout field list, and can add new rows to portals on direct connections.',
+        command: 'filemakerDataApiTools.createRecord'
+      },
+      {
+        id: 'delete-record',
+        label: 'Delete Record',
+        description: 'Deletes a chosen record after confirmation.',
+        command: 'filemakerDataApiTools.deleteRecord'
+      },
+      {
+        id: 'delete-saved-query',
+        label: 'Delete Saved Query',
+        description: 'Removes a selected saved query after confirmation.',
+        command: 'filemakerDataApiTools.deleteSavedQuery'
+      },
+      {
+        id: 'edit-record-by-id',
+        label: 'Edit Record by ID',
+        description: 'Prompts for a record ID and opens the record editor.',
+        command: 'filemakerDataApiTools.editRecordById'
+      },
+      {
+        id: 'export-saved-queries',
+        label: 'Export Saved Queries (JSON)',
+        description: 'Saves the saved-query collection to a JSON file.',
+        command: 'filemakerDataApiTools.exportSavedQueries'
+      },
+      {
+        id: 'get-record-by-id',
+        label: 'Get Record by ID',
+        description: 'Reads one record and opens it as JSON.',
+        command: 'filemakerDataApiTools.getRecordById'
+      },
+      {
+        id: 'import-saved-queries',
+        label: 'Import Saved Queries (JSON)',
+        description: 'Imports saved queries from a chosen JSON file.',
+        command: 'filemakerDataApiTools.importSavedQueries'
+      },
+      {
+        id: 'list-layouts',
+        label: 'List Layouts',
+        description: 'Opens a JSON list of the profile\'s layouts.',
+        command: 'filemakerDataApiTools.listLayouts'
+      },
+      {
+        id: 'open-saved-query',
+        label: 'Open Saved Query',
+        description: 'Loads a saved query into Query Builder.',
+        command: 'filemakerDataApiTools.openSavedQuery'
+      },
+      {
+        id: 'run-find-json',
+        label: 'Run Find (JSON)',
+        description: 'Prompts for find, sort and paging options and opens the result as JSON.',
+        command: 'filemakerDataApiTools.runFindJson'
+      },
+      {
+        id: 'run-saved-query',
+        label: 'Run Saved Query',
+        description: 'Runs a saved find and opens its result as JSON.',
+        command: 'filemakerDataApiTools.runSavedQuery'
+      },
+      {
+        id: 'save-current-query',
+        label: 'Save Current Query',
+        description: 'Asks the open Query Builder to save its current query.',
+        command: 'filemakerDataApiTools.saveCurrentQuery'
+      },
+      {
+        id: 'show-jobs',
+        label: 'Show Jobs',
+        description: 'Lists active and recent jobs once, shows counts and record details, and offers cancellation or Copy failures. After a restart, each saved list keeps at most 1,000 entries and marks any shortened list.',
+        command: 'filemakerDataApiTools.showJobs'
+      },
+      {
+        id: 'upload-container',
+        label: 'Upload to Container',
+        description: 'Uploads a chosen file to a record\'s container field.',
+        command: 'filemakerDataApiTools.uploadContainer'
+      }
+    ]
+  },
+  {
+    id: 'schema-and-layouts',
+    title: 'Schema and layouts',
+    description: 'What a layout holds, and what the schema cache knows about it.',
+    entries: [
+      {
+        id: 'diff-against-latest-snapshot',
+        label: 'Diff Against Latest Snapshot',
+        description: 'Compares current layout fields with its latest saved snapshot.',
+        command: 'filemakerDataApiTools.diffAgainstLatestSnapshot'
+      },
+      {
+        id: 'open-layout-metadata',
+        label: 'Open Layout Metadata',
+        description: 'Opens layout metadata, field count and cache status as JSON.',
+        command: 'filemakerDataApiTools.openLayoutMetadata'
+      },
+      {
+        id: 'open-schema-snapshot-json',
+        label: 'Open Schema Snapshot JSON',
+        description: 'Opens a saved schema snapshot as JSON.',
+        command: 'filemakerDataApiTools.openSchemaSnapshotJson'
+      },
+      {
+        id: 'refresh-explorer',
+        label: 'Refresh Connections',
+        description: 'Refreshes the FileMaker Connections tree.',
+        command: 'filemakerDataApiTools.refreshExplorer'
+      },
+      {
+        id: 'refresh-layout-inspector',
+        label: 'Refresh Layout Inspector',
+        description: 'Reloads the currently inspected layout.',
+        command: 'filemakerDataApiTools.refreshLayoutInspector'
+      },
+      {
+        id: 'refresh-schema-cache',
+        label: 'Refresh Schema Cache',
+        description: 'Clears schema and client layout caches and refreshes Connections.',
+        command: 'filemakerDataApiTools.refreshSchemaCache'
+      },
+      {
+        id: 'select-layout-for-inspector',
+        label: 'Select Layout for Inspector',
+        description: 'Selects a layout and focuses the Layout Inspector.',
+        command: 'filemakerDataApiTools.selectLayoutForInspector'
+      }
+    ]
+  },
+  {
+    id: 'fm-web-projects',
+    title: 'FM Web projects',
+    description: 'The project that holds the web app, its layouts and its preview.',
+    entries: [
+      {
+        id: 'generate-fm-web-layout-page',
+        label: 'Generate FM Web Layout Page',
+        description: 'Writes a saved layout for the preview, including which fields can be edited.',
+        command: 'filemakerDataApiTools.generateFmWebLayoutPage'
+      },
+      {
+        id: 'generate-fm-web-next-app',
+        label: 'Generate FM Web Next.js App',
+        description: 'Generates or updates the local preview app and its shared field controls.',
+        command: 'filemakerDataApiTools.generateFmWebNextApp'
+      },
+      {
+        id: 'open-layout-mode',
+        label: 'Open FM Web Layout Mode',
+        description: 'Opens the visual editor for saved FM Web layouts.',
+        command: 'filemakerDataApiTools.openLayoutMode'
+      },
+      {
+        id: 'start-fm-web-preview-server',
+        label: 'Start FM Web Preview Server',
+        description: 'Asks before installing and starting a clean private preview, then opens a one-time browser link.',
+        command: 'filemakerDataApiTools.startFmWebPreviewServer'
+      }
+    ]
+  },
+  {
+    id: 'environments',
+    title: 'Environments',
+    description: 'Group profiles and compare what the same layout looks like in each.',
+    entries: [
+      {
+        id: 'create-environment-set',
+        label: 'Create Environment Set',
+        description: 'Groups at least two profiles for comparison.',
+        command: 'filemakerDataApiTools.createEnvironmentSet'
+      },
+      {
+        id: 'diff-layout-across-environments',
+        label: 'Diff Layout Across Environments',
+        description: 'Shows field differences for one layout across an environment set.',
+        command: 'filemakerDataApiTools.diffLayoutAcrossEnvironments'
+      },
+      {
+        id: 'export-environment-comparison-report',
+        label: 'Export Environment Comparison Report',
+        description: 'Saves an environment comparison as JSON or Markdown.',
+        command: 'filemakerDataApiTools.exportEnvironmentComparisonReport'
+      },
+      {
+        id: 'open-environment-set-json',
+        label: 'Open Environment Set JSON',
+        description: 'Opens a selected environment set\'s definition as JSON.',
+        command: 'filemakerDataApiTools.openEnvironmentSetJson'
+      }
+    ]
+  },
+  {
+    id: 'ai-and-external-tools',
+    title: 'AI and external tools',
+    description: 'What the AI tools may do, and how an outside tool reaches them.',
+    entries: [
+      {
+        id: 'set-ai-access',
+        label: 'Set AI Access for Connection',
+        description: 'Chooses no AI access, read access or write access for a profile.',
+        command: 'filemakerDataApiTools.setAiAccess'
+      },
+      {
+        id: 'new-ai-session',
+        label: 'Start New AI Session',
+        description: 'Resets AI quotas, write counters and layout approvals after confirmation.',
+        command: 'filemakerDataApiTools.newAiSession'
+      },
+      {
+        id: 'toggle-ai-server',
+        label: 'Start/Stop AI Server for External Tools',
+        description: 'Starts or stops this window\'s local MCP server and remembers that choice.',
+        command: 'filemakerDataApiTools.toggleAiServer'
+      },
+      {
+        id: 'toggle-ai-kill-switch',
+        label: 'Switch AI Tools Off or On',
+        description: 'Stops AI tools immediately or restores them after confirmation.',
+        command: 'filemakerDataApiTools.toggleAiKillSwitch'
+      }
+    ]
+  },
+  {
+    id: 'platform-and-diagnostics',
+    title: 'Platform and diagnostics',
+    description: 'What the extension is doing, and the diagnostics it keeps.',
+    entries: [
+      {
+        id: 'copy-field-name',
+        label: 'Copy Field Name',
+        description: 'Copies the exact FileMaker name of a field in the sidebar to the clipboard.',
+        command: 'filemakerDataApiTools.copyFieldName'
+      },
+      {
+        id: 'copy-layout-name',
+        label: 'Copy Layout Name',
+        description: 'Copies the exact FileMaker name of a layout in the sidebar to the clipboard.',
+        command: 'filemakerDataApiTools.copyLayoutName'
+      },
+      {
+        id: 'open-diagnostics-dashboard',
+        label: 'Open Diagnostics Dashboard',
+        description: 'Opens request metrics and recent request history in a dashboard.',
+        command: 'filemakerDataApiTools.openDiagnosticsDashboard'
+      },
+      {
+        id: 'refresh-offline-cache',
+        label: 'Refresh Offline Metadata Cache',
+        description: 'Reads layouts and metadata into the offline cache.',
+        command: 'filemakerDataApiTools.refreshOfflineCache'
+      },
+      {
+        id: 'reload-plugins',
+        label: 'Reload Plugins',
+        description: 'Reloads configured workspace plugins.',
+        command: 'filemakerDataApiTools.reloadPlugins'
+      },
+      {
+        id: 'show-circuit-breaker-status',
+        label: 'Show Circuit Breaker Status',
+        description: 'Opens a Markdown report of connection circuit breakers.',
+        command: 'filemakerDataApiTools.showCircuitBreakerStatus'
+      },
+      {
+        id: 'start-here',
+        label: 'Start Here',
+        description: 'Opens the FileMaker home: Build a Web App, Connect and Test, Browse Data, Help, and the advanced tools.',
+        command: 'filemakerDataApiTools.startHere'
+      }
+    ]
+  }
+];
+
 /** Every command the home can run. */
 export const FILEMAKER_HOME_COMMANDS: string[] = [
   ...FILEMAKER_HOME_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command)),
-  ...FILEMAKER_ADVANCED_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command))
+  ...FILEMAKER_ADVANCED_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command)),
+  ...FILEMAKER_TOOL_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command))
 ];

@@ -26,6 +26,8 @@ PR title prefix matches the highest-tier label added:
 
 - Build a Portal now asks which starter the app is for, the same starters Create FM Web App offers, and its create, edit, preview, export and layout actions work on that app. It was fixed to the event registration starter, so a service inquiry, appointment request or application could not be built or resumed with it.
 
+- The FileMaker home now names every command the extension contributes, so the advanced tools are one click away in the home as well as in the Command Palette. The home used to name 34 of the 82 commands, which left 22 of them reachable only from the palette.
+
 - Create FM Web App offers three more starters — Service Inquiry, Appointment Request and Application — beside Event Registration and Feedback or Request Form. Each one is entirely synthetic, so it opens in the visual editor and previews with invented data without a FileMaker connection.
 
 - Right-click a field in the FileMaker sidebar and choose **Copy Field Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
