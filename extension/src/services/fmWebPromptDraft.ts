@@ -182,7 +182,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
           // "everything but phone" is the same request as "everything except phone": the word before
           // the "but" says that the items are all of them, so what follows is left out. A plain
           // "but" reverses the polarity instead.
-          negated = directive[5] === 'but' && /\b(?:everything|all)\s*$/.test(before.slice(0, directive.index))
+          negated = directive[5] === 'but' && /\b(?:everything|all)\b/.test(before.slice(0, directive.index))
             ? 'exclude' : undefined;
         }
       }
