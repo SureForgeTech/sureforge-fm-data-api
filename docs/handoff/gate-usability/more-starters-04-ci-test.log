@@ -1,0 +1,160 @@
+TAP version 13
+# Subtest: the first-run journey removes its profile before later journeys use the same session
+ok 1 - the first-run journey removes its profile before later journeys use the same session
+  ---
+  duration_ms: 1.676334
+  type: 'test'
+  ...
+# Subtest: the CSV journey answers the format picker before expecting a started job
+ok 2 - the CSV journey answers the format picker before expecting a started job
+  ---
+  duration_ms: 2.25825
+  type: 'test'
+  ...
+# Subtest: the packaged FM Web template contains source and matching hashes, with local state excluded
+ok 3 - the packaged FM Web template contains source and matching hashes, with local state excluded
+  ---
+  duration_ms: 46.547417
+  type: 'test'
+  ...
+# Subtest: a linked source refuses the build without replacing the previous complete template
+ok 4 - a linked source refuses the build without replacing the previous complete template
+  ---
+  duration_ms: 17.492625
+  type: 'test'
+  ...
+# Subtest: a missing required source or a linked output refuses instead of producing a partial kit
+ok 5 - a missing required source or a linked output refuses instead of producing a partial kit
+  ---
+  duration_ms: 8.121583
+  type: 'test'
+  ...
+# Subtest: both CI test jobs run workspace tests after shared is built
+ok 6 - both CI test jobs run workspace tests after shared is built
+  ---
+  duration_ms: 0.323834
+  type: 'test'
+  ...
+# Subtest: the required build-test context gates Windows and Ubuntu checks
+ok 7 - the required build-test context gates Windows and Ubuntu checks
+  ---
+  duration_ms: 5.095375
+  type: 'test'
+  ...
+# Subtest: strict E2E fails instead of skipping when its VSIX prerequisite is absent
+ok 8 - strict E2E fails instead of skipping when its VSIX prerequisite is absent
+  ---
+  duration_ms: 367.539917
+  type: 'test'
+  ...
+# Subtest: strict real VS Code E2E runs weekly, on demand and before release packaging
+ok 9 - strict real VS Code E2E runs weekly, on demand and before release packaging
+  ---
+  duration_ms: 0.288209
+  type: 'test'
+  ...
+# Subtest: the first-run smoke journey repeats in CI on Linux, against the mock only
+ok 10 - the first-run smoke journey repeats in CI on Linux, against the mock only
+  ---
+  duration_ms: 0.459917
+  type: 'test'
+  ...
+# Subtest: the weekly full real-desktop suite still gates the release package
+ok 11 - the weekly full real-desktop suite still gates the release package
+  ---
+  duration_ms: 0.040417
+  type: 'test'
+  ...
+# Subtest: the root lint and coverage gates reach every workspace
+ok 12 - the root lint and coverage gates reach every workspace
+  ---
+  duration_ms: 1.185
+  type: 'test'
+  ...
+# Subtest: the lint guard accepts a manifest lint script that really runs eslint over files
+ok 13 - the lint guard accepts a manifest lint script that really runs eslint over files
+  ---
+  duration_ms: 0.419875
+  type: 'test'
+  ...
+# Subtest: the lint guard rejects a lint script that only pretends to lint
+ok 14 - the lint guard rejects a lint script that only pretends to lint
+  ---
+  duration_ms: 0.969458
+  type: 'test'
+  ...
+# Subtest: the lint guard rejects a lint run without files, without --max-warnings=0, or without a lint script
+ok 15 - the lint guard rejects a lint run without files, without --max-warnings=0, or without a lint script
+  ---
+  duration_ms: 0.1175
+  type: 'test'
+  ...
+# Subtest: only PR runs cancel predecessors; branch pushes do not duplicate PR runs
+ok 16 - only PR runs cancel predecessors; branch pushes do not duplicate PR runs
+  ---
+  duration_ms: 0.073875
+  type: 'test'
+  ...
+# Subtest: CI checks the mock contract and enforces a 3 MiB VSIX budget
+ok 17 - CI checks the mock contract and enforces a 3 MiB VSIX budget
+  ---
+  duration_ms: 0.090875
+  type: 'test'
+  ...
+# Subtest: required CI uses hosted runners without depending on repository runner variables
+ok 18 - required CI uses hosted runners without depending on repository runner variables
+  ---
+  duration_ms: 0.150875
+  type: 'test'
+  ...
+# Subtest: both workflows use the trusted composite GitHub CLI action
+ok 19 - both workflows use the trusted composite GitHub CLI action
+  ---
+  duration_ms: 2.91
+  type: 'test'
+  ...
+# Subtest: Dependabot does not ignore uuid when neither lockfile contains it
+ok 20 - Dependabot does not ignore uuid when neither lockfile contains it
+  ---
+  duration_ms: 5.443959
+  type: 'test'
+  ...
+# Subtest: the secret rotation reminder tests the parser, installs nothing and files issues with narrow permissions
+ok 21 - the secret rotation reminder tests the parser, installs nothing and files issues with narrow permissions
+  ---
+  duration_ms: 2.550375
+  type: 'test'
+  ...
+# Subtest: CI runs the rotation calendar tests on every pull request
+ok 22 - CI runs the rotation calendar tests on every pull request
+  ---
+  duration_ms: 0.061916
+  type: 'test'
+  ...
+# Subtest: the parser tests are named one by one, because Node 22 cannot run a directory
+ok 23 - the parser tests are named one by one, because Node 22 cannot run a directory
+  ---
+  duration_ms: 1.413791
+  type: 'test'
+  ...
+# Subtest: the secret rotation reminder stays monthly, dry by default and serialized
+ok 24 - the secret rotation reminder stays monthly, dry by default and serialized
+  ---
+  duration_ms: 1.398208
+  type: 'test'
+  ...
+# Subtest: Open VS X publishing fails closed: environment-gated, read-only, token only in step env
+ok 25 - Open VS X publishing fails closed: environment-gated, read-only, token only in step env
+  ---
+  duration_ms: 0.204875
+  type: 'test'
+  ...
+1..25
+# tests 25
+# suites 0
+# pass 25
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 552.561459
