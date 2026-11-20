@@ -240,6 +240,23 @@ export function toUserErrorMessage(error: unknown, fallbackMessage = 'Unexpected
 }
 
 /**
+ * A bounded, single line for a notification that shows a name the user chose to copy. The name
+ * keeps its spaces and its case, because that is what the copy holds; control characters and
+ * line separators are replaced, and link syntax is broken, so that a name cannot break the
+ * message it is shown in.
+ */
+export function notificationText(value: string, maxChars = 120): string {
+  const text = breakLinkSyntax(value.replace(/[\p{Cc}\p{Cf}\p{Zl}\p{Zp}]+/gu, ' '));
+  if (text.length <= maxChars) {
+    return text;
+  }
+
+  // Cut on a character boundary, so a symbol is never split in half.
+  const cut = text.slice(0, maxChars);
+  return `${/[\uD800-\uDBFF]$/.test(cut) ? cut.slice(0, -1) : cut}…`;
+}
+
+/**
  * One short line for a place with room for a sentence: what went wrong and the code that
  * identifies it, so a failure can be understood where it happens instead of only in the log.
  */
@@ -433,12 +450,18 @@ function displayErrorMessage(value: string): string {
   // Notifications are plain text; break link syntax without adding visible escape characters.
   // A bare address from a server must not become a clickable link either: a space after the
   // scheme ("https: //host") keeps it readable but stops it being recognised as a link.
-  return errorMessageText(
-    errorMessageText(value)
-      .replace(/\]\(/g, '] (')
-      .replace(/\b([a-z][a-z0-9+.-]*):(?=\/\/)/gi, '$1: ')
-      .replace(/\bwww\.(?=\S)/gi, 'www. ')
-  );
+  return errorMessageText(breakLinkSyntax(errorMessageText(value)));
+}
+
+/**
+ * Break the link syntax in text that goes into a notification, without adding visible escape
+ * characters. A bare address from a server must not become a clickable link either.
+ */
+function breakLinkSyntax(value: string): string {
+  return value
+    .replace(/\]\(/g, '] (')
+    .replace(/\b([a-z][a-z0-9+.-]*):(?=\/\/)/gi, '$1: ')
+    .replace(/\bwww\.(?=\S)/gi, 'www. ');
 }
 
 function markdownErrorMessage(value: string): string {

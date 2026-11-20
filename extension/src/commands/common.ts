@@ -175,6 +175,19 @@ export function parseLayoutArg(arg: unknown): LayoutCommandArg {
 }
 
 /**
+ * The exact FileMaker field name of a sidebar item. The name is kept exactly as the server sent
+ * it, because that is the name a request or a script has to use.
+ */
+export function parseFieldNameArg(arg: unknown): string | undefined {
+  if (!arg || typeof arg !== 'object') {
+    return undefined;
+  }
+
+  const value = arg as { fieldName?: unknown };
+  return typeof value.fieldName === 'string' && value.fieldName.length > 0 ? value.fieldName : undefined;
+}
+
+/**
  * Runs a task behind a progress notification so long operations show that work
  * is under way. Not cancellable: the services underneath take no cancel token.
  */

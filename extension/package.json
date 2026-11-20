@@ -229,6 +229,11 @@
         "category": "FileMaker"
       },
       {
+        "command": "filemakerDataApiTools.copyFieldName",
+        "title": "Copy Field Name",
+        "category": "FileMaker"
+      },
+      {
         "command": "filemakerDataApiTools.copyConnectionDiagnosis",
         "title": "Copy Connection Diagnosis for Bug Report",
         "category": "FileMaker"
@@ -706,6 +711,11 @@
           "group": "inline@2"
         },
         {
+          "command": "filemakerDataApiTools.copyFieldName",
+          "when": "view == filemakerExplorer && viewItem == fmField",
+          "group": "1_copy@1"
+        },
+        {
           "command": "filemakerDataApiTools.openQueryBuilder",
           "when": "view == filemakerExplorer && viewItem == fmLayout",
           "group": "1_records@1"
@@ -830,6 +840,10 @@
         {
           "command": "filemakerDataApiTools.testMyServer",
           "when": "filemaker.hasProfiles"
+        },
+        {
+          "command": "filemakerDataApiTools.copyFieldName",
+          "when": "false"
         },
         {
           "command": "filemakerDataApiTools.refreshExplorer",

@@ -388,6 +388,105 @@ describe('registerCoreCommands', () => {
     expect(prompts[3]?.validateInput?.('1.5')).toContain('must be at least 1');
   });
 
+  it('copies the exact field name of a sidebar field to the clipboard', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: 'Customer ID', layoutName: 'Contacts' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('Customer ID');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard: Customer ID'
+    );
+  });
+
+  it('keeps the name exactly, with its spaces and its case', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: '  Notes  ' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('  Notes  ');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard:   Notes  '
+    );
+  });
+
+  it('shows the name on one line without changing what it copies', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: 'Name\nWith\nNewlines' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('Name\nWith\nNewlines');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard: Name With Newlines'
+    );
+  });
+
+  it('keeps a long name whole in the clipboard and bounds the message', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+    const longName = 'A'.repeat(500);
+
+    await command('copyFieldName')({ fieldName: longName });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith(longName);
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      `Copied field name to clipboard: ${'A'.repeat(120)}…`
+    );
+  });
+
+  it('does not turn a name into a link in the message, and still shows it', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: '[Copy the field](https://example.invalid/paste)' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('[Copy the field](https://example.invalid/paste)');
+    const message = vi.mocked(vscode.window.showInformationMessage).mock.calls.map((call) => String(call[0])).join('\n');
+    expect(message).not.toMatch(/\]\(/);
+    expect(message).toContain('Copy the field');
+  });
+
+  it('puts a line separator on one line in the message', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({ fieldName: 'Name\u2028With\u2029Separators' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith('Name\u2028With\u2029Separators');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied field name to clipboard: Name With Separators'
+    );
+  });
+
+  it('cuts a long name on a character boundary', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+    const name = 'B'.repeat(119) + '\u{1F98A}' + 'C'.repeat(10);
+
+    await command('copyFieldName')({ fieldName: name });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith(name);
+    const message = String(vi.mocked(vscode.window.showInformationMessage).mock.calls.at(-1)?.[0]);
+    expect(message).toBe(`Copied field name to clipboard: ${'B'.repeat(119)}…`);
+    expect(message).not.toMatch(/[\uD800-\uDFFF]/);
+  });
+
+  it('says what to do when no field was chosen', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyFieldName')({});
+    await command('copyFieldName')(undefined);
+
+    expect(vscode.env.clipboard.writeText).not.toHaveBeenCalled();
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Choose a field in the FileMaker sidebar to copy its name.'
+    );
+  });
+
   it('warns when a script reported an error next to a find that worked, and stays quiet otherwise', async () => {
     const deps = createSelectionDeps();
     registerCoreCommands(deps);
