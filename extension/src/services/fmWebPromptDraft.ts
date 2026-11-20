@@ -44,6 +44,22 @@ interface Mention {
   candidates: DesignerFieldMetadata[];
 }
 
+/**
+ * The words that leave a field out when they follow it: "phone excluded", "phone is excluded" and
+ * "phone left out" all say the same thing. Only the forms that come after their object are here.
+ * The words that come before it - "without", "no", "omit", "skip" - are read from the text before
+ * the field instead, because in "include email without phone" the "without" belongs to phone, and
+ * reading it as if it followed email would drop email as well.
+ */
+const EXCLUSION_AFTER = /^\s*(?:(?:is|are|was|were|to be)\s+)?(?:excluded|omitted|skipped|left out)\b/;
+
+/**
+ * The words that say the list is complete, so that what follows a "but" is left out: "everything",
+ * "all", "all of them", "all fields". The word has to sit right before the "but", because "all" also
+ * begins a partitive phrase - "for all attendees" - that says nothing about what follows.
+ */
+const QUANTIFIER = /\b(?:everything|all(?:\s+of\s+(?:them|it))?(?:\s+(?:the\s+)?(?:fields|field))?)\s*$/;
+
 /** A requirement word, and whether the prompt negated it. "not required" means optional. */
 function qualifier(value: string, negated = false): boolean | undefined {
   if (/^(?:require|required|must collect)$/.test(value)) return !negated;
@@ -164,14 +180,24 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       // Negation continues through "or collect" and ends at an explicit positive instruction.
       // A bare "not" negates a field ("include email but not phone"). It does not negate a requirement
       // ("not required", "not strictly required") and it is not an emphatic inclusion ("not only", "not just").
-      const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leaving out|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
+      const directives = /\b(?:(do not|don t|dont|never|not(?!\s+(?:only|just|merely|simply)\b)(?!\s+(?:\w+\s+)?(?:required|optional)\b))(?:\s+(includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))?|(exclud(?:e|es|ed|ing)|omit(?:s|ted|ting)?|without|skip(?:s|ped|ping)?|no(?: need for)?|leav(?:e|es|ing) out|left out|except)|(or\s+)?(but|includ(?:e|es|ed|ing)|add(?:s|ed|ing)?|collect(?:s|ed|ing)?|requir(?:e|es|ing)|ask(?:s|ed|ing)? for))\b/g;
       for (const directive of before.matchAll(directives)) {
         if (directive[1] || directive[3]) {
           negated = directive[2] === 'require' ? 'optional' : 'exclude';
         } else if (directive[4] && negated && directive[5] !== 'but') {
           negated = directive[5] === 'require' ? 'optional' : 'exclude';
         } else {
-          negated = undefined;
+          // "everything but phone" is the same request as "everything except phone": the words before
+          // the "but" say that the items are all of them, so what follows is left out. The quantifier
+          // has to sit right before the "but", because "all" also begins a partitive phrase - "for all
+          // attendees" - that says nothing about what follows. A requirement after the "but" says the
+          // items are still wanted, one way or another: "all the fields but keep email optional".
+          // A plain "but" reverses the polarity instead.
+          const rest = before.slice(directive.index + directive[0].length).trim();
+          negated = directive[5] === 'but'
+            && !/\b(?:required|optional)\b/.test(`${rest} ${after}`)
+            && QUANTIFIER.test(before.slice(0, directive.index))
+            ? 'exclude' : undefined;
         }
       }
       // The head clause's own polarity starts the list's anchor.
@@ -180,6 +206,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const suffix = /^((?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
       const requirement = prefix ? qualifier(prefix[2] ?? '', Boolean(prefix[1]))
         : suffix ? qualifier(suffix[3] ?? '', Boolean(suffix[2])) : undefined;
+      // An exclusion that follows the field applies to that field: "include email, phone excluded."
+      // The text after a mention stops at the next mention, so it cannot reach a later field.
+      const excludedAfter = EXCLUSION_AFTER.test(after);
       // A requirement stated after the list states the rule for its subject. The subject decides how far the
       // requirement reaches: a plural copula ("Name and email are required.") names the whole list, a bare
       // word ("email and phone required") names the coordinated phrase before it, and a negation ("notes not
@@ -188,7 +217,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const singular = copula !== undefined && /^(?:is|as)\s/.test(copula);
       const negatedQualifier = !prefix && suffix !== null && Boolean(suffix[2]);
       const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier && !singular;
-      if (!negated) {
+      if (!negated && !excludedAfter) {
         const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
         if (entry) {
           // The coordinated chain: the fields joined by "and" or "as well as", and the fields of a plain
@@ -205,7 +234,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
             }
           }
         }
-      } else if (negated === 'exclude') {
+      } else if (negated === 'exclude' || excludedAfter) {
         // An excluded field ends the coordinated phrase it belonged to.
         chain = { members: [], coordinated: false };
         if (mention.candidates.length === 1) {

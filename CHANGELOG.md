@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- Create FM Web App offers three more starters — Service Inquiry, Appointment Request and Application — beside Event Registration and Feedback or Request Form. Each one is entirely synthetic, so it opens in the visual editor and previews with invented data without a FileMaker connection.
+
 - Right-click a field in the FileMaker sidebar and choose **Copy Field Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
 - Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
@@ -49,6 +51,8 @@ PR title prefix matches the highest-tier label added:
 - Added a private event-registration sample that reuses FM Web fields, validates submissions on both sides and reports duplicate or uncertain outcomes without automatic write retries. It uses a synthetic adapter, not a FileMaker server.
 
 ### [FIX]
+
+- Drafting a form from a prompt now reads an exclusion that follows the field it is about, so "include email, phone excluded" leaves phone out instead of suggesting it. "Everything but phone" now reads as the exclusion it is, the way "everything except phone" already did, and "leave out", "leaves out" and "left out" leave a field out too.
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
 
