@@ -229,6 +229,11 @@
         "category": "FileMaker"
       },
       {
+        "command": "filemakerDataApiTools.copyLayoutName",
+        "title": "Copy Layout Name",
+        "category": "FileMaker"
+      },
+      {
         "command": "filemakerDataApiTools.copyFieldName",
         "title": "Copy Field Name",
         "category": "FileMaker"
@@ -711,6 +716,11 @@
           "group": "inline@2"
         },
         {
+          "command": "filemakerDataApiTools.copyLayoutName",
+          "when": "view == filemakerExplorer && viewItem == fmLayout",
+          "group": "1_copy@1"
+        },
+        {
           "command": "filemakerDataApiTools.copyFieldName",
           "when": "view == filemakerExplorer && viewItem == fmField",
           "group": "1_copy@1"
@@ -840,6 +850,10 @@
         {
           "command": "filemakerDataApiTools.testMyServer",
           "when": "filemaker.hasProfiles"
+        },
+        {
+          "command": "filemakerDataApiTools.copyLayoutName",
+          "when": "false"
         },
         {
           "command": "filemakerDataApiTools.copyFieldName",

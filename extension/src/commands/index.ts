@@ -348,6 +348,17 @@ export function registerCoreCommands(deps: RegisterCoreCommandDeps): vscode.Disp
       void vscode.window.showInformationMessage(`Copied field name to clipboard: ${notificationText(fieldName)}`);
     }),
 
+    vscode.commands.registerCommand('filemakerDataApiTools.copyLayoutName', async (arg: unknown) => {
+      const layoutName = parseLayoutArg(arg).layout;
+      if (!layoutName) {
+        await vscode.window.showWarningMessage('Choose a layout in the FileMaker sidebar to copy its name.');
+        return;
+      }
+
+      await vscode.env.clipboard.writeText(layoutName);
+      void vscode.window.showInformationMessage(`Copied layout name to clipboard: ${notificationText(layoutName)}`);
+    }),
+
     vscode.commands.registerCommand('filemakerDataApiTools.runFindJson', async (arg: unknown) => {
       const selection = await resolveLayoutContext(arg, profileStore, fmClient);
       if (!selection) {

@@ -487,6 +487,31 @@ describe('registerCoreCommands', () => {
     );
   });
 
+  it('copies the exact layout name of a sidebar layout to the clipboard', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyLayoutName')({ layoutName: ' Order Details ', profileId: 'p1' });
+
+    expect(vscode.env.clipboard.writeText).toHaveBeenCalledWith(' Order Details ');
+    expect(vscode.window.showInformationMessage).toHaveBeenCalledWith(
+      'Copied layout name to clipboard:  Order Details '
+    );
+  });
+
+  it('says what to do when no layout was chosen', async () => {
+    const deps = createSelectionDeps();
+    registerCoreCommands(deps);
+
+    await command('copyLayoutName')({});
+    await command('copyLayoutName')(undefined);
+
+    expect(vscode.env.clipboard.writeText).not.toHaveBeenCalled();
+    expect(vscode.window.showWarningMessage).toHaveBeenCalledWith(
+      'Choose a layout in the FileMaker sidebar to copy its name.'
+    );
+  });
+
   it('warns when a script reported an error next to a find that worked, and stays quiet otherwise', async () => {
     const deps = createSelectionDeps();
     registerCoreCommands(deps);
