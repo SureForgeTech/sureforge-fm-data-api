@@ -130,6 +130,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       inherited = undefined;
       negated = undefined;
       comma = false;
+      // A sentence ends the list, so a comma after it points at nothing.
+      commaTarget = undefined;
+      lastAppended = undefined;
       anchorNegated = undefined;
       chain = { members: [], coordinated: false };
       headPending = true;
@@ -278,9 +281,12 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       if (commaTarget && EXCLUSION_AFTER.test(clause)) {
         draft.fields = draft.fields.filter(({ field }) => field.name !== commaTarget!.field.name);
         chain = { members: [], coordinated: false };
-        lastAppended = undefined;
         comma = false;
       }
+      // A clause that names no field adds no field, so a comma after it points at nothing. The
+      // marker must not remove a field the user asked for, because it names a field that is not
+      // the one before it.
+      lastAppended = undefined;
       commaTarget = undefined;
       continue;
     }
