@@ -398,4 +398,40 @@ describe('prompt form suggestions', () => {
       { name: 'Email' }, { name: 'Phone' }, { name: 'Notes' }
     ]).fields.map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Notes', false]]);
   });
+
+  it('reads a quantifier that counts the fields', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    // "all of the fields" says the same as "all fields" and "everything".
+    expect(suggestPromptFields('Include all of the fields but phone.', fields).fields).toEqual([]);
+    expect(suggestPromptFields('Include all of the fields but phone, include email.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+  });
+
+  it('reads an exclusion that follows a comma', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    // The comma ends the list, and the marker after it names the item before it.
+    expect(suggestPromptFields('Include email, phone, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include email, phone, left out.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include email, phone, omitted.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+  });
+
+  it('reads an exclusion whose particle follows the field', () => {
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    // The verb and the particle belong together, with the field between them.
+    expect(suggestPromptFields('Include email, leaving phone out.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('A registration form leaving phone out and email in.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+  });
+
+  it('leaves a prompt that keeps everything but one field empty, as it does today', () => {
+    // The quantifier rule fires under a "keep" head too, so the draft is empty. The suggested fix
+    // was not taken: scoping the rule to include and require heads would make this prompt suggest
+    // the field again, which is the bug #573 is about.
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Keep everything but phone.', fields).fields).toEqual([]);
+  });
 });
