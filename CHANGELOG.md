@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The form editor can go back to the invented data: **Try sample fields** in the editor restores the starter's sample fields, so a developer who chose their own fields does not have to start over. The saved app stays unchanged until the replacement is saved.
+
 - A script that needs longer than the shared request timeout can ask for its own deadline in the Script Runner. Type the seconds in **Timeout (seconds)**, from 1 to 600; that deadline applies to that run only, and the timeout message still says the change may already have been applied.
 
 - Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
