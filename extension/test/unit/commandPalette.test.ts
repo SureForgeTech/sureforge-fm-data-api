@@ -76,6 +76,35 @@ describe('the Command Palette', () => {
     }
   });
 
+  it('keeps the conditions the everyday commands already had', () => {
+    // The everyday commands keep the conditions they had before the palette was shortened: a
+    // profile, or a saved snapshot. None of them gained the power-user setting, and none of
+    // them lost what they needed.
+    const expected: Record<string, string> = {
+      'filemakerDataApiTools.connect': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.testMyServer': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.openQueryBuilder': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.openRecordViewer': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.openRecordEditor': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.openScriptRunner': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.createRecord': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.deleteRecord': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.copyRequestAsCode': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.captureSchemaSnapshot': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.diffSchemaSnapshots': 'filemaker.hasSchemaSnapshots',
+      'filemakerDataApiTools.generateTypesForLayout': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.batchExportFind': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.batchUpdateFromFile': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.writeAiContext': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.selectLayoutForInspector': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.disconnect': 'filemaker.hasProfiles',
+      'filemakerDataApiTools.listLayouts': 'filemaker.hasProfiles'
+    };
+    for (const [command, when] of Object.entries(expected)) {
+      expect(palette.get(command), command).toBe(when);
+    }
+  });
+
   it('names every command the extension contributes', () => {
     for (const { command } of manifest.contributes.commands) {
       expect(palette.has(command) || everyday.includes(command), command).toBe(true);
