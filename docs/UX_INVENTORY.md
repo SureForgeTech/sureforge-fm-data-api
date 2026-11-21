@@ -247,8 +247,18 @@ while this inventory was being written; the fifth is still open.
 ## What this inventory did not verify
 
 - The elapsed time and deliberate choices to a first sample receipt, which the roadmap asks for. The
-  packaged-extension browser journey cannot run in this sandbox: the e2e-ui harness downloads VS Code
-  from `update.code.visualstudio.com`, and that host does not resolve here.
+  harness now records both, for every journey: a measurement — how long the journey took, and which
+  commands were run and which options were picked — goes to `measurements.json` and to a
+  **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The
+  path to a first sample receipt is not a journey yet**, so the figure the roadmap asks for is still
+  not measured. Two things keep it from being one: the preview opens an external browser
+  (`vscode.env.openExternal`), and a CI runner has no browser to open; and the submission needs the
+  preview session token from the URL that browser was given. What the code says today is that the
+  path has **five deliberate choices** — the starter, where the fields come from, the workspace
+  folder, the save-and-preview action, and the submission in the browser — and that the cold
+  dependency setup, the generated app's `npm install`, is a separate cost, which is how the tracker
+  asks for it to be recorded. To reproduce the measurement once the journey exists: run the
+  harness, and read `measurements.json` in the run's artefact.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension

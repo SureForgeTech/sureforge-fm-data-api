@@ -18,7 +18,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { startMock } from './lib/mock.mjs';
-import { Report } from './lib/report.mjs';
+import { Measurement, Report } from './lib/report.mjs';
 import { getVSCode, loadDeps, Session } from './lib/session.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
@@ -146,6 +146,9 @@ try {
       if (!s.app && !mod.ownsLaunch) await s.launch();
       else if (s.app && !s.helperOn && !mod.ownsLaunch) await s.restart();
       s.trustThrow = false;
+      // The measurement of this journey: how long it took and which decisions the user made on
+      // the way. The commands they ran and the options they picked are the deliberate choices.
+      s.measurement = new Measurement(`journey ${file}`);
       await mod.run(ctx);
     } catch (e) {
       exitCode = 1;
@@ -158,6 +161,8 @@ try {
         detail: e.stack ?? String(e)
       });
     }
+    report.measure(s.measurement.end());
+    s.measurement = undefined;
     report.write();
   }
 } finally {
