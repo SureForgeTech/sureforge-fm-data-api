@@ -440,6 +440,23 @@ describe('prompt form suggestions', () => {
       .map(({ field }) => field.name)).toEqual(['Email']);
   });
 
+  it('does not let a marker after a comma name a field from an earlier clause', () => {
+    // The comma points at the item before it. An item the parser does not know adds no field, so
+    // the marker names nothing, and the fields the user asked for stay.
+    const fields = [{ name: 'Email' }, { name: 'Phone' }];
+    expect(suggestPromptFields('Include email, fax, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include email and phone, fax, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email', 'Phone']);
+    expect(suggestPromptFields('Require email and phone, fax, excluded.', fields).fields
+      .map(({ field, required }) => [field.name, required])).toEqual([['Email', true], ['Phone', true]]);
+    // A sentence ends the list, so a marker after it names nothing either.
+    expect(suggestPromptFields('Include email. Fax, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include email. Phone. Fax, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email', 'Phone']);
+  });
+
   it('leaves a prompt that keeps everything but one field empty, as it does today', () => {
     // The quantifier rule fires under a "keep" head too, so the draft is empty. The suggested fix
     // was not taken: scoping the rule to include and require heads would make this prompt suggest
