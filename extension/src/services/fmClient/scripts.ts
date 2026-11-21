@@ -8,6 +8,7 @@ import { NOT_DATA_API_CODE } from '../responseGuard';
 import type { ClientRequestControl } from './types';
 import type { ClientContext } from './context';
 import { MAX_SCRIPT_URL_LENGTH } from './types';
+import { effectiveTimeout } from '../requestLimits';
 import { strictQuerySerializer, buildEndpoint } from './transport';
 import { isNoRecordsFound } from './records';
 import { getErrorStatus } from './response';
@@ -43,7 +44,7 @@ export async function runScript(
       assertUsableUrlName(request.scriptName, 'script');
       assertUsableUrlName(request.layout, 'layout');
       if (isProxyProfile(profile)) {
-        const result = await client.proxyClient.runScript(profile, request, control?.signal);
+        const result = await client.proxyClient.runScript(profile, request, control?.signal, control?.timeoutMs);
         return { ...result, response: scriptResponse(result.response) };
       }
 
@@ -72,7 +73,7 @@ export async function runScript(
           }
           const envelope = await client.requestWithAuth<Record<string, unknown>>(
             profile,
-            { method: 'GET', path: recordPath, params: query, strictQuery: true, signal: control?.signal },
+            { method: 'GET', path: recordPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs },
             true,
             trace
           );
@@ -85,7 +86,7 @@ export async function runScript(
         }
         try {
           const envelope = await client.requestWithAuth<Record<string, unknown>>(profile,
-            { method: 'GET', path, params, strictQuery: true, signal: control?.signal }, true, trace);
+            { method: 'GET', path, params, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs }, true, trace);
           return { response: scriptResponse(envelope.response), messages: envelope.messages };
         } catch (error) {
           if (isNoRecordsFound(error)) throw scriptLayoutEmpty();
@@ -101,7 +102,8 @@ export async function runScript(
               fallbackMessage: 'Failed to run FileMaker script.',
               operation: trace.operation,
               requestId: trace.requestId,
-              endpoint
+              endpoint,
+              timeoutOverride: effectiveTimeout(control?.timeoutMs, client.timeoutMs) !== client.timeoutMs
             })
           )
         );
@@ -126,7 +128,7 @@ export async function runScript(
 
       if (ifTooLong(scriptPath, query)) {
         const metadata = client.layoutMetadataCache.get(buildProfileCacheKey(profile, layout))
-          ?? await client.getLayoutMetadata(profile, layout, { signal: control?.signal, recordHistory: false });
+          ?? await client.getLayoutMetadata(profile, layout, { signal: control?.signal, timeoutMs: control?.timeoutMs, recordHistory: false });
         const fields = Array.isArray(metadata.fieldMetaData) ? metadata.fieldMetaData : [];
         const textFields = fields.filter((field): field is { name: string; result: string; type?: string } =>
           field !== null && typeof field === 'object' && typeof field.name === 'string'
@@ -147,7 +149,8 @@ export async function runScript(
             {
               method: 'POST', path: `/layouts/${encodeURIComponent(layout)}/_find`,
               data: { query: [{ [textField.name]: '*' }], limit: 1, ...buildScriptParams(scriptName, scriptParam) },
-              signal: control?.signal
+              signal: control?.signal,
+              timeoutMs: control?.timeoutMs
             },
             true,
             trace
@@ -168,7 +171,7 @@ export async function runScript(
       try {
         const envelope = await client.requestWithAuth<Record<string, unknown>>(
           profile,
-          { method: 'GET', path: scriptPath, params: query, strictQuery: true, signal: control?.signal },
+          { method: 'GET', path: scriptPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs },
           true,
           trace
         );

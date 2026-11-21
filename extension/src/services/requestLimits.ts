@@ -9,6 +9,15 @@ export const DEFAULT_MAX_RESPONSE_BYTES = 64 * 1024 * 1024;
 const TRANSFER_PROGRESS_BYTES = 64 * 1024;
 const MAX_TRANSFER_MS = 30 * 60 * 1000;
 
+/**
+ * The deadline a request uses: its own when it asked for a usable one, the shared timeout
+ * otherwise. A value that is not a positive number is not a deadline, so it falls back rather
+ * than ending the request at once.
+ */
+export function effectiveTimeout(requested: number | undefined, shared: number): number {
+  return typeof requested === 'number' && Number.isFinite(requested) && requested > 0 ? requested : shared;
+}
+
 /** Budget the whole upload exchange for a slow but real 32 KiB/s link. */
 export function uploadDeadlineMs(timeoutMs: number, bodyBytes: number): number {
   return Math.min(MAX_TRANSFER_MS, Math.max(timeoutMs, bodyBytes / (32 * 1024) * 1000));

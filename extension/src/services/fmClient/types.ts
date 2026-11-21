@@ -16,6 +16,12 @@ export interface RequestOptions {
   /** Percent-encode the query exactly (a space is `%20`, never `+`), as the Claris guide shows for script parameters. */
   strictQuery?: boolean;
   signal?: AbortSignal;
+  /**
+   * Use this deadline instead of the client's shared one, for this request only. A script that
+   * needs longer than the shared timeout asks for it here; every other request keeps the shared
+   * setting.
+   */
+  timeoutMs?: number;
   /** Refuse a response body larger than this (axios maxContentLength). */
   maxResponseBytes?: number;
   /** Record reads renew on downloaded bytes; uploads use a size-based deadline. Both cap at 30 minutes. */
@@ -45,6 +51,11 @@ export interface RequestTrace {
 export interface ClientRequestControl {
   portal?: PortalPaging;
   signal?: AbortSignal;
+  /**
+   * Use this deadline instead of the shared request timeout, for this request only. The Script
+   * Runner sets it when the user asks for a longer deadline for one script.
+   */
+  timeoutMs?: number;
   /**
    * The user asked for this sign-in (Connect, Test Connection). It goes ahead even when automatic
    * sign-ins are paused after the server rejected the stored credentials, and its result ends or

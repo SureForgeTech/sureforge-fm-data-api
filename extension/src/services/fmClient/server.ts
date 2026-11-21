@@ -1,4 +1,4 @@
-import { withRequestLimits } from '../requestLimits';
+import { effectiveTimeout, withRequestLimits } from '../requestLimits';
 import type { ConnectionProfile } from '../../types/fm';
 import type { DataApiEnvelope } from '../../types/dataApi';
 import { FMClientError, toFMClientError } from '../errors';
@@ -93,7 +93,7 @@ export async function requestServerLevel<TResponse extends Record<string, unknow
   const basePath = normalizePath(profile.apiBasePath ?? '/fmi/data');
   const version = (profile.apiVersionPath ?? 'vLatest').replace(/^\/+|\/+$/g, '');
   try {
-    const response = await withRequestLimits(client.timeoutMs, control?.signal, (limits) => client.httpClient.request<unknown>({
+    const response = await withRequestLimits(effectiveTimeout(control?.timeoutMs, client.timeoutMs), control?.signal, (limits) => client.httpClient.request<unknown>({
       method: 'GET',
       url: `${base}${basePath}/${version}${path}`,
       headers: { Accept: 'application/json' },
@@ -104,7 +104,12 @@ export async function requestServerLevel<TResponse extends Record<string, unknow
     onStatus?.(response.status);
     return parseDataApiEnvelope<TResponse>(response);
   } catch (error) {
-    const failure = toFMClientError(normalizeError(error, { fallbackMessage, endpoint: `GET ${path}` }));
+    const failure = toFMClientError(normalizeError(error, {
+      fallbackMessage,
+      endpoint: `GET ${path}`,
+      // A request under its own deadline is not governed by the shared setting.
+      timeoutOverride: effectiveTimeout(control?.timeoutMs, client.timeoutMs) !== client.timeoutMs
+    }));
     // Diagnosis already read the peer certificate with its own cancellable deadline.
     throw (skipCertificateInspection
       ? client.explainPinnedFailure(profile, failure)

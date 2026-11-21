@@ -1,4 +1,5 @@
-import { withRequestLimits } from './requestLimits';
+import { effectiveTimeout, withRequestLimits } from './requestLimits';
+import { noteRequestTimeout } from './tlsAgent';
 import { assertFindCriteria } from '../utils/findCriteria';
 import axios, { type AxiosInstance } from 'axios';
 
@@ -169,13 +170,15 @@ export class ProxyClient {
   public async runScript(
     profile: ConnectionProfile,
     request: RunScriptRequest,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    timeoutMs?: number
   ): Promise<RunScriptResult> {
     const data = await this.invoke<ProxyRunScriptResponse>(
       profile,
       'runScript',
       request as unknown as Record<string, unknown>,
-      signal
+      signal,
+      timeoutMs
     );
 
     if (!data.result) {
@@ -288,7 +291,8 @@ export class ProxyClient {
     profile: ConnectionProfile,
     action: string,
     payload: Record<string, unknown>,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    timeoutMs?: number
   ): Promise<T> {
     const endpoint = profile.proxyEndpoint?.trim();
     if (!endpoint) {
@@ -310,6 +314,10 @@ export class ProxyClient {
     // full threat model. The `name` and full server/path metadata are intentionally
     // omitted — proxies are configured per-environment and don't need to display
     // human-readable profile names.
+    // The deadline in force: the run's own when it asked for a usable one, the shared timeout
+    // otherwise. The advice names it when it is not the shared one.
+    const deadline = effectiveTimeout(timeoutMs, this.timeoutMs);
+    const ownDeadline = deadline !== this.timeoutMs;
     try {
       const transport = httpsTransportFor(profile, endpoint);
       const body = {
@@ -319,7 +327,9 @@ export class ProxyClient {
       };
       // Include the JSON envelope and base64 overhead in the upload budget.
       const uploadBytes = action === 'uploadContainer' ? Buffer.byteLength(JSON.stringify(body)) : 0;
-      const response = await withRequestLimits(this.timeoutMs, signal, (limits) => this.httpClient.post<ProxyEnvelope<T> | T>(
+      // A hop that may last longer than the shared timeout needs its retired agent to outlive it.
+      noteRequestTimeout(deadline);
+      const response = await withRequestLimits(deadline, signal, (limits) => this.httpClient.post<ProxyEnvelope<T> | T>(
         endpoint,
         body,
         {
@@ -362,7 +372,7 @@ export class ProxyClient {
         throw proxyFailure(body, (error as { response?: { status?: number } }).response?.status);
       }
 
-      throw this.normalizeProxyError(error, profile, action, payload);
+      throw this.normalizeProxyError(error, profile, action, payload, ownDeadline);
     }
   }
 
@@ -374,11 +384,18 @@ export class ProxyClient {
     return 'ok' in value || 'data' in value || 'error' in value;
   }
 
-  private normalizeProxyError(error: unknown, profile: ConnectionProfile, operation: string, payload: Record<string, unknown>): FMClientError {
+  private normalizeProxyError(
+    error: unknown,
+    profile: ConnectionProfile,
+    operation: string,
+    payload: Record<string, unknown>,
+    timeoutOverride = false
+  ): FMClientError {
     const normalized = normalizeError(error, {
       fallbackMessage: 'Proxy request failed.',
       operation,
-      requestData: payload.body ?? payload
+      requestData: payload.body ?? payload,
+      timeoutOverride
     });
 
     this.logger.error('Proxy request error', {
