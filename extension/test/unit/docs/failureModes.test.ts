@@ -27,6 +27,32 @@ it('keeps the no-match troubleshooting row to four cells, including the empty-pa
   expect(cells[2]).toContain('supplied match count');
 });
 
+/** The one row in the catalogue that starts with the given prefix. */
+function onlyRow(document: string, prefix: string): string {
+  const rows = document.split('\n').filter((line) => line.startsWith(prefix));
+  expect(rows, `the catalogue should have exactly one row starting with "${prefix}"`).toHaveLength(1);
+  return rows[0]!;
+}
+
+it('records the CA-file re-check as fixed, in the row and in the summary', () => {
+  const document = readFileSync(path.join(root, 'docs/FILEMAKER_FAILURE_MODES.md'), 'utf8');
+  const row = onlyRow(document, '| N6 |');
+  expect(row).toContain('**Fixed');
+  // The message the agent build now gives, and the work the row used to leave open.
+  expect(row).toContain('does not contain a certificate');
+  expect(row).toContain('re-checked when the agent is built');
+  expect(row).not.toMatch(/ends? in the misleading/);
+  expect(row).not.toContain('Re-check at agent build');
+  // The summary table called N6 fixed already; the detail row must say the same.
+  const summary = onlyRow(document, '| N1, N2, N4, N6 |');
+  expect(summary).toContain('**Fixed');
+  // The scenario row must not still describe the old behaviour.
+  const scenario = onlyRow(document, '| 1.27 |');
+  expect(scenario).toContain('does not contain a certificate');
+  expect(scenario).toContain('re-checked when the agent is built');
+  expect(scenario).not.toMatch(/ends? in the misleading/);
+});
+
 it('uses the current AI append button and records the owner-supplied real-server omit finding', () => {
   const guide = readFileSync(path.join(root, 'extension/docs/USER_GUIDE.md'), 'utf8');
   expect(guide).toContain('if you choose **Add to the file**, appends');
