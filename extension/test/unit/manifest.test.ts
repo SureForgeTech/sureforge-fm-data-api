@@ -119,7 +119,7 @@ describe('extension manifest UX contract', () => {
       ['openRecordViewer', 'ctrl+alt+v', 'cmd+alt+v', 'filemaker.hasProfiles'],
       ['openScriptRunner', 'ctrl+alt+e', 'cmd+alt+e', 'filemaker.hasProfiles'],
       ['showRequestHistory', 'ctrl+alt+h', 'ctrl+alt+h', 'filemaker.powerUserMode'],
-      ['openLayoutMode', 'ctrl+alt+l', 'cmd+alt+l', 'filemaker.fmWebProjectInitialized']
+      ['openLayoutMode', 'ctrl+alt+l', 'cmd+alt+l', 'filemaker.fmWebProjectInitialized && filemaker.powerUserMode']
     ];
     const bindings = new Map((keybindings ?? []).map((binding) => [binding.command, binding]));
     expect(bindings.size, 'exactly five default keybindings').toBe(expected.length);
@@ -206,7 +206,8 @@ describe('extension manifest UX contract', () => {
   it('declares the external-tools commands and builds the MCP shim as part of the build', () => {
     for (const name of ['toggleAiServer', 'copyAiMcpConfig']) {
       expect(commandIds.has(id(name)), name).toBe(true);
-      expect(palette.get(id(name)), name).toBe('filemaker.hasProfiles');
+      // They are not everyday commands, so they sit behind the power-user setting.
+      expect(palette.get(id(name)), name).toBe('filemaker.hasProfiles && filemaker.powerUserMode');
     }
     const scripts = (JSON.parse(readFileSync(join(extensionRoot, 'package.json'), 'utf8')) as { scripts: Record<string, string> }).scripts;
     // The bundle itself is defined in scripts/esbuild-config.mjs.

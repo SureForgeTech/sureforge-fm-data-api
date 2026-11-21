@@ -71,7 +71,7 @@ The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Co
 | Open Getting Started Walkthrough | Opens the guided setup steps in VS Code. | Always shown. |
 | Open User Guide | Opens this guide in a Markdown preview. | Always shown. |
 | Diagnose Connection | Checks a saved server or a typed address, without signing in, and explains likely fixes. | Always shown; turn off offline mode. Uses saved profiles or an address you type; never reads a workspace template. |
-| Copy Connection Diagnosis for Bug Report | Copies the latest connection diagnosis, with a choice to hide the server address. | Shown in power-user mode; run Diagnose Connection first. |
+| Copy Connection Diagnosis for Bug Report | Copies the latest connection diagnosis, with a choice to hide the server address. | Always shown; run Diagnose Connection first. |
 | Copy Field Name | Copies the exact FileMaker name of a field in the sidebar to the clipboard. | Right-click a field in the FileMaker sidebar; hidden from the Command Palette. |
 | Copy Layout Name | Copies the exact FileMaker name of a layout in the sidebar to the clipboard. | Right-click a layout in the FileMaker sidebar; hidden from the Command Palette. |
 | Test My Server | Reads a record, checks the connection and opens a report you can share. | Shown with a profile; needs an active connection and offline mode off. Optional writes and scripts also need trust, permission and their feature switches. |
@@ -82,9 +82,9 @@ The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Co
 | Edit Connection Profile | Opens a saved profile in the connection wizard, where you can trust or forget a certificate without changing a VS Code setting. | Shown in power-user mode with a profile; needs an unlocked profile and write operations allowed. |
 | Remove Connection Profile | Removes a profile, its saved queries and secrets after confirmation. | Shown in power-user mode with a profile; needs an unlocked profile and write operations allowed. |
 | Connect | Signs in, selects the active profile and offers a layout for inspection. | Shown with a profile. |
-| Disconnect | Ends a profile's session and clears it as active if selected. | Shown in power-user mode with a profile. |
+| Disconnect | Ends a profile's session and clears it as active if selected. | Shown with a profile. |
 | Show Connection Menu | Offers connection actions from the status bar menu. | Shown in power-user mode; actions depend on connection state. |
-| List Layouts | Opens a JSON list of the profile's layouts. | Shown in power-user mode with a profile. |
+| List Layouts | Opens a JSON list of the profile's layouts. | Shown with a profile. |
 | Run Find (JSON) | Prompts for find, sort and paging options and opens the result as JSON. | Shown in power-user mode with a profile; choose a layout. |
 | Get Record by ID | Reads one record and opens it as JSON. | Shown in power-user mode with a profile; choose a layout and record ID. |
 | Open Record Viewer | Shows fields in layout order, with Copy beside each field name and related row counts below. Direct connections can Load more. | Shown with a profile; choose a layout. |
@@ -121,8 +121,8 @@ The **FileMaker home** leads to the everyday commands: **Build a Web App**, **Co
 | Upload to Container | Uploads a chosen file to a record's container field. | Shown in power-user mode with a profile; needs record editing enabled and allowed, trust, a record and a container field. |
 | Batch Export (Find) | Saves matching records to CSV or JSONL safely as a background job, with missing related row notes and an optional CSV format for Excel. | Shown with a profile; needs batch operations enabled and workspace trust. |
 | Batch Update from CSV/JSON | Previews or applies updates, checks exported record versions unless you choose to overwrite, skips calculation, summary and container columns and later rows with editable values for the same record, and leaves empty CSV cells unchanged; refuses rows containing a NUL character. | Shown with a profile; needs batch operations enabled and trust; execution also needs record editing and batch, record and write permission. Dry runs remain available offline. |
-| Cancel Job | Stops sending new work for a running job, waits for pending requests and keeps partial results. | Shown in power-user mode; also on running jobs in the Jobs view and jobs menu. |
-| Show Jobs | Lists active and recent jobs once, shows counts and record details, and offers cancellation or Copy failures. After a restart, each saved list keeps at most 1,000 entries and marks any shortened list. | Shown in power-user mode; explains when there are no jobs. |
+| Cancel Job | Stops sending new work for a running job, waits for pending requests and keeps partial results. | Always available in the Command Palette; also on running jobs in the Jobs view and jobs menu. |
+| Show Jobs | Lists active and recent jobs once, shows counts and record details, and offers cancellation or Copy failures. After a restart, each saved list keeps at most 1,000 entries and marks any shortened list. | Always available in the Command Palette; explains when there are no jobs. |
 | Create Environment Set | Groups at least two profiles for comparison. | Shown in power-user mode and in enterprise mode; needs two profiles and write operations allowed. |
 | Compare Environments | Shows layout presence and schema comparisons across an environment set. | Shown in power-user mode and in enterprise mode; needs trust, an environment set and its profiles. |
 | Diff Layout Across Environments | Shows field differences for one layout across an environment set. | Shown in power-user mode and in enterprise mode; needs trust and a set with at least two existing profiles. |

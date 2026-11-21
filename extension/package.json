@@ -613,7 +613,7 @@
       { "command": "filemakerDataApiTools.openRecordViewer", "key": "ctrl+alt+v", "mac": "cmd+alt+v", "when": "filemaker.hasProfiles" },
       { "command": "filemakerDataApiTools.openScriptRunner", "key": "ctrl+alt+e", "mac": "cmd+alt+e", "when": "filemaker.hasProfiles" },
       { "command": "filemakerDataApiTools.showRequestHistory", "key": "ctrl+alt+h", "mac": "ctrl+alt+h", "when": "filemaker.powerUserMode" },
-      { "command": "filemakerDataApiTools.openLayoutMode", "key": "ctrl+alt+l", "mac": "cmd+alt+l", "when": "filemaker.fmWebProjectInitialized" }
+      { "command": "filemakerDataApiTools.openLayoutMode", "key": "ctrl+alt+l", "mac": "cmd+alt+l", "when": "filemaker.fmWebProjectInitialized && filemaker.powerUserMode" }
     ],
     "menus": {
       "view/title": [
@@ -869,7 +869,7 @@
         },
         {
           "command": "filemakerDataApiTools.disconnect",
-          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
+          "when": "filemaker.hasProfiles"
         },
         {
           "command": "filemakerDataApiTools.writeAiContext",
@@ -889,7 +889,7 @@
         },
         {
           "command": "filemakerDataApiTools.listLayouts",
-          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
+          "when": "filemaker.hasProfiles"
         },
         {
           "command": "filemakerDataApiTools.selectLayoutForInspector",
@@ -1100,10 +1100,6 @@
           "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
-          "command": "filemakerDataApiTools.copyConnectionDiagnosis",
-          "when": "filemaker.powerUserMode"
-        },
-        {
           "command": "filemakerDataApiTools.openConnectionMenu",
           "when": "filemaker.powerUserMode"
         },
@@ -1117,14 +1113,6 @@
         },
         {
           "command": "filemakerDataApiTools.openGeneratedTypesFolder",
-          "when": "filemaker.powerUserMode"
-        },
-        {
-          "command": "filemakerDataApiTools.cancelJob",
-          "when": "filemaker.powerUserMode"
-        },
-        {
-          "command": "filemakerDataApiTools.showJobs",
           "when": "filemaker.powerUserMode"
         },
         {

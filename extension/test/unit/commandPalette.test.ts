@@ -22,7 +22,17 @@ const palette = new Map(
 /**
  * The everyday commands: the home's four journeys, the README's "Common commands" table and the
  * walkthrough's six steps, plus Start Here, which opens the home.
+ *
+ * The manifest contract also calls a few commands always available or primary; they stay in the
+ * palette too.
  */
+const ALWAYS_AVAILABLE = [
+  'filemakerDataApiTools.cancelJob',
+  'filemakerDataApiTools.showJobs',
+  'filemakerDataApiTools.copyConnectionDiagnosis',
+  'filemakerDataApiTools.disconnect',
+  'filemakerDataApiTools.listLayouts'
+];
 function everydayCommands(): string[] {
   const byTitle = new Map(manifest.contributes.commands.map((entry) => [entry.title, entry.command]));
   const readme = readFileSync(path.join(extensionDir, 'README.md'), 'utf8');
@@ -34,7 +44,15 @@ function everydayCommands(): string[] {
     )
   );
   const journeys = FILEMAKER_HOME_SECTIONS.flatMap((section) => section.entries.map((entry) => entry.command));
-  return [...new Set([...journeys, ...fromReadme, ...fromWalkthrough, 'filemakerDataApiTools.startHere'])];
+  return [
+    ...new Set([
+      ...journeys,
+      ...fromReadme,
+      ...fromWalkthrough,
+      'filemakerDataApiTools.startHere',
+      ...ALWAYS_AVAILABLE
+    ])
+  ];
 }
 
 describe('the Command Palette', () => {

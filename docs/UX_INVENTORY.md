@@ -198,10 +198,12 @@ Each proposal names the acceptance check that would show it worked. None of them
    capability is removed, only moved.
    *Acceptance:* a connected user sees the everyday set in the palette; the rest are behind the
    existing power-user setting; every command still runs.
-   **Done the same day:** the palette now shows 25 everyday commands — those 25 plus **Start Here**,
-   which opens the home — and the other 53 sit behind `filemaker.advanced.powerUserMode`. A test derives
-   the everyday set from the same three documents and checks the rule, so the set cannot drift away
-   from the documents it comes from.
+   **Done the same day:** the palette now shows 31 everyday commands — the 25 from those three
+   documents, plus **Start Here**, which opens the home, plus the five the manifest contract already
+   called always available or primary. The other 48 sit behind `filemaker.advanced.powerUserMode`, and
+   three more stay out of the palette on purpose because they only work on a sidebar item. A test
+   derives the everyday set from the same three documents and checks the rule, so the set cannot drift
+   away from the documents it comes from.
 4. **Grow the starter set.** The wizard offered two starters when this was measured. The roadmap's
    first phase names "service inquiries, applications and appointment requests" as the next expansion,
    and those are the web activities a FileMaker solution is asked for most often. **Done the same
