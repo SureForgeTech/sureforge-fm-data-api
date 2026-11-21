@@ -1,4 +1,5 @@
-import { withRequestLimits } from '../requestLimits';
+import { effectiveTimeout, withRequestLimits } from '../requestLimits';
+import { noteRequestTimeout } from '../tlsAgent';
 import { type AxiosError, type AxiosRequestConfig } from 'axios';
 import type { ConnectionProfile } from '../../types/fm';
 import type { DataApiEnvelope } from '../../types/dataApi';
@@ -23,7 +24,13 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
     trace.endpoint = redactString(`${request.method} ${request.path}`);
   }
 
-  const token = await client.ensureSessionToken(profile, { signal: request.signal }, authOptions);
+  // The session work a request needs shares its deadline: a sign-in that the server takes longer
+  // than the shared timeout to answer must not end a run that asked for longer.
+  const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: request.timeoutMs }, authOptions);
+  // The deadline in force: the request's own when it asked for a usable one, the shared timeout
+  // otherwise. The advice names it when it is not the shared one.
+  const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
+  const ownDeadline = timeoutMs !== client.timeoutMs;
 
   try {
     const config: AxiosRequestConfig = {
@@ -44,7 +51,9 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
       ...httpsTransportFor(profile, buildEndpoint(profile, request.path))
     };
 
-    const response = await withRequestLimits(client.timeoutMs, request.signal,
+    // A run that may last longer than the shared timeout needs its retired agent to outlive it.
+    noteRequestTimeout(timeoutMs);
+    const response = await withRequestLimits(timeoutMs, request.signal,
       (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes, request.transfer, config.transport, request.uploadBytes);
     return parseDataApiEnvelope<TResponse>(response);
   } catch (error) {
@@ -57,7 +66,7 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
         profileId: profile.id,
         requestId: trace?.requestId
       });
-      await client.renewRejectedSession(profile, token, { signal: request.signal });
+      await client.renewRejectedSession(profile, token, { signal: request.signal, timeoutMs: request.timeoutMs });
 
       return requestWithAuth(client, profile, request, false, trace);
     }
@@ -71,7 +80,8 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
           requestParams: request.params,
           fallbackMessage: `FileMaker request failed (${redactString(`${request.method} ${request.path}`)}).`,
           requestId: trace?.requestId,
-          endpoint: redactString(`${request.method} ${request.path}`)
+          endpoint: redactString(`${request.method} ${request.path}`),
+          timeoutOverride: ownDeadline
         })
       )
     );
@@ -93,7 +103,9 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
     trace.endpoint = redactString(`${request.method} ${request.path}`);
   }
 
-  const token = await client.ensureSessionToken(profile, { signal: request.signal });
+  const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: request.timeoutMs });
+  const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
+  const ownDeadline = timeoutMs !== client.timeoutMs;
 
   try {
     const config: AxiosRequestConfig = {
@@ -113,7 +125,8 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
       validateStatus: (status) => (status >= 200 && status < 300) || status === 304
     };
 
-    const response = await withRequestLimits(client.timeoutMs, request.signal,
+    noteRequestTimeout(timeoutMs);
+    const response = await withRequestLimits(timeoutMs, request.signal,
       (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes, request.transfer, config.transport, request.uploadBytes);
     const headers = normalizeHeaders(response.headers as Record<string, unknown>);
     if (response.status === 304) {
@@ -138,7 +151,7 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
         profileId: profile.id,
         requestId: trace?.requestId
       });
-      await client.renewRejectedSession(profile, token, { signal: request.signal });
+      await client.renewRejectedSession(profile, token, { signal: request.signal, timeoutMs: request.timeoutMs });
 
       return requestWithAuthRaw(client, profile, request, false, trace);
     }
@@ -152,7 +165,8 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
           requestParams: request.params,
           fallbackMessage: `FileMaker request failed (${redactString(`${request.method} ${request.path}`)}).`,
           requestId: trace?.requestId,
-          endpoint: redactString(`${request.method} ${request.path}`)
+          endpoint: redactString(`${request.method} ${request.path}`),
+          timeoutOverride: ownDeadline
         })
       )
     );
@@ -178,7 +192,9 @@ export async function requestNoAuth<TResponse extends Record<string, unknown>>(
     ...httpsTransportFor(profile, buildEndpoint(profile, request.path))
   };
 
-  const response = await withRequestLimits(client.timeoutMs, request.signal,
+  const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
+  noteRequestTimeout(timeoutMs);
+  const response = await withRequestLimits(timeoutMs, request.signal,
     (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes);
   return parseDataApiEnvelope<TResponse>(response);
 }

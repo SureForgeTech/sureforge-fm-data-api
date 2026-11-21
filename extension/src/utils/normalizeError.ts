@@ -121,11 +121,16 @@ function normalizeAxiosError(error: AxiosError, options?: NormalizeErrorOptions)
     const seconds = error.config?.timeout ? (error.config.timeout / 1000).toFixed(1) : undefined;
     const uncertainChange = isUncertainChange(error, options);
     const warning = uncertainChange ? ' The change may have been applied. Check the record before trying again.' : '';
+    // A request with its own deadline is not governed by the shared setting, so the advice must
+    // not send the reader to a setting that would not change this request.
+    const advice = options?.timeoutOverride
+      ? 'If the server is slow, raise this request\'s timeout.'
+      : 'If the server is slow, raise the setting filemaker.requestTimeoutMs.';
     return {
       kind: 'timeout',
       message: options?.fallbackMessage
-        ? `${options.fallbackMessage} (request timed out${seconds ? ` after ${seconds} s` : ''}${status ? `, HTTP ${status}` : ''}). If the server is slow, raise the setting filemaker.requestTimeoutMs.${warning}`
-        : `Request timed out${seconds ? ` after ${seconds} s` : ''}${status ? ` (HTTP ${status})` : ''}. If the server is slow, raise the setting filemaker.requestTimeoutMs.${warning}`,
+        ? `${options.fallbackMessage} (request timed out${seconds ? ` after ${seconds} s` : ''}${status ? `, HTTP ${status}` : ''}). ${advice}${warning}`
+        : `Request timed out${seconds ? ` after ${seconds} s` : ''}${status ? ` (HTTP ${status})` : ''}. ${advice}${warning}`,
       status,
       safeHeaders,
       isRetryable: !uncertainChange,
