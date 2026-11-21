@@ -1,4 +1,4 @@
-import { withRequestLimits } from './requestLimits';
+import { effectiveTimeout, withRequestLimits } from './requestLimits';
 import { CertificateAdvice } from './fmClient/certificates';
 import { randomUUID } from 'crypto';
 import axios, { type AxiosInstance } from 'axios';
@@ -235,7 +235,7 @@ export class FMClient {
               requestId: trace.requestId,
               endpoint: 'POST /sessions',
               // A sign-in under the run's own deadline is not governed by the shared setting.
-              timeoutOverride: control?.timeoutMs !== undefined
+              timeoutOverride: effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
             })
           );
           if (control?.proactive !== true) {

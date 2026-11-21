@@ -103,6 +103,26 @@ describe('a run\'s deadline reaches every request the run makes', () => {
     expect(result.response).toEqual({ scriptResult: 'done', scriptError: '0' });
   });
 
+  it('tells the user to raise the run\'s own deadline when the sign-in gives up', async () => {
+    // The sign-in the run needs is under the run's own deadline, so the advice must name that
+    // deadline and not the shared setting.
+    const url = await listen((_request, response) => {
+      response.setHeader('Content-Type', 'application/json');
+      setTimeout(() => response.end(ok({ token: 'tok' })), 400);
+    });
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    await secrets.setPassword('p1', 'pw');
+    const profile: ConnectionProfile = { id: 'p1', name: 'T', authMode: 'direct', serverUrl: url, database: 'Sales Db', username: 'u' };
+    const fm = new FMClient(secrets, logger, 30_000);
+
+    const failure = await fm
+      .runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }, { timeoutMs: 100 })
+      .then(() => undefined, (error: unknown) => error as { message: string });
+
+    expect(failure?.message).toContain("raise this request's timeout");
+    expect(failure?.message).not.toContain('filemaker.requestTimeoutMs');
+  });
+
   it('gives the renewal after a rejected token the run\'s deadline', async () => {
     // The server rejects the token, so the run renews the session first. The renewal signs in
     // again, and that sign-in must not stop at the shared timeout.
