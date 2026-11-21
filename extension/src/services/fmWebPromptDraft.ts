@@ -258,8 +258,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         // "Do not require phone" states that phone is not required, so the field belongs to the
         // form as an optional one. That is the same reading the adjective form gives ("not
         // required phone"), and the field was dropped before, so the request disappeared.
+        // A mention that could not be added leaves no field for a following comma to point at.
         const optional = append(mention, false);
-        if (optional) lastAppended = optional;
+        lastAppended = optional;
       }
       previousEnd = mention.end;
       comma = false;

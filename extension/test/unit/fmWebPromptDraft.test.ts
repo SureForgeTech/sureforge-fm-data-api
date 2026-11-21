@@ -436,6 +436,8 @@ describe('prompt form suggestions', () => {
     const fields = [{ name: 'Email' }, { name: 'Phone' }, { name: 'Phone ' }];
     expect(suggestPromptFields('Include email, phone, excluded.', fields).fields
       .map(({ field }) => field.name)).toEqual(['Email']);
+    expect(suggestPromptFields('Include email, do not require phone, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
   });
 
   it('leaves a prompt that keeps everything but one field empty, as it does today', () => {
