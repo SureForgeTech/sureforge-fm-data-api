@@ -1,8 +1,8 @@
 # Homebrew formula for installing the FileMaker Data API Tools VS Code
-# extension via `brew install deffenda/tap/filemaker-vscode`.
+# extension via `brew install sureforgetech/tap/filemaker-vscode`.
 #
 # This file is a TEMPLATE. The real formula is published to
-# https://github.com/deffenda/homebrew-tap by the release workflow on
+# https://github.com/SureForgeTech/homebrew-tap by the release workflow on
 # every tag push (see tools/homebrew/update-formula.sh).
 #
 # Variables substituted at release time:
