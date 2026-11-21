@@ -52,7 +52,8 @@ export async function editRecord(
             // When given, FileMaker refuses the edit (error 306) if the record changed since this modId.
             ...(options?.modId !== undefined ? { modId: options.modId } : {})
           },
-          signal: control?.signal
+          signal: control?.signal,
+          timeoutMs: control?.timeoutMs
         },
         true,
         trace
@@ -119,7 +120,8 @@ export async function createRecord(
             // Only when related rows carry values, so the request matches the plain create otherwise.
             ...(portalData ? { portalData } : {})
           },
-          signal: control?.signal
+          signal: control?.signal,
+          timeoutMs: control?.timeoutMs
         },
         true,
         trace
@@ -181,7 +183,8 @@ export async function deleteRecord(
         {
           method: 'DELETE',
           path: `/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}`,
-          signal: control?.signal
+          signal: control?.signal,
+          timeoutMs: control?.timeoutMs
         },
         true,
         trace

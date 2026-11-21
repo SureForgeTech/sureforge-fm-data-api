@@ -146,6 +146,29 @@ describe('Script Runner: message routing', () => {
       );
     });
 
+    it('asks for the deadline the user typed, and keeps the shared timeout when the field is empty', async () => {
+      await panel.send({ type: 'runScript', payload: { ...script, timeoutSeconds: 120 } });
+      expect(panel.fmClient.runScript).toHaveBeenCalledWith(
+        profile,
+        expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' }),
+        { timeoutMs: 120_000 }
+      );
+
+      await panel.send({ type: 'runScript', payload: script });
+      expect(panel.fmClient.runScript).toHaveBeenLastCalledWith(
+        profile,
+        expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' })
+      );
+    });
+
+    it('refuses a timeout outside the bounds, and runs no script', async () => {
+      await panel.send({ type: 'runScript', payload: { ...script, timeoutSeconds: 5000 } });
+      expect(panel.fmClient.runScript).not.toHaveBeenCalled();
+      expect(panel.posted).toContainEqual(
+        expect.objectContaining({ type: 'error', message: expect.stringContaining('timeout must be a whole number') })
+      );
+    });
+
     it('answers "copyCurl" with a curl command on the clipboard, and runs no script', async () => {
       await panel.send({ type: 'copyCurl', payload: script });
       expect(vi.mocked(vscode.env.clipboard.writeText)).toHaveBeenCalledTimes(1);

@@ -20,6 +20,7 @@ const recordIdInput = document.getElementById('recordIdInput');
 const scriptNameInput = document.getElementById('scriptNameInput');
 const scriptNameList = document.getElementById('scriptNameList');
 const scriptParamInput = document.getElementById('scriptParamInput');
+const timeoutSecondsInput = document.getElementById('timeoutSecondsInput');
 const buildParameterButton = document.getElementById('buildParameterButton');
 const parameterBuilderPanel = document.getElementById('parameterBuilderPanel');
 const parameterRows = document.getElementById('parameterRows');
@@ -105,7 +106,7 @@ closeParameterBuilderButton.addEventListener('click', () => {
 
 runButton.addEventListener('click', () => {
   if (state.running) return;
-  const payload = collectPayload();
+  const payload = collectPayload(true);
   if (!payload) {
     return;
   }
@@ -123,7 +124,7 @@ runButton.addEventListener('click', () => {
 // Every format button under "Copy request" names its format (and, for Save as .http, an editor destination).
 document.querySelectorAll('[data-copy-format]').forEach((button) => {
   button.addEventListener('click', () => {
-    const payload = collectPayload();
+    const payload = collectPayload(false);
     if (!payload) {
       return;
     }
@@ -322,7 +323,11 @@ function renderLayouts(layouts, preferredLayout) {
   }
 }
 
-function collectPayload() {
+/**
+ * The values a run or a copy needs. A copy carries no deadline, so a value left in the timeout
+ * box does not stop it.
+ */
+function collectPayload(needsTimeout) {
   const profileId = profileSelect.value;
   const layout = layoutSelect.value;
   const scriptName = scriptNameInput.value; // exactly as typed: a space can be part of a script name
@@ -348,13 +353,33 @@ function collectPayload() {
     return undefined;
   }
 
+  const timeoutSeconds = needsTimeout ? readTimeoutSeconds() : undefined;
+  if (timeoutSeconds === null) {
+    setStatus('The timeout must be a whole number of seconds between 1 and 600.', true);
+    return undefined;
+  }
+
   return {
     profileId,
     layout,
     recordId: recordIdInput.value.trim(),
     scriptName,
-    scriptParam: scriptParamInput.value
+    scriptParam: scriptParamInput.value,
+    // A request with no deadline of its own carries no deadline at all.
+    ...(timeoutSeconds === undefined ? {} : { timeoutSeconds })
   };
+}
+
+/**
+ * The timeout the user asked for, in seconds: undefined when the field is empty, so the run keeps
+ * the shared request timeout, and null when the field holds a value the run cannot use.
+ */
+function readTimeoutSeconds() {
+  const raw = timeoutSecondsInput.value.trim();
+  if (raw === '') return undefined;
+  const seconds = Number(raw);
+  if (!Number.isInteger(seconds) || seconds < 1 || seconds > 600) return null;
+  return seconds;
 }
 
 function openParameterBuilder() {

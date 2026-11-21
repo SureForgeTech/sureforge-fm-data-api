@@ -204,7 +204,8 @@ export class FMClient {
               Authorization: `Basic ${basic}`
             },
             data: {},
-            signal: control?.signal
+            signal: control?.signal,
+            timeoutMs: control?.timeoutMs
           });
           trace.endpoint = 'POST /sessions';
 
@@ -232,7 +233,9 @@ export class FMClient {
               fallbackMessage: 'Failed to create FileMaker session.',
               operation: trace.operation,
               requestId: trace.requestId,
-              endpoint: 'POST /sessions'
+              endpoint: 'POST /sessions',
+              // A sign-in under the run's own deadline is not governed by the shared setting.
+              timeoutOverride: control?.timeoutMs !== undefined
             })
           );
           if (control?.proactive !== true) {
@@ -276,7 +279,8 @@ export class FMClient {
               {
                 method: 'DELETE',
                 path: `/sessions/${encodeURIComponent(token)}`,
-                signal: control?.signal
+                signal: control?.signal,
+                timeoutMs: control?.timeoutMs
               },
               false,
               trace,
@@ -655,7 +659,13 @@ export class FMClient {
     // A renewal ahead of expiry that fails (the password changed meanwhile, the server is busy) must
     // not stop work that the current token can still do: keep using it, and pause nothing. If the
     // token has really expired, the 401 on the next request starts a real renewal, which can pause.
-    const refreshPromise = this.createSession(profile, { proactive: Boolean(existing), userInitiated: control?.userInitiated })
+    const refreshPromise = this.createSession(profile, {
+      proactive: Boolean(existing),
+      userInitiated: control?.userInitiated,
+      // A sign-in the server takes longer than the shared timeout to answer must not end a run
+      // that asked for longer.
+      timeoutMs: control?.timeoutMs
+    })
       .then((token) => {
         if (existing && existing !== token) void this.retireSession(profile, existing);
         return token;
@@ -724,7 +734,7 @@ export class FMClient {
     const renewal = (async () => {
       await this.secretStore.deleteSessionToken(profile.id);
       this.sessionTracker.clear(profile.id);
-      const token = await this.createSession(profile);
+      const token = await this.createSession(profile, { timeoutMs: control?.timeoutMs });
       if (presumedLive && token !== rejectedToken) void this.retireSession(profile, rejectedToken);
       return token;
     })().finally(() => {

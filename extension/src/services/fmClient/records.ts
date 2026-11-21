@@ -38,6 +38,7 @@ export async function getRecord(
           path: `/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}`,
           ...(control?.portal ? { params: portalPagingParams(control.portal, '_'), strictQuery: true } : {}),
           signal: control?.signal,
+          timeoutMs: control?.timeoutMs,
           maxResponseBytes: control?.maxResponseBytes
         },
         true,
@@ -89,7 +90,8 @@ export async function listRecords(
       const envelope = await client.requestWithAuth<DataApiListRecordsResponse>(profile, {
         method: 'GET', path: `/layouts/${encodeURIComponent(layout)}/records`, params,
         transfer: true,
-        signal: control?.signal, maxResponseBytes: control?.maxResponseBytes
+        signal: control?.signal,
+        timeoutMs: control?.timeoutMs, maxResponseBytes: control?.maxResponseBytes
       }, true, trace);
       return { data: envelope.response.data ?? [], dataInfo: envelope.response.dataInfo, ...scriptErrorsOf(envelope.response) };
     } catch (error) {
@@ -159,6 +161,7 @@ export async function findRecords(
             path: `/layouts/${encodeURIComponent(layout)}/_find`,
             data: payload,
             signal: control?.signal,
+            timeoutMs: control?.timeoutMs,
             maxResponseBytes: control?.maxResponseBytes
           },
           true,
