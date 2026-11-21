@@ -122,6 +122,22 @@ export async function run(ctx) {
   );
   await s.step(
     J,
+    'Generate FM Web Next.js App writes the runtime template from the packaged build',
+    'the command runs, and the template lands in the workspace',
+    async () => {
+      await s.closeAllEditors();
+      await s.cmd('FileMaker: Generate FM Web Next.js App');
+      let files = [];
+      for (let i = 0; i < 60 && files.length === 0; i += 1) {
+        await s.page.waitForTimeout(500);
+        files = walk(path.join(s.ws, '.fmweb', 'generated'));
+      }
+      assert(files.length > 0, 'the runtime template was not generated from the packaged template');
+      return `${files.length} generated files`;
+    }
+  );
+  await s.step(
+    J,
     'Start FM Web Preview Server from the packaged build',
     'the command is offered, because the packaged build carries the runtime template; no server starts until it is run',
     async () => {
@@ -143,10 +159,29 @@ export async function run(ctx) {
     'script-run confirmation from a layout file',
     'needs a layout definition with a script behaviour wired in the designer; the guard is covered by test/unit/layoutModeScriptGuard.test.ts, not driven through the UI here'
   );
+  await s.step(
+    J,
+    'Start FM Web Preview Server asks before it runs the packaged template',
+    'the command opens its confirmation, and declining it starts nothing',
+    async () => {
+      await s.cmd('FileMaker: Start FM Web Preview Server');
+      await s.waitModal(20000);
+      const buttons = await s.modalButtons();
+      assert(
+        buttons.some((button) => /cancel/i.test(button)),
+        `no cancel button in the confirmation (buttons: ${buttons.join(' | ')})`
+      );
+      await s.modal('Cancel');
+      await s.page.waitForTimeout(1500);
+      const terminals = await s.page.locator('.terminal-tab, .terminal-tabs-entry').count();
+      assert(terminals === 0, `a terminal appeared after declining (${terminals})`);
+      return `declined; terminals ${terminals}`;
+    }
+  );
   s.notTestable(
     J,
     'preview server actually started',
-    'the packaged build carries the runtime template, but starting the preview installs that template\'s dependencies, which takes minutes and a network; this journey checks that the commands are offered'
+    'the packaged build carries the runtime template, but starting the preview installs that template\'s dependencies, which takes minutes and a network; this journey checks that the commands are offered and that declining the confirmation starts nothing'
   );
   await s.closeAllEditors();
 }

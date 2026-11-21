@@ -87,6 +87,7 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The packaged-extension journey now expects the FM Web preview commands to be offered, because the VSIX carries the runtime template, and a test stages that template with the repository's own packaging script and checks that the extension finds it and publishes the preview availability.
 - The UI test harness now measures every journey it runs: how long it took, and the deliberate choices on the way, are written to `measurements.json` and to the run's report. The maintainer inventory records what that measurement can and cannot cover for the path to a first sample receipt.
 
 - The entry-point inventory and the failure-mode catalogue now say what the extension does. The inventory's palette counts, the home's coverage of every command and its search were corrected against the manifest, and the CA-file re-check is recorded as fixed. A test recomputes the sizes and counts the inventory states, so the document and the extension cannot drift apart.

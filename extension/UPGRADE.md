@@ -73,7 +73,7 @@ The offline metadata cache folder now contains its own `.gitignore` with `*` and
 
 ### FM Web preview runs a clean private copy
 
-The preview remains a source-checkout feature, unavailable in the Marketplace package. It listens only on `127.0.0.1:3000`, opens through a single-use private launch link and requires the resulting private session cookie. The bridge token stays on the preview server. Next.js development endpoints, such as live reload, are outside the cookie check.
+The preview was a source-checkout feature in that release, unavailable in the Marketplace package; the packaged extension has carried the runtime template since the release after 1.9.1. It listens only on `127.0.0.1:3000`, opens through a single-use private launch link and requires the resulting private session cookie. The bridge token stays on the preview server. Next.js development endpoints, such as live reload, are outside the cookie check.
 
 VS Code asks before installing or starting, and before a script runs from Layout Mode or a preview button, showing the script, escaped parameter and connection host. Cancelling preview startup stops the old preview and clears saved bridge credentials. Installation uses a clean private temporary copy, with install scripts disabled and separate npm configuration and cache. Your npm configuration and edited or added runtime files are left alone and listed as ignored. A layout with an edited or linked generated file is skipped with a warning. Only **FileMaker: Generate FM Web Next.js App** offers regeneration that deletes files, after **Regenerate from template** lists them by name and you confirm.
 
