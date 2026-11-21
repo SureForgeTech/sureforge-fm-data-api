@@ -81,6 +81,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The entry-point inventory and the failure-mode catalogue now say what the extension does. The inventory's palette counts, the home's coverage of every command and its search were corrected against the manifest, and the CA-file re-check is recorded as fixed. A test recomputes the sizes and counts the inventory states, so the document and the extension cannot drift apart.
+
 - The loopback FileMaker mock can save a record and drop its reply, so registration tests verify that an uncertain write is not retried.
 
 - Pull requests are now welcome with a DCO sign-off (`git commit -s`): the organization contributing guide says so, and a new `dco` workflow checks the sign-off on pull requests from outside contributors.
