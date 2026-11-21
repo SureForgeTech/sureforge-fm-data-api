@@ -48,7 +48,12 @@ export class FMClient {
   private readonly layoutMetadataCache = new Map<string, Record<string, unknown>>();
   private readonly layoutMetadataEtags = new Map<string, string>();
   private readonly sessionTracker: SessionTokenTracker;
-  private readonly inFlightRefresh = new Map<string, Promise<string>>();
+  /**
+   * The sign-in in flight for a profile, with the deadline that sign-in runs under. A caller that
+   * asked for a longer deadline than that has to start its own sign-in: waiting for the shorter
+   * one would end its request at a deadline it never asked for.
+   */
+  private readonly inFlightRefresh = new Map<string, { promise: Promise<string>; timeoutMs: number }>();
   private readonly health = new Map<string, SessionHealth>();
   private readonly invalidationListeners = new Set<(profileId: string) => void>();
   private readonly healthListeners = new Set<(profileId: string, health: SessionHealth | undefined) => void>();
@@ -647,7 +652,20 @@ export class FMClient {
     // token is reused — orphaning the rest until server timeout.
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
-      return waitForSession(inFlight, control?.signal);
+      const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
+      if (wanted <= inFlight.timeoutMs) {
+        // The sign-in in flight runs under a deadline at least as long as this request's own, so
+        // waiting for it cannot end this request earlier than this request allows.
+        return waitForSession(inFlight.promise, control?.signal);
+      }
+      // The sign-in in flight runs under a shorter deadline than this request asked for. Waiting
+      // for it would end this request at a deadline the user never chose, so this request signs
+      // in for itself, under its own deadline.
+      this.logger.debug('A sign-in with a shorter deadline is in flight; signing in separately for this request.', {
+        profileId: profile.id,
+        inFlightTimeoutMs: inFlight.timeoutMs,
+        requestedTimeoutMs: wanted
+      });
     }
 
     if (existing) {
@@ -685,7 +703,10 @@ export class FMClient {
         this.inFlightRefresh.delete(profile.id);
       });
 
-    this.inFlightRefresh.set(profile.id, refreshPromise);
+    this.inFlightRefresh.set(profile.id, {
+      promise: refreshPromise,
+      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
+    });
 
     return waitForSession(refreshPromise, control?.signal);
   }
@@ -723,8 +744,18 @@ export class FMClient {
 
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
-      await waitForSession(inFlight, control?.signal);
-      return;
+      const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
+      if (wanted <= inFlight.timeoutMs) {
+        await waitForSession(inFlight.promise, control?.signal);
+        return;
+      }
+      // A sign-in with a shorter deadline is in flight. This renewal needs a longer one, so it
+      // signs in for itself below rather than ending at a deadline the user never chose.
+      this.logger.debug('A sign-in with a shorter deadline is in flight; renewing separately for this request.', {
+        profileId: profile.id,
+        inFlightTimeoutMs: inFlight.timeoutMs,
+        requestedTimeoutMs: wanted
+      });
     }
 
     // Registered synchronously (no await between the check above and the set below),
@@ -740,7 +771,10 @@ export class FMClient {
     })().finally(() => {
       this.inFlightRefresh.delete(profile.id);
     });
-    this.inFlightRefresh.set(profile.id, renewal);
+    this.inFlightRefresh.set(profile.id, {
+      promise: renewal,
+      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
+    });
     await waitForSession(renewal, control?.signal);
   }
 
