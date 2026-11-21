@@ -38,6 +38,8 @@ PR title prefix matches the highest-tier label added:
 
 - Right-click a layout in the FileMaker sidebar and choose **Copy Layout Name** to put its exact FileMaker name on the clipboard, ready to paste into a request or a script.
 
+- The Script Runner suggests the scripts the server lists, so the exact script name can be picked instead of typed. The name that runs is still the one in the box.
+
 - Start Here opens a FileMaker home with the four journeys — Build a Web App, Connect and Test, Browse Data and Help — and an Advanced Tools section for the rest. Each button runs the matching command.
 
 - Create FM Web App starts with a starter: Event Registration or Feedback or Request Form. The starter names the saved app, so choosing the same one again reopens it. Sample fields come first, the wizard resumes by itself after you open a folder or add a first connection, and the sample receipt needs no credentials, code or JSON.
@@ -71,6 +73,8 @@ PR title prefix matches the highest-tier label added:
 - The Record Viewer, the Record Editor and **Get Record by ID** now warn when a script that ran with the record reported an error. The record still loads, as it did before.
 
 - The FileMaker sidebar now says why it could not load layouts, fields or value lists, instead of the same advice for every failure. The reason is the FileMaker error code and what it means, or the kind of connection failure.
+
+- A field in the FileMaker sidebar now says what kind of field it is: calculation, summary, global or container. A calculation, a summary and a container are not written like an ordinary field, so a request that sets one is refused.
 
 - Record editing and intake validation preserve long decimal values that would otherwise be rounded when converted to JavaScript numbers.
 
