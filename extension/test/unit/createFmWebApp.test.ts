@@ -99,6 +99,29 @@ describe('Create FM Web App production controller', () => {
     expect(definition.id).toBe('event-registration');
   });
 
+  it('goes back to the invented data when the source changes to the sample fields', async () => {
+    const { deps } = fixture();
+    // The app was built with the FileMaker fields, and saved.
+    pickFileMaker();
+    await createFmWebApp(deps as never);
+    const fromFileMaker = open.mock.calls[0]![1] as ReturnType<typeof eventRegistrationExample>['definition'];
+    await actions().save(fromFileMaker);
+    const savedBefore = await readFile(path.join(root, '.fmweb/intakes/event-registration.intake.json'), 'utf8');
+    open.mockClear();
+    // The developer asks for the invented data again.
+    await createFmWebApp(deps as never, { source: 'sample', changeSource: true, starter: 'event-registration' });
+    const back = open.mock.calls[0]![1] as ReturnType<typeof eventRegistrationExample>['definition'];
+    const sample = eventRegistrationExample();
+    expect(back.fields.map((field) => field.fmFieldName)).toEqual(sample.definition.fields.map((field) => field.fmFieldName));
+    expect(back.layoutId).toBe(sample.layout.id);
+    // The saved app still holds the FileMaker layout until the developer saves.
+    expect(await readFile(path.join(root, '.fmweb/intakes/event-registration.intake.json'), 'utf8')).toBe(savedBefore);
+    // The editor's way back asks for the sample source by name.
+    await actions().changeSource?.('sample');
+    expect(vscode.commands.executeCommand).toHaveBeenCalledWith('filemakerDataApiTools.createFmWebApp',
+      expect.objectContaining({ source: 'sample', changeSource: true }));
+  });
+
   it('refuses a starter identifier the wizard does not offer', async () => {
     const { deps } = fixture();
     await expect(createFmWebApp(deps as never, { starter: 'not-a-starter' })).rejects.toThrow('starter');

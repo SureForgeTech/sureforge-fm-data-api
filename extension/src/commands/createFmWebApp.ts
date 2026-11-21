@@ -23,7 +23,7 @@ interface CreateAppDependencies {
 }
 
 export interface CreateAppOptions {
-  source?: 'filemaker' | 'draft';
+  source?: 'filemaker' | 'draft' | 'sample';
   changeSource?: boolean;
   /** The starter the user picked. The wizard asks for one when this is absent. */
   starter?: string;
@@ -178,7 +178,7 @@ export async function createFmWebApp(deps: CreateAppDependencies, options: Creat
         saved = saved ? await intakes.saveApp(definition, saved.revision, selectedModel.layout) : await intakes.createApp(definition, selectedModel.layout);
       } else saved = await intakes.saveApp(definition, saved.revision);
     },
-    changeSource: async (source = 'filemaker') => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source, changeSource: true, ...(starter ? { starter: starter.id } : {}) }); },
+    changeSource: async (source: 'filemaker' | 'draft' | 'sample' = 'filemaker') => { await vscode.commands.executeCommand('filemakerDataApiTools.createFmWebApp', { source, changeSource: true, ...(starter ? { starter: starter.id } : {}) }); },
     run: async (action) => {
       assertAvailable();
       if (action === 'filemaker') await vscode.commands.executeCommand('filemakerDataApiTools.startFmWebPreviewServer', { intakeId: appId, registrationMode: 'filemaker' });
