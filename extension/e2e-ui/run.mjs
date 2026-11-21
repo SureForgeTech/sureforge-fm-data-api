@@ -161,8 +161,12 @@ try {
         detail: e.stack ?? String(e)
       });
     }
-    report.measure(s.measurement.end());
-    s.measurement = undefined;
+    // A journey that could not start has no measurement to record: the crash row says so. The
+    // run carries on with the next journey, as it did before the measurement was added.
+    if (s.measurement) {
+      report.measure(s.measurement.end());
+      s.measurement = undefined;
+    }
     report.write();
   }
 } finally {
