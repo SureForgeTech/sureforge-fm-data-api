@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The Command Palette now shows the everyday commands by default: the home's four journeys, the extension README's common commands and the walkthrough's steps. The other commands appear when **filemaker.advanced.powerUserMode** is on, and every one of them stays in the FileMaker home, where you can find it by name. Nothing was removed.
+
 - The FileMaker home now has a **Find a command** box. It hides the commands that do not mention what you type, and the section they sit in when nothing is left in it, so the full list of commands is usable.
 
 - Build a Portal now asks which starter the app is for, the same starters Create FM Web App offers, and its create, edit, preview, export and layout actions work on that app. It was fixed to the event registration starter, so a service inquiry, appointment request or application could not be built or resumed with it.

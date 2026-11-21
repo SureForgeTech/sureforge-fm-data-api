@@ -613,7 +613,7 @@
       { "command": "filemakerDataApiTools.openRecordViewer", "key": "ctrl+alt+v", "mac": "cmd+alt+v", "when": "filemaker.hasProfiles" },
       { "command": "filemakerDataApiTools.openScriptRunner", "key": "ctrl+alt+e", "mac": "cmd+alt+e", "when": "filemaker.hasProfiles" },
       { "command": "filemakerDataApiTools.showRequestHistory", "key": "ctrl+alt+h", "mac": "ctrl+alt+h", "when": "filemaker.powerUserMode" },
-      { "command": "filemakerDataApiTools.openLayoutMode", "key": "ctrl+alt+l", "mac": "cmd+alt+l", "when": "filemaker.fmWebProjectInitialized" }
+      { "command": "filemakerDataApiTools.openLayoutMode", "key": "ctrl+alt+l", "mac": "cmd+alt+l", "when": "filemaker.fmWebProjectInitialized && filemaker.powerUserMode" }
     ],
     "menus": {
       "view/title": [
@@ -877,15 +877,15 @@
         },
         {
           "command": "filemakerDataApiTools.editConnectionProfile",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.removeConnectionProfile",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.selectActiveProfile",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.listLayouts",
@@ -897,11 +897,11 @@
         },
         {
           "command": "filemakerDataApiTools.refreshLayoutInspector",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.refreshSchemaCache",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.openScriptRunner",
@@ -917,7 +917,7 @@
         },
         {
           "command": "filemakerDataApiTools.openLayoutMetadata",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.openRecordViewer",
@@ -929,15 +929,15 @@
         },
         {
           "command": "filemakerDataApiTools.runFindJson",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.getRecordById",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.editRecordById",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.createRecord",
@@ -949,7 +949,7 @@
         },
         {
           "command": "filemakerDataApiTools.uploadContainer",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.batchExportFind",
@@ -965,23 +965,23 @@
         },
         {
           "command": "filemakerDataApiTools.saveCurrentQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.runSavedQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.openSavedQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.deleteSavedQuery",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.exportSavedQueries",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.generateTypesForLayout",
@@ -989,19 +989,19 @@
         },
         {
           "command": "filemakerDataApiTools.generateTypesForAllLayouts",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.generateSnippetsForLayout",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.generateTypeScriptClient",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.initializeFmWebProject",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.diffSchemaSnapshots",
@@ -1009,51 +1009,51 @@
         },
         {
           "command": "filemakerDataApiTools.diffAgainstLatestSnapshot",
-          "when": "filemaker.hasSchemaSnapshots"
+          "when": "filemaker.hasSchemaSnapshots && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.openSchemaSnapshotJson",
-          "when": "filemaker.hasSchemaSnapshots"
+          "when": "filemaker.hasSchemaSnapshots && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.syncFmWebMetadata",
-          "when": "filemaker.fmWebProjectInitialized"
+          "when": "filemaker.fmWebProjectInitialized && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.openLayoutMode",
-          "when": "filemaker.fmWebProjectInitialized"
+          "when": "filemaker.fmWebProjectInitialized && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.generateFmWebNextApp",
-          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable"
+          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.generateFmWebLayoutPage",
-          "when": "filemaker.fmWebProjectInitialized"
+          "when": "filemaker.fmWebProjectInitialized && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.startFmWebPreviewServer",
-          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable"
+          "when": "filemaker.fmWebProjectInitialized && filemaker.fmWebPreviewAvailable && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.createEnvironmentSet",
-          "when": "filemaker.enterpriseMode"
+          "when": "filemaker.enterpriseMode && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.compareEnvironments",
-          "when": "filemaker.enterpriseMode"
+          "when": "filemaker.enterpriseMode && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.diffLayoutAcrossEnvironments",
-          "when": "filemaker.enterpriseMode"
+          "when": "filemaker.enterpriseMode && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.exportEnvironmentComparisonReport",
-          "when": "filemaker.enterpriseMode"
+          "when": "filemaker.enterpriseMode && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.openEnvironmentSetJson",
-          "when": "filemaker.enterpriseMode"
+          "when": "filemaker.enterpriseMode && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.showRequestHistory",
@@ -1077,27 +1077,51 @@
         },
         {
           "command": "filemakerDataApiTools.setAiAccess",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.toggleAiKillSwitch",
-          "when": "filemaker.ai.active"
+          "when": "filemaker.ai.active && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.showAiActivity",
-          "when": "filemaker.ai.active"
+          "when": "filemaker.ai.active && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.newAiSession",
-          "when": "filemaker.ai.active"
+          "when": "filemaker.ai.active && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.toggleAiServer",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
         },
         {
           "command": "filemakerDataApiTools.copyAiMcpConfig",
-          "when": "filemaker.hasProfiles"
+          "when": "filemaker.hasProfiles && filemaker.powerUserMode"
+        },
+        {
+          "command": "filemakerDataApiTools.openConnectionMenu",
+          "when": "filemaker.powerUserMode"
+        },
+        {
+          "command": "filemakerDataApiTools.manageSavedQueries",
+          "when": "filemaker.powerUserMode"
+        },
+        {
+          "command": "filemakerDataApiTools.importSavedQueries",
+          "when": "filemaker.powerUserMode"
+        },
+        {
+          "command": "filemakerDataApiTools.openGeneratedTypesFolder",
+          "when": "filemaker.powerUserMode"
+        },
+        {
+          "command": "filemakerDataApiTools.toggleOfflineMode",
+          "when": "filemaker.powerUserMode"
+        },
+        {
+          "command": "filemakerDataApiTools.refreshOfflineCache",
+          "when": "filemaker.powerUserMode"
         }
       ]
     },
@@ -1569,8 +1593,8 @@
           "filemaker.advanced.powerUserMode": {
             "type": "boolean",
             "default": false,
-            "description": "Per workspace. Surface diagnostic / plugin / circuit-breaker / import-export commands in the Command Palette. Off by default to keep the FileMaker palette focused on commands new users actually need.",
-            "markdownDescription": "**Per workspace.** Surface diagnostic / plugin / circuit-breaker / import-export commands in the Command Palette. Off by default to keep the FileMaker palette focused on commands new users actually need.",
+            "description": "Per workspace. Surface the commands that are not everyday ones in the Command Palette. Off by default to keep the FileMaker palette focused on commands new users actually need; every command stays in the FileMaker home.",
+            "markdownDescription": "**Per workspace.** Surface the commands that are not everyday ones in the Command Palette. Off by default to keep the FileMaker palette focused on commands new users actually need; every command stays in the FileMaker home.",
             "order": 4
           },
           "filemaker.logging.level": {

@@ -1,14 +1,15 @@
 # Use cases and templates: what the extension gives a FileMaker developer on the first day
 
-Prepared 2026-11-20 against `main` at `cb88957` (extension 1.9.1). This is the companion to
+Prepared 2026-11-20 against `main` at `3c3a931` (extension 1.9.1). This is the companion to
 [`docs/UX_INVENTORY.md`](./UX_INVENTORY.md): that document counts the entry points and proposes the
 primary journey, and it maps the extension against Claris Studio as a whole. **This document covers
 the part that is still open**: which web activities a FileMaker developer can build today, which
 templates exist for them, what is missing for the two audiences that matter, and what the smallest
 next steps are.
 
-Every number below is measured from the sources at `cb88957` and says how to reproduce it. Nothing
-here is authorised work; the proposals at the end are the decisions this document is asking for.
+Every number below is measured from the sources at `3c3a931` and says how to reproduce it. The
+proposals at the end are the decisions this document is asking for; one of them was delivered the
+same day, and is marked as such.
 
 The comparison with Claris Studio is inherited from `docs/UX_INVENTORY.md`, which states that it
 "was not checked against Claris's own documentation, which was not reachable here". The same
@@ -17,10 +18,17 @@ disclosure applies here.
 ## The two questions behind this
 
 1. **"There are too many commands."** — measured and answered in `docs/UX_INVENTORY.md`: 82 commands
-   are declared, a connected user sees 58 of them in the Command Palette, and the FileMaker home now
-   names every one of them and has a filter box to find them (pull requests #593 and #595). Two of
-   that document's five proposals are still open: shortening the palette to the everyday set, and
-   giving the publish step a name. This document does not repeat that work.
+   are declared, and the FileMaker home now names every one of them and has a filter box to find
+   them (pull requests #593 and #595). The palette itself was shortened to the everyday set the
+   same day (pull request #596): a connected user now sees 30 entries instead of 58 (31 once a
+   schema snapshot is saved). The rest of the palette sits behind
+   `filemaker.advanced.powerUserMode`, and three commands stay out of the palette on purpose.
+   ```console
+   $ node -e "const p=require('./extension/package.json').contributes;const m=new Map(p.menus.commandPalette.map(e=>[e.command,e.when]));const always=p.commands.filter(c=>!m.has(c.command));const withProfile=p.menus.commandPalette.filter(e=>e.when==='filemaker.hasProfiles');console.log(always.length+withProfile.length)"
+   30
+   ```
+   One of that document's five proposals is still open: giving the publish step a name. This
+   document does not repeat that work.
 2. **"There is no out-of-the-box experience, and no templates that get a user productive within
    minutes."** — this document. The short answer: the *form* half of that now exists, and the
    *audience* half does not.
@@ -147,7 +155,8 @@ extension could make.
 
 ## The proposals, smallest first
 
-Each names the check that would show it worked. None is authorised.
+Each names the check that would show it worked. The one marked **Done the same day** was
+delivered; the rest are the decisions this document is asking for.
 
 1. **Let a developer go back to invented data.** A developer who picked a starter, then "Use
    FileMaker fields", has no way back to the invented-data preview: the editor's source switch offers
@@ -177,7 +186,8 @@ Each names the check that would show it worked. None is authorised.
 4. **Shorten the Command Palette to the everyday set.** The third proposal in `docs/UX_INVENTORY.md`.
    *Acceptance:* a connected user sees the everyday set; the rest stay behind the power-user setting
    and in the home.
-   *Size:* small, and it moves commands rather than removing them.
+   **Done the same day:** pull request #596 kept the palette to the everyday set; the other commands
+   stay in the home and behind the power-user setting, so no capability was removed.
 
 ## What this document does not claim
 

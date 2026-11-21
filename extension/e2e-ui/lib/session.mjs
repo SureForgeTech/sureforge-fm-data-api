@@ -113,7 +113,10 @@ export class Session {
       'window.commandCenter': false,
       'editor.minimap.enabled': false,
       'workbench.enableExperiments': false,
-      'workbench.welcomePage.walkthroughs.openOnInstall': false
+      'workbench.welcomePage.walkthroughs.openOnInstall': false,
+      // The journeys run the extension's advanced commands from the Command Palette. The everyday
+      // ones are in the palette by default; the rest need this setting.
+      'filemaker.advanced.powerUserMode': true
     };
     this.writeSettings({});
   }
