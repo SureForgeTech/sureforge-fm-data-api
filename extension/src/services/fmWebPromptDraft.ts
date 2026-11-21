@@ -213,7 +213,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         : suffix ? qualifier(suffix[3] ?? '', Boolean(suffix[2])) : undefined;
       // "leaving phone out": the verb before the field and the particle after it belong together,
       // with the field between them.
-      const excludedByParticle = /^\s*out\b/.test(after) && /\b(?:leav(?:e|es|ing)|left)\s*$/.test(before);
+      const excludedByParticle = /^\s*out\b/.test(after) && /\b(?:leav(?:e|es|ing)|left)(?:\s+the)?\s*$/.test(before);
       // An exclusion that follows the field applies to that field: "include email, phone excluded."
       // The text after a mention stops at the next mention, so it cannot reach a later field.
       const excludedAfter = EXCLUSION_AFTER.test(after) || excludedByParticle;
@@ -227,8 +227,10 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier && !singular;
       if (!negated && !excludedAfter) {
         const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
+        // A mention that could not be added - an ambiguous name, or a full draft - leaves no field
+        // for a following comma to point at.
+        lastAppended = entry;
         if (entry) {
-          lastAppended = entry;
           // The coordinated chain: the fields joined by "and" or "as well as", and the fields of a plain
           // comma-separated list ("name, email, and phone"). An explicit coordinator completes a phrase, so
           // a comma after one starts a new phrase instead of extending it.

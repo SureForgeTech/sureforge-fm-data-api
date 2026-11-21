@@ -425,6 +425,17 @@ describe('prompt form suggestions', () => {
       .map(({ field }) => field.name)).toEqual(['Email']);
     expect(suggestPromptFields('A registration form leaving phone out and email in.', fields).fields
       .map(({ field }) => field.name)).toEqual(['Email']);
+    // An article may stand between the verb and the field.
+    expect(suggestPromptFields('Include email, leaving the phone out.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
+  });
+
+  it('does not let a marker after a comma name an earlier field', () => {
+    // Two fields whose names differ only by a space: the name is ambiguous, so it is listed as
+    // unmatched, and there is no field for the marker to remove.
+    const fields = [{ name: 'Email' }, { name: 'Phone' }, { name: 'Phone ' }];
+    expect(suggestPromptFields('Include email, phone, excluded.', fields).fields
+      .map(({ field }) => field.name)).toEqual(['Email']);
   });
 
   it('leaves a prompt that keeps everything but one field empty, as it does today', () => {
