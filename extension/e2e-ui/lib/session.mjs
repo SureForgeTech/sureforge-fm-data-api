@@ -368,6 +368,7 @@ export class Session {
     let detail = '';
     let explicit = false;
     const before = assertCalls;
+    const startedAt = Date.now();
     try {
       const out = await fn();
       if (out && typeof out === 'object' && out.result) {
@@ -396,6 +397,8 @@ export class Session {
       result,
       shot,
       detail,
+      // How long the step took, so a run says how long a path takes and not only what it found.
+      ms: Date.now() - startedAt,
       ...(unasserted ? { unasserted } : {})
     });
     return result === 'PASS';
@@ -473,7 +476,17 @@ export class Session {
     }
     throw new Error('the command palette did not open');
   }
+  /**
+   * Record a decision the user made: the command they ran, or the option they picked. The
+   * measurement of the current journey counts them, so a run says how many choices a path took.
+   */
+  choice(label) {
+    this.measurement?.choice(label);
+    return this;
+  }
+
   async cmd(title, { exact = true, wait = 400 } = {}) {
+    this.choice(`command: ${title}`);
     await this.openPalette();
     await sleep(150);
     await this.page.keyboard.type(title, { delay: 4 });
@@ -543,6 +556,7 @@ export class Session {
   }
   /** Choose an item in the open quick pick by (part of) its label. */
   async pick(text, { timeout = 10000 } = {}) {
+    this.choice(`pick: ${text}`);
     await this.quickInputOpen(timeout);
     await sleep(300);
     const rows = this.page.locator('.quick-input-list .monaco-list-row');

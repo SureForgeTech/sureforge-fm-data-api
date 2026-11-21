@@ -51,6 +51,11 @@ export interface NormalizedError {
 export interface NormalizeErrorOptions {
   /** Logical operation recorded by the client, independent of the transport method. */
   operation?: string;
+  /**
+   * The request carried its own deadline, so the shared timeout setting does not govern it and
+   * the advice must not point at that setting.
+   */
+  timeoutOverride?: boolean;
   requestData?: unknown;
   requestParams?: unknown;
   fallbackMessage?: string;

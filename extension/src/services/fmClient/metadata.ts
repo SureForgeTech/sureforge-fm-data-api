@@ -42,6 +42,7 @@ export async function listLayouts(client: ClientContext, profile: ConnectionProf
           method: 'GET',
           path: '/layouts',
           signal: control?.signal,
+          timeoutMs: control?.timeoutMs,
           maxResponseBytes: control?.maxResponseBytes
         },
         true,
@@ -78,6 +79,7 @@ export async function listScripts(client: ClientContext, profile: ConnectionProf
           method: 'GET',
           path: '/scripts',
           signal: control?.signal,
+          timeoutMs: control?.timeoutMs,
           maxResponseBytes: control?.maxResponseBytes
         },
         true,
@@ -125,7 +127,8 @@ export async function getLayoutMetadata(
                 'If-None-Match': etag
               }
             : undefined,
-          signal: control?.signal
+          signal: control?.signal,
+          timeoutMs: control?.timeoutMs
         },
         true,
         trace

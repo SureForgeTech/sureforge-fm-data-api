@@ -4,6 +4,10 @@
 
 - The form editor can go back to the invented data: **Try sample fields** in the editor restores the starter's sample fields, so a developer who chose their own fields does not have to start over. The saved app stays unchanged until the replacement is saved.
 
+- The UI test harness now measures every journey it runs: how long it took, and the deliberate choices on the way, are written to `measurements.json` and to the run's report.
+
+- A script that needs longer than the shared request timeout can ask for its own deadline in the Script Runner. Type the seconds in **Timeout (seconds)**, from 1 to 600; that deadline applies to that run only, and the timeout message still says the change may already have been applied.
+
 - Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
 
 - The Command Palette now shows the everyday commands by default: the home's four journeys, the extension README's common commands and the walkthrough's steps. The other commands appear when **filemaker.advanced.powerUserMode** is on, and every one of them stays in the FileMaker home, where you can find it by name. Nothing was removed.

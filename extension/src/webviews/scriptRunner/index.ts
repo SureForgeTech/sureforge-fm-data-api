@@ -13,11 +13,16 @@ import type { SnippetFormat } from '../../snippets/model';
 import { buildWebviewCsp, createNonce } from '../common/csp';
 import { guardDispatch, requestType } from '../common/dispatch';
 import {
+  getOptionalNumberField,
   getStringField,
   toRecord
 } from '../common/messageValidation';
 import { isFeatureEnabled, isOfflineModeOn } from '../../utils/policySetting';
 import { versionFooterHtml } from '../../about/runtimeVersion';
+
+/** The shortest and longest deadline a script run may ask for, in seconds. */
+export const MIN_SCRIPT_TIMEOUT_SECONDS = 1;
+export const MAX_SCRIPT_TIMEOUT_SECONDS = 600;
 
 interface ScriptRunnerOpenOptions {
   profileId?: string;
@@ -31,6 +36,8 @@ interface RunScriptPayload {
   recordId?: string;
   scriptName: string;
   scriptParam?: string;
+  /** Seconds this run may take, when the user asked for a longer deadline than the shared one. */
+  timeoutSeconds?: number;
 }
 
 interface CopySnippetPayload extends RunScriptPayload {
@@ -303,8 +310,11 @@ export class ScriptRunnerPanel {
     }
 
     try {
-      const request = validateRunScriptPayload(payload);
-      const result = await this.fmClient.runScript(profile, request);
+      const { request, timeoutMs } = validateRunScriptPayload(payload);
+      // A run without its own deadline keeps the shared timeout and asks for no control at all.
+      const result = timeoutMs === undefined
+        ? await this.fmClient.runScript(profile, request)
+        : await this.fmClient.runScript(profile, request, { timeoutMs });
 
       const payloadForPage = { profileId: payload.profileId, request, result };
 
@@ -345,7 +355,7 @@ export class ScriptRunnerPanel {
     }
 
     try {
-      const request = validateRunScriptPayload(payload);
+      const { request } = validateRunScriptPayload(payload);
       await deliverSnippet(
         profile,
         {
@@ -477,6 +487,10 @@ export class ScriptRunnerPanel {
         <datalist id="scriptNameList"></datalist>
       </div>
       <div class="row">
+        <label for="timeoutSecondsInput">Timeout (seconds)</label>
+        <input id="timeoutSecondsInput" type="number" min="${MIN_SCRIPT_TIMEOUT_SECONDS}" max="${MAX_SCRIPT_TIMEOUT_SECONDS}" step="1" placeholder="Empty uses the shared request timeout" />
+      </div>
+      <div class="row">
         <label for="scriptParamInput">Script Parameter (optional)</label>
         <div class="parameter-input-group">
           <textarea id="scriptParamInput" rows="3" placeholder="Any string payload"></textarea>
@@ -552,7 +566,10 @@ function parseRunPayload(value: unknown): RunScriptPayload | undefined {
     layout,
     scriptName,
     scriptParam: getStringField(payload, 'scriptParam'),
-    recordId: getStringField(payload, 'recordId')
+    recordId: getStringField(payload, 'recordId'),
+    // The bounds are checked when the request is built, so a number outside them is refused
+    // rather than quietly dropped.
+    timeoutSeconds: getOptionalNumberField(payload, 'timeoutSeconds')
   };
 }
 
@@ -567,7 +584,7 @@ function parseCopyPayload(value: unknown, fallbackFormat?: SnippetFormat): CopyS
   return { ...payload, delivery };
 }
 
-function validateRunScriptPayload(payload: RunScriptPayload): RunScriptRequest {
+function validateRunScriptPayload(payload: RunScriptPayload): { request: RunScriptRequest; timeoutMs?: number } {
   // Script and layout names are used exactly as given: a leading or trailing space is part of the name.
   const scriptName = payload.scriptName;
 
@@ -578,18 +595,30 @@ function validateRunScriptPayload(payload: RunScriptPayload): RunScriptRequest {
   assertUsableUrlName(scriptName, 'script');
   assertUsableUrlName(layout, 'layout');
 
+  const seconds = payload.timeoutSeconds;
+  if (seconds !== undefined && (!Number.isInteger(seconds) || seconds < MIN_SCRIPT_TIMEOUT_SECONDS || seconds > MAX_SCRIPT_TIMEOUT_SECONDS)) {
+    throw new FMClientError(
+      `The timeout must be a whole number of seconds between ${MIN_SCRIPT_TIMEOUT_SECONDS} and ${MAX_SCRIPT_TIMEOUT_SECONDS}.`
+    );
+  }
+
   return {
-    layout,
-    scriptName,
-    scriptParam: payload.scriptParam?.trim() ? payload.scriptParam : undefined,
-    recordId: payload.recordId?.trim() ? payload.recordId : undefined
+    request: {
+      layout,
+      scriptName,
+      scriptParam: payload.scriptParam?.trim() ? payload.scriptParam : undefined,
+      recordId: payload.recordId?.trim() ? payload.recordId : undefined
+    },
+    // The deadline belongs to this run. An empty field keeps the shared request timeout.
+    timeoutMs: seconds === undefined ? undefined : seconds * 1000
   };
 }
 
 function formatError(error: unknown): string {
   if (error instanceof FMClientError && error.kind === 'timeout') {
-    // The request gave up waiting; the server was not told to stop.
-    return `${error.message} The script may still be running on the server.`;
+    // The request gave up waiting; the server was not told to stop. The Timeout field in this panel
+    // is where the deadline is changed.
+    return `${error.message} The script may still be running on the server. Raise the Timeout field in this panel to give the script longer.`;
   }
   if (error instanceof Error) {
     return error.message;

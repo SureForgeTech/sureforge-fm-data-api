@@ -70,7 +70,9 @@ ephemeral user-data directory use the plain text backend; nothing outside it is 
 ## Output
 
 `report.md` / `report.json`: one row per step with the expectation, the result (PASS, FAIL, NOTE, NOT-TESTABLE), the
-screenshot path and details. `screenshots/` has a PNG per step, `vscode-logs/` the VS Code and extension host logs.
+screenshot path, details and how long the step took. `screenshots/` has a PNG per step, `vscode-logs/` the VS Code and extension host logs.
+`measurements.json` has one measurement per journey: how long it took, and the deliberate choices on the way — the commands that were
+run and the options that were picked. `report.md` repeats them under **Measurements**.
 A FAIL row is a finding: the detail says what was seen. Rows in the 13a/13b/13c journeys assert the _recommended_ behaviour
 from `docs/FILEMAKER_FAILURE_MODES.md`, so a FAIL there confirms a gap.
 
