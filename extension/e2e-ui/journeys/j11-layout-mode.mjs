@@ -8,7 +8,11 @@ import { assert } from '../lib/session.mjs';
 
 const J = 'J11 layout mode';
 /** The private folders the preview server copies the template into. */
-const previewFolders = () => fs.readdirSync(tmpdir()).filter((name) => name.startsWith('fmweb-preview-')).length;
+const previewFolders = () =>
+  fs
+    .readdirSync(tmpdir(), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('fmweb-preview-'))
+    .map((entry) => entry.name);
 
 const walk = (dir) =>
   fs.existsSync(dir)
@@ -160,7 +164,7 @@ export async function run(ctx) {
     'Start FM Web Preview Server asks before it runs the packaged template',
     'the command opens its confirmation, and declining it starts nothing',
     async () => {
-      const before = previewFolders();
+      const before = new Set(previewFolders());
       await s.cmd('FileMaker: Start FM Web Preview Server');
       await s.waitModal(20000);
       const buttons = await s.modalButtons();
@@ -172,9 +176,11 @@ export async function run(ctx) {
       await s.page.waitForTimeout(1500);
       // The preview copies the template into a private temporary folder and installs it there, so
       // a new folder means it started and the confirmation was not what stopped it.
-      const after = previewFolders();
-      assert(after <= before, `a preview folder appeared after declining (${before} -> ${after})`);
-      return `declined; preview folders ${before} -> ${after}`;
+      // The names matter, not the count: the preview reaps a stale folder as it starts, so a count
+      // could stay the same while a new preview folder appeared.
+      const started = previewFolders().filter((name) => !before.has(name));
+      assert(started.length === 0, `a preview folder appeared after declining (${started.join(', ')})`);
+      return `declined; ${before.size} preview folders, none new`;
     }
   );
   s.notTestable(
