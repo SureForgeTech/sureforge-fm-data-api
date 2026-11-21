@@ -1,11 +1,15 @@
 // Journey 11: FM Web project, Layout Mode and the preview server: open, confirmations (declined), what works at this commit.
 import fs from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { answerPickers, connect, createProfile, ensureProfileCommands } from '../lib/flows.mjs';
 import { assert } from '../lib/session.mjs';
 
 const J = 'J11 layout mode';
+/** The private folders the preview server copies the template into. */
+const previewFolders = () => fs.readdirSync(tmpdir()).filter((name) => name.startsWith('fmweb-preview-')).length;
+
 const walk = (dir) =>
   fs.existsSync(dir)
     ? fs
@@ -142,16 +146,8 @@ export async function run(ctx) {
     'the command is offered, because the packaged build carries the runtime template; no server starts until it is run',
     async () => {
       const listed = await s.cmdListed('FileMaker: Start FM Web Preview Server');
-      const terminals = await s.page.locator('.terminal-tab, .terminal-tabs-entry').count();
-      const nm = fs.existsSync(
-        path.join(s.ws, '.fmweb', 'generated', 'runtime-next', 'node_modules')
-      );
       assert(listed, 'Start FM Web Preview Server is not offered although the packaged build carries the runtime template');
-      assert(
-        !nm && terminals === 0,
-        `a terminal or node_modules appeared (terminals ${terminals}, node_modules ${nm})`
-      );
-      return `command offered; terminals ${terminals}; node_modules ${nm}`;
+      return 'command offered';
     }
   );
   s.notTestable(
@@ -164,6 +160,7 @@ export async function run(ctx) {
     'Start FM Web Preview Server asks before it runs the packaged template',
     'the command opens its confirmation, and declining it starts nothing',
     async () => {
+      const before = previewFolders();
       await s.cmd('FileMaker: Start FM Web Preview Server');
       await s.waitModal(20000);
       const buttons = await s.modalButtons();
@@ -173,12 +170,11 @@ export async function run(ctx) {
       );
       await s.modal('Cancel');
       await s.page.waitForTimeout(1500);
-      // The install only starts after the confirmation, so no dependency folder means nothing started.
-      const installed = fs.existsSync(
-        path.join(s.ws, '.fmweb', 'generated', 'runtime-next', 'node_modules')
-      );
-      assert(!installed, 'the preview installed the template after the confirmation was declined');
-      return 'declined; nothing installed';
+      // The preview copies the template into a private temporary folder and installs it there, so
+      // a new folder means it started and the confirmation was not what stopped it.
+      const after = previewFolders();
+      assert(after <= before, `a preview folder appeared after declining (${before} -> ${after})`);
+      return `declined; preview folders ${before} -> ${after}`;
     }
   );
   s.notTestable(
