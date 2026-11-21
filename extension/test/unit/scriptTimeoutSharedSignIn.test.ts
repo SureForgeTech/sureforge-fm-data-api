@@ -16,6 +16,13 @@ import { InMemorySecretStorage } from './mocks';
  */
 
 const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } as never;
+
+/** The body of a request, read to the end. */
+async function readBody(request: IncomingMessage): Promise<string> {
+  const chunks: Buffer[] = [];
+  for await (const chunk of request) chunks.push(Buffer.from(chunk));
+  return Buffer.concat(chunks).toString('utf8');
+}
 const ok = (response: Record<string, unknown>) => JSON.stringify({ response, messages: [{ code: '0', message: 'OK' }] });
 
 describe("a request's deadline is not shortened by a sign-in in flight", () => {
@@ -77,6 +84,75 @@ describe("a request's deadline is not shortened by a sign-in in flight", () => {
     const firstFailure = await first;
     expect(String((firstFailure as { message?: string }).message ?? '')).toContain('timed out');
     expect(sessions).toBeGreaterThanOrEqual(2);
+  });
+
+  it('gives the proxy sign-in the deadline the caller asked for', async () => {
+    // A proxy profile signs in through the proxy hop. The hop must carry the caller's deadline,
+    // or a caller that asked for longer still has its sign-in ended at the shared timeout.
+    const url = await listen(async (request, response) => {
+      const body = JSON.parse((await readBody(request)) ?? '{}') as { action?: string };
+      response.setHeader('Content-Type', 'application/json');
+      if (body.action === 'createSession') {
+        // The proxy hop is slow to answer the sign-in.
+        setTimeout(() => response.end(JSON.stringify({ ok: true, data: { token: 'tok' } })), 400);
+        return;
+      }
+      response.end(JSON.stringify({ ok: true, data: {} }));
+    });
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    await secrets.setPassword('p1', 'pw');
+    const profile: ConnectionProfile = {
+      id: 'p1',
+      name: 'T',
+      authMode: 'proxy',
+      serverUrl: url,
+      proxyEndpoint: url,
+      database: 'Sales Db',
+      username: 'u'
+    };
+    const fm = new FMClient(secrets, logger, 150);
+
+    const token = await fm.createSession(profile, { timeoutMs: 5000 });
+
+    expect(token).toBe('tok');
+  });
+
+  it('does not let a settling sign-in delete the entry a newer sign-in registered', async () => {
+    // The first request starts a sign-in under the shared deadline; the second asks for longer
+    // and signs in for itself. When the first sign-in settles it must not clear the second one's
+    // entry, or a third request would start a third sign-in instead of joining the second.
+    let sessions = 0;
+    const url = await listen((request, response) => {
+      const path = new URL(request.url ?? '/', 'http://x').pathname;
+      response.setHeader('Content-Type', 'application/json');
+      if (path.endsWith('/sessions')) {
+        sessions += 1;
+        const attempt = sessions;
+        // The first sign-in is slow enough to fail at the shared timeout; the second one stays in
+        // flight long enough for the third request to arrive while it runs.
+        setTimeout(() => response.end(ok({ token: `tok${attempt}` })), attempt === 1 ? 400 : 900);
+        return;
+      }
+      response.end(ok({ scriptResult: 'done', scriptError: '0' }));
+    });
+    // The shared timeout is short, so the first sign-in runs under it and the second request,
+    // which asks for longer, has to sign in for itself.
+    const { fm, profile } = await client(url, 150);
+
+    const first = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }).catch(() => undefined);
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    const second = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }, { timeoutMs: 5000 });
+    // The third request arrives after the first sign-in has settled and while the second one is
+    // still in flight.
+    await new Promise((resolve) => setTimeout(resolve, 250));
+    const third = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }, { timeoutMs: 5000 });
+
+    await second;
+    await third;
+    await first;
+
+    // The second and third requests share the second sign-in: three requests, two sign-ins.
+    expect(sessions).toBe(2);
   });
 
   it('signs in for itself and leaves the connection on one token', async () => {

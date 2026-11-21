@@ -174,7 +174,10 @@ export class FMClient {
           this.setHealth(profile.id, { state: 'connecting', at: this.now() });
         }
         if (isProxyProfile(profile)) {
-          const token = await this.proxyClient.createSession(profile, control?.signal);
+          // The deadline in force: the run's own when it asked for a usable one, the shared
+          // timeout otherwise. The proxy hop takes the same deadline as the direct path, so a
+          // proxy run's sign-in is not ended at the shared timeout either.
+          const token = await this.proxyClient.createSession(profile, control?.signal, control?.timeoutMs);
           const normalizedToken = token ?? 'proxy-session';
           await this.secretStore.setSessionToken(profile.id, normalizedToken);
           this.sessionTracker.markIssued(profile.id, this.now());
@@ -700,7 +703,12 @@ export class FMClient {
         return existing;
       })
       .finally(() => {
-        this.inFlightRefresh.delete(profile.id);
+        // Only clear the entry if it is still this sign-in's. A request that asked for a longer
+        // deadline registers its own sign-in under this profile, and this one must not delete
+        // that entry when it settles: the request behind it would then start a third sign-in.
+        if (this.inFlightRefresh.get(profile.id)?.promise === refreshPromise) {
+          this.inFlightRefresh.delete(profile.id);
+        }
       });
 
     this.inFlightRefresh.set(profile.id, {
@@ -769,7 +777,12 @@ export class FMClient {
       if (presumedLive && token !== rejectedToken) void this.retireSession(profile, rejectedToken);
       return token;
     })().finally(() => {
-      this.inFlightRefresh.delete(profile.id);
+      // Only clear the entry if it is still this renewal's: a renewal that asked for a longer
+      // deadline registers its own sign-in under this profile, and this one must not delete that
+      // entry when it settles.
+      if (this.inFlightRefresh.get(profile.id)?.promise === renewal) {
+        this.inFlightRefresh.delete(profile.id);
+      }
     });
     this.inFlightRefresh.set(profile.id, {
       promise: renewal,
