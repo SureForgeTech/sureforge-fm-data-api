@@ -44,7 +44,7 @@ export async function run(ctx) {
   await s.step(
     J,
     'after Initialize, the other FM Web commands are offered',
-    'Sync and Open Layout Mode appear without reloading; Generate and Start Preview stay hidden in the Marketplace build',
+    'Sync and Open Layout Mode appear without reloading; Generate and Start Preview appear too, because the packaged build carries the runtime template (the harness turns the power-user setting on, which they need)',
     async () => {
       const ms = await s.waitCmdListed('FileMaker: Open FM Web Layout Mode', 10000);
       if (ms < 0) {
@@ -59,10 +59,10 @@ export async function run(ctx) {
       const preview = await s.cmdListed('FileMaker: Start FM Web Preview Server');
       assert(sync, 'Sync FM Web Project Metadata is not offered after Initialize');
       assert(
-        !generate && !preview,
-        `Marketplace preview commands should stay hidden (Generate=${generate}, Start Preview=${preview})`
+        generate && preview,
+        `the packaged build carries the runtime template, so the preview commands are offered (Generate=${generate}, Start Preview=${preview})`
       );
-      return `Layout Mode listed after ${ms} ms; Sync listed; Generate and Start Preview hidden`;
+      return `Layout Mode listed after ${ms} ms; Sync listed; Generate and Start Preview listed`;
     }
   );
   await s.step(
@@ -109,33 +109,33 @@ export async function run(ctx) {
   );
   await s.step(
     J,
-    'Generate FM Web Next.js App from the Marketplace build',
-    'the command is hidden because the preview runtime is not shipped; nothing is generated',
+    'Generate FM Web Next.js App from the packaged build',
+    'the command is offered, because the packaged build carries the runtime template; nothing is generated until it is run',
     async () => {
       await s.closeAllEditors();
       const listed = await s.cmdListed('FileMaker: Generate FM Web Next.js App');
       const files = walk(path.join(s.ws, '.fmweb', 'generated')).map((f) => path.relative(s.ws, f));
-      assert(!listed, 'Generate FM Web Next.js App is offered without the preview runtime');
+      assert(listed, 'Generate FM Web Next.js App is not offered although the packaged build carries the runtime template');
       assert(files.length === 0, `unexpected generated files: ${files.join(', ')}`);
-      return 'command hidden; 0 generated files';
+      return 'command offered; 0 generated files';
     }
   );
   await s.step(
     J,
-    'Start FM Web Preview Server from the Marketplace build',
-    'the command is hidden because the preview runtime is not shipped; no install or server starts',
+    'Start FM Web Preview Server from the packaged build',
+    'the command is offered, because the packaged build carries the runtime template; no server starts until it is run',
     async () => {
       const listed = await s.cmdListed('FileMaker: Start FM Web Preview Server');
       const terminals = await s.page.locator('.terminal-tab, .terminal-tabs-entry').count();
       const nm = fs.existsSync(
         path.join(s.ws, '.fmweb', 'generated', 'runtime-next', 'node_modules')
       );
-      assert(!listed, 'Start FM Web Preview Server is offered without the preview runtime');
+      assert(listed, 'Start FM Web Preview Server is not offered although the packaged build carries the runtime template');
       assert(
         !nm && terminals === 0,
         `a terminal or node_modules appeared (terminals ${terminals}, node_modules ${nm})`
       );
-      return `command hidden; terminals ${terminals}; node_modules ${nm}`;
+      return `command offered; terminals ${terminals}; node_modules ${nm}`;
     }
   );
   s.notTestable(
@@ -146,7 +146,7 @@ export async function run(ctx) {
   s.notTestable(
     J,
     'preview server actually started',
-    'the Marketplace VSIX intentionally does not include the preview runtime; this journey verifies that its commands stay hidden'
+    'the packaged build carries the runtime template, but starting the preview installs that template\'s dependencies, which takes minutes and a network; this journey checks that the commands are offered'
   );
   await s.closeAllEditors();
 }
