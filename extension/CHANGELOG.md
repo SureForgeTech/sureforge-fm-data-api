@@ -4,6 +4,8 @@
 
 - A script that needs longer than the shared request timeout can ask for its own deadline in the Script Runner. Type the seconds in **Timeout (seconds)**, from 1 to 600; that deadline applies to that run only, and the timeout message still says the change may already have been applied.
 
+- Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
+
 - The Command Palette now shows the everyday commands by default: the home's four journeys, the extension README's common commands and the walkthrough's steps. The other commands appear when **filemaker.advanced.powerUserMode** is on, and every one of them stays in the FileMaker home, where you can find it by name. Nothing was removed.
 
 - The FileMaker home now has a **Find a command** box. It hides the commands that do not mention what you type, and the section they sit in when nothing is left in it, so the full list of commands is usable.

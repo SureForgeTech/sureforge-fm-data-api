@@ -55,10 +55,11 @@ const EXCLUSION_AFTER = /^\s*(?:(?:is|are|was|were|to be)\s+)?(?:excluded|omitte
 
 /**
  * The words that say the list is complete, so that what follows a "but" is left out: "everything",
- * "all", "all of them", "all fields". The word has to sit right before the "but", because "all" also
- * begins a partitive phrase - "for all attendees" - that says nothing about what follows.
+ * "all", "all of them", "all fields", "all of the fields". The word has to sit right before the
+ * "but", because "all" also begins a partitive phrase - "for all attendees" - that says nothing
+ * about what follows.
  */
-const QUANTIFIER = /\b(?:everything|all(?:\s+of\s+(?:them|it))?(?:\s+(?:the\s+)?(?:fields|field))?)\s*$/;
+const QUANTIFIER = /\b(?:everything|all(?:\s+of\s+(?:them|it|the\s+(?:fields|field)))?(?:\s+(?:the\s+)?(?:fields|field))?)\s*$/;
 
 /** A requirement word, and whether the prompt negated it. "not required" means optional. */
 function qualifier(value: string, negated = false): boolean | undefined {
@@ -120,6 +121,10 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
   let chain: { members: PromptFormDraft['fields'][number][]; coordinated: boolean } = { members: [], coordinated: false };
   let headPending = true;
   let comma = false;
+  // The field a comma follows, so that an exclusion marker in the next clause can name it.
+  let commaTarget: PromptFormDraft['fields'][number] | undefined;
+  // The last field a clause added, which is the field a following comma points at.
+  let lastAppended: PromptFormDraft['fields'][number] | undefined;
   for (const raw of clauses) {
     if (/^[;.!?\r\n]$/.test(raw)) {
       inherited = undefined;
@@ -130,7 +135,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       headPending = true;
       continue;
     }
-    if (raw === ',') { comma = true;continue; }
+    if (raw === ',') { comma = true;commaTarget = lastAppended;continue; }
     if (!raw.trim()) continue;
     // A clause after the head starts from the anchor's polarity; its own directives then adjust it.
     if (!headPending) negated = anchorNegated;
@@ -206,9 +211,12 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const suffix = /^((?:is|are|as)\s+)?(not\s+(?:\w+\s+)?)?(required|optional)\b/.exec(after);
       const requirement = prefix ? qualifier(prefix[2] ?? '', Boolean(prefix[1]))
         : suffix ? qualifier(suffix[3] ?? '', Boolean(suffix[2])) : undefined;
+      // "leaving phone out": the verb before the field and the particle after it belong together,
+      // with the field between them.
+      const excludedByParticle = /^\s*out\b/.test(after) && /\b(?:leav(?:e|es|ing)|left)(?:\s+the)?\s*$/.test(before);
       // An exclusion that follows the field applies to that field: "include email, phone excluded."
       // The text after a mention stops at the next mention, so it cannot reach a later field.
-      const excludedAfter = EXCLUSION_AFTER.test(after);
+      const excludedAfter = EXCLUSION_AFTER.test(after) || excludedByParticle;
       // A requirement stated after the list states the rule for its subject. The subject decides how far the
       // requirement reaches: a plural copula ("Name and email are required.") names the whole list, a bare
       // word ("email and phone required") names the coordinated phrase before it, and a negation ("notes not
@@ -219,6 +227,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       const trailing = !prefix && suffix !== null && requirement !== undefined && !negatedQualifier && !singular;
       if (!negated && !excludedAfter) {
         const entry = append(mention, requirement ?? (isContinuation ? inherited : undefined));
+        // A mention that could not be added - an ambiguous name, or a full draft - leaves no field
+        // for a following comma to point at.
+        lastAppended = entry;
         if (entry) {
           // The coordinated chain: the fields joined by "and" or "as well as", and the fields of a plain
           // comma-separated list ("name, email, and phone"). An explicit coordinator completes a phrase, so
@@ -237,6 +248,7 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
       } else if (negated === 'exclude' || excludedAfter) {
         // An excluded field ends the coordinated phrase it belonged to.
         chain = { members: [], coordinated: false };
+        lastAppended = undefined;
         if (mention.candidates.length === 1) {
           const name = mention.candidates[0]!.name;
           draft.fields = draft.fields.filter(({ field }) => field.name !== name);
@@ -246,7 +258,9 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         // "Do not require phone" states that phone is not required, so the field belongs to the
         // form as an optional one. That is the same reading the adjective form gives ("not
         // required phone"), and the field was dropped before, so the request disappeared.
-        append(mention, false);
+        // A mention that could not be added leaves no field for a following comma to point at.
+        const optional = append(mention, false);
+        lastAppended = optional;
       }
       previousEnd = mention.end;
       comma = false;
@@ -258,6 +272,19 @@ export function suggestPromptFields(prompt: string, fields: readonly DesignerFie
         else if (prefix) inherited = requirement;
       }
     }
+    // An exclusion marker in a clause of its own, after a comma, applies to the field before the
+    // comma: "include email, phone, excluded".
+    if (mentions.length === 0) {
+      if (commaTarget && EXCLUSION_AFTER.test(clause)) {
+        draft.fields = draft.fields.filter(({ field }) => field.name !== commaTarget!.field.name);
+        chain = { members: [], coordinated: false };
+        lastAppended = undefined;
+        comma = false;
+      }
+      commaTarget = undefined;
+      continue;
+    }
+    commaTarget = undefined;
     // A clause that ends positive becomes the anchor for the items coordinated with it.
     if (negated === undefined) anchorNegated = undefined;
   }
