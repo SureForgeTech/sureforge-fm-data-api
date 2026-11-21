@@ -87,6 +87,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- A script run that asks for its own deadline is no longer ended by a sign-in that started under the shared timeout: when another sign-in is in flight with a shorter deadline, the run signs in for itself instead. The proxy path takes the same deadline for its sign-in.
+
 - The UI test harness counts only the decisions a user actually made: a command or an option that never ran is not counted, the harness's own housekeeping is not counted as a decision, and a journey that drives a second window records its choices in the same measurement.
 
 - The UI test harness now measures every journey it runs: how long it took, and the deliberate choices on the way, are written to `measurements.json` and to the run's report. The maintainer inventory records what that measurement can and cannot cover for the path to a first sample receipt.
