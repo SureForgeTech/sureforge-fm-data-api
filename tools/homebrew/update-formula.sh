@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Update the Homebrew formula in deffenda/homebrew-tap from a release here.
+# Update the Homebrew formula in SureForgeTech/homebrew-tap from a release here.
 #
 # Usage:
 #   tools/homebrew/update-formula.sh <version>
@@ -11,7 +11,7 @@
 # Requires:
 #   - gh CLI authenticated
 #   - shasum (macOS) or sha256sum (Linux)
-#   - Write access to deffenda/homebrew-tap
+#   - Write access to SureForgeTech/homebrew-tap
 #
 # Closes #183.
 
@@ -30,7 +30,7 @@ if [ ! -f "$TEMPLATE" ]; then
 fi
 
 REPO="SureForgeTech/sureforge-fm-data-api"
-TAP_REPO="deffenda/homebrew-tap"
+TAP_REPO="SureForgeTech/homebrew-tap"
 VSIX_NAME="filemaker-data-api-tools-${VERSION}.vsix"
 VSIX_URL="https://github.com/${REPO}/releases/download/v${VERSION}/${VSIX_NAME}"
 
