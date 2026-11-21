@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The form editor can go back to the invented data: **Try sample fields** in the editor restores the starter's sample fields, so a developer who chose their own fields does not have to start over. The saved app stays unchanged until the replacement is saved.
+
 - Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
 
 - The Command Palette now shows the everyday commands by default: the home's four journeys, the extension README's common commands and the walkthrough's steps. The other commands appear when **filemaker.advanced.powerUserMode** is on, and every one of them stays in the FileMaker home, where you can find it by name. Nothing was removed.

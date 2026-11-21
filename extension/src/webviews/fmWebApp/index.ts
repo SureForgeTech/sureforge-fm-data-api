@@ -8,7 +8,7 @@ export interface AppEditorActions {
   save(definition: IntakeDefinition): Promise<void>;
   run(action: 'preview' | 'export' | 'layout' | 'filemaker'): Promise<void>;
   assertAvailable(): void;
-  changeSource?(source?: 'filemaker' | 'draft'): Promise<void>;
+  changeSource?(source?: 'filemaker' | 'draft' | 'sample'): Promise<void>;
 }
 
 export class FmWebAppPanel {
@@ -45,12 +45,12 @@ export class FmWebAppPanel {
       this.actions.assertAvailable();
       if (!message || typeof message !== 'object' || Array.isArray(message)) throw new Error('Invalid app editor request.');
       const request = message as Record<string, unknown>;
-      if (!['save', 'preview', 'export', 'layout', 'source', 'draft', 'filemaker'].includes(String(request.action))
+      if (!['save', 'preview', 'export', 'layout', 'source', 'draft', 'sample', 'filemaker'].includes(String(request.action))
         || Object.keys(request).some((key) => !['action', 'definition'].includes(key))) throw new Error('Unsupported app editor action.');
-      if (request.action === 'source' || request.action === 'draft') {
-        const label = request.action === 'draft' ? 'Draft form' : 'Choose fields';
+      if (request.action === 'source' || request.action === 'draft' || request.action === 'sample') {
+        const label = request.action === 'draft' ? 'Draft form' : request.action === 'sample' ? 'Try sample fields' : 'Choose fields';
         const answer = await vscode.window.showWarningMessage(`${label}? Unsaved edits in this tab will be discarded. Your saved app stays unchanged until you save the replacement.`, { modal: true }, label);
-        if (answer === label) { this.panel.dispose();await this.actions.changeSource?.(request.action === 'draft' ? 'draft' : undefined); }
+        if (answer === label) { this.panel.dispose();await this.actions.changeSource?.(request.action === 'draft' ? 'draft' : request.action === 'sample' ? 'sample' : undefined); }
         else await this.panel.webview.postMessage({ type: 'saved', message: 'Field source unchanged. Your edits remain in this tab.' });
         return;
       }
@@ -84,7 +84,7 @@ body{max-width:1000px;margin:0 auto;padding:24px}label{display:block;margin-top:
 <p role="note">Save and preview uses sample submissions. Save to FileMaker enables real record creation only after you confirm the connection and layout in VS Code.</p>
 ${draft ? '<p role="note">Review the suggested field mappings and required settings before saving.</p>' : ''}
 ${draft?.unmatched.length ? `<p>Check these requests against your FileMaker fields: ${escapeHtml(draft.unmatched.join(', '))}.</p>` : ''}
-<form id="app-form"><button type="button" data-action="source">Choose FileMaker fields</button><button type="button" data-action="draft">Draft form from a prompt</button><fieldset><legend>Form and branding</legend>
+<form id="app-form"><button type="button" data-action="sample">Try sample fields</button><button type="button" data-action="source">Choose FileMaker fields</button><button type="button" data-action="draft">Draft form from a prompt</button><fieldset><legend>Form and branding</legend>
 ${input('title', 'Form title', definition.title, 160)}
 <label for="description">Description</label><textarea id="description" maxlength="2000">${escapeHtml(definition.description)}</textarea>
 <label for="organization">Organization</label><input id="organization" maxlength="120" value="${escapeHtml(definition.branding?.organizationName ?? '')}"/>
