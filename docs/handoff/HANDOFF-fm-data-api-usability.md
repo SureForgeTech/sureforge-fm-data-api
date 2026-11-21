@@ -23,7 +23,7 @@ recorded below.
 | #595 | the FileMaker home has a "Find a command" filter | `46c90e5` | `3c3fe79` | MERGEABLE, no P0/P1/P2/P3 (3 rounds, Kimi K2.8) |
 | #596 | the Command Palette shows the everyday set only | `3c3a931` | `0eb24c9` | MERGEABLE, no P0/P1/P2 (4 rounds, Kimi K2.8) |
 
-`main` is `3c3a931`. #592 closes issue #573: an exclusion that follows the field now applies to it
+The four merge commits are `5d96a11`, `0c58d7c`, `46c90e5` and `3c3a931`, and each contains exactly the tree its reviewed head had. `main` has since moved on with another session's work (#597, #598); #592 closes issue #573: an exclusion that follows the field now applies to it
 ("include email, phone excluded" no longer suggests phone), "everything but X" and "all of them but X"
 are read as exclusions, and the vocabulary covers "leave out", "leaves out" and "left out". The third
 gap of the issue, "Do not require X", already read correctly and is unchanged.
