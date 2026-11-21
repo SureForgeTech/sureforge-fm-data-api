@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 
 import { startMock } from './lib/mock.mjs';
 import { Measurement, Report } from './lib/report.mjs';
-import { getVSCode, loadDeps, Session } from './lib/session.mjs';
+import { getVSCode, loadDeps, Session, clearCurrentMeasurement, getCurrentMeasurement, setCurrentMeasurement } from './lib/session.mjs';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const extDir = path.resolve(here, '..');
@@ -148,7 +148,7 @@ try {
       s.trustThrow = false;
       // The measurement of this journey: how long it took and which decisions the user made on
       // the way. The commands they ran and the options they picked are the deliberate choices.
-      s.measurement = new Measurement(`journey ${file}`);
+      setCurrentMeasurement(new Measurement(`journey ${file}`));
       await mod.run(ctx);
     } catch (e) {
       exitCode = 1;
@@ -163,9 +163,10 @@ try {
     }
     // A journey that could not start has no measurement to record: the crash row says so. The
     // run carries on with the next journey, as it did before the measurement was added.
-    if (s.measurement) {
-      report.measure(s.measurement.end());
-      s.measurement = undefined;
+    const measurement = getCurrentMeasurement();
+    if (measurement) {
+      report.measure(measurement.end());
+      clearCurrentMeasurement();
     }
     report.write();
   }
