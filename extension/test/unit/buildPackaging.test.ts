@@ -88,7 +88,12 @@ describe('THIRD_PARTY_NOTICES.txt', () => {
 describe('VSIX contents', () => {
   const required = ['dist/extension.js', 'dist/aiMcpShim.js', 'dist/schemaDiffWorker.js', 'dist/webviews/fmWebApp/ui/main.js'];
   const layout = 'dist/webviews/layoutMode/ui/index.js';
-  const templates: string[] = REQUIRED_TEMPLATE_FILES.map((file: string) => `dist/fmweb-template/${file}`);
+  // This list is spelled out here on purpose: it is the guard against a validator that stops
+  // requiring a file, so it must not be derived from the validator it checks.
+  const templateFiles = ['runtime-next/package.json', 'runtime-next/preview-server.mjs',
+    'runtime-next/app/intake/[id]/page.tsx', 'runtime-next/app/api/intake/[id]/route.ts',
+    'shared/package.json', 'shared/src/index.ts', 'shared/src/intake.ts', 'manifest.json'];
+  const templates: string[] = templateFiles.map((file) => `dist/fmweb-template/${file}`);
 
   async function checkArchive(options: { missing?: string; layoutBytes?: number; map?: string; privateFile?: string } = {}): Promise<void> {
     const require = createRequire(path.join(extensionDir, 'package.json'));
@@ -120,6 +125,10 @@ describe('VSIX contents', () => {
 
   it.each(required)('rejects a VSIX missing %s', async (missing) => {
     await expect(checkArchive({ missing })).rejects.toThrow(missing);
+  });
+
+  it('the VSIX validation requires every template file this test checks', () => {
+    expect(REQUIRED_TEMPLATE_FILES).toEqual(expect.arrayContaining(templateFiles));
   });
 
   it.each(templates)('rejects a VSIX missing its template resource %s', async (missing) => {
