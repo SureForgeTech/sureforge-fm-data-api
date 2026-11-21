@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The UI test harness counts only the decisions a user actually made: a command or an option that never ran is not counted, the harness's own housekeeping is not counted as a decision, and a journey that drives a second window records its choices in the same measurement.
+
 - The form editor can go back to the invented data: **Try sample fields** in the editor restores the starter's sample fields, so a developer who chose their own fields does not have to start over. The saved app stays unchanged until the replacement is saved.
 
 - The UI test harness now measures every journey it runs: how long it took, and the deliberate choices on the way, are written to `measurements.json` and to the run's report.
