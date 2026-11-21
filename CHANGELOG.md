@@ -64,6 +64,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
+
 - Drafting a form from a prompt now reads an exclusion that follows the field it is about, so "include email, phone excluded" leaves phone out instead of suggesting it. "Everything but phone" now reads as the exclusion it is, the way "everything except phone" already did, and "leave out", "leaves out" and "left out" leave a field out too.
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.

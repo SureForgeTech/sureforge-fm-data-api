@@ -8,7 +8,6 @@ import { NOT_DATA_API_CODE } from '../responseGuard';
 import type { ClientRequestControl } from './types';
 import type { ClientContext } from './context';
 import { MAX_SCRIPT_URL_LENGTH } from './types';
-import { effectiveTimeout } from '../requestLimits';
 import { strictQuerySerializer, buildEndpoint } from './transport';
 import { isNoRecordsFound } from './records';
 import { getErrorStatus } from './response';
@@ -102,8 +101,7 @@ export async function runScript(
               fallbackMessage: 'Failed to run FileMaker script.',
               operation: trace.operation,
               requestId: trace.requestId,
-              endpoint,
-              timeoutOverride: effectiveTimeout(control?.timeoutMs, client.timeoutMs) !== client.timeoutMs
+              endpoint
             })
           )
         );

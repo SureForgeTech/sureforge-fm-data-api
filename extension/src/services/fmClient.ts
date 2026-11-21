@@ -1,4 +1,4 @@
-import { effectiveTimeout, withRequestLimits } from './requestLimits';
+import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from './requestLimits';
 import { CertificateAdvice } from './fmClient/certificates';
 import { randomUUID } from 'crypto';
 import axios, { type AxiosInstance } from 'axios';
@@ -235,7 +235,7 @@ export class FMClient {
               requestId: trace.requestId,
               endpoint: 'POST /sessions',
               // A sign-in under the run's own deadline is not governed by the shared setting.
-              timeoutOverride: effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
+              timeoutOverride: hasOwnDeadline(control?.timeoutMs)
             })
           );
           if (control?.proactive !== true) {
@@ -530,6 +530,10 @@ export class FMClient {
     if (error.kind === 'cancellation') {
       return undefined;
     }
+    if (error.code === 'SESSION_WAIT_TIMEOUT') {
+      // Another request's sign-in was still running. Nothing is known about the connection.
+      return undefined;
+    }
     if (error.kind === 'certificate') {
       return { state: 'certificate', message: error.message, at };
     }
@@ -647,7 +651,8 @@ export class FMClient {
     // token is reused — orphaning the rest until server timeout.
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
-      return waitForSession(inFlight, control?.signal);
+      // The refresh is shared, so waiting for it must not outlive this request's own deadline.
+      return waitForSession(inFlight, control?.signal, effectiveTimeout(control?.timeoutMs, this.timeoutMs));
     }
 
     if (existing) {
@@ -723,7 +728,8 @@ export class FMClient {
 
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
-      await waitForSession(inFlight, control?.signal);
+      // The renewal is shared too: a request with a short deadline must not wait for a long one.
+      await waitForSession(inFlight, control?.signal, effectiveTimeout(control?.timeoutMs, this.timeoutMs));
       return;
     }
 

@@ -4,6 +4,8 @@
 
 - The UI test harness now measures every journey it runs: how long it took, and the deliberate choices on the way, are written to `measurements.json` and to the run's report.
 
+- A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
+
 - A script that needs longer than the shared request timeout can ask for its own deadline in the Script Runner. Type the seconds in **Timeout (seconds)**, from 1 to 600; that deadline applies to that run only, and the timeout message still says the change may already have been applied.
 
 - Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
