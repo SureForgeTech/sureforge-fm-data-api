@@ -7,6 +7,10 @@ import { pathToFileURL } from 'url';
 
 import { describe, expect, it } from 'vitest';
 
+// The VSIX validation is JavaScript; this test uses the file list it requires.
+// @ts-expect-error The VSIX validation is JavaScript.
+import { REQUIRED_TEMPLATE_FILES } from '../../scripts/validate-vsix.mjs';
+
 const extensionDir = path.resolve(__dirname, '../..');
 const script = (name: string): string => pathToFileURL(path.join(extensionDir, 'scripts', name)).href;
 
@@ -84,10 +88,7 @@ describe('THIRD_PARTY_NOTICES.txt', () => {
 describe('VSIX contents', () => {
   const required = ['dist/extension.js', 'dist/aiMcpShim.js', 'dist/schemaDiffWorker.js', 'dist/webviews/fmWebApp/ui/main.js'];
   const layout = 'dist/webviews/layoutMode/ui/index.js';
-  const templates = ['runtime-next/package.json', 'runtime-next/preview-server.mjs',
-    'runtime-next/app/intake/[id]/page.tsx', 'runtime-next/app/api/intake/[id]/route.ts',
-    'shared/package.json', 'shared/src/index.ts', 'shared/src/intake.ts', 'manifest.json']
-    .map((file) => `dist/fmweb-template/${file}`);
+  const templates: string[] = REQUIRED_TEMPLATE_FILES.map((file: string) => `dist/fmweb-template/${file}`);
 
   async function checkArchive(options: { missing?: string; layoutBytes?: number; map?: string; privateFile?: string } = {}): Promise<void> {
     const require = createRequire(path.join(extensionDir, 'package.json'));

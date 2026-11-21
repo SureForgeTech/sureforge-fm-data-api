@@ -173,9 +173,12 @@ export async function run(ctx) {
       );
       await s.modal('Cancel');
       await s.page.waitForTimeout(1500);
-      const terminals = await s.page.locator('.terminal-tab, .terminal-tabs-entry').count();
-      assert(terminals === 0, `a terminal appeared after declining (${terminals})`);
-      return `declined; terminals ${terminals}`;
+      // The install only starts after the confirmation, so no dependency folder means nothing started.
+      const installed = fs.existsSync(
+        path.join(s.ws, '.fmweb', 'generated', 'runtime-next', 'node_modules')
+      );
+      assert(!installed, 'the preview installed the template after the confirmation was declined');
+      return 'declined; nothing installed';
     }
   );
   s.notTestable(
