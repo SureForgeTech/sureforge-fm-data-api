@@ -44,9 +44,10 @@ const standardsCss = standardModule.exports.standardFieldsCss(true);
 const basicField = '<table class="fm-field-table"><tbody class="fm-fields"><tr class="fm-field" data-fm-width="240" data-fm-height="34"><td class="fm-field-label">Customer name</td><td><textarea class="fm-field-control">Ada Lovelace</textarea></td></tr></tbody></table>';
 function webview(page) {
   const source = read(`extension/src/webviews/${page}/index.ts`);
-  let body = /<body>([\s\S]*?)<\/body>/.exec(source)[1].replace(/<script[\s\S]*?<\/script>/g,'').replace(/\$\{[^}]*\}/g,'');
+  let body = /<body>([\s\S]*?)<\/body>/.exec(source)[1].replace(/\$\{[^}]*\}/g,'');
   const dom = new JSDOM(body);
   const doc = dom.window.document;
+  doc.querySelectorAll('script').forEach((script) => script.remove());
   for (const select of doc.querySelectorAll('select')) select.innerHTML = '<option>Customers</option>';
   for (const input of doc.querySelectorAll('input[type=text]')) input.value = '1';
   for (const pre of doc.querySelectorAll('pre')) pre.textContent = '{ "Name": "Ada Lovelace" }';
