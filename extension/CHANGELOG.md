@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A live registration's date now reaches FileMaker as the day the person entered. The form's year-month-day date is sent in FileMaker's month-first order, and the request says so, whatever date order the developer chose for the connection; this works through a proxy connection too.
+
 - A desktop journey now covers the Command Palette's two sides: the everyday commands without the power-user setting, and the power-user commands with it.
 
 - The generated TypeScript client's calls can now run a FileMaker script alongside them and read its result, and it can run one on its own.
