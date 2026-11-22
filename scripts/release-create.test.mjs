@@ -20,7 +20,7 @@ const scriptPath = fileURLToPath(new URL('../tools/release-create.sh', import.me
  * visible to the next call the way the real CLI behaves. `existing` says what a published
  * release already carries: its asset names and whether it has notes.
  */
-function writeFakeGh(directory, { existing = null, uploadFails = false, viewError = '', uploadDoesNotAdd = false } = {}) {
+function writeFakeGh(directory, { existing = null, uploadFails = false, viewError = '', viewOutput = '', uploadDoesNotAdd = false } = {}) {
   const log = path.join(directory, 'gh-calls.log');
   const state = path.join(directory, 'gh-state.json');
   const binary = path.join(directory, 'gh');
@@ -41,6 +41,10 @@ const read = () => {
 const write = (value) => writeFileSync(statePath, JSON.stringify(value));
 
 if (args[0] === 'release' && args[1] === 'view') {
+  if (process.env.FAKE_GH_VIEW_OUTPUT) {
+    process.stdout.write(process.env.FAKE_GH_VIEW_OUTPUT);
+    process.exit(0);
+  }
   if (process.env.FAKE_GH_VIEW_ERROR) {
     process.stderr.write(process.env.FAKE_GH_VIEW_ERROR + '\\n');
     process.exit(1);
@@ -93,13 +97,14 @@ if (args[0] === 'release' && args[1] === 'view') {
       FAKE_GH_STATE: state,
       FAKE_GH_UPLOAD_FAILS: uploadFails ? '1' : '',
       FAKE_GH_VIEW_ERROR: viewError,
+      FAKE_GH_VIEW_OUTPUT: viewOutput,
       FAKE_GH_UPLOAD_DOES_NOT_ADD: uploadDoesNotAdd ? '1' : ''
     }
   };
 }
 
 /** Run the script with a fake GitHub CLI and report what it did. */
-function runReleaseCreate({ existing = null, uploadFails = false, viewError = '', uploadDoesNotAdd = false, assets = ['extension.vsix'], notes = 'notes here', missingAsset = false } = {}) {
+function runReleaseCreate({ existing = null, uploadFails = false, viewError = '', viewOutput = '', uploadDoesNotAdd = false, assets = ['extension.vsix'], notes = 'notes here', missingAsset = false } = {}) {
   const directory = mkdtempSync(path.join(tmpdir(), 'release-create-'));
   const notesFile = path.join(directory, 'notes.md');
   writeFileSync(notesFile, notes, 'utf8');
@@ -108,7 +113,7 @@ function runReleaseCreate({ existing = null, uploadFails = false, viewError = ''
     if (!missingAsset) writeFileSync(full, 'asset', 'utf8');
     return full;
   });
-  const fake = writeFakeGh(directory, { existing, uploadFails, viewError, uploadDoesNotAdd });
+  const fake = writeFakeGh(directory, { existing, uploadFails, viewError, viewOutput, uploadDoesNotAdd });
   const result = spawnSync('bash', [scriptPath, 'v1.9.1', notesFile, ...assetPaths], {
     encoding: 'utf8',
     env: { ...process.env, ...fake.env, GH_CLI: fake.binary }
@@ -196,4 +201,14 @@ test('refuses to publish an asset that is not there', () => {
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /asset not found/);
   assert.equal(calls.length, 0);
+});
+
+test('fails when the release cannot be read because the answer is not readable', () => {
+  // An answer that is not JSON, or no Node to read it with, is a failure to report. Treating it as
+  // a release with nothing in it would make the script upload and edit, and then fail on every
+  // rerun with the cause hidden.
+  const { result, calls } = runReleaseCreate({ viewOutput: 'not json at all' });
+  assert.notEqual(result.status, 0);
+  assert.ok(!calls.some((call) => call[0] === 'release' && call[1] === 'upload'), 'it uploaded to a release it could not read');
+  assert.ok(!calls.some((call) => call[0] === 'release' && call[1] === 'create'), 'it published a release it could not read');
 });

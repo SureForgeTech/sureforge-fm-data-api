@@ -66,11 +66,14 @@ published() {
     fi
     echo "release-create: cannot read the release $tag:" >&2
     cat "$error_file" >&2
+    if [ -s "$error_file.json" ]; then cat "$error_file.json" >&2; fi
     rm -f "$error_file" "$error_file.json"
     return 1
   fi
   rm -f "$error_file"
-  "$node_bin" -e '
+  # The answer has to be read, and a failure to read it - an answer that is not JSON, or no Node
+  # to read it with - is a failure to report, not a release with nothing in it.
+  if ! "$node_bin" -e '
 let input = "";
 process.stdin.on("data", (chunk) => { input += chunk; });
 process.stdin.on("end", () => {
@@ -78,7 +81,11 @@ process.stdin.on("end", () => {
   for (const asset of release.assets ?? []) console.log("asset:" + asset.name);
   console.log("body:" + String(release.body ?? "").replace(/\n/g, " "));
 });
-' <"$error_file.json"
+' <"$error_file.json"; then
+    echo "release-create: cannot read the release $tag: the answer could not be read" >&2
+    rm -f "$error_file.json"
+    return 1
+  fi
   rm -f "$error_file.json"
 }
 
