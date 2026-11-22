@@ -31,8 +31,9 @@ is a private preview and the app's source.
   bridge, that is, a running VS Code window.
 - **"Export app scaffold" hands the user the app's source.** It is one of the entries in the Build a
   Portal picker, and it generates the Next.js runtime from the shipped template into
-  `.fmweb/generated/runtime-next`, with the saved forms and layouts in it. Hosting that is the
-  user's next step, with their own account and their own runtime.
+  `.fmweb/generated/runtime-next`, with the saved forms and layouts alongside it in
+  `.fmweb/generated`. Hosting that is the user's next step, with their own account and their own
+  runtime.
 - **Public hosting is separate work.** The roadmap places a guided deployment path for one supported
   server runtime in Phase 1. The extension's own marketplace publishing is a different thing
   entirely: that is the CI publishing the VSIX, not the extension publishing a user's app.
@@ -43,5 +44,7 @@ a Portal picker — and this section will say so.
 
 Evidence: `extension/package.json` declares no publish, deploy or host command; the Build a Portal
 picker and the export handler are in `extension/src/commands/fmWebProject.ts`; the preview's host
-check is `runtime-next/proxy.ts` and its bridge routes are `runtime-next/app/api/bridge/[route]/route.ts`;
+check is `runtime-next/preview-server.mjs` and `runtime-next/lib/preview-gate.mjs` (the same two
+hosts are allowed by `runtime-next/lib/preview-security.ts`), and its bridge routes are
+`runtime-next/app/api/bridge/[route]/route.ts`;
 the roadmap's Phase 1 lists the guided deployment path as its fourth capability.

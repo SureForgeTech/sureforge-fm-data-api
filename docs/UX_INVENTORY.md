@@ -270,7 +270,7 @@ while this inventory was being written; the fifth is still open.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension
-  ships and from the FileMaker development environment as generally understood to cover; it was not
+  ships and what the FileMaker development environment is generally understood to cover; it was not
   checked against Claris's own documentation, which was not reachable here. It was tried again on
   2026-11-22, on two egress paths — the shell and the fetch tool — and both were refused by this
   sandbox's allowlist, so the Claris side of each row is still unchecked. What each row would need
