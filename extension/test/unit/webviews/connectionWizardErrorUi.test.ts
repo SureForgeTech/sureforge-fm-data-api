@@ -20,6 +20,7 @@ interface JsdomWindow {
   document: {
     getElementById(id: string): DomElement | null;
     body: { textContent: string | null };
+    querySelectorAll(selector: string): Array<{ remove(): void }>;
     dispatchEvent(event: unknown): boolean;
   };
   eval(code: string): void;
@@ -60,8 +61,9 @@ describe.skipIf(!JSDOM)('Test Connection failure in the wizard page', () => {
   beforeEach(() => vi.clearAllMocks());
 
   function load() {
-    const dom = new (JSDOM as JsdomCtor)(pageHtml().replace(/<script[^>]*src=[^>]*><\/script>/g, ''), { runScripts: 'outside-only', url: 'https://wizard.invalid/' });
+    const dom = new (JSDOM as JsdomCtor)(pageHtml(), { runScripts: 'outside-only', url: 'https://wizard.invalid/' });
     const { window } = dom;
+    window.document.querySelectorAll('script[src]').forEach((script) => script.remove());
     const posted: Array<Record<string, unknown>> = [];
     (window as unknown as { acquireVsCodeApi: () => unknown }).acquireVsCodeApi = () => ({ postMessage: (m: Record<string, unknown>) => posted.push(m) });
     window.eval(uiSource);

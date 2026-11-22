@@ -89,6 +89,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- Webview tests and the offline theme audit remove script elements through the parsed DOM before using the fixture.
+
 - The tag release step can be rerun: the release is published when the tag has none, and completed when it already exists, so a job that was cancelled after the release was published no longer fails with a duplicate-release error.
 
 - The packaged-extension journey now expects the FM Web preview commands to be offered, because the VSIX carries the runtime template, and a test stages that template with the repository's own packaging script and checks that the extension finds it and publishes the preview availability.
