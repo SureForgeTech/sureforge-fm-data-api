@@ -68,6 +68,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
+
 - Escape every slash in a run when the Query Builder produces literal Find criteria, and keep literal punctuation inside E2E report table cells.
 
 - Dates can now be read and written in the order you choose. Set **filemaker.dateFormats** to `1` for the locale of the file the dates came from, or to `2` for ISO 8601. The default leaves it to the server, so the option is only sent when you ask for another one.
