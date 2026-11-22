@@ -647,7 +647,7 @@ Calculation, summary and container columns are skipped when the layout field lis
 Rows containing a NUL character are refused before sending any fields from that row; see [Text with a NUL character and repeated field names](#text-with-a-nul-character-and-repeated-field-names).
 
 1. Run **FileMaker: Batch Update from CSV/JSON** (or the layout's right-click menu).
-2. Choose a `.csv` or `.json` file.
+2. Choose a `.csv`, `.json` or `.jsonl` file.
    - **CSV**: a header row with a `recordId` column and one column per field. Empty cells are skipped (a CSV cannot clear a field).
    - **JSON**: an array of `{ "recordId": "123", "modId": "7", "fieldData": { "Field": "value" } }` entries (`recordId` and `modId` are strings). Keep `modId` from the export when available.
    - **JSONL**: one record per line, the same object as a JSON entry. The extension does not read this shape on its own: when the file looks like JSONL, it asks whether to read it that way, and the file is read only if you say so.
