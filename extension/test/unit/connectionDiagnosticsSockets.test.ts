@@ -4,6 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import * as tls from 'node:tls';
 import * as net from 'node:net';
 
+import { inspectServerCertificate } from '../../src/services/certificateInspect';
 import { createDiagnosticProbes, runConnectionDiagnostics } from '../../src/services/connectionDiagnostics';
 import * as agents from '../../src/services/tlsAgent';
 import { DAY, makeCertificate, newKeyPair } from '../helpers/x509';
@@ -30,6 +31,25 @@ describe('real probe adapters without opening sockets', () => {
     expect(peer.write).not.toHaveBeenCalled(); peer.emit('secureConnect');
     expect(await result).toMatchObject({ selfSigned: true, nameMatch: true, noNames: false, chainBeyondLeaf: false, fingerprint: agents.normalizeSha256(certificate.fingerprint256) });
     expect(peer.destroy).toHaveBeenCalled(); expect(peer.write).not.toHaveBeenCalled();
+  });
+  it('closes trust inspection on an elapsed deadline before the peer supplies a certificate', async () => {
+    vi.useFakeTimers();
+    const peer = socket(); vi.mocked(tls.connect).mockReturnValue(peer as never);
+    const result = inspectServerCertificate('https://localhost', 20);
+    const rejected = expect(result).rejects.toMatchObject({ code: 'ETIMEDOUT' });
+    await vi.advanceTimersByTimeAsync(21);
+    await rejected;
+    expect(peer.destroy).toHaveBeenCalledTimes(1);
+    expect(peer.write).not.toHaveBeenCalled();
+  });
+  it('closes certificate discovery when diagnostics are cancelled', async () => {
+    const peer = socket(); vi.mocked(tls.connect).mockReturnValue(peer as never);
+    const controller = new AbortController();
+    const result = createDiagnosticProbes(client).certificate('localhost', 443, controller.signal);
+    controller.abort();
+    await expect(result).rejects.toMatchObject({ code: 'CANCELLED' });
+    expect(peer.destroy).toHaveBeenCalledTimes(1);
+    expect(peer.write).not.toHaveBeenCalled();
   });
   it('strictly verifies with tlsAgent CA policy even for a pinned or legacy profile', async () => {
     const peer = socket(); vi.mocked(tls.connect).mockReturnValue(peer as never);

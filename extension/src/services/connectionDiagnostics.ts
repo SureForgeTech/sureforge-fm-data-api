@@ -6,7 +6,7 @@ import * as tls from 'node:tls';
 import type { ConnectionProfile } from '../types/fm';
 import { describeNetworkFailure } from '../utils/networkErrors';
 import { redactString } from '../utils/redact';
-import { formatFingerprint } from './certificateInspect';
+import { formatFingerprint, readPresentedCertificate } from './certificateInspect';
 import type { FMClient } from './fmClient';
 import { createHttpsAgentForProfile, environmentProxyFor, normalizeSha256 } from './tlsAgent';
 
@@ -279,9 +279,8 @@ export function createDiagnosticProbes(client: Pick<FMClient, 'getProductInfoDia
   return {
     dns: async (host) => { const result = await lookup(host); return result.address; },
     tcp: (host, port, signal) => socketProbe(host, port, signal, undefined, () => undefined),
-    certificate: (host, port, signal) => socketProbe(host, port, signal, { rejectUnauthorized: false, ca: [] }, (socket) => {
-      // Empty discovery roots keep the peer chain from being extended from the local trust store.
-      const peer = socket.getPeerCertificate(true);
+    certificate: async (host, port, signal) => {
+      const { peer, protocol, cipher } = await readPresentedCertificate(host, port, { signal, servedChainOnly: true });
       const x509 = new X509Certificate(peer.raw);
       const commonName = Array.isArray(peer.subject?.CN) ? peer.subject.CN[0] : peer.subject?.CN;
       return {
@@ -290,10 +289,10 @@ export function createDiagnosticProbes(client: Pick<FMClient, 'getProductInfoDia
         altNames: x509.subjectAltName ?? '', commonName,
         chainBeyondLeaf: Boolean(peer.issuerCertificate?.raw && !peer.raw.equals(peer.issuerCertificate.raw)),
         selfSigned: x509.checkIssued(x509) && x509.verify(x509.publicKey),
-        protocol: socket.getProtocol() ?? '(unknown)', cipher: socket.getCipher()?.name ?? '(unknown)',
+        protocol: protocol ?? '(unknown)', cipher,
         ...certificateExpiry(x509.validFrom, x509.validTo), ...matchCertificateName(host, x509.subjectAltName ?? '', commonName)
       };
-    }),
+    },
     verify: (host, port, profile, signal) => {
       // Reuse the real CA/root policy, but require strict verification even for a pinned/legacy profile.
       const agent = createHttpsAgentForProfile({ caBundlePath: profile.caBundlePath });
