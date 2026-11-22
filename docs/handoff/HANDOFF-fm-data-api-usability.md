@@ -29,7 +29,7 @@ recorded below.
 | #617 | a journey that measures the path to a first sample receipt | `fcdf02e` | `a24deb0` | MERGEABLE, no P0/P1 (6 rounds, MiniMax M3) |
 | #621 | the desktop journeys expect what the product does | `3aae6b5` | `66dea41` | MERGEABLE, no P0/P1/P2 (3 rounds, Kimi K2.8) |
 | #623 | the batch import takes the file's shape, and says the date order | `18e6ebf` | `5402ef0` | MERGEABLE, no P0/P1/P2 (10 rounds, Kimi K2.8) |
-| #627 | the generated client can carry the record version with an edit | pending | pending | pending |
+| #627 | the generated client can carry the record version with an edit | `6105b67` | `1d7272e` | MERGEABLE, no P0/P1/P2/P3 (5 rounds, Kimi K2.8 then MiniMax M3) |
 
 The four merge commits are `5d96a11`, `0c58d7c`, `46c90e5` and `3c3a931`, and each contains exactly the tree its reviewed head had. `main` has since moved on with another session's work (#597, #598); #592 closes issue #573: an exclusion that follows the field now applies to it
 ("include email, phone excluded" no longer suggests phone), "everything but X" and "all of them but X"
@@ -144,8 +144,8 @@ of the palette on purpose, because they only work on a sidebar item.
   `-wt-journey`, `-wt-dates` and `-wt-receipt`; all hold merged work and can be deleted.
 - The main checkout `/workspace/sureforge-fm-data-api` is on `wip/fm-data-api-home`, which also holds
   the handover files.
-- Open pull requests after this session: #627 from this session, if it is not merged by the time this
-  is read. #588 and #589 belonged to another session and were merged by it.
+- Open pull requests after this session: none from this session. #588 and #589 belonged to another
+  session and were merged by it.
 - The worktrees for this batch are `/workspace/sureforge-fm-data-api-wt-journeys` (#621),
   `-wt-import` (#623) and `-wt-modid` (#627).
 
