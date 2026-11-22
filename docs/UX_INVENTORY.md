@@ -243,6 +243,10 @@ while this inventory was being written; the fifth is still open.
    an app and wants to share it has no next step to look for.
    *Acceptance:* the journey documents where publishing will live, or says plainly that it is not
    built yet.
+   **Done:** the journey now says where publishing lives: there is no publish command, the preview is
+   private, and **Export app scaffold** hands the user the app's source to host themselves. The
+   roadmap's guided deployment path for one supported server runtime is where publishing will live,
+   and it is separate work. See "Where publishing lives" in `docs/PORTAL_BUILDER_JOURNEY.md`.
 
 ## What this inventory did not verify
 
@@ -266,8 +270,14 @@ while this inventory was being written; the fifth is still open.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension
-  ships and what the FileMaker development environment is generally understood to cover; it was not
-  checked against Claris's own documentation, which was not reachable here.
+  ships and from the FileMaker development environment as generally understood to cover; it was not
+  checked against Claris's own documentation, which was not reachable here. It was tried again on
+  2026-11-22, on two egress paths — the shell and the fetch tool — and both were refused by this
+  sandbox's allowlist, so the Claris side of each row is still unchecked. What each row would need
+  is one Claris Studio documentation page that says the capability exists; the nine rows are, in
+  order: running a script with parameters; browsing and changing records; finding and exporting
+  records; seeing a layout's fields; changing the database schema; designing a layout; debugging a
+  solution against a server; publishing a web front end; and writing FileMaker-side automation.
 - Whether the 13 commands visible on a fresh install are the right 13. They are the everyday
   commands that need no connection, which is a proxy for "always useful", not a decision anybody
   made.
