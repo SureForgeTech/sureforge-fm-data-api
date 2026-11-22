@@ -480,8 +480,6 @@ jobs:
             echo "::error::No release notes found for $GITHUB_REF_NAME in extension/CHANGELOG.md."
             exit 1
           fi
-          "$RUNNER_TEMP/gh-cli/bin/gh" release create "$GITHUB_REF_NAME" "$VSIX_PATH" artifacts/maps/*.tgz \
-            --title "$GITHUB_REF_NAME" \
-            --notes-file "$NOTES_FILE"
+          GH_CLI="$RUNNER_TEMP/gh-cli/bin/gh" tools/release-create.sh "$GITHUB_REF_NAME" "$NOTES_FILE" "$VSIX_PATH" artifacts/maps/*.tgz
         env:
           GH_TOKEN: ${{ github.token }}
