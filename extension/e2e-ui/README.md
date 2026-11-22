@@ -98,6 +98,10 @@ Computer-use screen control cannot type into VS Code, so nothing here uses it.
 - `run.mjs` orchestrator; `lib/session.mjs` (launch, palette, pickers, modals, webview frames), `lib/flows.mjs`, `lib/observe.mjs`, `lib/mock.mjs`, `lib/report.mjs` (paths in the report are made relative), `lib/vscode.mjs` (cache and checksum), `known-findings.json`.
 - `helper-extension/` a tiny test-only extension loaded with `--extensionDevelopmentPath`. It lets the harness call `vscode.lm.invokeTool`, read settings and list extensions through JSON files. It is never packaged (`.vscodeignore` excludes `e2e-ui/**`).
 - `journeys/j*.mjs` the journeys (see the table in the PR description).
+- `journeys/j18-palette-toggle.mjs` checks the Command Palette's two sides: the everyday
+  commands without the power-user setting and the power-user commands with it, toggling the
+  setting back and forth. Its two command names and the setting live in `lib/journeyFacts.mjs`,
+  where a unit test holds them against the manifest.
 - `journeys/j17-first-sample-receipt.mjs` drives the first-run path to a first sample receipt and
   records the measurement: the elapsed time, the choices the user had to make, and the preview's own
   start as a separate figure. It reads the private launch link the preview writes into its own folder

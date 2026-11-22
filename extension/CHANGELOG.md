@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- A desktop journey now covers the Command Palette's two sides: the everyday commands without the power-user setting, and the power-user commands with it.
+
 - The Marketplace overview separates the free extension from optional FileMaker consulting, links to current prices, and states the Apache-2.0 license.
 
 - The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.

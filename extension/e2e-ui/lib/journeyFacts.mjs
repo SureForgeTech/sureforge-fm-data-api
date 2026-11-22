@@ -90,3 +90,15 @@ export const SCRIPT_LIST_REQUEST = /\/scripts(\?|$|\s)/;
 export function isScriptRunRequest(line) {
   return !/\/sessions/.test(line) && !SCRIPT_LIST_REQUEST.test(line);
 }
+
+/**
+ * The Command Palette's two sides.
+ *
+ * The everyday commands are in the palette on their own; the rest wait behind the power-user
+ * setting, which drives the `filemaker.powerUserMode` context that the manifest's `when` clauses
+ * read. The palette-toggle journey checks one command from each side and toggles the setting, so
+ * the names and the rule live here, where a unit test holds them against the manifest.
+ */
+export const POWER_USER_SETTING = 'filemaker.advanced.powerUserMode';
+export const PALETTE_EVERYDAY_COMMAND = 'FileMaker: Add Connection Profile';
+export const PALETTE_POWER_USER_COMMAND = 'FileMaker: Show Request History';
