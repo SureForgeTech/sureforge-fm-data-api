@@ -8,6 +8,7 @@ import { TypeGenService } from '../../src/services/typeGenService';
 
 interface GeneratedClient {
   editContacts(recordId: string, fieldData: unknown, options?: { modId?: string }): Promise<unknown>;
+  createContacts(fieldData: unknown): Promise<unknown>;
 }
 
 describe('the generated client and the record version', () => {
@@ -72,6 +73,31 @@ describe('the generated client and the record version', () => {
 
     expect(body).toEqual({ fieldData: { Name: 'Ada' } });
     expect(Object.hasOwn(body as object, 'modId')).toBe(false);
+  });
+
+  it('sends no version with a create', () => {
+    // A new record has no earlier version, and the Data API's create request body has no
+    // modId field, so the create carries none.
+    let body: unknown;
+    const client = makeClient(async (_url, init) => {
+      body = JSON.parse(String(init?.body));
+      return new Response(JSON.stringify({ response: { recordId: '1', modId: '0' }, messages: [{ code: '0', message: 'OK' }] }), { status: 200 });
+    });
+
+    return (async () => {
+      await client.createContacts({ Name: 'Ada' });
+      expect(body).toEqual({ fieldData: { Name: 'Ada' } });
+      expect(Object.hasOwn(body as object, 'modId')).toBe(false);
+    })();
+  });
+
+  it('gives the create no version option at all', () => {
+    // The generated create must not even mention the version: a create has no earlier one.
+    const start = clientSource.indexOf('public async createContacts');
+    const end = clientSource.indexOf('public async editContacts');
+    expect(start).toBeGreaterThan(-1);
+    expect(end).toBeGreaterThan(start);
+    expect(clientSource.slice(start, end)).not.toMatch(/modId/);
   });
 
   it('declares the option in the generated types', () => {
