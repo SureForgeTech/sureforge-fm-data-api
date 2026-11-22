@@ -197,3 +197,39 @@ of the palette on purpose, because they only work on a sidebar item.
 The same list as the earlier handover: `node_modules/` in each workspace, `local-transcription/venv`
 for the Python unit tests, `site/node_modules` for the docs site, and the `dist/`, `coverage/` and
 `artifacts/` build outputs. All are reproducible from the lockfile, and none carries session work.
+
+## The follow-up batch: the plan's tasks 1-3 (2026-11-22, later the same day)
+
+Built from the plan this session produced: the generated client's script calls (AD10's script
+half), its session calls (AD10's session half) and the palette-toggle journey.
+
+| PR | What | Merge commit | Reviewed head | Review |
+| --- | --- | --- | --- | --- |
+| #631 | the generated client can open and close its own session | `82cbfc4` | `9aabae6` | MERGEABLE, no P0/P1/P2 (1 round, Kimi K2.8; two P3s accepted by design) |
+| #630 | the generated client can run a FileMaker script | `5513c51` | `6d918cb` | MERGEABLE, no P0/P1 (2 rounds + merge-head round, Kimi K2.8; merged tree byte-identical to the reviewed head) |
+| #632 | a journey for the Command Palette's two sides | `fcbdf42` | `26f0e9e` (the merged head `6e71c8b3` is that work plus a base merge, this session verified byte-identical for the branch's own files) | MERGEABLE, no P0/P1 (4 rounds, Kimi K2.8; the first found one P2, fixed) |
+| #633 | one copy of each changelog entry | pending | `3f711e2` | pending: #632's base merge duplicated two generated-client entries on main; this removes the duplicate copy (`changelog-skip`) |
+
+Checkpoint at the time of writing:
+
+```text
+Status — In progress
+Work — The plan's tasks 1-3 are all built and merged (#631 session calls, #630 script calls, #632 palette journey); a small repair PR #633 removes two changelog entries that #632's base merge duplicated on main.
+Delivery — SureForgeTech/sureforge-fm-data-api · main @ fcbdf42 · #631 merged 82cbfc4 · #630 merged 5513c51 (reviewed head 6d918cb) · #632 merged fcbdf42 (head 6e71c8b3, the branch's own files verified byte-identical to reviewed head 26f0e9e) · #633 head 3f711e2, PR open
+Checks — The twelve-step gate exits 0 on every head; 66 generated-client tests green together on #630's merged head; 11/11 journey-expectation tests green on #632; changelogStructure 17/17 on #633
+Review — #631: 9aabae6 P0=0 P1=0 · #630: 6d918cb P0=0 P1=0 · #632: 40664cc P0=0 P1=0 and d3bb7fe P0=0 P1=0 (4 rounds) · #633: pending on 3f711e2
+Next — Merge #633 on its verdict and green checks, then close out
+```
+
+Notes for whoever reads this next:
+
+- **Both generated-client tasks came out of one catalogue row.** AD10's row now says only the
+  container calls are missing, and its next step names them. The container half should wait for
+  AD05's design decision ("one authenticated download action with a save destination").
+- **The two generator features shared template regions** (the README paragraphs, the helper
+  block, the per-layout methods tail). The merge kept both; a fresh review is checking that
+  neither was lost or duplicated. Any future change to `typeGenService.ts` should expect the
+  same overlap and re-run the generated-client suites together.
+- **The palette journey cannot run here** (no display, no VS Code download), same as every
+  journey since 2026-11-16. Its facts are pinned in `journeyFacts.mjs` and held against the
+  manifest by `e2eJourneyExpectations.test.ts`; the first real run is the weekly `e2e-ui` job.
