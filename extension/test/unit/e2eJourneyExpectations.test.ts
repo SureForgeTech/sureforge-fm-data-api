@@ -12,8 +12,13 @@ import {
 // @ts-expect-error The UI harness is JavaScript; no browser dependencies are loaded here.
 import * as journeyFacts from '../../e2e-ui/lib/journeyFacts.mjs';
 
-const { EXPLORER_FAILURE_LABEL, explorerFailureReason, isFieldRow, isScriptRunRequest } =
-  journeyFacts;
+const {
+  EXPLORER_FAILURE_LABEL,
+  EXPLORER_FAILURE_REASON,
+  explorerFailureReason,
+  isFieldRow,
+  isScriptRunRequest
+} = journeyFacts;
 const { WALKTHROUGH_STEPS } = journeyFacts;
 
 const EXTENSION = path.join(__dirname, '../..');
@@ -77,6 +82,16 @@ describe('the desktop journeys expect what the product does', () => {
     // The full cause is in the tooltip.
     expect(failure.tooltip).toMatch(/web page/i);
     expect(failure.tooltip).toMatch(/output channel/i);
+
+    // The reason has to name the failure, or the journey's fallback could not tell a failure
+    // from the generic advice.
+    expect(failure.description).toMatch(EXPLORER_FAILURE_REASON);
+    // A failure with no status to quote still has to name what went wrong.
+    const offline = explorerFailureText(
+      new FMClientError('connect ECONNREFUSED 127.0.0.1:443', { kind: 'network' }),
+      'Use FileMaker: Connect, then refresh explorer.'
+    );
+    expect(offline.description).toMatch(EXPLORER_FAILURE_REASON);
 
     const row = `${EXPLORER_FAILURE_LABEL} ${failure.description}`;
     expect(explorerFailureReason(row)).toBe(failure.description);

@@ -49,6 +49,15 @@ export function explorerFailureReason(row) {
 }
 
 /**
+ * What a reason has to look like to name the failure.
+ *
+ * The Explorer's short reason names the kind of failure and, when the server answered, its
+ * status: "Server problem (HTTP 200)". A reason that names none of that is the generic advice,
+ * which says nothing about what went wrong.
+ */
+export const EXPLORER_FAILURE_REASON = /problem|timed out|cancelled|code \d+|HTTP \d+/i;
+
+/**
  * Read the tooltip of a tree row, which is where the Explorer keeps the full cause of a failure.
  *
  * The row is hovered and the hover widget is read. When no tooltip appears, the empty string is

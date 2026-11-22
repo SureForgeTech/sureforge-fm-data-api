@@ -11,6 +11,7 @@ import {
 } from '../lib/flows.mjs';
 import {
   EXPLORER_FAILURE_LABEL,
+  EXPLORER_FAILURE_REASON,
   explorerFailureReason,
   readTreeTooltip
 } from '../lib/journeyFacts.mjs';
@@ -335,7 +336,7 @@ export async function run(ctx) {
         // The cause is in the row's tooltip. When no tooltip can be read - the hover did not
         // open - the row still has to name the failure rather than show the generic advice.
         assert(
-          /problem|timed out|cancelled|code \d+|HTTP \d+/i.test(reason),
+          EXPLORER_FAILURE_REASON.test(reason),
           `the cause is nowhere in the Explorer: row "${placeholder}", tooltip "${tooltip}" (confirms S6). ${msg}`
         );
         return `${placeholder} | tooltip: (none could be read)`;
