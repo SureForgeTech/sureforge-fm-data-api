@@ -251,16 +251,15 @@ while this inventory was being written; the fifth is still open.
   commands were run and which options were picked — goes to `measurements.json` and to a
   **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The path
   to a first sample receipt is a journey now** (`j17-first-sample-receipt.mjs`): it chooses a starter
-  and the invented data, starts the preview, submits the form and reads the receipt. It records the
-  deliberate choices on the way — the starter, where the fields come from, the workspace folder, the
-  save-and-preview action and, when the form is submitted, the submission — and the preview's own
-  start as a separate figure. The measurement is produced where the desktop suite runs, so the number
-  is in that run's artefact rather than here. The path has **five deliberate choices** — the starter,
-  where the fields come from, the workspace folder, the save-and-preview action, and the submission
-  in the browser — among the commands that were run and the options that were picked, which the
-  harness records as well; and the preview's own start, which installs the shipped template, is a
-  separate cost, which is how the tracker asks for it to be recorded. The journey reads the preview's private
-  launch link from the preview's own folder, so it does not need a browser to reach the form; when
+  and the invented data, starts the preview, submits the form and reads the receipt. The path has
+  **five deliberate choices** — the starter, where the fields come from, the workspace folder, the
+  save-and-preview action, and the submission in the browser — and the journey records them among the
+  commands that were run and the options that were picked, which the harness records as well; the
+  submission is recorded only when the form really is submitted. The preview's own start, which
+  installs the shipped template, is a separate cost, which is how the tracker asks for it to be
+  recorded. The measurement is produced where the desktop suite runs, so the number is in that run's
+  artefact rather than here. The journey reads the preview's private launch link from the preview's own
+  folder, so it does not need a browser to reach the form; when
   the browser the preview opened redeemed that one-time link first, the journey records that rather
   than submitting. To reproduce the measurement: run the harness, and read `measurements.json` in
   the run's artefact.
