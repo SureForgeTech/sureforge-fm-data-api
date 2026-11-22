@@ -15,7 +15,16 @@ const MAX_TRANSFER_MS = 30 * 60 * 1000;
  * than ending the request at once.
  */
 export function effectiveTimeout(requested: number | undefined, shared: number): number {
-  return typeof requested === 'number' && Number.isFinite(requested) && requested > 0 ? requested : shared;
+  return hasOwnDeadline(requested) ? requested : shared;
+}
+
+/**
+ * Whether the request carried a deadline of its own that can be used. A request that named a
+ * value the request cannot use falls back to the shared timeout, and the advice then names the
+ * shared setting rather than a deadline that was never in force.
+ */
+export function hasOwnDeadline(requested: number | undefined): requested is number {
+  return typeof requested === 'number' && Number.isFinite(requested) && requested > 0;
 }
 
 /** Budget the whole upload exchange for a slow but real 32 KiB/s link. */

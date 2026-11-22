@@ -276,7 +276,7 @@ The [FileMaker failure-mode catalogue](../../docs/FILEMAKER_FAILURE_MODES.md) ha
 - "The server did not return Data API JSON (...; HTTP n, content type)".
 - "The server redirected the request".
 - HTTP 429, 502, 503 or 504.
-- **request timed out (after N s)** (uploads omit the seconds), or a failed-action notice with the oversize limit text in **Details**, under **Stack trace (redacted)**.
+- **request timed out (after N s)** (uploads omit the seconds), **request timed out waiting for the connection to sign in** (another request is signing in; the sign-in may still be running, so try again), or a failed-action notice with the oversize limit text in **Details**, under **Stack trace (redacted)**.
 
 ### Likely cause
 

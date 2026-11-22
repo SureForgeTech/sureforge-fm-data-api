@@ -343,7 +343,7 @@ export class ScriptRunnerPanel {
         layout: payload.layout,
         code: error instanceof FMClientError ? error.code : undefined
       });
-      await this.postError(formatError(error));
+      await this.postError(formatError(error, { scriptRun: true }));
     }
   }
 
@@ -614,10 +614,14 @@ function validateRunScriptPayload(payload: RunScriptPayload): { request: RunScri
   };
 }
 
-function formatError(error: unknown): string {
+function formatError(error: unknown, options?: { scriptRun?: boolean }): string {
   if (error instanceof FMClientError && error.kind === 'timeout') {
-    // The request gave up waiting; the server was not told to stop. The Timeout field in this panel
-    // is where the deadline is changed.
+    // The request gave up waiting; the server was not told to stop. Only a script run can leave a
+    // script running on the server, and only a script run has a Timeout field. A run that gave up
+    // waiting for the sign-in never reached the server, so no script is running.
+    if (!options?.scriptRun || (error instanceof FMClientError && error.code === 'SESSION_WAIT_TIMEOUT')) {
+      return error.message;
+    }
     return `${error.message} The script may still be running on the server. Raise the Timeout field in this panel to give the script longer.`;
   }
   if (error instanceof Error) {

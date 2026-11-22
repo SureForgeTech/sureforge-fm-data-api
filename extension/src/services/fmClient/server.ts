@@ -1,4 +1,4 @@
-import { effectiveTimeout, withRequestLimits } from '../requestLimits';
+import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from '../requestLimits';
 import type { ConnectionProfile } from '../../types/fm';
 import type { DataApiEnvelope } from '../../types/dataApi';
 import { FMClientError, toFMClientError } from '../errors';
@@ -108,7 +108,7 @@ export async function requestServerLevel<TResponse extends Record<string, unknow
       fallbackMessage,
       endpoint: `GET ${path}`,
       // A request under its own deadline is not governed by the shared setting.
-      timeoutOverride: effectiveTimeout(control?.timeoutMs, client.timeoutMs) !== client.timeoutMs
+      timeoutOverride: hasOwnDeadline(control?.timeoutMs)
     }));
     // Diagnosis already read the peer certificate with its own cancellable deadline.
     throw (skipCertificateInspection
