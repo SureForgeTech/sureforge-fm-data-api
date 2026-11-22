@@ -119,6 +119,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [SECURITY]
 
+- Certificate inspection now closes the discovery connection as soon as the certificate is read, cancelled, or times out. Connection diagnostics still verify trust in a separate handshake.
+
 - Strengthened the in-memory identifier used to recognize unchanged credentials after a rejected sign-in. The identifier now uses a randomly salted password derivation function.
 
 - AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
