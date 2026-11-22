@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.
+
 - Dates can now be read and written in the order you choose. Set **filemaker.dateFormats** to `1` for the locale of the file the dates came from, or to `2` for ISO 8601. The default leaves it to the server, so the option is only sent when you ask for another one.
 
 - AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.

@@ -91,6 +91,19 @@ describe('private preview process', () => {
     await expect(preview().start(new Map(),new Map(),'http://127.0.0.1:1234','synthetic',undefined,new Map(),new Map(),undefined,'filemaker')).rejects.toThrow('explicit saved intake');
     expect(calls).toHaveLength(0);
   });
+  it('writes the private launch link into the preview folder, so a run without a browser can reach it', async () => {
+    const process = preview();
+    await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),
+      new Map(), 'http://127.0.0.1:1234', 'synthetic');
+    const linkPath = process.launchLinkPath!;
+    expect(linkPath).toBeTruthy();
+    const link = (await readFile(linkPath, 'utf8')).trim();
+    expect(link).toMatch(/^http:\/\/127\.0\.0\.1:3000\/\?launch=[0-9a-f]{64}$/);
+    expect(link).toBe(vi.mocked(vscode.env.openExternal).mock.calls[0]![0].toString());
+    // The folder is the preview's own, and only the owner may read the link.
+    expect((await lstat(linkPath)).mode & 0o077).toBe(0);
+  });
+
   it('passes an explicit saved intake landing only to the private server', async () => {
     const process = preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'inherited-target' });
     await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),

@@ -89,6 +89,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.
+
 - Webview tests and the offline theme audit remove script elements through the parsed DOM before using the fixture.
 
 - The tag release step can be rerun: the release is published when the tag has none, and completed when it already exists, so a job that was cancelled after the release was published no longer fails with a duplicate-release error.
