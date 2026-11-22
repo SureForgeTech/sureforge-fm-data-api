@@ -465,6 +465,13 @@ jobs:
           name: extension-sourcemaps
           path: artifacts/maps
 
+      # tools/release-create.sh reads the existing release with Node when a rerun finds one.
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
       - name: Ensure GitHub CLI is available
         uses: ./.github/actions/ensure-gh
 
