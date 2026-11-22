@@ -657,7 +657,13 @@ export function parseBatchUpdateInput(
           { cause: error }
         );
       }
-      return normalizeBatchUpdateEntry(value);
+      try {
+        return normalizeBatchUpdateEntry(value);
+      } catch (error) {
+        throw new Error(`Line ${number} of the JSONL file: ${(error as Error).message}`, {
+          cause: error
+        });
+      }
     });
   }
 
