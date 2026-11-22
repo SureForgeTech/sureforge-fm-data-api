@@ -111,6 +111,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [SECURITY]
 
+- AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
+
 - Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.
 
 - Close four small gaps left from the security review: an edited server address now replaces a saved address that still carried a password (the old password is dropped, not kept on the old server); addresses in error notifications are shown as plain text that cannot be clicked; the FM Web preview checks the private session before Next's own development endpoints, hot reload included; and the preview installs with `npm ci` when the shipped template carries a lockfile.
