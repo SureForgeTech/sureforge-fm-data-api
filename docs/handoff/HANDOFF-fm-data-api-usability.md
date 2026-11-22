@@ -127,10 +127,11 @@ of the palette on purpose, because they only work on a sidebar item.
 - This session's branches: `feat/more-starters` (#590), `feat/ux-inventory` (#591),
   `feat/prompt-drafting-exclusions` (#592), `feat/home-complete` (#593), `fix/portal-starters` (#594),
   `feat/home-filter` (#595), `feat/palette-everyday` (#596), `fix/prompt-exclusion-readings` (#599),
-  `feat/fmweb-sample-source` (#602) and `fix/journey-preview-availability` (#609). All are pushed and
-  merged. #609 was merged by another session's account after it merged `main` into the branch.
-- The worktrees are `/workspace/sureforge-fm-data-api-wt-starters`, `-wt-ux`, `-wt-parser`, `-wt-invented`
-  and `-wt-journey`; all hold merged work and can be deleted.
+  `feat/fmweb-sample-source` (#602), `fix/journey-preview-availability` (#609), `feat/date-formats`
+  (#613) and `feat/first-sample-receipt` (#617). All are pushed and merged. #609 was merged by another
+  session's account after it merged `main` into the branch.
+- The worktrees are `/workspace/sureforge-fm-data-api-wt-starters`, `-wt-ux`, `-wt-parser`, `-wt-invented`,
+  `-wt-journey`, `-wt-dates` and `-wt-receipt`; all hold merged work and can be deleted.
 - The main checkout `/workspace/sureforge-fm-data-api` is on `wip/fm-data-api-home`, which also holds
   the handover files.
 - Open pull requests after this session: none from this session. #588 and #589 belonged to another
