@@ -66,6 +66,15 @@ describe('the deliberate choices a run records', () => {
     expect(measurement.choices).toEqual([]);
   });
 
+  it('records a picked option without the whitespace the row carried', async () => {
+    const measurement = new Measurement('a journey');
+    setCurrentMeasurement(measurement);
+    // A quick-pick row's text routinely carries a trailing newline.
+    const s = session(['  Event Registration  ']);
+    await s.pick('Event Registration');
+    expect(measurement.choices).toEqual(['pick: Event Registration']);
+  });
+
   it('records the option that was picked, and nothing when the picker had none', async () => {
     const measurement = new Measurement('a journey');
     setCurrentMeasurement(measurement);
