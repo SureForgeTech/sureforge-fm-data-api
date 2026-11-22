@@ -108,6 +108,13 @@ describe('Query Builder find form', () => {
     }
   });
 
+  it('escapes complete slash runs while keeping single date separators', () => {
+    const value = '1/2/2026///notes';
+    const encoded = FindForm.criterionToFindValue({ operator: 'equals', value });
+    expect(encoded).toBe('==1/2/2026' + '\\/'.repeat(3) + 'notes');
+    expect(FindForm.findValueToCriterion('F', encoded)).toMatchObject({ operator: 'equals', value });
+  });
+
   it('escapes two-period runs so equals never becomes a range', () => {
     expect(FindForm.criterionToFindValue({ operator: 'equals', value: 'a..b' })).toBe('==a\\.\\.b');
   });
