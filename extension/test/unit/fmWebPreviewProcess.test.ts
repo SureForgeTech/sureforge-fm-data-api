@@ -100,8 +100,9 @@ describe('private preview process', () => {
     const link = (await readFile(linkPath, 'utf8')).trim();
     expect(link).toMatch(/^http:\/\/127\.0\.0\.1:3000\/\?launch=[0-9a-f]{64}$/);
     expect(link).toBe(vi.mocked(vscode.env.openExternal).mock.calls[0]![0].toString());
-    // The folder is the preview's own, and only the owner may read the link.
-    expect((await lstat(linkPath)).mode & 0o077).toBe(0);
+    // The folder is the preview's own, and only the owner may read the link. Windows does not
+    // carry POSIX modes, so the check is for the platforms that do.
+    if (globalThis.process.platform !== 'win32') expect((await lstat(linkPath)).mode & 0o077).toBe(0);
   });
 
   it('forgets the launch link once the preview is gone', async () => {
