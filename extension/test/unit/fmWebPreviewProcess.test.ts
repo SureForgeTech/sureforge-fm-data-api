@@ -104,6 +104,15 @@ describe('private preview process', () => {
     expect((await lstat(linkPath)).mode & 0o077).toBe(0);
   });
 
+  it('forgets the launch link once the preview is gone', async () => {
+    const process = preview();
+    await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),
+      new Map(), 'http://127.0.0.1:1234', 'synthetic');
+    expect(process.launchLinkPath).toBeTruthy();
+    await process.dispose();
+    expect(process.launchLinkPath).toBeUndefined();
+  });
+
   it('passes an explicit saved intake landing only to the private server', async () => {
     const process = preview('linux', { FMWEB_PREVIEW_INTAKE_ID: 'inherited-target' });
     await process.start(new Map([['package.json', Buffer.from('{}')], ['preview-server.mjs', Buffer.from('')]]),

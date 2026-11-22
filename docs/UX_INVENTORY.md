@@ -247,13 +247,15 @@ while this inventory was being written; the fifth is still open.
 ## What this inventory did not verify
 
 - The elapsed time and deliberate choices to a first sample receipt, which the roadmap asks for. The
-  harness now records both, for every journey: a measurement — how long the journey took, and which
+  harness records both, for every journey: a measurement — how long the journey took, and which
   commands were run and which options were picked — goes to `measurements.json` and to a
-  **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The
-  path to a first sample receipt is a journey now** (`j17-first-sample-receipt.mjs`): it chooses a
-  starter and the invented data, starts the preview, submits the form and reads the receipt, and it
-  records the measurement. The figure itself is in the run's artefact, so it is measured where the
-  desktop suite runs rather than here. Two things keep it from being one: the preview opens an external browser
+  **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The path
+  to a first sample receipt is a journey now** (`j17-first-sample-receipt.mjs`): it chooses a starter
+  and the invented data, starts the preview, submits the form and reads the receipt, and it records
+  the five deliberate choices — the starter, where the fields come from, the workspace folder, the
+  save-and-preview action and the submission — with the preview's cold dependency setup as a separate
+  figure. The measurement is produced where the desktop suite runs, so the number is in that run's
+  artefact rather than here. Two things keep it from being one: the preview opens an external browser
   (`vscode.env.openExternal`), and a CI runner has no browser to open; and the submission needs the
   preview session token from the URL that browser was given. What the code says today is that the
   path has **five deliberate choices** — the starter, where the fields come from, the workspace

@@ -257,7 +257,11 @@ export class FmWebPreviewProcess implements vscode.Disposable {
       } finally {
         try {
           if (this.directory) await bounded(rm(this.directory, { recursive: true, force: true }), 5000);
-        } finally { activePreviews.delete(this); }
+        } finally {
+          // The folder is gone, so the path to the link in it is gone too.
+          this.directory = undefined;
+          activePreviews.delete(this);
+        }
       }
     }
   }
