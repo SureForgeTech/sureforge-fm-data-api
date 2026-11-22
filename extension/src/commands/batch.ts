@@ -7,6 +7,7 @@ import { singleFlight } from '../utils/singleFlight';
 import type { RoleGuard } from '../enterprise/roleGuard';
 import type { BatchService } from '../services/batchService';
 import type { BatchUpdateInputFormat } from '../services/batchService';
+import { isProxyProfile } from '../types/fm';
 import type { BatchUpdateEntry } from '../types/fm';
 import type { JobRunner } from '../services/jobRunner';
 import type { FMClient } from '../services/fmClient';
@@ -243,8 +244,12 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
 
           const defaults = await batchService.getDefaultBatchUpdateOptions();
           // The dates in the file are read the way the developer chose, so the mode picker says
-          // which order that is beside the choice itself.
+          // which order that is beside the choice itself. A proxy connection is answered by the
+          // proxy, so the setting does not apply there and the order is the proxy's own.
           const dateFormat = settingsService.getDateFormats();
+          const dateOrder = isProxyProfile(profile)
+            ? { dateFormatLabel: "the proxy's own order" }
+            : { dateFormat, dateFormatLabel: dateFormatLabel(dateFormat) };
           const dryRunSelection = await vscode.window.showQuickPick(
             [
               { label: 'Dry-run only (recommended)', value: true },
@@ -252,7 +257,7 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
             ],
             {
               title: 'Batch Update Mode',
-              placeHolder: `Default: ${defaults.dryRun ? 'dry-run' : 'execute'} · Dates: ${dateFormatLabel(dateFormat)}`
+              placeHolder: `Default: ${defaults.dryRun ? 'dry-run' : 'execute'} · Dates: ${dateOrder.dateFormatLabel}`
             }
           );
 
@@ -334,8 +339,7 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
                 layout,
                 // The dates in the file are read in the order the developer chose, so the preview
                 // says which order that is.
-                dateFormat,
-                dateFormatLabel: dateFormatLabel(dateFormat),
+                ...dateOrder,
                 rowsWithModId: result.rowsWithModId ?? rowsWithModId,
                 rowsChecked: result.rowsChecked ?? rowsWithModId,
                 skippedColumns: result.skippedColumns ?? [],

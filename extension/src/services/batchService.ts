@@ -641,11 +641,24 @@ export function parseBatchUpdateInput(
   }
 
   if (format === 'jsonl') {
+    // The line number is the line in the file, so a broken line in a long file can be found.
     const lines = content
       .replace(/^\uFEFF/, '')
       .split(/\r?\n/)
-      .filter((line) => line.trim().length > 0);
-    return lines.map((line) => normalizeBatchUpdateEntry(JSON.parse(line) as unknown));
+      .map((line, index) => ({ line, number: index + 1 }))
+      .filter((entry) => entry.line.trim().length > 0);
+    return lines.map(({ line, number }) => {
+      let value: unknown;
+      try {
+        value = JSON.parse(line) as unknown;
+      } catch (error) {
+        throw new Error(
+          `Line ${number} of the JSONL file is not JSON: ${(error as Error).message}`,
+          { cause: error }
+        );
+      }
+      return normalizeBatchUpdateEntry(value);
+    });
   }
 
   return parseCsvBatchUpdates(content, format === 'semicolon-csv' ? ';' : ',');

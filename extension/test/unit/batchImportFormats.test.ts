@@ -69,6 +69,16 @@ describe('the shapes a batch update file can be in', () => {
 
     expect(entries[0]!.fieldData).toEqual({ Notes: 'one; two' });
   });
+
+  it('names the line of a JSONL file that is not JSON', () => {
+    const jsonl = [
+      JSON.stringify({ recordId: '1', fieldData: { Name: 'Ada' } }),
+      '{ this is not json',
+      JSON.stringify({ recordId: '3', fieldData: { Name: 'Grace' } })
+    ].join('\n');
+
+    expect(() => parseBatchUpdateInput(jsonl, 'jsonl')).toThrow(/Line 2 of the JSONL file/);
+  });
 });
 
 describe('the date format the import says it uses', () => {

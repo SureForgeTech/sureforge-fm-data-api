@@ -159,4 +159,33 @@ describe('the batch update import', () => {
       expect.stringMatching(/cancelled/i)
     );
   });
+
+  it('does not name the date order of the setting for a proxy connection', async () => {
+    // A proxy connection is answered by the proxy, so `filemaker.dateFormats` does not apply
+    // there and the preview must not claim an order it will not send.
+    const d = deps();
+    d.profileStore.getProfile = vi.fn(async () => ({ ...profile, authMode: 'proxy' }));
+    registerBatchCommands(d as never);
+    vi.mocked(vscode.window.showQuickPick).mockImplementation(async (items) => {
+      const choices = items as unknown as Array<{ label: string }>;
+      if (choices.some((choice) => /JSONL/.test(choice.label))) return choices[0] as never;
+      return choices[0] as never;
+    });
+
+    await handlerFor('filemakerDataApiTools.batchUpdateFromFile')({
+      profileId: profile.id,
+      layout: 'Contacts'
+    });
+
+    const modePick = vi.mocked(vscode.window.showQuickPick).mock.calls[1]![1] as
+      | { placeHolder?: string }
+      | undefined;
+    expect(modePick?.placeHolder).toMatch(/proxy/i);
+    expect(modePick?.placeHolder).not.toMatch(/ISO 8601/);
+    const opened = vi.mocked(vscode.workspace.openTextDocument).mock.calls[0]![0] as {
+      content: string;
+    };
+    expect(opened.content).toMatch(/"dateFormatLabel": "the proxy's own order"/);
+    expect(opened.content).not.toMatch(/"dateFormat":/);
+  });
 });
