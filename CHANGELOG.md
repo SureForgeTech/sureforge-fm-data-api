@@ -72,6 +72,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- Align the Marketplace overview with the product page and the current ABD Enterprises consulting offer.
+
 - A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
 
 - Escape every slash in a run when the Query Builder produces literal Find criteria, and keep literal punctuation inside E2E report table cells.

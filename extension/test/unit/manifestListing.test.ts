@@ -40,10 +40,12 @@ describe('marketplace manifest', () => {
     }
   });
 
-  it('links to URLs that resolve (no ?ref= query on the home page)', () => {
-    expect(manifest.homepage).toBe('https://abdenterprises.com');
+  it('links Marketplace readers to the product and publisher pages', () => {
+    const readme = readFileSync(path.join(extensionDir, 'README.md'), 'utf8');
+    expect(manifest.homepage).toBe('https://sureforgetech.com/products/sureforge-fm-data-api/');
     expect(manifest.author.url).toBe('https://abdenterprises.com');
-    expect(readFileSync(path.join(extensionDir, 'README.md'), 'utf8')).not.toContain('abdenterprises.com?ref=');
+    expect(readme).toContain(`(${manifest.homepage})`);
+    expect(readme).not.toContain('abdenterprises.com?ref=');
   });
 
   it('declares virtual and untrusted workspace support truthfully', () => {
