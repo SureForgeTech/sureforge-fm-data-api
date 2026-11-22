@@ -11,6 +11,10 @@ import { startTlsServer, type TestTlsServer } from '../helpers/tlsServer';
 import { DAY, makeCertificate, newKeyPair } from '../helpers/x509';
 import { InMemorySecretStorage } from './mocks';
 
+// Generating keys and the TLS handshake can take seconds when the whole suite runs at once; these
+// tests expect a certificate refusal, never a timeout, so the client and each test get room for that.
+const TLS_CLIENT_TIMEOUT_MS = 20_000;
+
 const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } as never;
 const PLAIN =
   "This server uses a certificate that is not trusted: FileMaker Server's default certificate is self-signed. You can trust this certificate, or install a certificate from a public authority on the server.";
@@ -34,7 +38,7 @@ function clarisDefault() {
   return { leafKey, leaf };
 }
 
-describe("FileMaker Server's default certificate", () => {
+describe("FileMaker Server's default certificate", { timeout: 30_000 }, () => {
   const servers: TestTlsServer[] = [];
   beforeAll(() => nock.restore());
   afterAll(() => {
@@ -56,7 +60,7 @@ describe("FileMaker Server's default certificate", () => {
     const secrets = new SecretStore(new InMemorySecretStorage() as never);
     await secrets.setPassword('p1', 'the-password');
     try {
-      return await new FMClient(secrets, logger, 3000).createSession({
+      return await new FMClient(secrets, logger, TLS_CLIENT_TIMEOUT_MS).createSession({
         id: 'p1', name: 'Claris', authMode: 'direct', serverUrl: `https://localhost:${server.port}`, database: 'Sales', username: 'u', ...extra
       });
     } catch (error) {
