@@ -4,7 +4,11 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { FMClientError } from '../../src/services/errors';
-import { explorerFailureText, fieldRowDescription } from '../../src/views/fmExplorer';
+import {
+  EXPLORER_FAILURE_LABELS,
+  explorerFailureText,
+  fieldRowDescription
+} from '../../src/views/fmExplorer';
 // @ts-expect-error The UI harness is JavaScript; no browser dependencies are loaded here.
 import * as journeyFacts from '../../e2e-ui/lib/journeyFacts.mjs';
 
@@ -42,12 +46,21 @@ describe('the desktop journeys expect what the product does', () => {
     ];
     for (const field of rows) {
       const description = fieldRowDescription(field);
-      expect(description.length).toBeGreaterThan(0);
+      expect(description).toBeTruthy();
       expect(isFieldRow(`${field.name} ${description}`), `${field.name}: ${description}`).toBe(true);
     }
+    // A field with nothing to say has no description at all.
+    expect(fieldRowDescription({ name: 'Empty' })).toBeUndefined();
     // A row that names no field type is not a field row.
     expect(isFieldRow('Customers Database')).toBe(false);
     expect(isFieldRow('Status Value list')).toBe(false);
+  });
+
+  it('names the Explorer failure row the Explorer names', () => {
+    // The journeys look for the row by this label, so it has to be the one the tree writes.
+    expect(EXPLORER_FAILURE_LABEL).toBe(EXPLORER_FAILURE_LABELS.layouts);
+    expect(EXPLORER_FAILURE_LABELS.fields).not.toBe(EXPLORER_FAILURE_LABELS.layouts);
+    expect(EXPLORER_FAILURE_LABELS.valueLists).not.toBe(EXPLORER_FAILURE_LABELS.layouts);
   });
 
   it('reads the reason an Explorer failure row carries, with the cause in its tooltip', () => {
@@ -77,5 +90,8 @@ describe('the desktop journeys expect what the product does', () => {
     expect(
       isScriptRunRequest('GET /layouts/Customers/script/Echo?script.param=only -> 200/0')
     ).toBe(true);
+    // A record read and a find are what the check exists to catch, so they have to survive it.
+    expect(isScriptRunRequest('GET /layouts/Customers/records/1 -> 200/0')).toBe(true);
+    expect(isScriptRunRequest('POST /layouts/Customers/_find -> 200/0')).toBe(true);
   });
 });

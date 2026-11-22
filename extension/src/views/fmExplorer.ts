@@ -438,7 +438,7 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
       children.push(
         new FMExplorerItem({
           kind: 'placeholder',
-          label: 'Failed to load layouts',
+          label: EXPLORER_FAILURE_LABELS.layouts,
           description: failure.description,
           tooltip: failure.tooltip,
           iconPath: new vscode.ThemeIcon('error')
@@ -642,7 +642,7 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
       return [
         new FMExplorerItem({
           kind: 'placeholder',
-          label: 'Failed to load fields',
+          label: EXPLORER_FAILURE_LABELS.fields,
           description: failure.description,
           tooltip: failure.tooltip,
           iconPath: new vscode.ThemeIcon('error')
@@ -715,7 +715,7 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
       return [
         new FMExplorerItem({
           kind: 'placeholder',
-          label: 'Failed to load value lists',
+          label: EXPLORER_FAILURE_LABELS.valueLists,
           description: failure.description,
           tooltip: failure.tooltip,
           iconPath: new vscode.ThemeIcon('error')
@@ -763,6 +763,13 @@ export function explorerFailureText(
   };
 }
 
+/** What the Explorer calls the lists it could not load. */
+export const EXPLORER_FAILURE_LABELS = {
+  layouts: 'Failed to load layouts',
+  fields: 'Failed to load fields',
+  valueLists: 'Failed to load value lists'
+} as const;
+
 /**
  * The text an Explorer field row carries: the field's type, the kind when the kind is not the
  * type's own name, and the repetition count.
@@ -771,7 +778,7 @@ export function explorerFailureText(
  * applies to the whole session, so the kind is shown with the field. The same table names the kind
  * elsewhere.
  */
-export function fieldRowDescription(field: FileMakerFieldMetadata): string {
+export function fieldRowDescription(field: FileMakerFieldMetadata): string | undefined {
   const descriptionParts: string[] = [];
 
   if (field.result) {
@@ -788,7 +795,7 @@ export function fieldRowDescription(field: FileMakerFieldMetadata): string {
     descriptionParts.push(`x${field.repetitions}`);
   }
 
-  return descriptionParts.join(' • ');
+  return descriptionParts.length > 0 ? descriptionParts.join(' • ') : undefined;
 }
 
 function toFieldTreeItem(

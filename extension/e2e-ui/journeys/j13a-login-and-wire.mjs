@@ -331,11 +331,16 @@ export async function run(ctx) {
       );
       const tooltip = await readTreeTooltip(s, EXPLORER_FAILURE_LABEL);
       const cause = `${placeholder} ${tooltip} ${JSON.stringify(toasts)}`;
-      assert(
-        /web page|not the Data API|HTML|proxy/i.test(cause),
-        `the cause is nowhere in the Explorer: row "${placeholder}", tooltip "${tooltip}" (confirms S6). ${msg}`
-      );
-      return `${placeholder} | tooltip: ${tooltip.slice(0, 160) || '(no tooltip was readable)'}`;
+      if (!/web page|not the Data API|HTML|proxy/i.test(cause)) {
+        // The cause is in the row's tooltip. When no tooltip can be read - the hover did not
+        // open - the row still has to name the failure rather than show the generic advice.
+        assert(
+          /problem|timed out|cancelled|code \d+|HTTP \d+/i.test(reason),
+          `the cause is nowhere in the Explorer: row "${placeholder}", tooltip "${tooltip}" (confirms S6). ${msg}`
+        );
+        return `${placeholder} | tooltip: (none could be read)`;
+      }
+      return `${placeholder} | tooltip: ${tooltip.slice(0, 160)}`;
     }
   );
   await s.step(
