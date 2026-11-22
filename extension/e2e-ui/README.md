@@ -31,9 +31,11 @@ a digest. Elsewhere, or for a pinned version, only the download server's own hea
 **CI.** Two jobs run these tests on Ubuntu under `xvfb-run`. `e2e-ui-smoke` runs on every pull request, push to `main`
 and tag: it packages the VSIX and runs one journey, `j01b-first-run-happy-path.mjs` (add a profile, test the
 connection, save it, connect, run the first query), selected with `E2E_ONLY=j01b`. `e2e-ui` runs the full strict suite
-on a weekly schedule and before tagged releases, and tagged releases wait for it before packaging/publishing. Reports,
+on a weekly schedule and before tagged releases, and tagged releases wait for it before packaging/publishing. The strict
+suite now also starts the private preview, which installs the shipped template's dependencies from npm — that needs the
+network and minutes. Reports,
 screenshots and VS Code logs are uploaded even on failure. The full job has a 120-minute timeout to allow for the VS Code
-download and the 25–55 minute run. The smoke job is not a required status check; branch protection still requires only
+download, the run and the template install. The smoke job is not a required status check; branch protection still requires only
 `build-test`, so its failures are visible on the pull request without blocking unrelated work.
 
 ## What gates, and the known-findings list
@@ -91,4 +93,10 @@ Computer-use screen control cannot type into VS Code, so nothing here uses it.
 - `run.mjs` orchestrator; `lib/session.mjs` (launch, palette, pickers, modals, webview frames), `lib/flows.mjs`, `lib/observe.mjs`, `lib/mock.mjs`, `lib/report.mjs` (paths in the report are made relative), `lib/vscode.mjs` (cache and checksum), `known-findings.json`.
 - `helper-extension/` a tiny test-only extension loaded with `--extensionDevelopmentPath`. It lets the harness call `vscode.lm.invokeTool`, read settings and list extensions through JSON files. It is never packaged (`.vscodeignore` excludes `e2e-ui/**`).
 - `journeys/j*.mjs` the journeys (see the table in the PR description).
+- `journeys/j17-first-sample-receipt.mjs` drives the first-run path to a first sample receipt and
+  records the measurement: the elapsed time, the choices the user had to make, and the preview's own
+  start as a separate figure. It reads the private launch link the preview writes into its own folder
+  (`launch-url`), which is also how a run whose browser could not be opened reaches the preview. When
+  the browser the preview opened redeemed the one-time link first, the journey records that instead
+  of submitting the form.
 - `journeys/j16-marketplace-screenshots.mjs` is not a test: it takes the screenshots in `docs/marketplace/` (Marketplace page and User Guide) from the real VS Code against the mock, with made-up data. It does nothing unless `E2E_MARKETPLACE=1`; run it alone with `E2E_MARKETPLACE=1 E2E_ONLY=j16 E2E_SHOTS_DIR=<folder> npm run test:e2e-ui`, look at every image, and copy the ones you want into `docs/marketplace/`. The chat screenshot uses the harness's stand-in language model (see j10c).

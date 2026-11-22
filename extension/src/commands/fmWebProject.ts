@@ -412,7 +412,12 @@ export function registerFmWebProjectCommands(
         if (real && typeof intakeId === 'string') await preview.start(...previewArgs, intakeId, 'filemaker');
         else if (typeof intakeId === 'string') await preview.start(...previewArgs, intakeId);
         else await preview.start(...previewArgs);
-        vscode.window.showInformationMessage('FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.');
+        vscode.window.showInformationMessage(
+          `FM Web preview is ready in your browser. Restarting it invalidates the previous launch and session.`
+          + (preview.launchLinkPath
+            ? ` If no browser opened, the private link is in ${preview.launchLinkPath}. It works once, within two minutes of the preview starting.`
+            : '')
+        );
       } catch (error) {
         await preview?.dispose().catch(() => logger.warn('Could not stop the private preview or finish its temporary-file cleanup.'));
         preview = undefined;

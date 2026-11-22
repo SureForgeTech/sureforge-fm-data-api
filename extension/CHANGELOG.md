@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.
+
 - The Query Builder treats repeated slashes as literal text in Find conditions. Single slashes in dates still work as before.
 
 - Strengthened the in-memory identifier used to recognize unchanged credentials after a rejected sign-in. The identifier now uses a randomly salted password derivation function.

@@ -186,7 +186,7 @@ export async function run(ctx) {
   s.notTestable(
     J,
     'preview server actually started',
-    'the packaged build carries the runtime template, but starting the preview installs that template\'s dependencies, which takes minutes and a network; this journey checks that the commands are offered and that declining the confirmation starts nothing'
+    'the first-sample-receipt journey starts the preview and reads the private launch link the preview writes into its own folder; this journey only checks that the command is offered'
   );
   await s.closeAllEditors();
 }

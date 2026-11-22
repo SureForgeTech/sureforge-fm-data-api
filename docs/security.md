@@ -173,6 +173,11 @@ authenticate a local process; possession of the private session cookie is requir
 
 At each start the extension generates independent random 256-bit launch and
 session credentials and passes both only through the server process environment.
+The launch code is also written to the preview's own owner-only folder, as
+`launch-url`, so that a session whose browser could not be opened - a CI
+runner, a remote session - can still reach the preview. The file is readable
+only by the owner, is removed with the rest of the preview folder, and holds a
+code that can be redeemed once and only within two minutes of the server start.
 Once Next reports ready, the extension opens `http://127.0.0.1:3000/?launch=...`
 in the user's browser. Proxy exchanges the launch code once, within two minutes
 of server start, for an HttpOnly, SameSite=Strict, Path=/ session cookie and
