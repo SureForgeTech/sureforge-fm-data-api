@@ -4,6 +4,9 @@
 
 - The generated TypeScript client's calls can now run a FileMaker script alongside them and read its result, and it can run one on its own.
 
+- The generated TypeScript client can open and close its own session: sign in with the Data API's Basic account sign-in, and check the token when you need to.
+
+- The Marketplace overview separates the free extension from optional FileMaker consulting, links to current prices, and states the Apache-2.0 license.
 - The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
 
 - Batch update now reads a file that is one record per line (JSONL) or a semicolon-delimited CSV when you say so, and the import shows which date order the server will read the dates in.

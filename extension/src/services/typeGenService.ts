@@ -628,6 +628,7 @@ export class FileMakerDataApiError extends Error {
 export class FileMakerDataApiClient {
   private readonly fetchImpl: typeof fetch;
   private readonly baseUrl: string;
+  private readonly rootUrl: string;
 
   public constructor(private readonly config: FileMakerClientConfig) {
     this.fetchImpl = config.fetch ?? globalThis.fetch;
@@ -638,17 +639,58 @@ export class FileMakerDataApiClient {
     const serverUrl = trimSlashes(config.serverUrl);
     const apiBasePath = trimSlashes(config.apiBasePath ?? 'fmi/data');
     const apiVersionPath = trimSlashes(config.apiVersionPath ?? 'vLatest');
-    this.baseUrl = \`\${serverUrl}/\${apiBasePath}/\${apiVersionPath}/databases/\${encodeURIComponent(config.database)}\`;
+    this.rootUrl = \`\${serverUrl}/\${apiBasePath}/\${apiVersionPath}\`;
+    this.baseUrl = \`\${this.rootUrl}/databases/\${encodeURIComponent(config.database)}\`;
   }
 
 ${indent(methods, 2)}
 
+  public async createSession(username: string, password: string): Promise<string> {
+    const envelope = await this.request<{ token?: string }>(
+      '/sessions',
+      {
+        method: 'POST',
+        headers: { Authorization: basicAuthHeader(username, password) },
+        body: JSON.stringify({})
+      }
+    );
+    const token = envelope.response.token;
+    if (!token) {
+      throw new Error('FileMaker create session response did not include a session token.');
+    }
+    // The calls that follow are signed in with the new token: it is kept on the config passed to
+    // the client.
+    this.config.token = token;
+    return token;
+  }
+
+  public async deleteSession(): Promise<void> {
+    const token = this.config.token;
+    if (!token) {
+      throw new Error('There is no session token to delete. Call createSession first.');
+    }
+    await this.request<Record<string, never>>(
+      \`/sessions/\${encodeURIComponent(token)}\`,
+      { method: 'DELETE' }
+    );
+  }
+
+  public async validateSession(): Promise<void> {
+    await this.request<Record<string, never>>(
+      '/validateSession',
+      { method: 'GET' },
+      false,
+      this.rootUrl
+    );
+  }
+
   private async request<TResponse>(
     path: string,
     init: RequestInit,
-    allowNoRecords = false
+    allowNoRecords = false,
+    base: string = this.baseUrl
   ): Promise<DataApiEnvelope<TResponse>> {
-    const response = await this.fetchImpl(\`\${this.baseUrl}\${path}\`, {
+    const response = await this.fetchImpl(\`\${base}\${path}\`, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
@@ -737,6 +779,17 @@ function pickScriptOutcome(response: FileMakerScriptOutcome): FileMakerScriptOut
     }
   }
   return outcome;
+}
+
+function basicAuthHeader(username: string, password: string): string {
+  // Base64 of the UTF-8 "username:password": the Data API's Basic sign-in. TextEncoder and btoa
+  // exist in a browser and in Node 18 alike.
+  const bytes = new TextEncoder().encode(username + ':' + password);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]!);
+  }
+  return 'Basic ' + btoa(binary);
 }
 `;
 }
@@ -853,7 +906,7 @@ Generated at ${generatedAt} for profile ${readmeName(profile.name)}.
 ## Files
 
 - \`types.ts\` contains interfaces for the selected layout fields and records.
-- \`client.ts\` contains typed fetch wrappers for find, get, create, edit, delete and run-script operations.
+- \`client.ts\` contains typed fetch wrappers for find, get, create, edit, delete, session and run-script operations.
 
 ## Usage
 
@@ -891,6 +944,8 @@ An edit can carry the record's \`modId\`: \`await client.edit${firstMethod}('1',
 A call can run a FileMaker script alongside it. Give the script's name and parameter as the Data API names them: \`{ script: 'Tidy', 'script.param': 'a value' }\`, and \`script.prerequest\` or \`script.presort\` with their \`.param\` for the scripts that run before the request is evaluated or sorted. The script's answer comes back with the result: give the options to a find or a get and the call returns the records (or the record) together with \`scriptResult\` and \`scriptError\`; a create or an edit returns them alongside \`recordId\` and \`modId\`. \`scriptError\` is \`"0"\` when the script succeeded, and any other value is the script's own error code (3 is "command is invalid"): the call itself still succeeded. A delete carries no scripts, because the Data API has no script parameters on it.
 
 Run a script on its own with \`runScript\`: \`await client.runScript${firstMethod}('Tidy', 'a parameter')\` answers \`{ scriptResult, scriptError }\`. That route is a GET and takes only \`script.param\`.
+
+Sign in with \`createSession\` and out with \`deleteSession\`: \`await client.createSession(process.env.FM_USERNAME ?? '', process.env.FM_PASSWORD ?? '')\` signs the client in and keeps the token on the config you passed, so the calls that follow carry it. \`deleteSession()\` logs out (the route answers 200 even for a token that is already gone), and \`validateSession()\` resolves while the token is good and throws \`FileMakerDataApiError\` when it is not. The sign-in is the Data API's Basic account sign-in: a Claris ID (FMID) tenant is not covered by the generated client.
 A find with FileMaker code 401 returns an empty array, whatever the HTTP status. Other failures throw \`FileMakerDataApiError\` with \`code\`, \`status\` and \`messages\`. A web page instead of JSON gives an address/proxy check message.
 
 Regenerating this client overwrites these files with a new timestamp.
