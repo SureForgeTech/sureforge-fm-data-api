@@ -113,6 +113,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [SECURITY]
 
+- Strengthened the in-memory identifier used to recognize unchanged credentials after a rejected sign-in. The identifier now uses a randomly salted password derivation function.
+
 - AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
 
 - Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.

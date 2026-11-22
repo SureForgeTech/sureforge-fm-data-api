@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Strengthened the in-memory identifier used to recognize unchanged credentials after a rejected sign-in. The identifier now uses a randomly salted password derivation function.
+
 - AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
 
 - A script run that asks for its own deadline is no longer ended by a sign-in that started under the shared timeout: when another sign-in is in flight with a shorter deadline, the run signs in for itself instead. The proxy path takes the same deadline for its sign-in.

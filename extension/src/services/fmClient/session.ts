@@ -1,11 +1,16 @@
-import { createHash } from 'crypto';
+import { randomBytes, scrypt } from 'crypto';
+import { promisify } from 'util';
 import type { ConnectionProfile } from '../../types/fm';
 import { FMClientError } from '../errors';
 
-export function credentialStamp(profile: ConnectionProfile, username: string, password: string): string {
-  return createHash('sha256')
-    .update([profile.serverUrl, profile.database, username, password].join('\u0000'))
-    .digest('hex');
+// The sign-in pause only needs to detect credential changes within this process.
+const credentialStampSalt = randomBytes(32);
+const deriveCredentialStamp = promisify(scrypt);
+
+export async function credentialStamp(profile: ConnectionProfile, username: string, password: string): Promise<string> {
+  const credentials = JSON.stringify([profile.serverUrl, profile.database, username, password]);
+  const stamp = await deriveCredentialStamp(credentials, credentialStampSalt, 32);
+  return (stamp as Buffer).toString('hex');
 }
 
 /** A shared sign-in belongs to the connection; each waiting request owns only its own wait. */
