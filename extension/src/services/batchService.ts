@@ -640,6 +640,14 @@ export function parseBatchUpdateInput(
     const parsed = JSON.parse(content) as unknown;
 
     if (!Array.isArray(parsed)) {
+      // A single record is a JSONL file with one line in it. The developer is asked rather than
+      // left with a message that says only that an array was expected.
+      if (isBatchUpdateEntryLike(parsed)) {
+        throw new BatchUpdateFormatRefusal(
+          'This looks like a JSONL file with one record.',
+          'jsonl'
+        );
+      }
       throw new Error('Batch update JSON must be an array.');
     }
 
@@ -729,6 +737,19 @@ function parseCsvBatchUpdates(content: string, delimiter: ',' | ';'): BatchUpdat
   }
 
   return entries;
+}
+
+/**
+ * The value looks like one batch update entry.
+ *
+ * A JSON file that holds one record is a JSONL file with a single line, and the developer is
+ * asked which shape it is rather than told only that an array was expected.
+ */
+function isBatchUpdateEntryLike(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  return typeof (value as Record<string, unknown>).recordId === 'string';
 }
 
 /**

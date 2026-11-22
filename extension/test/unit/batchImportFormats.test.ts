@@ -107,6 +107,30 @@ describe('the shapes a batch update file can be in', () => {
     expect(entries[1]!.recordId).toBe('2');
   });
 
+  it('offers the JSONL shape for a file that holds one record', () => {
+    // One record is a JSONL file with a single line, and the developer is asked.
+    let refusal: unknown;
+    try {
+      parseBatchUpdateInput('{"recordId":"1","fieldData":{"Name":"Ada"}}', 'json');
+    } catch (error) {
+      refusal = error;
+    }
+
+    expect(refusal).toBeInstanceOf(BatchUpdateFormatRefusal);
+    expect((refusal as BatchUpdateFormatRefusal).alternative).toBe('jsonl');
+    expect((refusal as Error).message).toMatch(/JSONL file with one record/i);
+  });
+
+  it('reads a JSONL file that holds one record', () => {
+    const entries = parseBatchUpdateInput(
+      '{"recordId":"1","fieldData":{"Name":"Ada"}}\n',
+      'jsonl'
+    );
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.fieldData).toEqual({ Name: 'Ada' });
+  });
+
   it('names the line of a JSONL file that is not JSON', () => {
     const jsonl = [
       JSON.stringify({ recordId: '1', fieldData: { Name: 'Ada' } }),

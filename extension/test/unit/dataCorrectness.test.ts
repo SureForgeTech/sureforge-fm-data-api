@@ -211,7 +211,8 @@ it('uses extra underscores when reserved names are real fields too', async () =>
 it('recognizes semicolon CSV with quoted commas, and JSONL selected through the JSON path', () => {
   expect(() => parseBatchUpdateInput('recordId;"Last, First"\n1;"Élie, Jo"', 'csv')).toThrow(/semicolon-delimited/);
   expect(() => parseBatchUpdateInput('{"recordId":"1","fieldData":{}}\n{"recordId":"2","fieldData":{}}\n', 'json')).toThrow(/looks like a JSONL file/);
-  expect(() => parseBatchUpdateInput('{"recordId":"1","fieldData":{}}', 'json')).toThrow('Batch update JSON must be an array.');
+  expect(() => parseBatchUpdateInput('{"recordId":"1","fieldData":{}}', 'json')).toThrow(/looks like a JSONL file/);
+  expect(() => parseBatchUpdateInput('{"not":"an entry"}', 'json')).toThrow('Batch update JSON must be an array.');
 });
 
 it('proxy portal paging gives a clear direct-connection explanation', async () => {
