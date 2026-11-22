@@ -208,17 +208,17 @@ half), its session calls (AD10's session half) and the palette-toggle journey.
 | #631 | the generated client can open and close its own session | `82cbfc4` | `9aabae6` | MERGEABLE, no P0/P1/P2 (1 round, Kimi K2.8; two P3s accepted by design) |
 | #630 | the generated client can run a FileMaker script | `5513c51` | `6d918cb` | MERGEABLE, no P0/P1 (2 rounds + merge-head round, Kimi K2.8; merged tree byte-identical to the reviewed head) |
 | #632 | a journey for the Command Palette's two sides | `fcbdf42` | `26f0e9e` (the merged head `6e71c8b3` is that work plus a base merge, this session verified byte-identical for the branch's own files) | MERGEABLE, no P0/P1 (4 rounds, Kimi K2.8; the first found one P2, fixed) |
-| #633 | one copy of each changelog entry | pending | `3f711e2` | pending: #632's base merge duplicated two generated-client entries on main; this removes the duplicate copy (`changelog-skip`) |
+| #633 | one copy of each changelog entry | `0f0c529` | `3f711e2` | MERGEABLE, no P0/P1/P2/P3 (1 round, Kimi K2.8) |
 
 Checkpoint at the time of writing:
 
 ```text
-Status — In progress
-Work — The plan's tasks 1-3 are all built and merged (#631 session calls, #630 script calls, #632 palette journey); a small repair PR #633 removes two changelog entries that #632's base merge duplicated on main.
-Delivery — SureForgeTech/sureforge-fm-data-api · main @ fcbdf42 · #631 merged 82cbfc4 · #630 merged 5513c51 (reviewed head 6d918cb) · #632 merged fcbdf42 (head 6e71c8b3, the branch's own files verified byte-identical to reviewed head 26f0e9e) · #633 head 3f711e2, PR open
-Checks — The twelve-step gate exits 0 on every head; 66 generated-client tests green together on #630's merged head; 11/11 journey-expectation tests green on #632; changelogStructure 17/17 on #633
-Review — #631: 9aabae6 P0=0 P1=0 · #630: 6d918cb P0=0 P1=0 · #632: 40664cc P0=0 P1=0 and d3bb7fe P0=0 P1=0 (4 rounds) · #633: pending on 3f711e2
-Next — Merge #633 on its verdict and green checks, then close out
+Status — Done
+Work — The plan's tasks 1-3 are built, independently reviewed and merged: the generated client runs scripts (#630) and manages its own session (#631), and the desktop suite has the palette-toggle journey (#632); #633 repaired two changelog entries #632's base merge duplicated.
+Delivery — SureForgeTech/sureforge-fm-data-api · main @ 0f0c529 · #631 merged 82cbfc4 (reviewed 9aabae6) · #630 merged 5513c51 (reviewed 6d918cb) · #632 merged fcbdf42 (branch files verified byte-identical to reviewed 26f0e9e) · #633 merged 0f0c529 (reviewed 3f711e2)
+Checks — The twelve-step gate exits 0 on every head; 66 generated-client tests green together; 11/11 journey-expectation pins green; changelogStructure 17/17; required checks green on each merged head
+Review — #631: 9aabae6 P0=0 P1=0 · #630: 6d918cb P0=0 P1=0 · #632: four rounds, final d3bb7fe P0=0 P1=0 · #633: 3f711e2 P0=0 P1=0
+Next — None for this batch. Open for the owner: AD10's remaining container calls (wait on AD05's download design), a desktop run of the new journey via the weekly e2e-ui job, and the items recorded above
 ```
 
 Notes for whoever reads this next:
