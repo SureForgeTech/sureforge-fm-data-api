@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The generated TypeScript client's calls can now run a FileMaker script alongside them and read its result, and it can run one on its own.
+
 - The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
 
 - Batch update now reads a file that is one record per line (JSONL) or a semicolon-delimited CSV when you say so, and the import shows which date order the server will read the dates in.
