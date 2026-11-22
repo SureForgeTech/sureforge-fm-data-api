@@ -637,7 +637,9 @@ export function parseBatchUpdateInput(
     }
   }
   if (format === 'json') {
-    const parsed = JSON.parse(content) as unknown;
+    // A file saved with a byte-order mark is JSON all the same, and every other reading of a
+    // file here ignores the mark.
+    const parsed = JSON.parse(content.replace(/^\uFEFF/, '')) as unknown;
 
     if (!Array.isArray(parsed)) {
       // A single record on one line is a JSONL file with one line in it. The developer is asked

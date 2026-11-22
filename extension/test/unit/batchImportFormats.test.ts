@@ -121,6 +121,29 @@ describe('the shapes a batch update file can be in', () => {
     expect((refusal as Error).message).toMatch(/JSONL file with one record/i);
   });
 
+  it('reads a JSON file saved with a byte-order mark', () => {
+    // A file saved as "UTF-8 with BOM" is JSON all the same.
+    const entries = parseBatchUpdateInput(
+      '\uFEFF[{"recordId":"1","fieldData":{"Name":"Ada"}}]',
+      'json'
+    );
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.fieldData).toEqual({ Name: 'Ada' });
+  });
+
+  it('offers the JSONL shape for a file saved with a byte-order mark', () => {
+    let refusal: unknown;
+    try {
+      parseBatchUpdateInput('\uFEFF{"recordId":"1","fieldData":{"Name":"Ada"}}', 'json');
+    } catch (error) {
+      refusal = error;
+    }
+
+    expect(refusal).toBeInstanceOf(BatchUpdateFormatRefusal);
+    expect((refusal as BatchUpdateFormatRefusal).alternative).toBe('jsonl');
+  });
+
   it('does not offer the JSONL shape for a record spread over several lines', () => {
     // A pretty-printed JSON file is a JSON file: the JSONL remedy could not succeed.
     expect(() =>
