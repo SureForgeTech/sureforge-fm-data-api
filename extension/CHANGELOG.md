@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
+
 - A script run that asks for its own deadline is no longer ended by a sign-in that started under the shared timeout: when another sign-in is in flight with a shorter deadline, the run signs in for itself instead. The proxy path takes the same deadline for its sign-in.
 
 - The UI test harness counts only the decisions a user actually made: a command or an option that never ran is not counted, the harness's own housekeeping is not counted as a decision, and a journey that drives a second window records its choices in the same measurement.
