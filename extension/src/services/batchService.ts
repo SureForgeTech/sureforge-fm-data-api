@@ -597,8 +597,39 @@ export function inferExportFormat(outputPath: string): BatchExportFormat {
   return 'jsonl';
 }
 
-export function parseBatchUpdateInput(content: string, format: 'json' | 'csv'): BatchUpdateEntry[] {
-  if (looksLikeJsonl(content, format === 'json')) throw new Error('This looks like a JSONL file; export as comma-separated CSV.');
+/** The shapes a batch update file can be in. */
+export type BatchUpdateInputFormat = 'json' | 'csv' | 'jsonl' | 'semicolon-csv';
+
+/**
+ * The file is a shape the extension does not read unless the developer says so.
+ *
+ * A JSONL file is one record per line, and a semicolon-delimited file is a CSV written by a
+ * spreadsheet in a locale that uses semicolons. Both are refused by default, because reading a
+ * file as the wrong shape loses data silently; the refusal says which shape it looks like, so
+ * the developer can choose it.
+ */
+export class BatchUpdateFormatRefusal extends Error {
+  constructor(
+    message: string,
+    readonly alternative: 'jsonl' | 'semicolon-csv'
+  ) {
+    super(message);
+    this.name = 'BatchUpdateFormatRefusal';
+  }
+}
+
+export function parseBatchUpdateInput(
+  content: string,
+  format: BatchUpdateInputFormat
+): BatchUpdateEntry[] {
+  if (format === 'json' || format === 'csv') {
+    if (looksLikeJsonl(content, format === 'json')) {
+      throw new BatchUpdateFormatRefusal(
+        'This looks like a JSONL file: one record per line.',
+        'jsonl'
+      );
+    }
+  }
   if (format === 'json') {
     const parsed = JSON.parse(content) as unknown;
 
@@ -609,15 +640,31 @@ export function parseBatchUpdateInput(content: string, format: 'json' | 'csv'): 
     return parsed.map((entry) => normalizeBatchUpdateEntry(entry));
   }
 
-  return parseCsvBatchUpdates(content);
+  if (format === 'jsonl') {
+    const lines = content
+      .replace(/^\uFEFF/, '')
+      .split(/\r?\n/)
+      .filter((line) => line.trim().length > 0);
+    return lines.map((line) => normalizeBatchUpdateEntry(JSON.parse(line) as unknown));
+  }
+
+  return parseCsvBatchUpdates(content, format === 'semicolon-csv' ? ';' : ',');
 }
 
-function parseCsvBatchUpdates(content: string): BatchUpdateEntry[] {
+function parseCsvBatchUpdates(content: string, delimiter: ',' | ';'): BatchUpdateEntry[] {
   const firstLine = content.replace(/^\uFEFF/, '').split(/\r?\n/)[0] ?? '';
-  if (!parseCsv(firstLine)[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header)) && firstLine.includes(';') && parseCsv(firstLine, ';')[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header))) {
-    throw new Error('This looks like a semicolon-delimited file; export as comma-separated CSV.');
+  if (
+    delimiter === ',' &&
+    !parseCsv(firstLine)[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header)) &&
+    firstLine.includes(';') &&
+    parseCsv(firstLine, ';')[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header))
+  ) {
+    throw new BatchUpdateFormatRefusal(
+      'This looks like a semicolon-delimited file.',
+      'semicolon-csv'
+    );
   }
-  const rows = parseCsv(content.replace(/^\uFEFF/, ''));
+  const rows = parseCsv(content.replace(/^\uFEFF/, ''), delimiter);
   if (rows.length === 0) {
     return [];
   }

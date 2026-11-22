@@ -6,12 +6,15 @@ import { singleFlight } from '../utils/singleFlight';
 
 import type { RoleGuard } from '../enterprise/roleGuard';
 import type { BatchService } from '../services/batchService';
+import type { BatchUpdateInputFormat } from '../services/batchService';
+import type { BatchUpdateEntry } from '../types/fm';
 import type { JobRunner } from '../services/jobRunner';
 import type { FMClient } from '../services/fmClient';
 import type { Logger } from '../services/logger';
 import type { ProfileStore } from '../services/profileStore';
 import type { SettingsService } from '../services/settingsService';
 import { nulTextFields } from '../utils/nulText';
+import { dateFormatLabel } from '../utils/dateFormat';
 import { parseFindJson, parseSortJson } from '../utils/jsonValidate';
 import {
   parseLayoutArg,
@@ -197,8 +200,36 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
           const sourceBytes = await vscode.workspace.fs.readFile(sourceUri);
           const sourceText = Buffer.from(sourceBytes).toString('utf8');
           const format = sourceUri.fsPath.toLowerCase().endsWith('.csv') ? 'csv' : 'json';
-          const { parseBatchUpdateInput } = await import('../services/batchService');
-          const entries = parseBatchUpdateInput(sourceText, format);
+          const { parseBatchUpdateInput, BatchUpdateFormatRefusal } = await import(
+            '../services/batchService'
+          );
+          let entries: BatchUpdateEntry[];
+          try {
+            entries = parseBatchUpdateInput(sourceText, format);
+          } catch (error) {
+            // The file is a shape the extension does not read on its own: one record per line, or
+            // a spreadsheet's semicolons. The developer says which one it is.
+            if (!(error instanceof BatchUpdateFormatRefusal)) throw error;
+            const alternative = error.alternative;
+            const choice = await vscode.window.showQuickPick(
+              [
+                {
+                  label:
+                    alternative === 'jsonl'
+                      ? 'Import it as JSONL (one record per line)'
+                      : 'Import it as a semicolon-delimited CSV',
+                  value: alternative
+                },
+                { label: 'Cancel', value: 'cancel' }
+              ] as Array<{ label: string; value: BatchUpdateInputFormat | 'cancel' }>,
+              { title: error.message, placeHolder: 'The extension does not guess this shape.' }
+            );
+            if (!choice || choice.value === 'cancel') {
+              vscode.window.showWarningMessage('Batch update cancelled: the file was not read.');
+              return;
+            }
+            entries = parseBatchUpdateInput(sourceText, choice.value);
+          }
           if (entries.length === 0) {
             vscode.window.showWarningMessage('No valid update rows found.');
             return;
@@ -211,6 +242,9 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
           }
 
           const defaults = await batchService.getDefaultBatchUpdateOptions();
+          // The dates in the file are read the way the developer chose, so the mode picker says
+          // which order that is beside the choice itself.
+          const dateFormat = settingsService.getDateFormats();
           const dryRunSelection = await vscode.window.showQuickPick(
             [
               { label: 'Dry-run only (recommended)', value: true },
@@ -218,7 +252,7 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
             ],
             {
               title: 'Batch Update Mode',
-              placeHolder: `Default: ${defaults.dryRun ? 'dry-run' : 'execute'}`
+              placeHolder: `Default: ${defaults.dryRun ? 'dry-run' : 'execute'} · Dates: ${dateFormatLabel(dateFormat)}`
             }
           );
 
@@ -298,6 +332,10 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
                 dryRun: true,
                 totalEntries: entries.length,
                 layout,
+                // The dates in the file are read in the order the developer chose, so the preview
+                // says which order that is.
+                dateFormat,
+                dateFormatLabel: dateFormatLabel(dateFormat),
                 rowsWithModId: result.rowsWithModId ?? rowsWithModId,
                 rowsChecked: result.rowsChecked ?? rowsWithModId,
                 skippedColumns: result.skippedColumns ?? [],

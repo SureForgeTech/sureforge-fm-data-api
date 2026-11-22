@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Batch update now reads a file that is one record per line (JSONL) or a semicolon-delimited CSV when you say so, and the import shows which date order the server will read the dates in.
+
 - Certificate inspection now closes the discovery connection as soon as the certificate is read, cancelled, or times out. Connection diagnostics still verify trust in a separate handshake.
 
 - The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.
