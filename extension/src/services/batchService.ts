@@ -640,9 +640,10 @@ export function parseBatchUpdateInput(
     const parsed = JSON.parse(content) as unknown;
 
     if (!Array.isArray(parsed)) {
-      // A single record is a JSONL file with one line in it. The developer is asked rather than
-      // left with a message that says only that an array was expected.
-      if (isBatchUpdateEntryLike(parsed)) {
+      // A single record on one line is a JSONL file with one line in it. The developer is asked
+      // rather than left with a message that says only that an array was expected. A record
+      // spread over several lines is a JSON file, not a JSONL one, and is not offered.
+      if (isBatchUpdateEntryLike(parsed) && isOneLine(content)) {
         throw new BatchUpdateFormatRefusal(
           'This looks like a JSONL file with one record.',
           'jsonl'
@@ -737,6 +738,20 @@ function parseCsvBatchUpdates(content: string, delimiter: ',' | ';'): BatchUpdat
   }
 
   return entries;
+}
+
+/**
+ * The file holds one line of content.
+ *
+ * A JSONL file holds one record per line, so a file with a single line is one record. A JSON
+ * file spread over several lines is a JSON file and is not a JSONL one.
+ */
+function isOneLine(content: string): boolean {
+  const lines = content
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0);
+  return lines.length === 1;
 }
 
 /**

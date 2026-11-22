@@ -121,6 +121,13 @@ describe('the shapes a batch update file can be in', () => {
     expect((refusal as Error).message).toMatch(/JSONL file with one record/i);
   });
 
+  it('does not offer the JSONL shape for a record spread over several lines', () => {
+    // A pretty-printed JSON file is a JSON file: the JSONL remedy could not succeed.
+    expect(() =>
+      parseBatchUpdateInput('{\n  "recordId": "1",\n  "fieldData": {}\n}', 'json')
+    ).toThrow(/must be an array/);
+  });
+
   it('reads a JSONL file that holds one record', () => {
     const entries = parseBatchUpdateInput(
       '{"recordId":"1","fieldData":{"Name":"Ada"}}\n',
