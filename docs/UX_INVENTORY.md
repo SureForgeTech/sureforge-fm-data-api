@@ -36,14 +36,14 @@ asking for, and the ones marked **Done the same day** have been delivered since.
 
 ### Commands and settings
 
-The manifest declares **82 commands** and **54 configuration properties**, in one `FileMaker`
+The manifest declares **82 commands** and **55 configuration properties**, in one `FileMaker`
 command category. To reproduce:
 
 ```console
 $ node -e "const p=require('./extension/package.json').contributes;console.log(p.commands.length)"
 82
 $ node -e "const p=require('./extension/package.json').contributes;console.log(p.configuration.flatMap(s=>Object.keys(s.properties)).length)"
-54
+55
 ```
 
 ### How many commands are visible at once
