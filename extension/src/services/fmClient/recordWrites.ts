@@ -111,11 +111,16 @@ export async function createRecord(
             'Creating related (portal) rows is not supported through a proxy connection. Create the parent record first, then add the related rows on the FileMaker layout, or use a direct Data API connection.'
           );
         }
+        // The proxy cannot forward dateformats, so FileMaker uses its US default (0).
+        if (options?.dateFormats !== undefined && options.dateFormats !== 0) {
+          throw new FMClientError(
+            'This proxy connection cannot use the requested date order. Use a direct Data API connection.'
+          );
+        }
         return client.proxyClient.createRecord(profile, layout, fieldData, control?.signal);
       }
 
-      // The dates the developer chose are the ones the server reads and writes.
-      const dateFormats = client.dateFormats();
+      const dateFormats = options?.dateFormats ?? client.dateFormats();
       const envelope = await client.requestWithAuth<Record<string, unknown>>(
         profile,
         {
@@ -125,7 +130,7 @@ export async function createRecord(
             fieldData,
             // Only when related rows carry values, so the request matches the plain create otherwise.
             ...(portalData ? { portalData } : {}),
-            ...(dateFormats ? { dateformats: dateFormats } : {})
+            ...(options?.dateFormats !== undefined || dateFormats ? { dateformats: dateFormats } : {})
           },
           signal: control?.signal,
           timeoutMs: control?.timeoutMs

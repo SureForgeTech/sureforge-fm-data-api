@@ -45,11 +45,22 @@ describe('FileMaker registration service durable write boundary', () => {
     expect(await service.submit(request)).toEqual({ status: 'accepted', receipt: 'fm-42' });
     expect(createRecord).toHaveBeenCalledWith(target.profile, ' Registrations ', {
       ' Full Name ': ' Synthetic Attendee ', 'Email Address': 'attendee@example.invalid', Session: 'Morning', Notes: ''
-    }, { signal: expect.any(AbortSignal) });
+    }, { signal: expect.any(AbortSignal) }, { dateFormats: 0 });
     expect(createRecord).toHaveBeenCalledOnce();
     const content = await readFile(path.join(target.ledgerRoot, `${request.submissionId}.json`), 'utf8');
     expect(JSON.parse(content)).toEqual({ fingerprint: expect.stringMatching(/^[a-f0-9]{64}$/), status: 'accepted', receipt: 'fm-42' });
     for (const value of ['Synthetic Attendee', 'attendee@example.invalid', 'registration', 'fm.example.invalid']) expect(content).not.toContain(value);
+  });
+
+  it('sends an intake date in US order and says so, whatever the developer\'s date setting', async () => {
+    const { target, request, createRecord } = fixture();
+    target.definition.fields[3]!.kind = 'date';
+    const service = new FmWebRegistrationService(target);
+
+    expect(await service.submit({ ...request, values: { ...request.values, notes: '2026-03-04' } }))
+      .toEqual({ status: 'accepted', receipt: 'fm-42' });
+    expect(createRecord).toHaveBeenCalledWith(target.profile, ' Registrations ',
+      expect.objectContaining({ Notes: '03/04/2026' }), { signal: expect.any(AbortSignal) }, { dateFormats: 0 });
   });
 
   it('rejects malformed requests, unknown inputs and caller-supplied targets before any write or ledger claim', async () => {
@@ -121,7 +132,7 @@ describe('FileMaker registration service durable write boundary', () => {
     target.profile.database = 'Changed database';target.layout.fmLayoutName = 'Changed layout';target.definition.fields[0]!.fmFieldName = 'Admin';
     expect(await service.submit(request)).toMatchObject({ status: 'accepted' });
     expect(createRecord).toHaveBeenCalledWith(expect.objectContaining({ database: ' Events ' }), ' Registrations ',
-      expect.objectContaining({ ' Full Name ': ' Synthetic Attendee ' }), expect.any(Object));
+      expect.objectContaining({ ' Full Name ': ' Synthetic Attendee ' }), expect.any(Object), { dateFormats: 0 });
   });
 
   it('does not create a claim or dispatch when policy is revoked before submission', async () => {
