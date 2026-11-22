@@ -75,7 +75,7 @@ describe('the generated client and the record version', () => {
     expect(Object.hasOwn(body as object, 'modId')).toBe(false);
   });
 
-  it('sends no version with a create', () => {
+  it('sends no version with a create', async () => {
     // A new record has no earlier version, and the Data API's create request body has no
     // modId field, so the create carries none.
     let body: unknown;
@@ -84,11 +84,9 @@ describe('the generated client and the record version', () => {
       return new Response(JSON.stringify({ response: { recordId: '1', modId: '0' }, messages: [{ code: '0', message: 'OK' }] }), { status: 200 });
     });
 
-    return (async () => {
-      await client.createContacts({ Name: 'Ada' });
-      expect(body).toEqual({ fieldData: { Name: 'Ada' } });
-      expect(Object.hasOwn(body as object, 'modId')).toBe(false);
-    })();
+    await client.createContacts({ Name: 'Ada' });
+    expect(body).toEqual({ fieldData: { Name: 'Ada' } });
+    expect(Object.hasOwn(body as object, 'modId')).toBe(false);
   });
 
   it('gives the create no version option at all', () => {
@@ -105,7 +103,8 @@ describe('the generated client and the record version', () => {
   });
 
   it('tells the developer in the generated README how to use it', () => {
-    expect(readmeSource).toMatch(/modId/);
-    expect(readmeSource).toMatch(/306/);
+    expect(readmeSource).toMatch(/An edit can carry the record's `modId`/);
+    expect(readmeSource).toMatch(/error 306/);
+    expect(readmeSource).toMatch(/A create has no such option/);
   });
 });

@@ -713,7 +713,7 @@ Any request the extension sends can be copied as text, to try it in a terminal, 
 | fetch() | A `fetch` call for Node 18 or later (top-level `await`) or a browser. |
 | .http (REST Client) | A `.http` file for VS Code's REST Client (and other editors that read the `.http` convention) with an `@host` variable (and `@token` when **Include auth header** is ticked), one request after a `###` line. |
 | Postman collection | A Postman v2.1 collection (JSON) with one request and the variable `baseUrl` (and `token` when **Include auth header** is ticked). Import it with **Import** in Postman. |
-| TypeScript | A small typed `fetch` wrapper and the call, with the response typed. It stands alone: the client from **Generate TypeScript Client** needs generated types per layout and has no calls for sessions, scripts, modId or containers, so it is not used here. |
+| TypeScript | A small typed `fetch` wrapper and the call, with the response typed. It stands alone: the client from **Generate TypeScript Client** needs generated types per layout and has no calls for sessions, scripts or containers, so it is not used here. |
 
 **Save as .http file…** opens the request in a new unsaved editor. Use **File > Save As** to put it where you want; the extension never writes a request into your workspace by itself.
 
