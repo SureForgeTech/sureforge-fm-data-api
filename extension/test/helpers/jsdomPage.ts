@@ -18,6 +18,7 @@ export interface DomElement {
   querySelectorAll(selector: string): DomElement[];
   querySelector(selector: string): DomElement | null;
   getAttribute(name: string): string | null;
+  remove(): void;
 }
 export interface JsdomWindow {
   document: {
@@ -50,8 +51,9 @@ export interface WebviewStateOptions {
 
 /** Loads a webview's HTML and runs its page script; returns the window, what the page posts, and a way to message it. */
 export function loadPage(html: string, uiSource: string, url = 'https://panel.invalid/', options: WebviewStateOptions = {}) {
-  const dom = new (JSDOM as JsdomCtor)(html.replace(/<script[^>]*src=[^>]*><\/script>/g, ''), { runScripts: 'outside-only', url });
+  const dom = new (JSDOM as JsdomCtor)(html, { runScripts: 'outside-only', url });
   const { window } = dom;
+  window.document.querySelectorAll('script[src]').forEach((script) => script.remove());
   const posted: Array<Record<string, unknown>> = [];
   // Only a page that asks for it sees a stored state; every other caller keeps the old no-op store.
   const tracksState = 'state' in options || 'onSetState' in options;
