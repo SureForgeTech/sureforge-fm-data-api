@@ -14,7 +14,7 @@ The primary audience is FileMaker developers and consultancies delivering experi
 
 ## Starting point and direction
 
-At main revision `491eb797de747bfbb208bc773869e386bda97ec7`, the extension has query and script tools, saved queries, request-to-code export, schema snapshots and comparisons, type/client generation, batch operations and optional AI tools. The source also includes FM Web project metadata, a layout designer and a Next.js runtime template. The Marketplace package does not include the complete runtime template; a source-checkout preview is not a shipped portal product.
+At main revision `491eb797de747bfbb208bc773869e386bda97ec7`, the extension has query and script tools, saved queries, request-to-code export, schema snapshots and comparisons, type/client generation, batch operations and optional AI tools. The source also includes FM Web project metadata, a layout designer and a Next.js runtime template. At that revision the Marketplace package did not include the complete runtime template; a source-checkout preview is not a shipped portal product.
 
 Packaging follow-through (2026-11-16): VSIX builds now bundle the runtime and shared source kit, enabling local app generation and private preview without a repository checkout. The event-registration slice is synthetic; it is not a production FileMaker backend or a public portal deployment.
 

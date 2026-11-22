@@ -1,11 +1,19 @@
 // Journey 11: FM Web project, Layout Mode and the preview server: open, confirmations (declined), what works at this commit.
 import fs from 'node:fs';
+import { tmpdir } from 'node:os';
 import path from 'node:path';
 
 import { answerPickers, connect, createProfile, ensureProfileCommands } from '../lib/flows.mjs';
 import { assert } from '../lib/session.mjs';
 
 const J = 'J11 layout mode';
+/** The private folders the preview server copies the template into. */
+const previewFolders = () =>
+  fs
+    .readdirSync(tmpdir(), { withFileTypes: true })
+    .filter((entry) => entry.isDirectory() && entry.name.startsWith('fmweb-preview-'))
+    .map((entry) => entry.name);
+
 const walk = (dir) =>
   fs.existsSync(dir)
     ? fs
@@ -44,7 +52,7 @@ export async function run(ctx) {
   await s.step(
     J,
     'after Initialize, the other FM Web commands are offered',
-    'Sync and Open Layout Mode appear without reloading; Generate and Start Preview stay hidden in the Marketplace build',
+    'Sync and Open Layout Mode appear without reloading; Generate and Start Preview appear too, because the packaged build carries the runtime template (the harness turns the power-user setting on, which they need)',
     async () => {
       const ms = await s.waitCmdListed('FileMaker: Open FM Web Layout Mode', 10000);
       if (ms < 0) {
@@ -59,10 +67,10 @@ export async function run(ctx) {
       const preview = await s.cmdListed('FileMaker: Start FM Web Preview Server');
       assert(sync, 'Sync FM Web Project Metadata is not offered after Initialize');
       assert(
-        !generate && !preview,
-        `Marketplace preview commands should stay hidden (Generate=${generate}, Start Preview=${preview})`
+        generate && preview,
+        `the packaged build carries the runtime template, so the preview commands are offered (Generate=${generate}, Start Preview=${preview})`
       );
-      return `Layout Mode listed after ${ms} ms; Sync listed; Generate and Start Preview hidden`;
+      return `Layout Mode listed after ${ms} ms; Sync listed; Generate and Start Preview listed`;
     }
   );
   await s.step(
@@ -109,33 +117,41 @@ export async function run(ctx) {
   );
   await s.step(
     J,
-    'Generate FM Web Next.js App from the Marketplace build',
-    'the command is hidden because the preview runtime is not shipped; nothing is generated',
+    'Generate FM Web Next.js App from the packaged build',
+    'the command is offered, because the packaged build carries the runtime template; nothing is generated until it is run',
     async () => {
       await s.closeAllEditors();
       const listed = await s.cmdListed('FileMaker: Generate FM Web Next.js App');
       const files = walk(path.join(s.ws, '.fmweb', 'generated')).map((f) => path.relative(s.ws, f));
-      assert(!listed, 'Generate FM Web Next.js App is offered without the preview runtime');
+      assert(listed, 'Generate FM Web Next.js App is not offered although the packaged build carries the runtime template');
       assert(files.length === 0, `unexpected generated files: ${files.join(', ')}`);
-      return 'command hidden; 0 generated files';
+      return 'command offered; 0 generated files';
     }
   );
   await s.step(
     J,
-    'Start FM Web Preview Server from the Marketplace build',
-    'the command is hidden because the preview runtime is not shipped; no install or server starts',
+    'Generate FM Web Next.js App writes the runtime template from the packaged build',
+    'the command runs, and the template lands in the workspace',
+    async () => {
+      await s.closeAllEditors();
+      await s.cmd('FileMaker: Generate FM Web Next.js App');
+      let files = [];
+      for (let i = 0; i < 60 && files.length === 0; i += 1) {
+        await s.page.waitForTimeout(500);
+        files = walk(path.join(s.ws, '.fmweb', 'generated'));
+      }
+      assert(files.length > 0, 'the runtime template was not generated from the packaged template');
+      return `${files.length} generated files`;
+    }
+  );
+  await s.step(
+    J,
+    'Start FM Web Preview Server from the packaged build',
+    'the command is offered, because the packaged build carries the runtime template; no server starts until it is run',
     async () => {
       const listed = await s.cmdListed('FileMaker: Start FM Web Preview Server');
-      const terminals = await s.page.locator('.terminal-tab, .terminal-tabs-entry').count();
-      const nm = fs.existsSync(
-        path.join(s.ws, '.fmweb', 'generated', 'runtime-next', 'node_modules')
-      );
-      assert(!listed, 'Start FM Web Preview Server is offered without the preview runtime');
-      assert(
-        !nm && terminals === 0,
-        `a terminal or node_modules appeared (terminals ${terminals}, node_modules ${nm})`
-      );
-      return `command hidden; terminals ${terminals}; node_modules ${nm}`;
+      assert(listed, 'Start FM Web Preview Server is not offered although the packaged build carries the runtime template');
+      return 'command offered';
     }
   );
   s.notTestable(
@@ -143,10 +159,34 @@ export async function run(ctx) {
     'script-run confirmation from a layout file',
     'needs a layout definition with a script behaviour wired in the designer; the guard is covered by test/unit/layoutModeScriptGuard.test.ts, not driven through the UI here'
   );
+  await s.step(
+    J,
+    'Start FM Web Preview Server asks before it runs the packaged template',
+    'the command opens its confirmation, and declining it starts nothing',
+    async () => {
+      const before = new Set(previewFolders());
+      await s.cmd('FileMaker: Start FM Web Preview Server');
+      await s.waitModal(20000);
+      const buttons = await s.modalButtons();
+      assert(
+        buttons.some((button) => /cancel/i.test(button)),
+        `no cancel button in the confirmation (buttons: ${buttons.join(' | ')})`
+      );
+      await s.modal('Cancel');
+      await s.page.waitForTimeout(1500);
+      // The preview copies the template into a private temporary folder and installs it there, so
+      // a new folder means it started and the confirmation was not what stopped it.
+      // The names matter, not the count: the preview reaps a stale folder as it starts, so a count
+      // could stay the same while a new preview folder appeared.
+      const started = previewFolders().filter((name) => !before.has(name));
+      assert(started.length === 0, `a preview folder appeared after declining (${started.join(', ')})`);
+      return `declined; ${before.size} preview folders, none new`;
+    }
+  );
   s.notTestable(
     J,
     'preview server actually started',
-    'the Marketplace VSIX intentionally does not include the preview runtime; this journey verifies that its commands stay hidden'
+    'the packaged build carries the runtime template, but starting the preview installs that template\'s dependencies, which takes minutes and a network; this journey checks that the commands are offered and that declining the confirmation starts nothing'
   );
   await s.closeAllEditors();
 }
