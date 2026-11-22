@@ -5,6 +5,7 @@ import { describe, expect, it } from 'vitest';
 
 import { FMClientError } from '../../src/services/errors';
 import { SCRIPTS_PATH } from '../../src/services/fmClient/metadata';
+import { extractFieldsFromMetadata } from '../../src/services/schemaService';
 // @ts-expect-error The mock server is JavaScript; it is loaded here as the server the journeys run against.
 import { createEngine } from '../../test/mock-server/lib/engine.mjs';
 import {
@@ -65,7 +66,11 @@ async function mockLayoutFields(): Promise<Array<{ name: string; result?: string
   assert(metadata.status === 200, `the mock refused the layout metadata: ${metadata.status}`);
   const fields = (metadata.json as { response?: { fieldMetaData?: unknown } }).response?.fieldMetaData;
   assert(Array.isArray(fields) && fields.length > 0, 'the mock returned no field metadata');
-  return fields as Array<{ name: string; result?: string; type?: string; global?: boolean; repetitions?: number }>;
+  // The fields the Explorer renders come from the product's own extraction of what the mock
+  // returns, so the row held here is the row the Explorer writes.
+  const extracted = extractFieldsFromMetadata((metadata.json as { response?: Record<string, unknown> }).response ?? {});
+  assert(extracted.length === fields.length, 'the product extracted a different number of fields');
+  return extracted;
 }
 
 describe('the desktop journeys expect what the product does', () => {

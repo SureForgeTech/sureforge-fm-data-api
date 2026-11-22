@@ -33,12 +33,12 @@ const FIELD_TYPES = ['text', 'number', 'date', 'timeStamp', 'time', 'container']
 /**
  * Is this tree row a field row, with the type the Explorer shows?
  *
- * The Explorer writes the type on its own for an ordinary field that does not repeat - "text" -
- * and writes the kind and the repetition count after it when it has them - "text • calculation •
- * x1". The type may therefore end the row.
+ * The Explorer writes the type, then the kind when the field has one, then the repetition count:
+ * "text • calculation • x1". A field always carries a repetition count, so the type is always
+ * followed by a separator.
  */
 export function isFieldRow(row) {
-  return new RegExp(`(?:^|\\s)(?:${FIELD_TYPES.join('|')})(?:\\s*[·•]|\\s*$)`, 'i').test(String(row));
+  return new RegExp(`(?:${FIELD_TYPES.join('|')})\\s*[·•]`, 'i').test(String(row));
 }
 
 /** The Explorer names the list it could not load. */
