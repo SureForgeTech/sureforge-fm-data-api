@@ -44,6 +44,18 @@ describe('the measured milestones of a run', () => {
     expect(readFileSync(join(r.dir, 'report.md'), 'utf8')).not.toContain('## Measurements');
   });
 
+  it('keeps literal table text in one Markdown cell and preserves the JSON text', () => {
+    const r = report();
+    const detail = 'A\\|B\r\n<C> & D';
+    r.add({ journey: 'J', step: 'S', result: 'PASS', detail });
+    r.write();
+
+    const md = readFileSync(join(r.dir, 'report.md'), 'utf8');
+    expect(md).toContain('| J | S |  | PASS |  | A&#92;&#124;B &lt;C&gt; &amp; D |');
+    const rows = JSON.parse(readFileSync(join(r.dir, 'report.json'), 'utf8'));
+    expect(rows[0].detail).toBe(detail);
+  });
+
   it('records the elapsed time of a step in the report', () => {
     const r = report();
     r.add({ journey: 'J', step: 'a step', expect: 'what it checks', result: 'PASS', detail: '', ms: 1234 });

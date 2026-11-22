@@ -30,13 +30,13 @@
 
   // Characters FileMaker treats as find operators. Values typed under any
   // condition except "matches" are escaped with a backslash so they match literally.
-  const SPECIAL_CHARACTERS = /[@#*\\?!"~=<>…]/g;
+  const FIND_OPERATORS = /[@#*\\?!"~=<>…]|\.{2,}|\/{2,}/g;
 
   function escapeFindText(value) {
-    return String(value ?? '')
-      .replace(SPECIAL_CHARACTERS, '\\$&')
-      .replace(/\.{2,}/g, (run) => run.replace(/\./g, '\\.'))
-      .replace(/\/\//g, '\\/\\/');
+    return String(value ?? '').replace(
+      FIND_OPERATORS,
+      (operator) => ('\\' + operator[0]).repeat(operator.length)
+    );
   }
 
   /** A range bound also escapes a leading or trailing period so `a.` + `...` + `b` stays unambiguous. */
