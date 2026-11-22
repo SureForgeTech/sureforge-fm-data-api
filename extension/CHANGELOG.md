@@ -4,6 +4,8 @@
 
 - The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
 
+- Batch update now reads a file that is one record per line (JSONL) or a semicolon-delimited CSV when you say so, and the import shows which date order the server will read the dates in.
+
 - A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
 
 - The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens.

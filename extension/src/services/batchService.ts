@@ -597,27 +597,98 @@ export function inferExportFormat(outputPath: string): BatchExportFormat {
   return 'jsonl';
 }
 
-export function parseBatchUpdateInput(content: string, format: 'json' | 'csv'): BatchUpdateEntry[] {
-  if (looksLikeJsonl(content, format === 'json')) throw new Error('This looks like a JSONL file; export as comma-separated CSV.');
+/** The shapes a batch update file can be in. */
+export type BatchUpdateInputFormat = 'json' | 'csv' | 'jsonl' | 'semicolon-csv';
+
+/**
+ * The file is a shape the extension does not read unless the developer says so.
+ *
+ * A JSONL file is one record per line, and a semicolon-delimited file is a CSV written by a
+ * spreadsheet in a locale that uses semicolons. Both are refused by default, because reading a
+ * file as the wrong shape loses data silently; the refusal says which shape it looks like, so
+ * the developer can choose it.
+ */
+export class BatchUpdateFormatRefusal extends Error {
+  constructor(
+    message: string,
+    readonly alternative: 'jsonl' | 'semicolon-csv'
+  ) {
+    super(message);
+    this.name = 'BatchUpdateFormatRefusal';
+  }
+}
+
+export function parseBatchUpdateInput(
+  content: string,
+  format: BatchUpdateInputFormat
+): BatchUpdateEntry[] {
+  if (format === 'json' || format === 'csv') {
+    if (looksLikeJsonl(content, format === 'json')) {
+      throw new BatchUpdateFormatRefusal(
+        'This looks like a JSONL file: one record per line.',
+        'jsonl'
+      );
+    }
+    if (looksLikeSemicolonCsv(content)) {
+      throw new BatchUpdateFormatRefusal(
+        'This looks like a semicolon-delimited file.',
+        'semicolon-csv'
+      );
+    }
+  }
   if (format === 'json') {
-    const parsed = JSON.parse(content) as unknown;
+    // A file saved with a byte-order mark is JSON all the same, and every other reading of a
+    // file here ignores the mark.
+    const parsed = JSON.parse(content.replace(/^\uFEFF/, '')) as unknown;
 
     if (!Array.isArray(parsed)) {
+      // A single record on one line is a JSONL file with one line in it. The developer is asked
+      // rather than left with a message that says only that an array was expected. A record
+      // spread over several lines is a JSON file, not a JSONL one, and is not offered.
+      if (isBatchUpdateEntryLike(parsed) && isOneLine(content)) {
+        throw new BatchUpdateFormatRefusal(
+          'This looks like a JSONL file with one record.',
+          'jsonl'
+        );
+      }
       throw new Error('Batch update JSON must be an array.');
     }
 
     return parsed.map((entry) => normalizeBatchUpdateEntry(entry));
   }
 
-  return parseCsvBatchUpdates(content);
+  if (format === 'jsonl') {
+    // The line number is the line in the file, so a broken line in a long file can be found.
+    const lines = content
+      .replace(/^\uFEFF/, '')
+      .split(/\r?\n/)
+      .map((line, index) => ({ line, number: index + 1 }))
+      .filter((entry) => entry.line.trim().length > 0);
+    return lines.map(({ line, number }) => {
+      let value: unknown;
+      try {
+        value = JSON.parse(line) as unknown;
+      } catch (error) {
+        throw new Error(
+          `Line ${number} of the JSONL file is not JSON: ${(error as Error).message}`,
+          { cause: error }
+        );
+      }
+      try {
+        return normalizeBatchUpdateEntry(value);
+      } catch (error) {
+        throw new Error(`Line ${number} of the JSONL file: ${(error as Error).message}`, {
+          cause: error
+        });
+      }
+    });
+  }
+
+  return parseCsvBatchUpdates(content, format === 'semicolon-csv' ? ';' : ',');
 }
 
-function parseCsvBatchUpdates(content: string): BatchUpdateEntry[] {
-  const firstLine = content.replace(/^\uFEFF/, '').split(/\r?\n/)[0] ?? '';
-  if (!parseCsv(firstLine)[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header)) && firstLine.includes(';') && parseCsv(firstLine, ';')[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header))) {
-    throw new Error('This looks like a semicolon-delimited file; export as comma-separated CSV.');
-  }
-  const rows = parseCsv(content.replace(/^\uFEFF/, ''));
+function parseCsvBatchUpdates(content: string, delimiter: ',' | ';'): BatchUpdateEntry[] {
+  const rows = parseCsv(content.replace(/^\uFEFF/, ''), delimiter);
   if (rows.length === 0) {
     return [];
   }
@@ -669,6 +740,53 @@ function parseCsvBatchUpdates(content: string): BatchUpdateEntry[] {
   }
 
   return entries;
+}
+
+/**
+ * The file holds one line of content.
+ *
+ * A JSONL file holds one record per line, so a file with a single line is one record. A JSON
+ * file spread over several lines is a JSON file and is not a JSONL one.
+ */
+function isOneLine(content: string): boolean {
+  const lines = content
+    .replace(/^\uFEFF/, '')
+    .split(/\r?\n/)
+    .filter((line) => line.trim().length > 0);
+  return lines.length === 1;
+}
+
+/**
+ * The value looks like one batch update entry.
+ *
+ * A JSON file that holds one record is a JSONL file with a single line, and the developer is
+ * asked which shape it is rather than told only that an array was expected.
+ */
+function isBatchUpdateEntryLike(value: unknown): boolean {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return false;
+  }
+  return typeof (value as Record<string, unknown>).recordId === 'string';
+}
+
+/**
+ * The file looks like a spreadsheet's semicolon-delimited columns.
+ *
+ * The first line has to name a `recordId` column when it is split on semicolons, and must not
+ * name one when it is split on commas: a comma-delimited file that holds a semicolon in a value
+ * is a comma-delimited file.
+ */
+function looksLikeSemicolonCsv(content: string): boolean {
+  const firstLine = content.replace(/^\uFEFF/, '').split(/\r?\n/)[0] ?? '';
+  if (!firstLine.includes(';')) {
+    return false;
+  }
+  const semicolonHeaders = parseCsv(firstLine, ';')[0] ?? [];
+  if (!semicolonHeaders.some((header) => /^(?:_{2,})?recordId$/.test(header))) {
+    return false;
+  }
+  const commaHeaders = parseCsv(firstLine)[0] ?? [];
+  return !commaHeaders.some((header) => /^(?:_{2,})?recordId$/.test(header));
 }
 
 function looksLikeJsonl(content: string, requireMultipleLines: boolean): boolean {

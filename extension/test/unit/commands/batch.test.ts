@@ -29,7 +29,7 @@ function setup() {
     return { id: '12345678-abcd' };
   }) };
   const roleGuard = { assertFeature: vi.fn().mockResolvedValue(true), resolvePerformanceMode: vi.fn().mockReturnValue('balanced') };
-  const settings = { isRecordEditEnabled: vi.fn().mockReturnValue(true), isBatchEnabled: vi.fn().mockReturnValue(true), getBatchMaxRecords: vi.fn().mockReturnValue(250), getBatchConcurrency: vi.fn().mockReturnValue(3) };
+  const settings = { isRecordEditEnabled: vi.fn().mockReturnValue(true), isBatchEnabled: vi.fn().mockReturnValue(true), getBatchMaxRecords: vi.fn().mockReturnValue(250), getBatchConcurrency: vi.fn().mockReturnValue(3), getDateFormats: vi.fn().mockReturnValue(0) };
   const log = logger();
   registerBatchCommands({ profileStore: profiles as never, fmClient: client as never, batchService: batchService as never,
     jobRunner: jobRunner as never, roleGuard: roleGuard as never, settingsService: settings as never, logger: log as never });
@@ -264,7 +264,7 @@ describe('batch commands', () => {
     expect(batchService.batchUpdate).toHaveBeenCalledWith(profile, layout, entries, { dryRun: true, concurrency: 3 }, context);
     expect(vscode.window.showWarningMessage).not.toHaveBeenCalled();
     const doc = vi.mocked(vscode.workspace.openTextDocument).mock.calls[0]![0] as { content: string };
-    expect(JSON.parse(doc.content)).toEqual({ dryRun: true, totalEntries: 1, layout, sample: entries, flaggedRows: [], rowsWithModId: 0, rowsChecked: 0, skippedColumns: [], warnings: [] });
+    expect(JSON.parse(doc.content)).toEqual({ dryRun: true, totalEntries: 1, layout, dateFormat: 0, dateFormatLabel: "the server's own default (US order)", sample: entries, flaggedRows: [], rowsWithModId: 0, rowsChecked: 0, skippedColumns: [], warnings: [] });
     expect(context.log).toHaveBeenCalledWith('info', 'Batch update completed. Attempted=1, success=1, failures=0');
   });
 
@@ -282,7 +282,8 @@ describe('batch commands', () => {
     const doc = vi.mocked(vscode.workspace.openTextDocument).mock.calls[0]![0] as { content: string };
     expect(JSON.parse(doc.content)).toEqual({
       rowsWithModId: 0, rowsChecked: 0, skippedColumns: [], warnings: [],
-      dryRun: true, totalEntries: 7, layout, sample: rows.slice(0, 5),
+      dryRun: true, totalEntries: 7, layout, dateFormat: 0, dateFormatLabel: "the server's own default (US order)",
+      sample: rows.slice(0, 5),
       flaggedRows: [{ row: 2, recordId: '42', fields: [' Name '] }, { row: 7, recordId: '42', fields: [' Name ', 'Other'] }]
     });
   });
