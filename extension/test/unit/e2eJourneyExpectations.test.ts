@@ -22,6 +22,9 @@ const {
   explorerFailureReason,
   isFieldRow,
   isScriptRunRequest,
+  PALETTE_EVERYDAY_COMMAND,
+  PALETTE_POWER_USER_COMMAND,
+  POWER_USER_SETTING,
   SCRIPT_LIST_REQUEST
 } = journeyFacts;
 const { WALKTHROUGH_STEPS } = journeyFacts;
@@ -156,5 +159,74 @@ describe('the desktop journeys expect what the product does', () => {
     expect(SCRIPT_LIST_REQUEST.test('/sessions')).toBe(false);
     expect(isScriptRunRequest('GET /sessions')).toBe(false);
     expect(isScriptRunRequest(`GET ${SCRIPTS_PATH}`)).toBe(false);
+  });
+});
+
+describe('the palette-toggle journey', () => {
+  const commands = new Map<string, { command: string; title: string; category?: string }>(
+    manifest.contributes.commands.map((entry: { command: string; title: string; category?: string }) => [
+      entry.command,
+      entry
+    ])
+  );
+  const palette = new Map<string, string>(
+    manifest.contributes.menus.commandPalette.map((entry: { command: string; when?: string }) => [
+      entry.command,
+      entry.when ?? 'true'
+    ])
+  );
+  /** The rows of the Command Palette are named "Category: Title". */
+  const byLabel = new Map<string, string>(
+    [...commands].map(([id, entry]) => [`${entry.category ?? ''}: ${entry.title}`, id])
+  );
+
+  it('checks two commands that are the palette rows', () => {
+    // The journey types these two names into the palette. A rename in the manifest breaks this
+    // case rather than the journey on the machine that runs the suite.
+    expect(byLabel.has(PALETTE_EVERYDAY_COMMAND), PALETTE_EVERYDAY_COMMAND).toBe(true);
+    expect(byLabel.has(PALETTE_POWER_USER_COMMAND), PALETTE_POWER_USER_COMMAND).toBe(true);
+  });
+
+  it('the everyday one is in the palette without the power-user setting', () => {
+    // The everyday command carries no commandPalette entry at all: no when clause gates it, so
+    // the default palette always offers it. A new gate - even a mild one such as
+    // filemaker.hasProfiles - would hide it on the machine that runs the suite, so the case has
+    // to fail here first.
+    expect(palette.has(byLabel.get(PALETTE_EVERYDAY_COMMAND)!), PALETTE_EVERYDAY_COMMAND).toBe(
+      false
+    );
+  });
+
+  it('the power-user one waits behind the setting', () => {
+    const when = palette.get(byLabel.get(PALETTE_POWER_USER_COMMAND)!);
+    expect(when, PALETTE_POWER_USER_COMMAND).toBe('filemaker.powerUserMode');
+  });
+
+  it('the setting the journey toggles drives the context the manifest reads', () => {
+    // The journey flips the power-user setting; the manifest hides commands on the
+    // filemaker.powerUserMode context. The extension sets that context from the setting, and the
+    // setting is off by default, which is what makes the everyday palette the default.
+    const settingsSource = fs.readFileSync(
+      path.join(EXTENSION, 'src/services/settingsService.ts'),
+      'utf8'
+    );
+    const settingsKey = POWER_USER_SETTING.replace(/^filemaker\./, '');
+    expect(settingsSource).toContain(`get<boolean>('${settingsKey}', false)`);
+    const extensionSource = fs.readFileSync(path.join(EXTENSION, 'src/extension.ts'), 'utf8');
+    expect(extensionSource).toContain(`'filemaker.powerUserMode'`);
+    expect(extensionSource).toContain('isPowerUserModeEnabled()');
+  });
+
+  it('the journey reads its names from the shared facts', () => {
+    // The journey and this file must not carry two copies of the names. The journey imports them
+    // from journeyFacts.mjs, so a change moves both at once.
+    const journey = fs.readFileSync(
+      path.join(EXTENSION, 'e2e-ui/journeys/j18-palette-toggle.mjs'),
+      'utf8'
+    );
+    expect(journey).toMatch(/from '\.\.\/lib\/journeyFacts\.mjs'/);
+    for (const name of ['PALETTE_EVERYDAY_COMMAND', 'PALETTE_POWER_USER_COMMAND', 'POWER_USER_SETTING']) {
+      expect(journey, name).toContain(name);
+    }
   });
 });

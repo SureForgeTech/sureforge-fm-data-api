@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- A desktop journey now covers the Command Palette's two sides: the everyday commands without the power-user setting, and the power-user commands with it.
+
+- The generated TypeScript client's calls can now run a FileMaker script alongside them and read its result, and it can run one on its own.
+
+- The generated TypeScript client can open and close its own session: sign in with the Data API's Basic account sign-in, and check the token when you need to.
+
+
 - The generated TypeScript client's calls can now run a FileMaker script alongside them and read its result, and it can run one on its own.
 
 - The generated TypeScript client can open and close its own session: sign in with the Data API's Basic account sign-in, and check the token when you need to.
