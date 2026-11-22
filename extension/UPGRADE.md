@@ -10,6 +10,7 @@ Your profiles, saved queries and settings carry over. No command or setting was 
 - Changing a connection's server address clears its old certificate exceptions and custom CA file. If you change the gateway path, API path or database, enter the saved credentials again.
 - Server addresses with a query string or fragment are refused. Custom CA files are limited to 1 MB and cannot contain private keys.
 - A project's workspace settings can no longer select performance mode or raise your connection retry limit.
+- Batch update reads a file that is one record per line (JSONL) or a spreadsheet's semicolon-delimited columns when you say so: the import asks which shape the file is instead of refusing it. The mode picker and the dry-run preview now say which date order the server will read the dates in.
 
 To roll back, use **Install Specific Version...** in the Extensions view and pick 1.9.0.
 
