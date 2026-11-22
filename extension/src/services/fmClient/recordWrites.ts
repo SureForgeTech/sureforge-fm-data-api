@@ -42,6 +42,9 @@ export async function editRecord(
         throw new FMClientError('At least one field change is required to edit a record.');
       }
 
+      // A value the server read in one format has to be written back in the same one, so the
+      // option goes with the field data.
+      const dateFormats = client.dateFormats();
       const envelope = await client.requestWithAuth<Record<string, unknown>>(
         profile,
         {
@@ -50,7 +53,8 @@ export async function editRecord(
           data: {
             fieldData: fieldDataPartial,
             // When given, FileMaker refuses the edit (error 306) if the record changed since this modId.
-            ...(options?.modId !== undefined ? { modId: options.modId } : {})
+            ...(options?.modId !== undefined ? { modId: options.modId } : {}),
+            ...(dateFormats ? { dateformats: dateFormats } : {})
           },
           signal: control?.signal,
           timeoutMs: control?.timeoutMs
@@ -110,6 +114,8 @@ export async function createRecord(
         return client.proxyClient.createRecord(profile, layout, fieldData, control?.signal);
       }
 
+      // The dates the developer chose are the ones the server reads and writes.
+      const dateFormats = client.dateFormats();
       const envelope = await client.requestWithAuth<Record<string, unknown>>(
         profile,
         {
@@ -118,7 +124,8 @@ export async function createRecord(
           data: {
             fieldData,
             // Only when related rows carry values, so the request matches the plain create otherwise.
-            ...(portalData ? { portalData } : {})
+            ...(portalData ? { portalData } : {}),
+            ...(dateFormats ? { dateformats: dateFormats } : {})
           },
           signal: control?.signal,
           timeoutMs: control?.timeoutMs

@@ -71,6 +71,9 @@ export async function runScript(
           if (ifTooLong(recordPath, query as Record<string, string>)) {
             throw tooLongScriptParameter();
           }
+          // The dates come back in the order the developer chose, as in every other read.
+          const dateFormats = client.dateFormats();
+          if (dateFormats) query.dateformats = dateFormats;
           const envelope = await client.requestWithAuth<Record<string, unknown>>(
             profile,
             { method: 'GET', path: recordPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs },
@@ -144,11 +147,18 @@ export async function runScript(
           return attach();
         }
         try {
+          // The dates come back in the order the developer chose, as in every other read.
+          const dateFormats = client.dateFormats();
           const envelope = await client.requestWithAuth<Record<string, unknown>>(
             profile,
             {
               method: 'POST', path: `/layouts/${encodeURIComponent(layout)}/_find`,
-              data: { query: [{ [textField.name]: '*' }], limit: 1, ...buildScriptParams(scriptName, scriptParam) },
+              data: {
+                query: [{ [textField.name]: '*' }],
+                limit: 1,
+                ...buildScriptParams(scriptName, scriptParam),
+                ...(dateFormats ? { dateformats: dateFormats } : {})
+              },
               signal: control?.signal,
               timeoutMs: control?.timeoutMs
             },
