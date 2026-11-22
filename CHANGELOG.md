@@ -95,6 +95,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The maintainer inventory now states the criterion for the commands visible on a fresh install: a command belongs there when the repository's own launcher offers it. Every one of the thirteen is named in the FileMaker home, and a unit test holds that.
+
 - The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens. The facts they rest on are held by a unit test, so a product change that moves one fails in a pull request.
 
 - The first-portal journey now says where publishing lives: there is no publish command, the preview is private, and Export app scaffold hands the user the app's source to host themselves. The maintainer inventory records that the Claris Studio capability map was still unchecked, and what each of its rows would need.
