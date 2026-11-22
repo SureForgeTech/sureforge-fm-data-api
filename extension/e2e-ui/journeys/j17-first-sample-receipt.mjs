@@ -50,7 +50,9 @@ export async function run(ctx) {
       const editor = await s.webview('#app-form');
       const title = await editor.locator('#title').inputValue();
       assert(title.trim().length > 0, 'the editor opened without a title');
-      return `the editor is open with the title "${title}"`;
+      const fields = await editor.locator('#fields .app-field').count();
+      assert(fields === 4, `the editor shows ${fields} fields, not the starter's four`);
+      return `the editor is open with the title "${title}" and the starter's four fields`;
     }
   );
 

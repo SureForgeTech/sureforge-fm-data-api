@@ -31,7 +31,9 @@ a digest. Elsewhere, or for a pinned version, only the download server's own hea
 **CI.** Two jobs run these tests on Ubuntu under `xvfb-run`. `e2e-ui-smoke` runs on every pull request, push to `main`
 and tag: it packages the VSIX and runs one journey, `j01b-first-run-happy-path.mjs` (add a profile, test the
 connection, save it, connect, run the first query), selected with `E2E_ONLY=j01b`. `e2e-ui` runs the full strict suite
-on a weekly schedule and before tagged releases, and tagged releases wait for it before packaging/publishing. Reports,
+on a weekly schedule and before tagged releases, and tagged releases wait for it before packaging/publishing. The strict
+suite now also starts the private preview, which installs the shipped template's dependencies from npm — that needs the
+network and minutes, and it is why the full job has a 120-minute timeout. Reports,
 screenshots and VS Code logs are uploaded even on failure. The full job has a 120-minute timeout to allow for the VS Code
 download and the 25–55 minute run. The smoke job is not a required status check; branch protection still requires only
 `build-test`, so its failures are visible on the pull request without blocking unrelated work.

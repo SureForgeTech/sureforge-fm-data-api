@@ -68,7 +68,6 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
-
 - Dates can now be read and written in the order you choose. Set **filemaker.dateFormats** to `1` for the locale of the file the dates came from, or to `2` for ISO 8601. The default leaves it to the server, so the option is only sent when you ask for another one.
 
 - Drafting a form from a prompt now reads an exclusion that follows the field it is about, so "include email, phone excluded" leaves phone out instead of suggesting it. "Everything but phone" now reads as the exclusion it is, the way "everything except phone" already did, and "leave out", "leaves out" and "left out" leave a field out too.
@@ -91,7 +90,6 @@ PR title prefix matches the highest-tier label added:
 
 
 ### [INTERNAL]
-
 
 - Webview tests and the offline theme audit remove script elements through the parsed DOM before using the fixture.
 
