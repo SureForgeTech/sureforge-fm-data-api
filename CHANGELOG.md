@@ -93,6 +93,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens. The facts they rest on are held by a unit test, so a product change that moves one fails in a pull request.
+
 - Webview tests and the offline theme audit remove script elements through the parsed DOM before using the fixture.
 
 - The tag release step can be rerun: the release is published when the tag has none, and completed when it already exists, so a job that was cancelled after the release was published no longer fails with a duplicate-release error.

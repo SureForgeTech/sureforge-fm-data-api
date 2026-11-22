@@ -434,12 +434,13 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
         error
       });
 
+      const failure = explorerFailureText(error, 'Use FileMaker: Connect, then refresh explorer.');
       children.push(
         new FMExplorerItem({
           kind: 'placeholder',
           label: 'Failed to load layouts',
-          description: toShortErrorSummary(error),
-          tooltip: failureTooltip(error, 'Use FileMaker: Connect, then refresh explorer.'),
+          description: failure.description,
+          tooltip: failure.tooltip,
           iconPath: new vscode.ThemeIcon('error')
         })
       );
@@ -634,12 +635,16 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
         error
       });
 
+      const failure = explorerFailureText(
+        error,
+        'Use FileMaker: Refresh Schema Cache and try again.'
+      );
       return [
         new FMExplorerItem({
           kind: 'placeholder',
           label: 'Failed to load fields',
-          description: toShortErrorSummary(error),
-          tooltip: failureTooltip(error, 'Use FileMaker: Refresh Schema Cache and try again.'),
+          description: failure.description,
+          tooltip: failure.tooltip,
           iconPath: new vscode.ThemeIcon('error')
         })
       ];
@@ -703,12 +708,16 @@ export class FMExplorerProvider implements vscode.TreeDataProvider<FMExplorerIte
         error
       });
 
+      const failure = explorerFailureText(
+        error,
+        'Use FileMaker: Refresh Schema Cache and try again.'
+      );
       return [
         new FMExplorerItem({
           kind: 'placeholder',
           label: 'Failed to load value lists',
-          description: toShortErrorSummary(error),
-          tooltip: failureTooltip(error, 'Use FileMaker: Refresh Schema Cache and try again.'),
+          description: failure.description,
+          tooltip: failure.tooltip,
           iconPath: new vscode.ThemeIcon('error')
         })
       ];
@@ -737,20 +746,38 @@ function failureTooltip(error: unknown, nextStep: string): string {
   ].join('\n\n');
 }
 
-function toFieldTreeItem(
-  field: FileMakerFieldMetadata,
-  profileId: string,
-  layoutName: string
-): FMExplorerItem {
+/**
+ * What the Explorer shows when a list could not be loaded: the short reason in the row, and the
+ * full cause with the next step in the tooltip.
+ *
+ * The reason names what went wrong, so the row is never the generic advice on its own; the cause
+ * itself is in the tooltip, because a row is too narrow for it.
+ */
+export function explorerFailureText(
+  error: unknown,
+  nextStep: string
+): { description: string; tooltip: string } {
+  return {
+    description: toShortErrorSummary(error),
+    tooltip: failureTooltip(error, nextStep)
+  };
+}
+
+/**
+ * The text an Explorer field row carries: the field's type, the kind when the kind is not the
+ * type's own name, and the repetition count.
+ *
+ * A calculation, a summary and a container cannot be written like an ordinary field, and a global
+ * applies to the whole session, so the kind is shown with the field. The same table names the kind
+ * elsewhere.
+ */
+export function fieldRowDescription(field: FileMakerFieldMetadata): string {
   const descriptionParts: string[] = [];
 
   if (field.result) {
     descriptionParts.push(field.result);
   }
 
-  // A calculation, a summary and a container cannot be written like an ordinary field, and a
-  // global applies to the whole session, so the kind is shown with the field. The same table
-  // names the kind elsewhere.
   const kind = layoutFieldKind(field);
   const sameAsResult = kind === fieldType(field.result);
   if (kind !== 'normal' && !sameAsResult) {
@@ -760,6 +787,17 @@ function toFieldTreeItem(
   if (typeof field.repetitions === 'number') {
     descriptionParts.push(`x${field.repetitions}`);
   }
+
+  return descriptionParts.join(' • ');
+}
+
+function toFieldTreeItem(
+  field: FileMakerFieldMetadata,
+  profileId: string,
+  layoutName: string
+): FMExplorerItem {
+  const kind = layoutFieldKind(field);
+  const sameAsResult = kind === fieldType(field.result);
 
   const tooltip = [
     `Field: ${field.name}`,
@@ -777,7 +815,7 @@ function toFieldTreeItem(
     profileId,
     layoutName,
     fieldName: field.name,
-    description: descriptionParts.length > 0 ? descriptionParts.join(' • ') : undefined,
+    description: fieldRowDescription(field),
     tooltip,
     contextValue: 'fmField',
     iconPath: new vscode.ThemeIcon('symbol-field')
