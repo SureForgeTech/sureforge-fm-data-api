@@ -70,6 +70,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
+
 - Escape every slash in a run when the Query Builder produces literal Find criteria, and keep literal punctuation inside E2E report table cells.
 
 - Dates can now be read and written in the order you choose. Set **filemaker.dateFormats** to `1` for the locale of the file the dates came from, or to `2` for ISO 8601. The default leaves it to the server, so the option is only sent when you ask for another one.
@@ -94,6 +96,8 @@ PR title prefix matches the highest-tier label added:
 
 
 ### [INTERNAL]
+
+- The maintainer inventory now states the criterion for the commands visible on a fresh install: a command belongs there when the repository's own launcher offers it. Every one of the thirteen is named in the FileMaker home, and a unit test holds that.
 
 - The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens. The facts they rest on are held by a unit test, so a product change that moves one fails in a pull request.
 

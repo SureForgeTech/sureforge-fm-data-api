@@ -268,6 +268,20 @@ describe('the UX inventory', () => {
     );
   });
 
+  it('names every command the palette shows without a connection in the FileMaker home', () => {
+    // The criterion the inventory applies to the commands visible on a fresh install: a command
+    // belongs there when the repository's own launcher offers it.
+    const paletteCommands = new Set(
+      (manifest.contributes.menus?.commandPalette ?? []).map((entry: { command: string }) => entry.command)
+    );
+    const alwaysVisible = manifest.contributes.commands
+      .map((command: { command: string }) => command.command)
+      .filter((command: string) => !paletteCommands.has(command));
+    expect(alwaysVisible.length).toBeGreaterThan(0);
+    const named = alwaysVisible.filter((command: string) => FILEMAKER_HOME_COMMANDS.includes(command));
+    expect(named).toEqual(alwaysVisible);
+  });
+
   it('states the keybindings the extension ships', () => {
     const keybindings = manifest.contributes.keybindings.length;
     expect(keybindings).toBeGreaterThan(0);

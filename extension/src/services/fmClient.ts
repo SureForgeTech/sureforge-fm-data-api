@@ -643,6 +643,16 @@ export class FMClient {
     }
   }
 
+  /**
+   * The advice after a timeout: the deadline that was in force, not the shared setting. A request
+   * that asked for its own deadline is told to raise that deadline.
+   */
+  private timeoutAdvice(control?: ClientRequestControl): string {
+    return effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
+      ? 'If the server is slow, raise this request\'s timeout.'
+      : 'If the server is slow, raise the setting filemaker.requestTimeoutMs.';
+  }
+
   private async ensureSessionToken(
     profile: ConnectionProfile,
     control?: ClientRequestControl,
@@ -670,8 +680,9 @@ export class FMClient {
       const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
       if (wanted <= inFlight.timeoutMs) {
         // The sign-in in flight runs under a deadline at least as long as this request's own, so
-        // waiting for it cannot end this request earlier than this request allows.
-        return waitForSession(inFlight.promise, control?.signal);
+        // waiting for it cannot end this request earlier than this request allows. It can still
+        // end this request at this request's own deadline, which is what the wait is bounded by.
+        return waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
       }
       // The sign-in in flight runs under a shorter deadline than this request asked for. Waiting
       // for it would end this request at a deadline the user never chose, so this request signs
@@ -728,7 +739,12 @@ export class FMClient {
       timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
     });
 
-    return waitForSession(refreshPromise, control?.signal);
+    return waitForSession(
+      refreshPromise,
+      control?.signal,
+      effectiveTimeout(control?.timeoutMs, this.timeoutMs),
+      this.timeoutAdvice(control)
+    );
   }
 
   private async retireSession(profile: ConnectionProfile, token: string): Promise<void> {
@@ -766,7 +782,7 @@ export class FMClient {
     if (inFlight) {
       const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
       if (wanted <= inFlight.timeoutMs) {
-        await waitForSession(inFlight.promise, control?.signal);
+        await waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
         return;
       }
       // A sign-in with a shorter deadline is in flight. This renewal needs a longer one, so it
@@ -800,7 +816,12 @@ export class FMClient {
       promise: renewal,
       timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
     });
-    await waitForSession(renewal, control?.signal);
+    await waitForSession(
+      renewal,
+      control?.signal,
+      effectiveTimeout(control?.timeoutMs, this.timeoutMs),
+      this.timeoutAdvice(control)
+    );
   }
 
   private async requestWithAuth<TResponse extends Record<string, unknown>>(
