@@ -40,7 +40,7 @@ export function waitForSession<T>(
     const expire = () => {
       cleanup();
       reject(new FMClientError(
-        `The session did not arrive: the request timed out after ${timeoutMs ?? 0} ms. ${advice}`,
+        `The session did not arrive: the request timed out after ${((timeoutMs ?? 0) / 1000).toFixed(1)} s. ${advice}`,
         { kind: 'timeout', isRetryable: true }
       ));
     };

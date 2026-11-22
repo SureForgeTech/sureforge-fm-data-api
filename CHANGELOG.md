@@ -93,6 +93,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
+
 - The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens. The facts they rest on are held by a unit test, so a product change that moves one fails in a pull request.
 
 - The first-portal journey now says where publishing lives: there is no publish command, the preview is private, and Export app scaffold hands the user the app's source to host themselves. The maintainer inventory records that the Claris Studio capability map was still unchecked, and what each of its rows would need.
