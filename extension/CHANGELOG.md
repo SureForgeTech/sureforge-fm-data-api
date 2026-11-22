@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Strengthened the in-memory identifier used to recognize unchanged credentials after a rejected sign-in. The identifier now uses a randomly salted password derivation function.
+
 - Dates can now be read and written in the order you choose. Set **filemaker.dateFormats** to `1` for the locale of the file the dates came from, or to `2` for ISO 8601. The default leaves it to the server, so the option is only sent when you ask for another one.
 
 - AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.

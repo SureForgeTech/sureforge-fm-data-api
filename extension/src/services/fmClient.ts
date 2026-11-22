@@ -209,7 +209,7 @@ export class FMClient {
           );
         }
 
-        const stamp = credentialStamp(profile, username, password);
+        const stamp = await credentialStamp(profile, username, password);
         if (control?.userInitiated !== true) {
           this.assertAutomaticSignInAllowed(profile, stamp);
         }
