@@ -131,9 +131,8 @@ describe('the date formats the developer chose', () => {
     expect(reread.data[0]!.fieldData['Created']).toBe(before);
   });
 
-  it('sends the option on the reads that run a script', async () => {
+  it('sends the option on the read that runs a script with a record in context', async () => {
     const { client, http, profile } = await clientWith(() => 2);
-    // A record in context is read with the script attached.
     http.request.mockResolvedValueOnce(
       createAxiosResponse({
         data: { response: { data: [{ recordId: '1', fieldData: {} }], scriptError: '0' }, messages: [{ code: '0', message: 'OK' }] }
@@ -142,6 +141,24 @@ describe('the date formats the developer chose', () => {
 
     await client.runScript(profile, { layout: ' Contacts ', scriptName: ' Echo ', scriptParam: 'x y', recordId: '1' });
 
+    expect(http.request.mock.calls.at(-1)![0].params).toMatchObject({ dateformats: 2 });
+  });
+
+  it('sends the option on the fallback read that runs a script', async () => {
+    const { client, http, profile } = await clientWith(() => 2);
+    // The script endpoint is refused, so the client falls back to reading a record with the script
+    // attached, and that read has to agree with every other read.
+    http.request
+      .mockRejectedValueOnce({ isAxiosError: true, response: { status: 405 } })
+      .mockResolvedValueOnce(
+        createAxiosResponse({
+          data: { response: { data: [{ recordId: '1', fieldData: {} }], scriptError: '0' }, messages: [{ code: '0', message: 'OK' }] }
+        })
+      );
+
+    await client.runScript(profile, { layout: ' Contacts ', scriptName: ' Echo ', scriptParam: 'x y' });
+
+    expect(http.request.mock.calls.at(-1)![0].method).toBe('GET');
     expect(http.request.mock.calls.at(-1)![0].params).toMatchObject({ dateformats: 2 });
   });
 
