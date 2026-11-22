@@ -22,6 +22,9 @@ recorded below.
 | #594 | Build a Portal works on any starter, not only the event registration one | `0c58d7c` | `f2fcdd2` | MERGEABLE, no P0/P1 (3 rounds, Kimi K2.8) |
 | #595 | the FileMaker home has a "Find a command" filter | `46c90e5` | `3c3fe79` | MERGEABLE, no P0/P1/P2/P3 (3 rounds, Kimi K2.8) |
 | #596 | the Command Palette shows the everyday set only | `3c3a931` | `0eb24c9` | MERGEABLE, no P0/P1/P2 (4 rounds, Kimi K2.8) |
+| #599 | the prompt parser reads three more ways of leaving a field out | `fcdf02e` | `759a291` | MERGEABLE, no P0/P1/P2/P3 (3 rounds, Kimi K2.8) |
+| #602 | the form editor can go back to the invented data | `e42d641` | `d1a48e9` | MERGEABLE, no P0/P1/P2 (3 rounds, Kimi K2.8) |
+| #609 | the packaged journey expects what the VSIX ships | `fa6914b` | `d9e152e` | MERGEABLE, no P0/P1/P2 (5 rounds, MiniMax M3) |
 
 The four merge commits are `5d96a11`, `0c58d7c`, `46c90e5` and `3c3a931`, and each contains exactly the tree its reviewed head had. `main` has since moved on with another session's work (#597, #598); #592 closes issue #573: an exclusion that follows the field now applies to it
 ("include email, phone excluded" no longer suggests phone), "everything but X" and "all of them but X"
@@ -76,17 +79,25 @@ of the palette on purpose, because they only work on a sidebar item.
    *Remove Connection Profile*. The rule is covered by the unit tests, but the end-to-end toggle —
    turning the setting off and on and seeing the palette change — is not covered any more. A journey
    that did that would close the gap.
-3. **#573 is closed** by #592. Three readings are still open, and the reviewer recorded them:
-   - the quantifier rule also fires under a "keep", "save" or "with" head, so "Keep everything but
-     phone" leaves the draft empty. The suggested fix was not taken, because it would make that prompt
-     suggest phone again; the pull request says why;
-   - "all of the fields but phone" is not read as an exclusion, and the trailing exclusion after a
-     comma ("include email, phone, excluded") is not read either;
-   - "leaving phone out" is not read, because the vocabulary keeps the multiword forms only.
+3. **#573's three readings are closed** by #599: "all of the fields but phone", the trailing
+   exclusion after a comma ("include email, phone, excluded") and "leaving phone out" are read now.
+   The deferred reading stays deferred on purpose and is now pinned by a case: the quantifier rule
+   fires under a "keep" head too, so "Keep everything but phone" still leaves the draft empty. The
+   suggested fix was not taken, because it would make that prompt suggest phone again.
 4. **The inventory's proposal 5** — "Give the publish step a name" — is not built. "Publish" does not
    exist as a command, so a user who has built an app and wants to share it has no next step to look
    for. The acceptance is that the journey documents where publishing will live, or says plainly that
    it is not built yet.
+5. **The desktop journey has not run since the VSIX began to carry the FM Web runtime template**
+   (2026-11-17). The journey asserted the opposite of the product for that week, and nothing caught
+   it; #609 corrects it and adds a local test that pins the fact. Its new expectations have not yet
+   been observed to pass in CI either — the weekly `e2e-ui` job is the first run that will.
+6. **The web-app commands sit behind the power-user setting.** "Generate FM Web Next.js App", "Start FM
+   Web Preview Server" and "Open FM Web Layout Mode" are not in the everyday set, because none of the
+   three documents the derivation reads names them. The home carries all three, one click away. If the
+   palette should keep them, that is one line in the everyday set and one in the test.
+7. **The failure-mode catalogue's AD10 row is only partly fixed.** The packaging half is done; the
+   generated client still lacks the session, script, modId and container calls, and the row says so.
 
 ## The exact next step
 
@@ -100,9 +111,11 @@ of the palette on purpose, because they only work on a sidebar item.
 
 - This session's branches: `feat/more-starters` (#590), `feat/ux-inventory` (#591),
   `feat/prompt-drafting-exclusions` (#592), `feat/home-complete` (#593), `fix/portal-starters` (#594),
-  `feat/home-filter` (#595) and `feat/palette-everyday` (#596). All are pushed and merged.
-- The worktrees are `/workspace/sureforge-fm-data-api-wt-starters`, `-wt-ux`, `-wt-portal`, `-wt-home`,
-  `-wt-filter` and `-wt-palette`; all hold merged work and can be deleted.
+  `feat/home-filter` (#595), `feat/palette-everyday` (#596), `fix/prompt-exclusion-readings` (#599),
+  `feat/fmweb-sample-source` (#602) and `fix/journey-preview-availability` (#609). All are pushed and
+  merged. #609 was merged by another session's account after it merged `main` into the branch.
+- The worktrees are `/workspace/sureforge-fm-data-api-wt-starters`, `-wt-ux`, `-wt-parser`, `-wt-invented`
+  and `-wt-journey`; all hold merged work and can be deleted.
 - The main checkout `/workspace/sureforge-fm-data-api` is on `wip/fm-data-api-home`, which also holds
   the handover files.
 - Open pull requests after this session: none from this session. #588 and #589 belonged to another
@@ -133,8 +146,10 @@ of the palette on purpose, because they only work on a sidebar item.
   Code from `update.code.visualstudio.com`, which does not resolve here, so the elapsed time and the
   deliberate choices to a first sample receipt are still unmeasured. The inventory says so. The
   journey itself runs in CI, and it is how #596's break was found.
-- **The Kimi reviewer allowance was exhausted in the earlier session of this repository** and has
-  since reset; `kimi-code-plan-cn/kimi-for-coding` worked for every review in this session.
+- **The Kimi reviewer allowance ran out during this batch.** `kimi-code-plan-cn/kimi-for-coding` worked
+  for the reviews of #599 and #602 and then returned "You've reached your 5-hour usage limit". The
+  reviews of #609 were done with `minimax-coding-plan/MiniMax-M3` in a fresh context, which the
+  session rules accept as an independent review. No review in this batch found a P0 or a P1.
 - **The extension's `.github/workflows/codeql.yml` is live at `disabled_manually`** while
   `docs/operations/deployment.md` says the workflow "is enabled". That is a settings change and is
   deliberately not touched.
