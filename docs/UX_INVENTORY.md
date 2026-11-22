@@ -286,6 +286,13 @@ while this inventory was being written; the fifth is still open.
   order: running a script with parameters; browsing and changing records; finding and exporting
   records; seeing a layout's fields; changing the database schema; designing a layout; debugging a
   solution against a server; publishing a web front end; and writing FileMaker-side automation.
-- Whether the 13 commands visible on a fresh install are the right 13. They are the everyday
-  commands that need no connection, which is a proxy for "always useful", not a decision anybody
-  made.
+- Whether the 13 commands visible on a fresh install are the right 13. The criterion the repository
+  can state is that a command belongs there when the repository's own launcher offers it: the
+  FileMaker home is where a first-time user is sent, and every command the extension contributes is
+  named there. Applied to the 13, it holds for all of them — every one is named in the home and in
+  the User Guide, two of them (Add Connection Profile, About / Show Version) are also in the
+  extension README's common-commands table, and none of the 13 is a command that can be reached
+  only from the palette. The criterion says the set is consistent with where the repository sends
+  a new user; it does not say the thirteen are what a new user wants first, which is the question
+  the roadmap's representative-developer study has to answer. A unit test holds the criterion: every
+  command the palette shows without a connection is named in the FileMaker home.
