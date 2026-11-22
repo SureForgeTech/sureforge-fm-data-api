@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
+
 - Batch update now reads a file that is one record per line or a spreadsheet's semicolon-delimited columns, when you say so, and the import says which date order the server will read the dates in.
 
 - The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.

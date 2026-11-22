@@ -21,7 +21,7 @@ const RESPONSE_TYPES: Record<ResponseKind, string> = {
 
 /**
  * A typed `fetch` wrapper with the one call. The generated client of "Generate TypeScript Client"
- * needs the layout's generated types and has no calls for scripts, sessions, modId or containers,
+ * needs the layout's generated types and has no calls for scripts, sessions or containers,
  * so the call does not map onto it cleanly; this snippet stands alone instead.
  */
 export function renderTypeScript(spec: RequestSpec, options: SnippetOptions = {}): string {
