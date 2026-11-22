@@ -24,6 +24,7 @@ export async function run(ctx) {
     'an everyday command is listed and a power-user command is hidden while the setting is off',
     async () => {
       await s.setSetting(POWER_USER_SETTING, false);
+      await s.page.waitForTimeout(1000);
       const everyday = await s.cmdListed(PALETTE_EVERYDAY_COMMAND);
       const power = await s.cmdListed(PALETTE_POWER_USER_COMMAND);
       assert(everyday, `${PALETTE_EVERYDAY_COMMAND} is not in the default palette`);
@@ -38,6 +39,7 @@ export async function run(ctx) {
     'the power-user command is listed with the setting on, and the everyday command stays',
     async () => {
       await s.setSetting(POWER_USER_SETTING, true);
+      await s.page.waitForTimeout(1000);
       const everyday = await s.cmdListed(PALETTE_EVERYDAY_COMMAND);
       const power = await s.cmdListed(PALETTE_POWER_USER_COMMAND);
       assert(power, `${PALETTE_POWER_USER_COMMAND} is still hidden with the setting on`);
@@ -52,6 +54,7 @@ export async function run(ctx) {
     'the power-user command is hidden again and the everyday command stays',
     async () => {
       await s.setSetting(POWER_USER_SETTING, false);
+      await s.page.waitForTimeout(1000);
       const everyday = await s.cmdListed(PALETTE_EVERYDAY_COMMAND);
       const power = await s.cmdListed(PALETTE_POWER_USER_COMMAND);
       assert(

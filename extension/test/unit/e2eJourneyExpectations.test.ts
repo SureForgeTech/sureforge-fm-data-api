@@ -188,9 +188,13 @@ describe('the palette-toggle journey', () => {
   });
 
   it('the everyday one is in the palette without the power-user setting', () => {
-    const when = palette.get(byLabel.get(PALETTE_EVERYDAY_COMMAND)!) ?? 'true';
-    expect(when, PALETTE_EVERYDAY_COMMAND).not.toContain('filemaker.powerUserMode');
-    expect(when, PALETTE_EVERYDAY_COMMAND).not.toBe('false');
+    // The everyday command carries no commandPalette entry at all: no when clause gates it, so
+    // the default palette always offers it. A new gate - even a mild one such as
+    // filemaker.hasProfiles - would hide it on the machine that runs the suite, so the case has
+    // to fail here first.
+    expect(palette.has(byLabel.get(PALETTE_EVERYDAY_COMMAND)!), PALETTE_EVERYDAY_COMMAND).toBe(
+      false
+    );
   });
 
   it('the power-user one waits behind the setting', () => {
