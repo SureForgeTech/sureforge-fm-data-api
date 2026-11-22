@@ -539,8 +539,12 @@ export class Session {
       await rows.nth(idx).click();
     }
     await sleep(300);
-    // The choice is recorded once the command ran, under the label that ran.
-    if (record) this.choice(`command: ${chosen.replace(/^(recently used|other commands)\s*:?\s*/i, '')}`);
+    // The choice is recorded once the command ran, under the label that ran. The fallback runs the
+    // highlighted row, and a palette with no rows at all runs nothing, so there is no choice to
+    // record then.
+    if (record && (idx !== -1 || labels.length > 0)) {
+      this.choice(`command: ${chosen.replace(/^(recently used|other commands)\s*:?\s*/i, '').trim()}`);
+    }
   }
   /** Is the command listed in the palette right now? (when-clauses hide commands.) */
   async cmdListed(title) {
@@ -592,7 +596,7 @@ export class Session {
       if (t.toLowerCase().includes(text.toLowerCase())) {
         await rows.nth(i).click();
         await sleep(250);
-        this.choice(`pick: ${t}`);
+        this.choice(`pick: ${t.trim()}`);
         return t;
       }
     }
@@ -605,7 +609,7 @@ export class Session {
       throw new Error(`picker has no "${text}" (first: ${label})`);
     await this.page.keyboard.press('Enter');
     await sleep(250);
-    this.choice(`pick: ${label}`);
+    this.choice(`pick: ${label.trim()}`);
     return label;
   }
   async inputBox(value, { submit = true, timeout = 10000, prompt } = {}) {
@@ -758,7 +762,8 @@ export class Session {
     await sleep(300);
     await this.page.keyboard.press('Enter');
     await sleep(400);
-    // A multi-select is one decision, however many entries it ticked.
+    // A multi-select is one decision, however many entries it ticked. The joined string is for a
+    // reader, not for parsing back: two sets of labels can produce the same text.
     this.choice(`pick: ${labels.join(', ')}`);
   }
   async statusItem(re) {
