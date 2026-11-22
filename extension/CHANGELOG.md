@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
+
 - The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens.
 
 - Certificate inspection now closes the discovery connection as soon as the certificate is read, cancelled, or times out. Connection diagnostics still verify trust in a separate handshake.
