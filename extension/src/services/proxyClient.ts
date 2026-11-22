@@ -103,9 +103,10 @@ export class ProxyClient {
 
   public async createSession(
     profile: ConnectionProfile,
-    signal?: AbortSignal
+    signal?: AbortSignal,
+    timeoutMs?: number
   ): Promise<string | undefined> {
-    const data = await this.invoke<ProxySessionResponse>(profile, 'createSession', {}, signal);
+    const data = await this.invoke<ProxySessionResponse>(profile, 'createSession', {}, signal, timeoutMs);
     return data.token;
   }
 

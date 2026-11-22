@@ -62,4 +62,6 @@ export interface ClientContext {
     options?: { limit?: number; offset?: number; sort?: FindRecordsRequest['sort'] },
     control?: ClientRequestControl
   ): Promise<FindRecordsResult>;
+  /** How the server should read and write dates: 0 leaves it to the server, 1 is the file's locale, 2 is ISO 8601. */
+  dateFormats(): number;
 }

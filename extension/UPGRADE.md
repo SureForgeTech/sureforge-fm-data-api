@@ -10,6 +10,7 @@ Your profiles, saved queries and settings carry over. No command or setting was 
 - Changing a connection's server address clears its old certificate exceptions and custom CA file. If you change the gateway path, API path or database, enter the saved credentials again.
 - Server addresses with a query string or fragment are refused. Custom CA files are limited to 1 MB and cannot contain private keys.
 - A project's workspace settings can no longer select performance mode or raise your connection retry limit.
+- Batch update reads a file that is one record per line (JSONL) or a spreadsheet's semicolon-delimited columns when you say so: the import asks which shape the file is instead of refusing it. The mode picker and the dry-run preview now say which date order the server will read the dates in.
 
 To roll back, use **Install Specific Version...** in the Extensions view and pick 1.9.0.
 
@@ -73,7 +74,7 @@ The offline metadata cache folder now contains its own `.gitignore` with `*` and
 
 ### FM Web preview runs a clean private copy
 
-The preview remains a source-checkout feature, unavailable in the Marketplace package. It listens only on `127.0.0.1:3000`, opens through a single-use private launch link and requires the resulting private session cookie. The bridge token stays on the preview server. Next.js development endpoints, such as live reload, are outside the cookie check.
+The preview was a source-checkout feature in that release, unavailable in the Marketplace package. It listens only on `127.0.0.1:3000`, opens through a single-use private launch link and requires the resulting private session cookie. The bridge token stays on the preview server. Next.js development endpoints, such as live reload, are outside the cookie check.
 
 VS Code asks before installing or starting, and before a script runs from Layout Mode or a preview button, showing the script, escaped parameter and connection host. Cancelling preview startup stops the old preview and clears saved bridge credentials. Installation uses a clean private temporary copy, with install scripts disabled and separate npm configuration and cache. Your npm configuration and edited or added runtime files are left alone and listed as ignored. A layout with an edited or linked generated file is skipped with a warning. Only **FileMaker: Generate FM Web Next.js App** offers regeneration that deletes files, after **Regenerate from template** lists them by name and you confirm.
 

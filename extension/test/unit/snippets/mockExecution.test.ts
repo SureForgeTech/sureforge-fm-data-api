@@ -7,16 +7,16 @@ import vm from 'vm';
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 
-import { generateSnippet } from '../../../src/snippets';
+import { buildRequestSpec, generateSnippet } from '../../../src/snippets';
 import type { SnippetFormat, SnippetOperation } from '../../../src/snippets/model';
+import { bodyJson, pathAndQuery } from '../../../src/snippets/render';
 import type { ConnectionProfile } from '../../../src/types/fm';
 import { type RunningMock, startMockProcess } from '../mockServer/mockHelper';
 import { parseHttpFile, parsePostman, req, transpile } from './checks';
 import { FORMATS } from './fixtures';
 
 /**
- * The copied requests are not only read back, they are sent: each format of each operation is run against the
- * mock Data API (real `curl`, real `fetch`, a real HTTP client for .http and Postman) and the server's answer is
+ * The requests are sent for each format of each operation against the mock Data API (real `curl`, real `fetch`, a real HTTP client for .http and Postman) and the server's answer is
  * compared with the intended effect. The mock follows the Claris Data API Guide (see scripts/mock/ENDPOINTS.md).
  */
 
@@ -80,26 +80,50 @@ async function replay(request: { method: string; url: string; headers: Array<[st
   return outcomeOf((await response.json()) as Json, response.status);
 }
 
-/** Sends `operation` as `format`. `fill` replaces the variables a reader would fill in (modId). */
+/** Exercise the HTTP request with curl. The separate copy tests check the rendered shell text. */
+function sendWithCurl(operation: SnippetOperation, modId: string, includeAuth: boolean): Outcome {
+  const spec = buildRequestSpec(profile, operation);
+  const url = new URL(pathAndQuery(spec, { modId: encodeURIComponent(modId) }), spec.host);
+  if (url.origin !== new URL(mock.baseUrl).origin || spec.auth === 'proxy') {
+    throw new Error('The curl integration test only sends direct requests to the mock server.');
+  }
+  const args = ['--disable', '--globoff', '--request', spec.method, '--url', url.href];
+  if (spec.auth === 'basic') {
+    args.push('--user', 'tester:testpass1');
+  } else {
+    args.push('--header', `Authorization: Bearer ${includeAuth ? token : '<REDACTED>'}`);
+  }
+  if (spec.body?.kind === 'json') {
+    const body = bodyJson(spec.body.value, { placeholderLiteral: () => JSON.stringify(modId) });
+    args.push('--header', 'Content-Type: application/json', '--data-raw', body);
+  } else if (spec.body?.kind === 'upload') {
+    args.push('--form', 'upload=@./file-to-upload');
+  }
+  const run = spawnSync('curl', args, { cwd, env: { PATH: process.env.PATH ?? '' }, encoding: 'utf8', timeout: 30000 });
+  if (run.error || run.status !== 0) {
+    return { ok: false, response: {}, code: '', failure: run.error?.message ?? run.stderr };
+  }
+  try {
+    return outcomeOf(JSON.parse(run.stdout) as Json, 200);
+  } catch {
+    return { ok: false, response: {}, code: '', failure: 'curl did not return a JSON response' };
+  }
+}
+
+/** Sends `operation` as `format`. `modId` fills the edit and upload placeholders. */
 async function send(
   operation: SnippetOperation,
   format: SnippetFormat,
   options: { modId?: string; auth?: boolean } = {}
 ): Promise<Outcome> {
-  let text = generateSnippet(profile, operation, format, { includeAuthHeader: options.auth ?? operation.kind !== 'login' });
+  const includeAuth = options.auth ?? operation.kind !== 'login';
+  if (format === 'curl') return sendWithCurl(operation, options.modId ?? '<modId>', includeAuth);
+  let text = generateSnippet(profile, operation, format, { includeAuthHeader: includeAuth });
   if (options.modId !== undefined) {
     text = text.split('<modId>').join(options.modId).split('{{modId}}').join(options.modId);
   }
   const upload = operation.kind === 'uploadContainer';
   switch (format) {
-    case 'curl': {
-      const run = spawnSync('sh', ['-c', text], { cwd, env: env(), encoding: 'utf8', timeout: 30000 });
-      try {
-        return outcomeOf(JSON.parse(run.stdout) as Json, 200);
-      } catch {
-        return { ok: false, response: {}, code: '', failure: `${run.stdout} ${run.stderr}` };
-      }
-    }
     case 'fetch':
       return runInSandbox(text, 'return data;');
     case 'typescript': {

@@ -73,6 +73,13 @@ describe('FM Web app form editor', () => {
     await vi.waitFor(() => expect(changeSource).toHaveBeenCalledWith('draft'));
     expect(save).not.toHaveBeenCalled();expect(panel.dispose).toHaveBeenCalledOnce();
   });
+  it('offers the invented data again and asks for it after confirmation', async () => {
+    const { webview, save, changeSource, panel } = fixture();const { document } = browser(webview.html);
+    vi.mocked(vscode.window.showWarningMessage).mockResolvedValue('Try sample fields' as never);
+    (document.querySelector('[data-action="sample"]') as DomElement).click();
+    await vi.waitFor(() => expect(changeSource).toHaveBeenCalledWith('sample'));
+    expect(save).not.toHaveBeenCalled();expect(panel.dispose).toHaveBeenCalledOnce();
+  });
   it('keeps the editor and draft when changing fields is canceled', async () => {
     const { webview, save, changeSource, panel } = fixture();const { document } = browser(webview.html);
     vi.mocked(vscode.window.showWarningMessage).mockResolvedValue(undefined);

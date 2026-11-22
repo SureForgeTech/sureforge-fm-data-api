@@ -99,11 +99,12 @@ export class Report {
     }));
     fs.writeFileSync(path.join(this.dir, 'report.json'), JSON.stringify(rows, null, 2));
     fs.writeFileSync(path.join(this.dir, 'measurements.json'), JSON.stringify(this.measurements, null, 2));
+    const markdownEntities = { '\\': '&#92;', '|': '&#124;', '&': '&amp;', '<': '&lt;', '>': '&gt;' };
     const esc = (s) =>
       String(s ?? '')
-        .replace(/\|/g, '\\|')
-        .replace(/\n/g, ' ')
-        .slice(0, 400);
+        .slice(0, 400)
+        .replace(/\r\n?|\n/g, ' ')
+        .replace(/[\\|&<>]/g, (character) => markdownEntities[character]);
     const lines = ['# E2E UI report', '', `Generated ${new Date().toISOString()}`, ''];
     const counts = {};
     for (const r of this.rows) counts[r.result] = (counts[r.result] ?? 0) + 1;

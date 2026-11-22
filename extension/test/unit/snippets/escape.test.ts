@@ -51,7 +51,7 @@ describe('safeJson and jsString', () => {
   it('breaks every {{ inside strings when asked, and leaves ordinary braces alone', () => {
     const text = safeJson({ param: '{{$processEnv HOME}} {{{x}}} {"id": 1}' }, { neutralizeTemplates: true });
     expect(text).not.toContain('{{');
-    expect(text).toContain('{"id": 1}'.replace(/"/g, '\\"'));
+    expect(text).toContain(String.raw`{\"id\": 1}`);
     expect(text.startsWith('{"param"')).toBe(true);
   });
 

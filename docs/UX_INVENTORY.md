@@ -36,14 +36,14 @@ asking for, and the ones marked **Done the same day** have been delivered since.
 
 ### Commands and settings
 
-The manifest declares **82 commands** and **54 configuration properties**, in one `FileMaker`
+The manifest declares **82 commands** and **55 configuration properties**, in one `FileMaker`
 command category. To reproduce:
 
 ```console
 $ node -e "const p=require('./extension/package.json').contributes;console.log(p.commands.length)"
 82
 $ node -e "const p=require('./extension/package.json').contributes;console.log(p.configuration.flatMap(s=>Object.keys(s.properties)).length)"
-54
+55
 ```
 
 ### How many commands are visible at once
@@ -243,27 +243,59 @@ while this inventory was being written; the fifth is still open.
    an app and wants to share it has no next step to look for.
    *Acceptance:* the journey documents where publishing will live, or says plainly that it is not
    built yet.
+   **Done:** the journey now says where publishing lives: there is no publish command, the preview is
+   private, and **Export app scaffold** hands the user the app's source to host themselves. The
+   roadmap's guided deployment path for one supported server runtime is where publishing will live,
+   and it is separate work. See "Where publishing lives" in `docs/PORTAL_BUILDER_JOURNEY.md`.
 
 ## What this inventory did not verify
 
 - The elapsed time and deliberate choices to a first sample receipt, which the roadmap asks for. The
-  harness now records both, for every journey: a measurement — how long the journey took, and which
+  harness records both, for every journey: a measurement — how long the journey took, and which
   commands were run and which options were picked — goes to `measurements.json` and to a
-  **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The
-  path to a first sample receipt is not a journey yet**, so the figure the roadmap asks for is still
-  not measured. Two things keep it from being one: the preview opens an external browser
-  (`vscode.env.openExternal`), and a CI runner has no browser to open; and the submission needs the
-  preview session token from the URL that browser was given. What the code says today is that the
-  path has **five deliberate choices** — the starter, where the fields come from, the workspace
-  folder, the save-and-preview action, and the submission in the browser — and that the cold
-  dependency setup, the generated app's `npm install`, is a separate cost, which is how the tracker
-  asks for it to be recorded. To reproduce the measurement once the journey exists: run the
-  harness, and read `measurements.json` in the run's artefact.
+  **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The path
+  to a first sample receipt is a journey now** (`j17-first-sample-receipt.mjs`): it chooses a starter
+  and the invented data, starts the preview, submits the form and reads the receipt. The path has
+  **five deliberate choices** — the starter, where the fields come from, the workspace folder, the
+  save-and-preview action, and the submission in the browser — and the journey records them among the
+  commands that were run and the options that were picked, which the harness records as well; the
+  submission is recorded only when the form really is submitted. The preview's own start, which
+  installs the shipped template, is a separate cost, which is how the tracker asks for it to be
+  recorded. The measurement is produced where the desktop suite runs, so the number is in that run's
+  artefact rather than here. The journey reads the preview's private launch link from the preview's own
+  folder, so it does not need a browser to reach the form; when
+  the browser the preview opened redeemed that one-time link first, the journey records that rather
+  than submitting. To reproduce the measurement: run the harness, and read `measurements.json` in
+  the run's artefact.
+- Whether the desktop suite still expects what the product does. The suite has not run since
+  2026-11-16, and it cannot run in a pull request: it needs a packaged extension, a download and a
+  display. A static audit of every journey against the code found four expectations the product had
+  moved — the walkthrough gained a step, a field row carries its kind, an Explorer failure row now
+  names the reason and keeps the cause in its tooltip, and the Script Runner asks the server for
+  the script list when it opens. The journeys expect what the product does now, and the facts they
+  rest on are held by `extension/test/unit/e2eJourneyExpectations.test.ts`, so the next change that
+  moves one of them fails in a pull request rather than in a run nobody looks at.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension
   ships and what the FileMaker development environment is generally understood to cover; it was not
-  checked against Claris's own documentation, which was not reachable here.
-- Whether the 13 commands visible on a fresh install are the right 13. They are the everyday
-  commands that need no connection, which is a proxy for "always useful", not a decision anybody
-  made.
+  checked against Claris's own documentation, which was not reachable here. It was tried again on
+  2026-11-22, on two egress paths — the shell and the fetch tool — and both were refused by this
+  sandbox's allowlist, so the Claris side of each row is still unchecked. What each row would need
+  is one Claris Studio documentation page that says the capability exists; the nine rows are, in
+  order: running a script with parameters; browsing and changing records; finding and exporting
+  records; seeing a layout's fields; changing the database schema; designing a layout; debugging a
+  solution against a server; publishing a web front end; and writing FileMaker-side automation.
+- Whether the 13 commands visible on a fresh install are the right 13. The criterion the repository
+  can apply is that a command belongs there when the repository's own surfaces offer it. It holds for
+  all 13 — but it holds for every contributed command, because the FileMaker home names all of
+  them, so it cannot choose between them. What it does show is that the palette and the home agree,
+  and a unit test holds that: every command the palette shows without a connection is named in the
+  home. What the repository has about these 13 is this: all 13 are named in the home and in the
+  User Guide; four of them (Add Connection Profile, About / Show Version, Show Effective Settings,
+  Show Diagnostics) are in the extension README's common-commands table; and six (Build a Portal,
+  Diagnose Connection, Copy Connection Diagnosis for Bug Report, Show Diagnostics, Show Effective
+  Settings, About / Show Version) have no launcher beyond the palette and the home's own list, so
+  the palette is where a user finds them. Whether these 13 are what a new user wants first is not
+  settled here: on first run VS Code opens the walkthrough, and the question needs the roadmap's
+  representative-developer study.

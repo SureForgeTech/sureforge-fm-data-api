@@ -28,6 +28,7 @@ jobs:
     if: always()
     # The required check must have a runner even on contributor forks.
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       - name: Require successful platform checks
         env:
@@ -116,6 +117,7 @@ jobs:
   cross-platform:
     name: cross-platform (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
+    timeout-minutes: 35
     permissions:
       contents: read
     strategy:
@@ -250,6 +252,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [build-test, e2e-ui]
     runs-on: ${{ fromJSON(vars.LINUX_RUNNER_LABELS) }}
+    timeout-minutes: 25
     steps:
       - name: Checkout
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -312,6 +315,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: package
     runs-on: ${{ fromJSON(vars.LINUX_RUNNER_LABELS) }}
+    timeout-minutes: 45
     environment: marketplace
     permissions:
       contents: read
@@ -389,6 +393,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: publish
     runs-on: ${{ fromJSON(vars.LINUX_RUNNER_LABELS) }}
+    timeout-minutes: 30
     environment: marketplace
     permissions:
       contents: read
@@ -439,6 +444,7 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: [publish, publish-ovsx]
     runs-on: ${{ fromJSON(vars.LINUX_RUNNER_LABELS) }}
+    timeout-minutes: 30
     permissions:
       contents: write
     steps:
@@ -459,6 +465,13 @@ jobs:
           name: extension-sourcemaps
           path: artifacts/maps
 
+      # tools/release-create.sh reads the existing release with Node when a rerun finds one.
+      - name: Setup Node
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22
+          package-manager-cache: false
+
       - name: Ensure GitHub CLI is available
         uses: ./.github/actions/ensure-gh
 
@@ -474,8 +487,6 @@ jobs:
             echo "::error::No release notes found for $GITHUB_REF_NAME in extension/CHANGELOG.md."
             exit 1
           fi
-          "$RUNNER_TEMP/gh-cli/bin/gh" release create "$GITHUB_REF_NAME" "$VSIX_PATH" artifacts/maps/*.tgz \
-            --title "$GITHUB_REF_NAME" \
-            --notes-file "$NOTES_FILE"
+          GH_CLI="$RUNNER_TEMP/gh-cli/bin/gh" tools/release-create.sh "$GITHUB_REF_NAME" "$NOTES_FILE" "$VSIX_PATH" artifacts/maps/*.tgz
         env:
           GH_TOKEN: ${{ github.token }}

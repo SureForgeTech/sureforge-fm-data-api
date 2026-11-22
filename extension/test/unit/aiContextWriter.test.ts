@@ -92,6 +92,19 @@ describe('file writing', () => {
     await rm(dir, { recursive: true, force: true });
   });
 
+  it('rejects paths that cannot be represented as one ignore line without writing a file', async () => {
+    await expect(addToGitignore(dir, 'first\nsecond.md')).rejects.toThrow(/single \.gitignore line/);
+    await expect(addToGitignore(dir, 'first\rsecond.md')).rejects.toThrow(/single \.gitignore line/);
+    expect(await readdir(dir)).toEqual([]);
+  });
+
+  it('writes an escaped trailing-space entry only once', async () => {
+    expect(await addToGitignore(dir, 'notes.md  ')).toBe(true);
+    expect(await addToGitignore(dir, 'notes.md  ')).toBe(false);
+    const ignore = await readFile(join(dir, '.gitignore'), 'utf8');
+    expect(ignore.split('\n').filter((line) => line === '/notes.md\\ \\ ')).toHaveLength(1);
+  });
+
   it('writes atomically, creates folders and leaves no temporary file behind', async () => {
     const target = join(dir, 'a', 'b', 'ai.md');
     await writeFileAtomic(target, 'hello');

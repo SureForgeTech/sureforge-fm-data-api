@@ -24,6 +24,14 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
+
+- Batch update now reads a file that is one record per line or a spreadsheet's semicolon-delimited columns, when you say so, and the import says which date order the server will read the dates in.
+
+- The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.
+
+- The form editor can go back to the invented data: **Try sample fields** in the editor restores the starter's sample fields, so a developer who chose their own fields does not have to start over. The saved app stays unchanged until the replacement is saved.
+
 - A script that needs longer than the shared request timeout can ask for its own deadline in the Script Runner. Type the seconds in **Timeout (seconds)**, from 1 to 600; that deadline applies to that run only, and the timeout message still says the change may already have been applied.
 
 - Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
@@ -66,6 +74,12 @@ PR title prefix matches the highest-tier label added:
 
 - A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
 
+- A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
+
+- Escape every slash in a run when the Query Builder produces literal Find criteria, and keep literal punctuation inside E2E report table cells.
+
+- Dates can now be read and written in the order you choose. Set **filemaker.dateFormats** to `1` for the locale of the file the dates came from, or to `2` for ISO 8601. The default leaves it to the server, so the option is only sent when you ask for another one.
+
 - Drafting a form from a prompt now reads an exclusion that follows the field it is about, so "include email, phone excluded" leaves phone out instead of suggesting it. "Everything but phone" now reads as the exclusion it is, the way "everything except phone" already did, and "leave out", "leaves out" and "left out" leave a field out too.
 
 - A prompt that states the requirement at the end of a list of fields now marks every field of that list, so "Name and email are required" no longer leaves the first field optional.
@@ -87,6 +101,22 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The maintainer inventory now states the criterion for the commands visible on a fresh install: a command belongs there when the repository's own launcher offers it. Every one of the thirteen is named in the FileMaker home, and a unit test holds that.
+
+- The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens. The facts they rest on are held by a unit test, so a product change that moves one fails in a pull request.
+
+- The first-portal journey now says where publishing lives: there is no publish command, the preview is private, and Export app scaffold hands the user the app's source to host themselves. The maintainer inventory records that the Claris Studio capability map was still unchecked, and what each of its rows would need.
+
+- Webview tests and the offline theme audit remove script elements through the parsed DOM before using the fixture.
+
+- The tag release step can be rerun: the release is published when the tag has none, and completed when it already exists, so a job that was cancelled after the release was published no longer fails with a duplicate-release error.
+
+- The packaged-extension journey now expects the FM Web preview commands to be offered, because the VSIX carries the runtime template, and a test stages that template with the repository's own packaging script and checks that the extension finds it and publishes the preview availability.
+
+- A script run that asks for its own deadline is no longer ended by a sign-in that started under the shared timeout: when another sign-in is in flight with a shorter deadline, the run signs in for itself instead. The proxy path takes the same deadline for its sign-in.
+
+- The UI test harness counts only the decisions a user actually made: a command or an option that never ran is not counted, the harness's own housekeeping is not counted as a decision, and a journey that drives a second window records its choices in the same measurement.
+
 - The UI test harness now measures every journey it runs: how long it took, and the deliberate choices on the way, are written to `measurements.json` and to the run's report. The maintainer inventory records what that measurement can and cannot cover for the path to a first sample receipt.
 
 - The entry-point inventory and the failure-mode catalogue now say what the extension does. The inventory's palette counts, the home's coverage of every command and its search were corrected against the manifest, and the CA-file re-check is recorded as fixed. A test recomputes the sizes and counts the inventory states, so the document and the extension cannot drift apart.
@@ -102,6 +132,12 @@ PR title prefix matches the highest-tier label added:
 - Routine small updates to the libraries the project builds on: axios 1.21.1, ESLint 10.15.0, playwright-core 1.65.1, and Next.js 16.4.6 for the web page generator. No behavior change is intended.
 
 ### [SECURITY]
+
+- Certificate inspection now closes the discovery connection as soon as the certificate is read, cancelled, or times out. Connection diagnostics still verify trust in a separate handshake.
+
+- Strengthened the in-memory identifier used to recognize unchanged credentials after a rejected sign-in. The identifier now uses a randomly salted password derivation function.
+
+- AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
 
 - Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.
 

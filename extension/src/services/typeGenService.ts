@@ -487,6 +487,17 @@ export interface FileMakerRecord<TFieldData> {
   portalData?: Record<string, Array<Record<string, unknown>>>;
 }
 
+/**
+ * Extra options for an edit.
+ *
+ * \`modId\` is the record's modification id as it was read. When it is given, FileMaker refuses
+ * the edit with error 306 if the record has changed since, so a write cannot overwrite someone
+ * else's work. A create has no such option: a new record has no earlier version.
+ */
+export interface FileMakerEditOptions {
+  modId?: string;
+}
+
 ${layoutBlocks.join('\n\n')}
 
 export interface LayoutRecordMap {
@@ -530,6 +541,7 @@ function renderClientSource(
  */
 
 import type {
+  FileMakerEditOptions,
   FileMakerMessage,
   ${imports.join(',\n  ')}
 } from './types';
@@ -681,13 +693,19 @@ public async create${suffix}(fieldData: Partial<${suffix}FieldData>): Promise<Mu
 
 public async edit${suffix}(
   recordId: string,
-  fieldData: Partial<${suffix}FieldData>
+  fieldData: Partial<${suffix}FieldData>,
+  options?: FileMakerEditOptions
 ): Promise<MutateResponse> {
   const envelope = await this.request<MutateResponse>(
     \`/layouts/${encodedLayout}/records/\${encodeURIComponent(recordId)}\`,
     {
       method: 'PATCH',
-      body: JSON.stringify({ fieldData })
+      body: JSON.stringify({
+        fieldData,
+        // When given, FileMaker refuses the edit (error 306) if the record changed since this
+        // modId.
+        ...(options?.modId !== undefined ? { modId: options.modId } : {})
+      })
     }
   );
   return envelope.response;
@@ -758,6 +776,7 @@ Start request fields with \`Object.create(null)\` as above, especially when a fi
 
 Numbers are typed as \`number\`. Values beyond JavaScript's safe integer range (2^53 - 1), or with many decimal digits, may lose precision. Keep exact large identifiers or amounts in FileMaker text fields when needed.
 Dates, times and timestamps are strings in FileMaker's locale format; they are not JavaScript Date objects. Containers are URL strings. Repeating fields use optional keys such as \`Name(1)\` through the maximum repetition.
+An edit can carry the record's \`modId\`: \`await client.edit${firstMethod}('1', { "REPLACE_WITH_A_FIELD_NAME": "REPLACE_WITH_A_VALUE" }, { modId: '7' })\`. FileMaker then refuses the write with error 306 if the record changed since that \`modId\` was read, so a write cannot overwrite someone else's work. The \`modId\` of a record you read is on the record itself, as \`record.modId\`. A create has no such option: a new record has no earlier version.
 A find with FileMaker code 401 returns an empty array, whatever the HTTP status. Other failures throw \`FileMakerDataApiError\` with \`code\`, \`status\` and \`messages\`. A web page instead of JSON gives an address/proxy check message.
 
 Regenerating this client overwrites these files with a new timestamp.

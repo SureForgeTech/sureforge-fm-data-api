@@ -315,6 +315,17 @@ export class SettingsService {
     return this.getConfiguration('filemaker').get<boolean>('advanced.powerUserMode', false);
   }
 
+  /**
+   * How the server should read and write dates: 0 = the server's own US default, 1 = the locale of
+   * the file, 2 = ISO 8601. The client sends the option only when the developer asked for
+   * something other than the server's default, so a server that does not know the option is never
+   * asked about it.
+   */
+  public getDateFormats(): number {
+    const value = this.getConfiguration('filemaker').get<number>('dateFormats', 0);
+    return value === 1 || value === 2 ? value : 0;
+  }
+
   public getEnterpriseRole(): EnterpriseRole {
     const configured = this.getConfiguration('filemaker').get<string>('enterprise.role', 'developer');
     if (configured === 'viewer' || configured === 'developer' || configured === 'admin') {

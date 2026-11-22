@@ -1,4 +1,4 @@
-import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from './requestLimits';
+import { effectiveTimeout, withRequestLimits } from './requestLimits';
 import { CertificateAdvice } from './fmClient/certificates';
 import { randomUUID } from 'crypto';
 import axios, { type AxiosInstance } from 'axios';
@@ -48,7 +48,12 @@ export class FMClient {
   private readonly layoutMetadataCache = new Map<string, Record<string, unknown>>();
   private readonly layoutMetadataEtags = new Map<string, string>();
   private readonly sessionTracker: SessionTokenTracker;
-  private readonly inFlightRefresh = new Map<string, Promise<string>>();
+  /**
+   * The sign-in in flight for a profile, with the deadline that sign-in runs under. A caller that
+   * asked for a longer deadline than that has to start its own sign-in: waiting for the shorter
+   * one would end its request at a deadline it never asked for.
+   */
+  private readonly inFlightRefresh = new Map<string, { promise: Promise<string>; timeoutMs: number }>();
   private readonly health = new Map<string, SessionHealth>();
   private readonly invalidationListeners = new Set<(profileId: string) => void>();
   private readonly healthListeners = new Set<(profileId: string, health: SessionHealth | undefined) => void>();
@@ -83,7 +88,8 @@ export class FMClient {
     proxyClient?: ProxyClient,
     private readonly historyRecorder?: RequestHistoryRecorder,
     private readonly metricsRecorder?: RequestMetricsRecorder,
-    sessionOptions?: FMClientSessionOptions | (() => FMClientSessionOptions)
+    sessionOptions?: FMClientSessionOptions | (() => FMClientSessionOptions),
+    private readonly getDateFormats?: () => number
   ) {
     this.logger = logger;
     this.timeoutMs = timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -116,6 +122,16 @@ export class FMClient {
    * declaration below; only visibility changes. The receiver stays this client, so prototype
    * callers and overrides keep working without copied state or bound callbacks.
    */
+  /**
+   * How the server should read and write dates: 0 leaves it to the server, 1 uses the file's
+   * locale, 2 uses ISO 8601. Zero sends nothing, so a server that does not know the option is
+   * never asked about it.
+   */
+  public dateFormats(): number {
+    const value = this.getDateFormats?.() ?? 0;
+    return value === 1 || value === 2 ? value : 0;
+  }
+
   private get context(): ClientContext {
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- Local type queries verify private members in the view.
     const client = this;
@@ -136,6 +152,7 @@ export class FMClient {
       refineCertificateError: typeof client.refineCertificateError;
       getLayoutMetadata: typeof client.getLayoutMetadata;
       listRecords: typeof client.listRecords;
+      dateFormats: typeof client.dateFormats;
     };
   }
 
@@ -169,7 +186,10 @@ export class FMClient {
           this.setHealth(profile.id, { state: 'connecting', at: this.now() });
         }
         if (isProxyProfile(profile)) {
-          const token = await this.proxyClient.createSession(profile, control?.signal);
+          // The deadline in force: the run's own when it asked for a usable one, the shared
+          // timeout otherwise. The proxy hop takes the same deadline as the direct path, so a
+          // proxy run's sign-in is not ended at the shared timeout either.
+          const token = await this.proxyClient.createSession(profile, control?.signal, control?.timeoutMs);
           const normalizedToken = token ?? 'proxy-session';
           await this.secretStore.setSessionToken(profile.id, normalizedToken);
           this.sessionTracker.markIssued(profile.id, this.now());
@@ -189,7 +209,7 @@ export class FMClient {
           );
         }
 
-        const stamp = credentialStamp(profile, username, password);
+        const stamp = await credentialStamp(profile, username, password);
         if (control?.userInitiated !== true) {
           this.assertAutomaticSignInAllowed(profile, stamp);
         }
@@ -235,7 +255,7 @@ export class FMClient {
               requestId: trace.requestId,
               endpoint: 'POST /sessions',
               // A sign-in under the run's own deadline is not governed by the shared setting.
-              timeoutOverride: hasOwnDeadline(control?.timeoutMs)
+              timeoutOverride: effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
             })
           );
           if (control?.proactive !== true) {
@@ -627,6 +647,16 @@ export class FMClient {
     }
   }
 
+  /**
+   * The advice after a timeout: the deadline that was in force, not the shared setting. A request
+   * that asked for its own deadline is told to raise that deadline.
+   */
+  private timeoutAdvice(control?: ClientRequestControl): string {
+    return effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
+      ? 'If the server is slow, raise this request\'s timeout.'
+      : 'If the server is slow, raise the setting filemaker.requestTimeoutMs.';
+  }
+
   private async ensureSessionToken(
     profile: ConnectionProfile,
     control?: ClientRequestControl,
@@ -651,8 +681,21 @@ export class FMClient {
     // token is reused — orphaning the rest until server timeout.
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
-      // The refresh is shared, so waiting for it must not outlive this request's own deadline.
-      return waitForSession(inFlight, control?.signal, effectiveTimeout(control?.timeoutMs, this.timeoutMs));
+      const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
+      if (wanted <= inFlight.timeoutMs) {
+        // The sign-in in flight runs under a deadline at least as long as this request's own, so
+        // waiting for it cannot end this request earlier than this request allows. It can still
+        // end this request at this request's own deadline, which is what the wait is bounded by.
+        return waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
+      }
+      // The sign-in in flight runs under a shorter deadline than this request asked for. Waiting
+      // for it would end this request at a deadline the user never chose, so this request signs
+      // in for itself, under its own deadline.
+      this.logger.debug('A sign-in with a shorter deadline is in flight; signing in separately for this request.', {
+        profileId: profile.id,
+        inFlightTimeoutMs: inFlight.timeoutMs,
+        requestedTimeoutMs: wanted
+      });
     }
 
     if (existing) {
@@ -687,12 +730,25 @@ export class FMClient {
         return existing;
       })
       .finally(() => {
-        this.inFlightRefresh.delete(profile.id);
+        // Only clear the entry if it is still this sign-in's. A request that asked for a longer
+        // deadline registers its own sign-in under this profile, and this one must not delete
+        // that entry when it settles: the request behind it would then start a third sign-in.
+        if (this.inFlightRefresh.get(profile.id)?.promise === refreshPromise) {
+          this.inFlightRefresh.delete(profile.id);
+        }
       });
 
-    this.inFlightRefresh.set(profile.id, refreshPromise);
+    this.inFlightRefresh.set(profile.id, {
+      promise: refreshPromise,
+      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
+    });
 
-    return waitForSession(refreshPromise, control?.signal);
+    return waitForSession(
+      refreshPromise,
+      control?.signal,
+      effectiveTimeout(control?.timeoutMs, this.timeoutMs),
+      this.timeoutAdvice(control)
+    );
   }
 
   private async retireSession(profile: ConnectionProfile, token: string): Promise<void> {
@@ -728,9 +784,18 @@ export class FMClient {
 
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
-      // The renewal is shared too: a request with a short deadline must not wait for a long one.
-      await waitForSession(inFlight, control?.signal, effectiveTimeout(control?.timeoutMs, this.timeoutMs));
-      return;
+      const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
+      if (wanted <= inFlight.timeoutMs) {
+        await waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
+        return;
+      }
+      // A sign-in with a shorter deadline is in flight. This renewal needs a longer one, so it
+      // signs in for itself below rather than ending at a deadline the user never chose.
+      this.logger.debug('A sign-in with a shorter deadline is in flight; renewing separately for this request.', {
+        profileId: profile.id,
+        inFlightTimeoutMs: inFlight.timeoutMs,
+        requestedTimeoutMs: wanted
+      });
     }
 
     // Registered synchronously (no await between the check above and the set below),
@@ -744,10 +809,23 @@ export class FMClient {
       if (presumedLive && token !== rejectedToken) void this.retireSession(profile, rejectedToken);
       return token;
     })().finally(() => {
-      this.inFlightRefresh.delete(profile.id);
+      // Only clear the entry if it is still this renewal's: a renewal that asked for a longer
+      // deadline registers its own sign-in under this profile, and this one must not delete that
+      // entry when it settles.
+      if (this.inFlightRefresh.get(profile.id)?.promise === renewal) {
+        this.inFlightRefresh.delete(profile.id);
+      }
     });
-    this.inFlightRefresh.set(profile.id, renewal);
-    await waitForSession(renewal, control?.signal);
+    this.inFlightRefresh.set(profile.id, {
+      promise: renewal,
+      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
+    });
+    await waitForSession(
+      renewal,
+      control?.signal,
+      effectiveTimeout(control?.timeoutMs, this.timeoutMs),
+      this.timeoutAdvice(control)
+    );
   }
 
   private async requestWithAuth<TResponse extends Record<string, unknown>>(

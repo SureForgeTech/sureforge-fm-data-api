@@ -83,6 +83,25 @@ export const assert = (cond, msg) => {
   if (!cond) throw new Error(msg ?? 'assertion failed');
 };
 
+// The measurement of the journey being run. It is shared by every Session, so a journey that
+// drives a second window records its choices in the same measurement as the first.
+let currentMeasurement = null;
+
+/** The measurement the journeys record their choices into. */
+export function setCurrentMeasurement(measurement) {
+  currentMeasurement = measurement;
+}
+
+/** The measurement in force, or none when no journey is running. */
+export function getCurrentMeasurement() {
+  return currentMeasurement;
+}
+
+/** Stop recording choices: the journey is over. */
+export function clearCurrentMeasurement() {
+  currentMeasurement = null;
+}
+
 export class Session {
   constructor({ report, vscode, name = 'session' }) {
     this.report = report;
@@ -481,12 +500,11 @@ export class Session {
    * measurement of the current journey counts them, so a run says how many choices a path took.
    */
   choice(label) {
-    this.measurement?.choice(label);
+    currentMeasurement?.choice(label);
     return this;
   }
 
-  async cmd(title, { exact = true, wait = 400 } = {}) {
-    this.choice(`command: ${title}`);
+  async cmd(title, { exact = true, wait = 400, record = true } = {}) {
     await this.openPalette();
     await sleep(150);
     await this.page.keyboard.type(title, { delay: 4 });
@@ -505,6 +523,7 @@ export class Session {
         .startsWith(title.toLowerCase())
     );
     if (idx === -1) idx = labels.findIndex((l) => l.toLowerCase().includes(title.toLowerCase()));
+    let chosen = title;
     if (idx === -1) {
       if (exact) {
         await this.page.keyboard.press('Escape');
@@ -512,9 +531,20 @@ export class Session {
           `command not found in palette: ${title} (got: ${labels.slice(0, 3).join(' | ')})`
         );
       }
+      // The fallback runs the highlighted row, which is not necessarily the command that was typed.
+      chosen = labels[0] ?? title;
       await this.page.keyboard.press('Enter');
-    } else await rows.nth(idx).click();
+    } else {
+      chosen = labels[idx] ?? title;
+      await rows.nth(idx).click();
+    }
     await sleep(300);
+    // The choice is recorded once the command ran, under the label that ran. The fallback runs the
+    // highlighted row, and a palette with no rows at all runs nothing, so there is no choice to
+    // record then.
+    if (record && (idx !== -1 || labels.length > 0)) {
+      this.choice(`command: ${chosen.replace(/^(recently used|other commands)\s*:?\s*/i, '').trim()}`);
+    }
   }
   /** Is the command listed in the palette right now? (when-clauses hide commands.) */
   async cmdListed(title) {
@@ -540,7 +570,7 @@ export class Session {
     return -1;
   }
   async reloadWindow() {
-    await this.cmd('Developer: Reload Window');
+    await this.cmd('Developer: Reload Window', { record: false });
     await sleep(2500);
     await this.page.waitForSelector('.monaco-workbench', { timeout: 60000 });
     await this.waitHelper().catch(() => {});
@@ -556,7 +586,6 @@ export class Session {
   }
   /** Choose an item in the open quick pick by (part of) its label. */
   async pick(text, { timeout = 10000 } = {}) {
-    this.choice(`pick: ${text}`);
     await this.quickInputOpen(timeout);
     await sleep(300);
     const rows = this.page.locator('.quick-input-list .monaco-list-row');
@@ -567,6 +596,7 @@ export class Session {
       if (t.toLowerCase().includes(text.toLowerCase())) {
         await rows.nth(i).click();
         await sleep(250);
+        this.choice(`pick: ${t.trim()}`);
         return t;
       }
     }
@@ -579,6 +609,7 @@ export class Session {
       throw new Error(`picker has no "${text}" (first: ${label})`);
     await this.page.keyboard.press('Enter');
     await sleep(250);
+    this.choice(`pick: ${label.trim()}`);
     return label;
   }
   async inputBox(value, { submit = true, timeout = 10000, prompt } = {}) {
@@ -685,7 +716,7 @@ export class Session {
     await sleep(300);
   }
   async dismissToasts() {
-    await this.cmd('Notifications: Clear All Notifications').catch(() => {});
+    await this.cmd('Notifications: Clear All Notifications', { record: false }).catch(() => {});
   }
   async statusBar() {
     return (await this.page.locator('.statusbar-item').allInnerTexts())
@@ -731,6 +762,9 @@ export class Session {
     await sleep(300);
     await this.page.keyboard.press('Enter');
     await sleep(400);
+    // A multi-select is one decision, however many entries it ticked. The joined string is for a
+    // reader, not for parsing back: two sets of labels can produce the same text.
+    this.choice(`pick: ${labels.join(', ')}`);
   }
   async statusItem(re) {
     return (await this.statusBar()).find((s) => re.test(s));
@@ -741,7 +775,7 @@ export class Session {
     );
   }
   async closeAllEditors() {
-    await this.cmd('View: Close All Editors').catch(() => {});
+    await this.cmd('View: Close All Editors', { record: false }).catch(() => {});
     await sleep(400);
     // Untitled results documents are dirty: answer "Do you want to save?" with Don't Save.
     for (let i = 0; i < 4; i += 1) {

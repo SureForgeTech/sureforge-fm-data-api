@@ -58,6 +58,11 @@ interface PreviewProcessOptions {
 export class FmWebPreviewProcess implements vscode.Disposable {
   private child?: ChildProcess;
   private directory?: string;
+
+  /** Where the private launch link was written, so a caller can offer it when no browser opened. */
+  public get launchLinkPath(): string | undefined {
+    return this.directory ? path.join(this.directory, 'launch-url') : undefined;
+  }
   private cancelled = false;
   private starting?: Promise<void>;
   private stopping?: Promise<void>;
@@ -164,6 +169,18 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     await this.install(npm, [...prefix, ...flags, files.has(LOCK_FILE) ? 'ci' : 'install', '--ignore-scripts', '--no-audit', '--no-fund', '--registry=https://registry.npmjs.org', '--workspaces=false', '--include=optional'], root, env);
     if (this.cancelled) throw new Error('Preview was cancelled.');
     const launch = randomBytes(32).toString('hex');
+    const launchUrl = `http://127.0.0.1:3000/?launch=${launch}`;
+    // The launch code is a credential, so it is never logged. It is written to the preview's own
+    // owner-only folder, so a run whose browser could not be opened - a CI runner, a remote
+    // session - can still reach the preview, and so a test can drive the form.
+    const linkFile = path.join(directory, 'launch-url');
+    await writeFile(linkFile, `${launchUrl}\n`, { mode: 0o600, flag: 'wx' });
+    // The launch code is redeemed once, and only within two minutes of the server start. The file
+    // has no reason to outlive that window.
+    const expiry = setTimeout(() => {
+      void rm(linkFile, { force: true }).catch(() => undefined);
+    }, 120_000);
+    expiry.unref?.();
     const session = randomBytes(32).toString('hex');
     if (!files.has(PREVIEW_SERVER_FILE)) throw new Error('This installation does not carry the private preview server.');
     // Not `next dev`: its hot-reload and /_next, /__nextjs endpoints answer before the cookie gate.
@@ -191,7 +208,7 @@ export class FmWebPreviewProcess implements vscode.Disposable {
       child.once('exit', () => { clearTimeout(timer); reject(new Error('Preview stopped before it was ready. Port 3000 must be free.')); });
     });
     if (this.cancelled) throw new Error('Preview was cancelled.');
-    await vscode.env.openExternal(vscode.Uri.parse(`http://127.0.0.1:3000/?launch=${launch}`));
+    await vscode.env.openExternal(vscode.Uri.parse(launchUrl));
   }
 
   private install(command: string, args: string[], cwd: string, env: NodeJS.ProcessEnv): Promise<void> {
@@ -247,7 +264,11 @@ export class FmWebPreviewProcess implements vscode.Disposable {
       } finally {
         try {
           if (this.directory) await bounded(rm(this.directory, { recursive: true, force: true }), 5000);
-        } finally { activePreviews.delete(this); }
+        } finally {
+          // The folder is gone, so the path to the link in it is gone too.
+          this.directory = undefined;
+          activePreviews.delete(this);
+        }
       }
     }
   }
