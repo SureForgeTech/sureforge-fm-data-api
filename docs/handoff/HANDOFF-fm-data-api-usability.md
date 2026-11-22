@@ -25,7 +25,8 @@ recorded below.
 | #599 | the prompt parser reads three more ways of leaving a field out | `fcdf02e` | `759a291` | MERGEABLE, no P0/P1/P2/P3 (3 rounds, Kimi K2.8) |
 | #602 | the form editor can go back to the invented data | `e42d641` | `d1a48e9` | MERGEABLE, no P0/P1/P2 (3 rounds, Kimi K2.8) |
 | #609 | the packaged journey expects what the VSIX ships | `fa6914b` | `d9e152e` | MERGEABLE, no P0/P1/P2 (5 rounds, MiniMax M3) |
-| #613 | `filemaker.dateFormats` — the developer chooses how the server reads and writes dates | `3c3a931` | `0b81b21` | MERGEABLE, no P0/P1/P2/P3 (4 rounds, MiniMax M3) |
+| #613 | `filemaker.dateFormats` — the developer chooses how the server reads and writes dates | `8a05890` | `0b81b21` | MERGEABLE, no P0/P1/P2/P3 (4 rounds, MiniMax M3) |
+| #617 | a journey that measures the path to a first sample receipt | `fcdf02e` | `a24deb0` | MERGEABLE, no P0/P1 (6 rounds, MiniMax M3) |
 
 The four merge commits are `5d96a11`, `0c58d7c`, `46c90e5` and `3c3a931`, and each contains exactly the tree its reviewed head had. `main` has since moved on with another session's work (#597, #598); #592 closes issue #573: an exclusion that follows the field now applies to it
 ("include email, phone excluded" no longer suggests phone), "everything but X" and "all of them but X"
@@ -107,7 +108,11 @@ of the palette on purpose, because they only work on a sidebar item.
    is refused for a workflow dispatch (`HTTP 403: Resource not accessible by integration`), and the
    sandbox cannot download VS Code, so the weekly `e2e-ui` job is the only thing that runs the full
    desktop suite. It last ran on 2026-11-16, before the VSIX began to carry the FM Web runtime
-   template, so #609's corrected journey has still not been observed to pass.
+   template, so neither #609's corrected journey nor #617's new one has been observed to pass.
+10. **#617's journey is the first to start the private preview**, so the strict weekly job now
+   installs the shipped template's dependencies from npm: it needs the network and minutes it did not
+   need before. That is the change the roadmap's measured baseline needs, and it is also a new way
+   for that job to fail.
 
 ## The exact next step
 
@@ -153,10 +158,11 @@ of the palette on purpose, because they only work on a sidebar item.
 ## Blockers
 
 - **The packaged-VSIX browser journey cannot run in this sandbox.** The e2e-ui harness downloads VS
-  Code from `update.code.visualstudio.com`, which does not resolve here, so the elapsed time and the
-  deliberate choices to a first sample receipt are still unmeasured. The inventory says so. A workflow
-  dispatch is refused as well (`HTTP 403: Resource not accessible by integration`), so the suite can
-  only be started by the owner or by the weekly schedule. The
+  Code from `update.code.visualstudio.com`, which does not resolve here. A workflow dispatch is refused
+  as well (`HTTP 403: Resource not accessible by integration`), so the suite can only be started by the
+  owner or by the weekly schedule. #617 adds the journey that measures the path to a first sample
+  receipt, but the figure itself comes from a run of the desktop suite, so it is still unmeasured
+  until that job runs. The
   journey itself runs in CI, and it is how #596's break was found.
 - **The Kimi reviewer allowance ran out during this batch.** `kimi-code-plan-cn/kimi-for-coding` worked
   for the reviews of #599 and #602 and then returned "You've reached your 5-hour usage limit". The
