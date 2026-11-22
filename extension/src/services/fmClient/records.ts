@@ -30,13 +30,18 @@ export async function getRecord(
         return client.proxyClient.getRecord(profile, layout, recordId, control?.signal);
       }
 
+      // The server's own default is the US order. The option is sent only when the developer
+      // asked for another one, so a server that does not know it is never asked about it.
+      const dateFormats = client.dateFormats();
+      const params = { ...(control?.portal ? portalPagingParams(control.portal, '_') : {}) };
+      if (dateFormats) params.dateformats = dateFormats;
       const envelope = await client.requestWithAuth<DataApiListRecordsResponse>(
         profile,
         {
           method: 'GET',
           transfer: true,
           path: `/layouts/${encodeURIComponent(layout)}/records/${encodeURIComponent(recordId)}`,
-          ...(control?.portal ? { params: portalPagingParams(control.portal, '_'), strictQuery: true } : {}),
+          ...(Object.keys(params).length ? { params, strictQuery: true } : {}),
           signal: control?.signal,
           timeoutMs: control?.timeoutMs,
           maxResponseBytes: control?.maxResponseBytes
@@ -86,6 +91,10 @@ export async function listRecords(
     if (options.limit !== undefined) params._limit = options.limit;
     if (options.offset !== undefined) params._offset = options.offset;
     if (options.sort?.length) params._sort = JSON.stringify(options.sort);
+    // The server's own default is the US order; the option is sent only when the developer asked
+    // for another one.
+    const dateFormats = client.dateFormats();
+    if (dateFormats) params.dateformats = dateFormats;
     try {
       const envelope = await client.requestWithAuth<DataApiListRecordsResponse>(profile, {
         method: 'GET', path: `/layouts/${encodeURIComponent(layout)}/records`, params,
@@ -146,6 +155,11 @@ export async function findRecords(
       if (typeof body.offset === 'number') {
         payload.offset = body.offset;
       }
+
+      // The server's own default is the US order; the option is sent only when the developer
+      // asked for another one.
+      const dateFormats = client.dateFormats();
+      if (dateFormats) payload.dateformats = dateFormats;
 
       for (const key of ['script', 'script.param', 'script.prerequest', 'script.prerequest.param', 'script.presort', 'script.presort.param'] as const) {
         if (body[key] !== undefined) payload[key] = body[key];

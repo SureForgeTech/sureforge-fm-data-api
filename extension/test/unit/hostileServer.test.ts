@@ -21,6 +21,7 @@ const envelope = { response: { layouts: [] }, messages: [{ code: '0', message: '
 function context(httpClient: unknown, timeoutMs = 120): ClientContext {
   return {
     httpClient, timeoutMs, logger, ensureSessionToken: vi.fn().mockResolvedValue('token'),
+    dateFormats: () => 0,
     explainPinnedFailure: (_profile: unknown, error: unknown) => error,
     refineCertificateError: async (_profile: unknown, error: unknown) => error
   } as unknown as ClientContext;

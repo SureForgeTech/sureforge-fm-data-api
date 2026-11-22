@@ -1273,7 +1273,19 @@
             "markdownDescription": "**Per workspace.** Maximum number of request history entries stored per workspace.",
             "order": 1
           },
-          "filemaker.snippets.includeAuthByDefault": {
+          "filemaker.dateFormats": {
+            "type": "number",
+            "enum": [0, 1, 2],
+            "enumDescriptions": [
+              "The server's own default: dates are read and written in the US order, month first.",
+              "The locale of the file the dates came from.",
+              "ISO 8601, so every date is read and written the same way."
+            ],
+            "default": 0,
+            "description": "Per workspace. How the server reads and writes dates. The default leaves it to the server, which uses the US order; choose the file's locale or ISO 8601 if your dates are not in the US order. A proxy connection is answered by the proxy, so the setting does not apply there.",
+            "markdownDescription": "**Per workspace.** How the server reads and writes dates. The default leaves it to the server, which uses the US order; choose the file's locale or ISO 8601 if your dates are not in the US order. A proxy connection is answered by the proxy, so the setting does not apply there."
+          },
+        "filemaker.snippets.includeAuthByDefault": {
             "scope": "application",
             "type": "boolean",
             "default": false,

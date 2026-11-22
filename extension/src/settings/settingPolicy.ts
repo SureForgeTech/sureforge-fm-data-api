@@ -58,6 +58,7 @@ export const POLICY_SETTINGS: readonly PolicySetting[] = [
   { key: 'fmWeb.bridge.rateLimitBurst', kind: 'user-only' },
   { key: 'fmWeb.bridge.requestBudget', kind: 'user-only' },
   { key: 'savedQueries.scope', kind: 'workspace' },
+  { key: 'dateFormats', kind: 'workspace' },
   { key: 'typegen.outputDir', kind: 'workspace' },
   { key: 'schema.snapshots.storage', kind: 'workspace', forcedWhenUntrusted: true },
   { key: 'batch.maxRecords', kind: 'workspace' },
