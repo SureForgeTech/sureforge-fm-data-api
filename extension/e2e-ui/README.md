@@ -33,7 +33,7 @@ and tag: it packages the VSIX and runs one journey, `j01b-first-run-happy-path.m
 connection, save it, connect, run the first query), selected with `E2E_ONLY=j01b`. `e2e-ui` runs the full strict suite
 on a weekly schedule and before tagged releases, and tagged releases wait for it before packaging/publishing. The strict
 suite now also starts the private preview, which installs the shipped template's dependencies from npm — that needs the
-network and minutes, and it is why the full job has a 120-minute timeout. Reports,
+network and minutes. Reports,
 screenshots and VS Code logs are uploaded even on failure. The full job has a 120-minute timeout to allow for the VS Code
 download and the 25–55 minute run. The smoke job is not a required status check; branch protection still requires only
 `build-test`, so its failures are visible on the pull request without blocking unrelated work.

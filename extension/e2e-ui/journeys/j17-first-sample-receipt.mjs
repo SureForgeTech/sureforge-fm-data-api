@@ -51,7 +51,7 @@ export async function run(ctx) {
       const title = await editor.locator('#title').inputValue();
       assert(title.trim().length > 0, 'the editor opened without a title');
       const fields = await editor.locator('#fields .app-field').count();
-      assert(fields === 4, `the editor shows ${fields} fields, not the starter's four`);
+      assert(fields === 4, `the editor shows ${fields} fields; the starter's field list changed`);
       return `the editor is open with the title "${title}" and the starter's four fields`;
     }
   );

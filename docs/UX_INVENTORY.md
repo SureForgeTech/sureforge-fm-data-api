@@ -257,8 +257,9 @@ while this inventory was being written; the fifth is still open.
   start as a separate figure. The measurement is produced where the desktop suite runs, so the number
   is in that run's artefact rather than here. The path has **five deliberate choices** — the starter,
   where the fields come from, the workspace folder, the save-and-preview action, and the submission
-  in the browser — and the preview's own start, which installs the shipped template, is a separate
-  cost, which is how the tracker asks for it to be recorded. The journey reads the preview's private
+  in the browser — among the commands that were run and the options that were picked, which the
+  harness records as well; and the preview's own start, which installs the shipped template, is a
+  separate cost, which is how the tracker asks for it to be recorded. The journey reads the preview's private
   launch link from the preview's own folder, so it does not need a browser to reach the form; when
   the browser the preview opened redeemed that one-time link first, the journey records that rather
   than submitting. To reproduce the measurement: run the harness, and read `measurements.json` in
