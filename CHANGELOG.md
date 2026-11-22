@@ -75,6 +75,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
+
 - Align the Marketplace overview with the product page and the current ABD Enterprises consulting offer.
 
 - A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
@@ -103,6 +105,8 @@ PR title prefix matches the highest-tier label added:
 
 
 ### [INTERNAL]
+
+- Align the Marketplace overview with the product page and the current ABD Enterprises consulting offer.
 
 - The maintainer inventory now states the criterion for the commands visible on a fresh install: a command belongs there when the repository's own launcher offers it. Every one of the thirteen is named in the FileMaker home, and a unit test holds that.
 

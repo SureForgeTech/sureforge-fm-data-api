@@ -122,6 +122,27 @@ describe('Script Runner: message routing', () => {
       expect(panel.fmClient.runScript).not.toHaveBeenCalled();
     });
 
+    it('does not claim a script is running when the run never reached the server', async () => {
+      panel.fmClient.runScript.mockRejectedValue(new FMClientError(
+        'Request timed out waiting for the connection to sign in after 0.1 s. The sign-in may still be running; try again.',
+        { kind: 'timeout', code: 'SESSION_WAIT_TIMEOUT' }
+      ));
+      await panel.send({ type: 'runScript', payload: script });
+      const message = String(panel.posted.find((entry) => entry.type === 'error')?.message);
+      expect(message).not.toContain('script may still be running');
+      expect(message).not.toContain('Timeout field');
+    });
+
+    it('does not claim a script is running when the layout list times out', async () => {
+      panel.fmClient.listLayouts.mockRejectedValue(new FMClientError('Request timed out after 15.0 s.', {
+        kind: 'timeout'
+      }));
+      await panel.send({ type: 'loadLayouts', profileId: 'p1' });
+      const message = panel.posted.find((entry) => entry.type === 'error')?.message;
+      expect(String(message)).not.toContain('script may still be running');
+      expect(String(message)).not.toContain('Timeout field');
+    });
+
     it('answers "loadLayouts" with the layouts of that profile', async () => {
       await panel.send({ type: 'loadLayouts', profileId: 'p1' });
       expect(panel.fmClient.listLayouts).toHaveBeenCalledWith(profile);

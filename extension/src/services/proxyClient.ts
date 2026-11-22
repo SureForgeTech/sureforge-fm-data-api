@@ -1,4 +1,4 @@
-import { effectiveTimeout, withRequestLimits } from './requestLimits';
+import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from './requestLimits';
 import { noteRequestTimeout } from './tlsAgent';
 import { assertFindCriteria } from '../utils/findCriteria';
 import axios, { type AxiosInstance } from 'axios';
@@ -318,7 +318,7 @@ export class ProxyClient {
     // The deadline in force: the run's own when it asked for a usable one, the shared timeout
     // otherwise. The advice names it when it is not the shared one.
     const deadline = effectiveTimeout(timeoutMs, this.timeoutMs);
-    const ownDeadline = deadline !== this.timeoutMs;
+    const ownDeadline = hasOwnDeadline(timeoutMs);
     try {
       const transport = httpsTransportFor(profile, endpoint);
       const body = {
