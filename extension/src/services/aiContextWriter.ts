@@ -184,11 +184,17 @@ export function isTrackedByGit(directory: string, absolutePath: string): Promise
 
 /** One `.gitignore` line for a path inside the repository root: anchored, glob characters escaped. */
 export function gitignoreLine(relativePath: string): string {
-  const escaped = relativePath
+  if (relativePath.includes('\0') || relativePath.includes('\r') || relativePath.includes('\n')) {
+    throw new Error('The path cannot be represented as a single .gitignore line.');
+  }
+  let suffixStart = relativePath.length;
+  while (suffixStart > 0 && relativePath[suffixStart - 1] === ' ') {
+    suffixStart--;
+  }
+  const escaped = relativePath.slice(0, suffixStart)
     .replace(/[\\*?[\]]/g, (character) => `\\${character}`)
-    .replace(/^([#!])/, '\\$1')
-    .replace(/ +$/g, (spaces) => spaces.replace(/ /g, '\\ '));
-  return `/${escaped}`;
+    .replace(/^([#!])/, '\\$1');
+  return `/${escaped}${'\\ '.repeat(relativePath.length - suffixStart)}`;
 }
 
 /**
@@ -200,7 +206,7 @@ export async function addToGitignore(workspaceRoot: string, relativePath: string
   const target = await resolveConfinedFile('.gitignore', workspaceRoot, [workspaceRoot]);
   const line = gitignoreLine(relativePath);
   const existing = (await readExistingFile(target.path)) ?? '';
-  if (existing.split(/\r?\n/).some((candidate) => candidate.trim() === line)) {
+  if (existing.split(/\r?\n/).some((candidate) => candidate === line)) {
     return false;
   }
 

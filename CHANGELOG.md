@@ -89,6 +89,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [INTERNAL]
 
+- The tag release step can be rerun: the release is published when the tag has none, and completed when it already exists, so a job that was cancelled after the release was published no longer fails with a duplicate-release error.
+
 - The packaged-extension journey now expects the FM Web preview commands to be offered, because the VSIX carries the runtime template, and a test stages that template with the repository's own packaging script and checks that the extension finds it and publishes the preview availability.
 
 - A script run that asks for its own deadline is no longer ended by a sign-in that started under the shared timeout: when another sign-in is in flight with a shorter deadline, the run signs in for itself instead. The proxy path takes the same deadline for its sign-in.
@@ -110,6 +112,8 @@ PR title prefix matches the highest-tier label added:
 - Routine small updates to the libraries the project builds on: axios 1.21.1, ESLint 10.15.0, playwright-core 1.65.1, and Next.js 16.4.6 for the web page generator. No behavior change is intended.
 
 ### [SECURITY]
+
+- AI context exports add a single literal .gitignore rule for the chosen filename. Paths containing line breaks are refused, and repeated exports do not duplicate rules for filenames ending in spaces.
 
 - Generated file replacement now refuses hard-linked targets, including aliases added during confirmation, so replacing an export cannot change another linked file.
 
