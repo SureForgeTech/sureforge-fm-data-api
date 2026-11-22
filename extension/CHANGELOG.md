@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens.
+
 - Certificate inspection now closes the discovery connection as soon as the certificate is read, cancelled, or times out. Connection diagnostics still verify trust in a separate handshake.
 
 - The private preview now writes its launch link into the preview's own folder, so a run whose browser could not be opened - a CI runner, a remote session - can still reach the preview. The ready message says where to find it.

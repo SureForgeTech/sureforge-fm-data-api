@@ -7,6 +7,7 @@ import {
   refreshExplorer
 } from '../lib/flows.mjs';
 import { assert } from '../lib/session.mjs';
+import { isFieldRow } from '../lib/journeyFacts.mjs';
 
 const J = 'J03 explorer';
 export async function run(ctx) {
@@ -117,9 +118,9 @@ export async function run(ctx) {
       await expandTreeRow(s, 'Fields');
       await s.page.waitForTimeout(1200);
       rows = await s.treeRows();
-      const fields = rows.filter((r) =>
-        /(text|number|date|timeStamp|time|container)\s*[\u00b7\u2022]\s*x\d/i.test(r)
-      );
+      // A field row shows the field's type, and the kind and the repetition count when it has
+      // them: "text • calculation • x1". Every field row carries the type.
+      const fields = rows.filter((r) => isFieldRow(r));
       assert(fields.length >= 5, `field rows: ${rows.slice(0, 12).join(' | ')}`);
       return `${fields.length} typed field rows; sample: ${fields.slice(0, 4).join(' | ')}`;
     }

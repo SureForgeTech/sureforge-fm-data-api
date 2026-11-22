@@ -267,6 +267,14 @@ while this inventory was being written; the fifth is still open.
   the browser the preview opened redeemed that one-time link first, the journey records that rather
   than submitting. To reproduce the measurement: run the harness, and read `measurements.json` in
   the run's artefact.
+- Whether the desktop suite still expects what the product does. The suite has not run since
+  2026-11-16, and it cannot run in a pull request: it needs a packaged extension, a download and a
+  display. A static audit of every journey against the code found four expectations the product had
+  moved — the walkthrough gained a step, a field row carries its kind, an Explorer failure row now
+  names the reason and keeps the cause in its tooltip, and the Script Runner asks the server for
+  the script list when it opens. The journeys expect what the product does now, and the facts they
+  rest on are held by `extension/test/unit/e2eJourneyExpectations.test.ts`, so the next change that
+  moves one of them fails in a pull request rather than in a run nobody looks at.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension

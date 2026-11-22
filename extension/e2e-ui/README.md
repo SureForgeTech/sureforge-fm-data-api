@@ -53,6 +53,11 @@ A step passes only if it called `assert` (or returned an explicit `{ result }`).
 a NOTE with `unasserted: true`, never as PASS, and is listed at the end of the run; use `s.step(..., fn, { observe: true })`
 for a step that only records behaviour.
 
+**Where a journey's expectations live.** The facts the journeys assert about the product are in `lib/journeyFacts.mjs`:
+the walkthrough's steps, what a field row looks like, what an Explorer failure row carries, and which request belongs to the
+Script Runner rather than to a script run. `test/unit/e2eJourneyExpectations.test.ts` holds each of them against the code, so a
+product change that moves one of them fails in a pull request. A fact that belongs only to one journey stays in that journey.
+
 ## Claude Code CLI (opt-in)
 
 J10b can run the real `claude` CLI against the MCP server. It is **off by default**; set `E2E_CLAUDE=1`. It starts with an
