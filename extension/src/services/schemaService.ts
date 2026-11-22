@@ -235,7 +235,11 @@ function getPath(value: Record<string, unknown>, path: string[]): unknown {
   return current;
 }
 
-function toFieldMetadata(value: Record<string, unknown>): FileMakerFieldMetadata | undefined {
+/**
+ * The metadata of one field, as the Explorer writes it. Exported so a test can hold the row the
+ * Explorer renders for a field the mock really carries, rather than a row written by hand.
+ */
+export function toFieldMetadata(value: Record<string, unknown>): FileMakerFieldMetadata | undefined {
   const name =
     typeof value.name === 'string'
       ? value.name

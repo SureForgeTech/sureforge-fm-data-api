@@ -287,12 +287,15 @@ while this inventory was being written; the fifth is still open.
   records; seeing a layout's fields; changing the database schema; designing a layout; debugging a
   solution against a server; publishing a web front end; and writing FileMaker-side automation.
 - Whether the 13 commands visible on a fresh install are the right 13. The criterion the repository
-  can state is that a command belongs there when the repository's own launcher offers it: the
-  FileMaker home is where a first-time user is sent, and every command the extension contributes is
-  named there. Applied to the 13, it holds for all of them — every one is named in the home and in
-  the User Guide, two of them (Add Connection Profile, About / Show Version) are also in the
-  extension README's common-commands table, and none of the 13 is a command that can be reached
-  only from the palette. The criterion says the set is consistent with where the repository sends
-  a new user; it does not say the thirteen are what a new user wants first, which is the question
-  the roadmap's representative-developer study has to answer. A unit test holds the criterion: every
-  command the palette shows without a connection is named in the FileMaker home.
+  can apply is that a command belongs there when the repository's own surfaces offer it. It holds for
+  all 13 — but it holds for every contributed command, because the FileMaker home names all of
+  them, so it cannot choose between them. What it does show is that the palette and the home agree,
+  and a unit test holds that: every command the palette shows without a connection is named in the
+  home. What the repository has about these 13 is this: all 13 are named in the home and in the
+  User Guide; four of them (Add Connection Profile, About / Show Version, Show Effective Settings,
+  Show Diagnostics) are in the extension README's common-commands table; and six (Build a Portal,
+  Diagnose Connection, Copy Connection Diagnosis for Bug Report, Show Diagnostics, Show Effective
+  Settings, About / Show Version) have no launcher beyond the palette and the home's own list, so
+  the palette is where a user finds them. Whether these 13 are what a new user wants first is not
+  settled here: on first run VS Code opens the walkthrough, and the question needs the roadmap's
+  representative-developer study.
