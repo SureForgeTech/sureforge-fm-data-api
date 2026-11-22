@@ -1,4 +1,9 @@
 // Inspect the archive that vsce actually produced, including paths filtered by .vscodeignore.
+
+/** The FM Web template files the packaged extension must carry, relative to the template root. */
+export const REQUIRED_TEMPLATE_FILES = ['runtime-next/package.json', 'runtime-next/preview-server.mjs',
+  'runtime-next/app/intake/[id]/page.tsx', 'runtime-next/app/api/intake/[id]/route.ts',
+  'shared/package.json', 'shared/src/index.ts', 'shared/src/intake.ts', 'manifest.json'];
 import { createRequire } from 'node:module';
 
 const require = createRequire(import.meta.url);
@@ -23,9 +28,7 @@ export async function validateVsix(file) {
       throw new Error(`VSIX is missing dist/${bundle}`);
     }
   }
-  for (const template of ['runtime-next/package.json', 'runtime-next/preview-server.mjs',
-    'runtime-next/app/intake/[id]/page.tsx', 'runtime-next/app/api/intake/[id]/route.ts',
-    'shared/package.json', 'shared/src/index.ts', 'shared/src/intake.ts', 'manifest.json']) {
+  for (const template of REQUIRED_TEMPLATE_FILES) {
     if (!entries.has(`extension/dist/fmweb-template/${template}`)) {
       throw new Error(`VSIX is missing the FM Web template file: ${template}`);
     }
