@@ -83,7 +83,10 @@ export async function runScript(
           return { response: scriptResponse(envelope.response), messages: envelope.messages };
         }
         const path = `/layouts/${encodeURIComponent(layout)}/records`;
-        const params = { _limit: 1, ...buildScriptParams(scriptName, scriptParam) };
+        const params: Record<string, string | number | boolean> = { _limit: 1, ...buildScriptParams(scriptName, scriptParam) };
+        // The dates come back in the order the developer chose, as in every other read.
+        const dateFormats = client.dateFormats();
+        if (dateFormats) params.dateformats = dateFormats;
         if (ifTooLong(path, Object.fromEntries(Object.entries(params).map(([key, value]) => [key, String(value)])))) {
           throw tooLongScriptParameter();
         }

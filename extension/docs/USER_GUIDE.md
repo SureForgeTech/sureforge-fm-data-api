@@ -1129,7 +1129,7 @@ Open Settings (`Cmd+,` / `Ctrl+,`) and search for `filemaker`; make sure the **U
 | --- | --- | --- | --- |
 | `filemaker.savedQueries.scope` | `"workspace"` | Per workspace | Where saved queries are kept: `workspace` or `global`. |
 | `filemaker.history.maxEntries` | `10` | Per workspace | Request history entries kept per workspace. |
-| `filemaker.dateFormats` | `0` | Per workspace | How the server reads and writes dates: `0` leaves it to the server, which uses the US order; `1` uses the locale of the file the dates came from; `2` uses ISO 8601. The option is sent only when you choose `1` or `2`, so a server that does not know it is never asked about it. A proxy connection uses the proxy's own setting. |
+| `filemaker.dateFormats` | `0` | Per workspace | How the server reads and writes dates: `0` leaves it to the server, which uses the US order; `1` uses the locale of the file the dates came from; `2` uses ISO 8601. The option is sent only when you choose `1` or `2`, so a server that does not know it is never asked about it. A proxy connection is answered by the proxy, so the setting does not apply there. |
 | `filemaker.snippets.includeAuthByDefault` | `false` | User settings only | Show an Authorization header with a variable to fill in (`$FM_TOKEN`, `{{token}}`) instead of `<REDACTED>` in copied requests (curl, fetch(), .http, Postman, TypeScript). A real token, password or API key is never written. |
 
 **Records, Scripts, and Batch**
