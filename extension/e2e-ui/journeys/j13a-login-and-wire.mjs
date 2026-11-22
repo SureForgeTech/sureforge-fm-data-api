@@ -9,6 +9,13 @@ import {
   ensureProfileCommands,
   openQueryBuilder
 } from '../lib/flows.mjs';
+import {
+  EXPLORER_FAILURE_LABEL,
+  EXPLORER_FAILURE_REASON,
+  explorerFailureReason,
+  readTreeTooltip
+} from '../lib/journeyFacts.mjs';
+import { assert } from '../lib/session.mjs';
 
 const J = 'J13a login+wire';
 const RAW_JS = /Cannot read properties|undefined|TypeError|is not a function/i;
@@ -313,16 +320,28 @@ export async function run(ctx) {
       const rows = await s.allTreeRows();
       const toasts = await toastInfo(s);
       await clear();
-      const placeholder = rows.find((r) => /Failed to load layouts/i.test(r));
+      const placeholder = rows.find((r) => new RegExp(EXPLORER_FAILURE_LABEL, 'i').test(r));
       const msg = `rows: ${rows.slice(0, 5).join(' | ')} | toasts: ${toasts.map((t) => t.text).join('|') || 'none'}`;
-      if (
-        placeholder &&
-        !/web page|not the Data API|HTML|proxy/i.test(placeholder + JSON.stringify(toasts))
-      )
-        throw new Error(
-          `Explorer shows only "${placeholder}"; the cause is only in the Output channel (confirms S6). ${msg}`
+      assert(placeholder, `the Explorer shows no failure row (confirms S6). ${msg}`);
+      // The Explorer names what went wrong in the row and keeps the full cause in its tooltip.
+      const reason = explorerFailureReason(placeholder);
+      assert(reason.length > 0, `the Explorer row carries no reason: "${placeholder}" (confirms S6)`);
+      assert(
+        !/use filemaker: connect, then refresh explorer/i.test(placeholder),
+        `the Explorer row shows the generic advice instead of a reason: "${placeholder}" (confirms S6)`
+      );
+      const tooltip = await readTreeTooltip(s, EXPLORER_FAILURE_LABEL);
+      const cause = `${placeholder} ${tooltip} ${JSON.stringify(toasts)}`;
+      if (!/web page|not the Data API|HTML|proxy/i.test(cause)) {
+        // The cause is in the row's tooltip. When no tooltip can be read - the hover did not
+        // open - the row still has to name the failure rather than show the generic advice.
+        assert(
+          EXPLORER_FAILURE_REASON.test(reason),
+          `the cause is nowhere in the Explorer: row "${placeholder}", tooltip "${tooltip}" (confirms S6). ${msg}`
         );
-      return msg;
+        return `${placeholder} | tooltip: (none could be read)`;
+      }
+      return `${placeholder} | tooltip: ${tooltip.slice(0, 160)}`;
     }
   );
   await s.step(

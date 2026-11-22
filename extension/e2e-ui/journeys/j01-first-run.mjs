@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 
 import { assert } from '../lib/session.mjs';
+import { WALKTHROUGH_STEPS } from '../lib/journeyFacts.mjs';
 
 const J = 'J01 first run';
 export const ownsLaunch = true;
@@ -72,8 +73,8 @@ export async function run({ s }) {
   );
   await s.step(
     J,
-    'walkthrough shows its five steps',
-    'steps: add profile, connect, query, inspect layout, generate types',
+    'walkthrough shows its six steps',
+    'steps: create an app, add profile, connect, query, inspect layout, generate types',
     async () => {
       const text = await s.page
         .locator(
@@ -81,14 +82,9 @@ export async function run({ s }) {
         )
         .first()
         .innerText();
-      for (const t of [
-        'Add a connection profile',
-        'Connect and verify',
-        'Run your first query',
-        'Inspect a layout',
-        'Generate typed code'
-      ])
+      for (const t of WALKTHROUGH_STEPS)
         assert(text.includes(t), `missing step "${t}"`);
+      return `${WALKTHROUGH_STEPS.length} steps on the walkthrough`;
     }
   );
   await s.step(

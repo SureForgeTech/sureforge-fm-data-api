@@ -1,6 +1,7 @@
 // Journey 7: Script runner: run a script with a parameter, see result and error codes.
 import { answerPickers, connect, createProfile, ensureProfileCommands } from '../lib/flows.mjs';
 import { assert } from '../lib/session.mjs';
+import { isScriptRunRequest } from '../lib/journeyFacts.mjs';
 
 const J = 'J07 script runner';
 const text = async (wv, sel) =>
@@ -73,7 +74,9 @@ export async function run(ctx) {
     'one GET /layouts/<layout>/script/<script>?script.param=... and no record read or find (Claris: "Run a script")',
     async () => {
       const r = await runScript('Echo', 'only the script');
-      const sent = r.requests.filter((line) => !/\/sessions/.test(line));
+      // The panel asks the server for the script list when it opens, and the client signs in
+      // before the run; neither is part of the run itself.
+      const sent = r.requests.filter((line) => isScriptRunRequest(line));
       assert(
         sent.length === 1 && /^GET \/layouts\/Customers\/script\/Echo\?script\.param=only/.test(sent[0]),
         `requests: ${sent.join(' ; ')}`

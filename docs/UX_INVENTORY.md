@@ -243,6 +243,10 @@ while this inventory was being written; the fifth is still open.
    an app and wants to share it has no next step to look for.
    *Acceptance:* the journey documents where publishing will live, or says plainly that it is not
    built yet.
+   **Done:** the journey now says where publishing lives: there is no publish command, the preview is
+   private, and **Export app scaffold** hands the user the app's source to host themselves. The
+   roadmap's guided deployment path for one supported server runtime is where publishing will live,
+   and it is separate work. See "Where publishing lives" in `docs/PORTAL_BUILDER_JOURNEY.md`.
 
 ## What this inventory did not verify
 
@@ -263,11 +267,25 @@ while this inventory was being written; the fifth is still open.
   the browser the preview opened redeemed that one-time link first, the journey records that rather
   than submitting. To reproduce the measurement: run the harness, and read `measurements.json` in
   the run's artefact.
+- Whether the desktop suite still expects what the product does. The suite has not run since
+  2026-11-16, and it cannot run in a pull request: it needs a packaged extension, a download and a
+  display. A static audit of every journey against the code found four expectations the product had
+  moved — the walkthrough gained a step, a field row carries its kind, an Explorer failure row now
+  names the reason and keeps the cause in its tooltip, and the Script Runner asks the server for
+  the script list when it opens. The journeys expect what the product does now, and the facts they
+  rest on are held by `extension/test/unit/e2eJourneyExpectations.test.ts`, so the next change that
+  moves one of them fails in a pull request rather than in a run nobody looks at.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension
   ships and what the FileMaker development environment is generally understood to cover; it was not
-  checked against Claris's own documentation, which was not reachable here.
+  checked against Claris's own documentation, which was not reachable here. It was tried again on
+  2026-11-22, on two egress paths — the shell and the fetch tool — and both were refused by this
+  sandbox's allowlist, so the Claris side of each row is still unchecked. What each row would need
+  is one Claris Studio documentation page that says the capability exists; the nine rows are, in
+  order: running a script with parameters; browsing and changing records; finding and exporting
+  records; seeing a layout's fields; changing the database schema; designing a layout; debugging a
+  solution against a server; publishing a web front end; and writing FileMaker-side automation.
 - Whether the 13 commands visible on a fresh install are the right 13. They are the everyday
   commands that need no connection, which is a proxy for "always useful", not a decision anybody
   made.
