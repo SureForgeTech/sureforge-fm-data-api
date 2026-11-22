@@ -498,6 +498,47 @@ export interface FileMakerEditOptions {
   modId?: string;
 }
 
+/**
+ * A FileMaker script to run with a call, and the parameter to hand it.
+ *
+ * The names are the Data API's own. A pre-request script runs before the request is evaluated and
+ * a pre-sort script before a find's sort. A delete carries no scripts: the Data API has no script
+ * parameters on it.
+ */
+export interface FileMakerScriptOptions {
+  script?: string;
+  'script.param'?: string;
+  'script.prerequest'?: string;
+  'script.prerequest.param'?: string;
+  'script.presort'?: string;
+  'script.presort.param'?: string;
+}
+
+/**
+ * What a script answered. \`scriptError\` is "0" when the script succeeded; any other value is the
+ * script's own error code (3 is "command is invalid"), not a failed request. The pre-request and
+ * pre-sort results carry their phase in the name.
+ */
+export interface FileMakerScriptOutcome {
+  scriptResult?: string;
+  scriptError?: string;
+  'scriptResult.prerequest'?: string;
+  'scriptError.prerequest'?: string;
+  'scriptResult.presort'?: string;
+  'scriptError.presort'?: string;
+}
+
+/** The records a find returned, together with what a script attached to the find answered. */
+export interface FileMakerFindWithScripts<TRecord> extends FileMakerScriptOutcome {
+  data: TRecord[];
+  dataInfo?: Record<string, unknown>;
+}
+
+/** A record, together with what a script attached to the read answered. */
+export interface FileMakerRecordWithScripts<TRecord> extends FileMakerScriptOutcome {
+  record: TRecord;
+}
+
 ${layoutBlocks.join('\n\n')}
 
 export interface LayoutRecordMap {
@@ -542,7 +583,11 @@ function renderClientSource(
 
 import type {
   FileMakerEditOptions,
+  FileMakerFindWithScripts,
   FileMakerMessage,
+  FileMakerRecordWithScripts,
+  FileMakerScriptOptions,
+  FileMakerScriptOutcome,
   ${imports.join(',\n  ')}
 } from './types';
 
@@ -561,12 +606,12 @@ interface DataApiEnvelope<TResponse> {
   messages: FileMakerMessage[];
 }
 
-interface FindResponse<TRecord> {
+interface FindResponse<TRecord> extends FileMakerScriptOutcome {
   data: TRecord[];
   dataInfo?: Record<string, unknown>;
 }
 
-interface MutateResponse {
+interface MutateResponse extends FileMakerScriptOutcome {
   recordId?: string;
   modId?: string;
 }
@@ -689,6 +734,53 @@ function trimSlashes(value: string): string {
   return value.replace(/^\\/+|\\/+$/g, '');
 }
 
+const SCRIPT_OPTION_KEYS = [
+  'script',
+  'script.param',
+  'script.prerequest',
+  'script.prerequest.param',
+  'script.presort',
+  'script.presort.param'
+] as const;
+
+const SCRIPT_OUTCOME_KEYS = [
+  'scriptResult',
+  'scriptError',
+  'scriptResult.prerequest',
+  'scriptError.prerequest',
+  'scriptResult.presort',
+  'scriptError.presort'
+] as const;
+
+function scriptBody(options: FileMakerScriptOptions | undefined): Record<string, string> {
+  const body: Record<string, string> = {};
+  if (!options) return body;
+  for (const key of SCRIPT_OPTION_KEYS) {
+    const value = options[key];
+    if (value !== undefined) body[key] = value;
+  }
+  return body;
+}
+
+function scriptQuery(options: FileMakerScriptOptions | undefined): string {
+  const body = scriptBody(options);
+  const parts = SCRIPT_OPTION_KEYS
+    .filter((key) => body[key] !== undefined)
+    .map((key) => encodeURIComponent(key) + '=' + encodeURIComponent(body[key]!));
+  return parts.length === 0 ? '' : '?' + parts.join('&');
+}
+
+function pickScriptOutcome(response: FileMakerScriptOutcome): FileMakerScriptOutcome {
+  const outcome: FileMakerScriptOutcome = {};
+  for (const key of SCRIPT_OUTCOME_KEYS) {
+    const value = response[key];
+    if (value !== undefined) {
+      Object.assign(outcome, { [key]: value });
+    }
+  }
+  return outcome;
+}
+
 function basicAuthHeader(username: string, password: string): string {
   // Base64 of the UTF-8 "username:password": the Data API's Basic sign-in. TextEncoder and btoa
   // exist in a browser and in Node 18 alike.
@@ -705,7 +797,9 @@ function basicAuthHeader(username: string, password: string): string {
 function renderLayoutClientMethods(layout: string, suffix: string): string {
   const encodedLayout = `\${encodeURIComponent(${JSON.stringify(layout)})}`;
 
-  return `public async find${suffix}(request: ${suffix}FindRequest): Promise<${suffix}Record[]> {
+  return `public async find${suffix}(request: ${suffix}FindRequest): Promise<${suffix}Record[]>;
+public async find${suffix}(request: ${suffix}FindRequest, options: FileMakerScriptOptions): Promise<FileMakerFindWithScripts<${suffix}Record>>;
+public async find${suffix}(request: ${suffix}FindRequest, options?: FileMakerScriptOptions): Promise<${suffix}Record[] | FileMakerFindWithScripts<${suffix}Record>> {
   if (!Array.isArray(request.query) || request.query.length === 0 || request.query.some((criteria) =>
     !criteria || !Object.entries(criteria).some(([field, value]) => field !== 'omit' && value !== '' && value !== null && value !== undefined))) {
     throw new Error('Find criteria are empty. Enter at least one field value to search, or use Get records to list records.');
@@ -714,31 +808,37 @@ function renderLayoutClientMethods(layout: string, suffix: string): string {
     \`/layouts/${encodedLayout}/_find\`,
     {
       method: 'POST',
-      body: JSON.stringify(request)
+      body: JSON.stringify(options ? { ...request, ...scriptBody(options) } : request)
     },
     true
   );
-  return envelope.response.data;
+  // With script options the records come back together with the script's result; without them
+  // the list itself is returned, unchanged.
+  return options ? { ...envelope.response } : envelope.response.data;
 }
 
-public async get${suffix}(recordId: string): Promise<${suffix}Record> {
+public async get${suffix}(recordId: string): Promise<${suffix}Record>;
+public async get${suffix}(recordId: string, options: FileMakerScriptOptions): Promise<FileMakerRecordWithScripts<${suffix}Record>>;
+public async get${suffix}(recordId: string, options?: FileMakerScriptOptions): Promise<${suffix}Record | FileMakerRecordWithScripts<${suffix}Record>> {
   const envelope = await this.request<FindResponse<${suffix}Record>>(
-    \`/layouts/${encodedLayout}/records/\${encodeURIComponent(recordId)}\`,
+    \`/layouts/${encodedLayout}/records/\${encodeURIComponent(recordId)}\${scriptQuery(options)}\`,
     { method: 'GET' }
   );
   const record = envelope.response.data[0];
   if (!record) {
     throw new Error(\`Record not found: \${recordId}\`);
   }
-  return record;
+  // With script options the record comes back together with the script's result; without them
+  // the record itself is returned, unchanged.
+  return options ? { record, ...pickScriptOutcome(envelope.response) } : record;
 }
 
-public async create${suffix}(fieldData: Partial<${suffix}FieldData>): Promise<MutateResponse> {
+public async create${suffix}(fieldData: Partial<${suffix}FieldData>, options?: FileMakerScriptOptions): Promise<MutateResponse> {
   const envelope = await this.request<MutateResponse>(
     \`/layouts/${encodedLayout}/records\`,
     {
       method: 'POST',
-      body: JSON.stringify({ fieldData })
+      body: JSON.stringify({ fieldData, ...scriptBody(options) })
     }
   );
   return envelope.response;
@@ -747,7 +847,7 @@ public async create${suffix}(fieldData: Partial<${suffix}FieldData>): Promise<Mu
 public async edit${suffix}(
   recordId: string,
   fieldData: Partial<${suffix}FieldData>,
-  options?: FileMakerEditOptions
+  options?: FileMakerEditOptions & FileMakerScriptOptions
 ): Promise<MutateResponse> {
   const envelope = await this.request<MutateResponse>(
     \`/layouts/${encodedLayout}/records/\${encodeURIComponent(recordId)}\`,
@@ -757,7 +857,8 @@ public async edit${suffix}(
         fieldData,
         // When given, FileMaker refuses the edit (error 306) if the record changed since this
         // modId.
-        ...(options?.modId !== undefined ? { modId: options.modId } : {})
+        ...(options?.modId !== undefined ? { modId: options.modId } : {}),
+        ...scriptBody(options)
       })
     }
   );
@@ -769,6 +870,15 @@ public async delete${suffix}(recordId: string): Promise<void> {
     \`/layouts/${encodedLayout}/records/\${encodeURIComponent(recordId)}\`,
     { method: 'DELETE' }
   );
+}
+
+public async runScript${suffix}(script: string, scriptParam?: string): Promise<FileMakerScriptOutcome> {
+  const query = scriptParam !== undefined ? '?script.param=' + encodeURIComponent(scriptParam) : '';
+  const envelope = await this.request<FileMakerScriptOutcome>(
+    \`/layouts/${encodedLayout}/script/\${encodeURIComponent(script)}\` + query,
+    { method: 'GET' }
+  );
+  return envelope.response;
 }`;
 }
 
@@ -796,7 +906,7 @@ Generated at ${generatedAt} for profile ${readmeName(profile.name)}.
 ## Files
 
 - \`types.ts\` contains interfaces for the selected layout fields and records.
-- \`client.ts\` contains typed fetch wrappers for find, get, create, edit, delete and session operations.
+- \`client.ts\` contains typed fetch wrappers for find, get, create, edit, delete, session and run-script operations.
 
 ## Usage
 
@@ -831,6 +941,10 @@ Numbers are typed as \`number\`. Values beyond JavaScript's safe integer range (
 Dates, times and timestamps are strings in FileMaker's locale format; they are not JavaScript Date objects. Containers are URL strings. Repeating fields use optional keys such as \`Name(1)\` through the maximum repetition.
 An edit can carry the record's \`modId\`: \`await client.edit${firstMethod}('1', { "REPLACE_WITH_A_FIELD_NAME": "REPLACE_WITH_A_VALUE" }, { modId: '7' })\`. FileMaker then refuses the write with error 306 if the record changed since that \`modId\` was read, so a write cannot overwrite someone else's work. The \`modId\` of a record you read is on the record itself, as \`record.modId\`. A create has no such option: a new record has no earlier version.
 
+A call can run a FileMaker script alongside it. Give the script's name and parameter as the Data API names them: \`{ script: 'Tidy', 'script.param': 'a value' }\`, and \`script.prerequest\` or \`script.presort\` with their \`.param\` for the scripts that run before the request is evaluated or sorted. The script's answer comes back with the result: give the options to a find or a get and the call returns the records (or the record) together with \`scriptResult\` and \`scriptError\`; a create or an edit returns them alongside \`recordId\` and \`modId\`. \`scriptError\` is \`"0"\` when the script succeeded, and any other value is the script's own error code (3 is "command is invalid"): the call itself still succeeded. A delete carries no scripts, because the Data API has no script parameters on it.
+
+Run a script on its own with \`runScript\`: \`await client.runScript${firstMethod}('Tidy', 'a parameter')\` answers \`{ scriptResult, scriptError }\`. That route is a GET and takes only \`script.param\`.
+
 Sign in with \`createSession\` and out with \`deleteSession\`: \`await client.createSession(process.env.FM_USERNAME ?? '', process.env.FM_PASSWORD ?? '')\` signs the client in and keeps the token on the config you passed, so the calls that follow carry it. \`deleteSession()\` logs out (the route answers 200 even for a token that is already gone), and \`validateSession()\` resolves while the token is good and throws \`FileMakerDataApiError\` when it is not. The sign-in is the Data API's Basic account sign-in: a Claris ID (FMID) tenant is not covered by the generated client.
 A find with FileMaker code 401 returns an empty array, whatever the HTTP status. Other failures throw \`FileMakerDataApiError\` with \`code\`, \`status\` and \`messages\`. A web page instead of JSON gives an address/proxy check message.
 
@@ -845,6 +959,11 @@ const RESERVED_CLIENT_TYPE_NAMES = new Set([
   'FileMakerClientConfig',
   'FileMakerDataApiError',
   'FileMakerDataApiClient',
+  'FileMakerEditOptions',
+  'FileMakerScriptOptions',
+  'FileMakerScriptOutcome',
+  'FileMakerFindWithScripts',
+  'FileMakerRecordWithScripts',
   'DataApiEnvelope',
   'FindResponse',
   'MutateResponse',
