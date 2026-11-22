@@ -38,6 +38,17 @@ function session(rows: string[]) {
   return s;
 }
 
+/** A page whose quick input box is a multi-select box, for `pickMany`. */
+function fakeMultiSelectPage(rows: string[]) {
+  const box = { fill: async () => {}, };
+  const page = fakePage(rows);
+  return {
+    ...page,
+    locator: (selector: string) =>
+      selector === '.quick-input-box input' ? { first: () => box } : (page.locator as (value: string) => unknown)(selector)
+  };
+}
+
 describe('the deliberate choices a run records', () => {
   it('records a command once it ran, under the label that ran', async () => {
     const measurement = new Measurement('a journey');
@@ -91,5 +102,32 @@ describe('the deliberate choices a run records', () => {
     clearCurrentMeasurement();
     session([]).choice('command: FileMaker: One');
     expect(measurement.choices).toEqual([]);
+  });
+
+  it('records the row that ran when a command falls back to the highlighted row', async () => {
+    const measurement = new Measurement('a journey');
+    setCurrentMeasurement(measurement);
+    // The palette does not list the command by name, so the fallback runs the highlighted row.
+    const s = session(['FileMaker: Something Entirely Different']);
+    await s.cmd('FileMaker: Add Connection Profile', { exact: false });
+    expect(measurement.choices).toEqual(['command: FileMaker: Something Entirely Different']);
+  });
+
+  it('records nothing when the palette has no row to run', async () => {
+    const measurement = new Measurement('a journey');
+    setCurrentMeasurement(measurement);
+    // No rows at all: the fallback runs nothing, so there is no choice to record.
+    const s = session([]);
+    await s.cmd('FileMaker: Add Connection Profile', { exact: false });
+    expect(measurement.choices).toEqual([]);
+  });
+
+  it('records a multi-select as one decision', async () => {
+    const measurement = new Measurement('a journey');
+    setCurrentMeasurement(measurement);
+    const s = session(['Contacts', 'Orders']);
+    s.page = fakeMultiSelectPage(['Contacts', 'Orders']) as never;
+    await s.pickMany(['Contacts', 'Orders']);
+    expect(measurement.choices).toEqual(['pick: Contacts, Orders']);
   });
 });
