@@ -50,9 +50,27 @@ done
 
 # What the published release carries: one "asset:<name>" line per asset, and one "body:<text>"
 # line with its notes. An empty body means the release has no notes yet.
+#
+# The GitHub CLI reports a release that is not there and a failure the same way: it exits
+# non-zero. Only a message that says the release is not there means there is no release. Any
+# other failure - an authentication error, a network error, a server error, an answer that cannot
+# be read - is a failure to report, not a release to create: treating it as "no release" would
+# make the script try to publish a release that is already there.
 published() {
-  "$gh_cli" release view "$tag" ${repo:+--repo "$repo"} --json assets,body 2>/dev/null \
-    | "$node_bin" -e '
+  local error_file
+  error_file="$(mktemp)"
+  if ! "$gh_cli" release view "$tag" ${repo:+--repo "$repo"} --json assets,body >"$error_file.json" 2>"$error_file"; then
+    if grep -qiE 'not found|http 404' "$error_file"; then
+      rm -f "$error_file" "$error_file.json"
+      return 3
+    fi
+    echo "release-create: cannot read the release $tag:" >&2
+    cat "$error_file" >&2
+    rm -f "$error_file" "$error_file.json"
+    return 1
+  fi
+  rm -f "$error_file"
+  "$node_bin" -e '
 let input = "";
 process.stdin.on("data", (chunk) => { input += chunk; });
 process.stdin.on("end", () => {
@@ -60,7 +78,8 @@ process.stdin.on("end", () => {
   for (const asset of release.assets ?? []) console.log("asset:" + asset.name);
   console.log("body:" + String(release.body ?? "").replace(/\n/g, " "));
 });
-'
+' <"$error_file.json"
+  rm -f "$error_file.json"
 }
 
 # The name of an asset path.
@@ -68,12 +87,22 @@ asset_name() {
   basename "$1"
 }
 
-if ! state="$(published)"; then
+state=""
+status=0
+state="$(published)" || status=$?
+
+if [ "$status" = "3" ]; then
   # No release for this tag yet: publish it.
   "$gh_cli" release create "$tag" "${assets[@]}" ${repo:+--repo "$repo"} \
     --title "$tag" --notes-file "$notes_file"
   echo "release-create: published $tag"
   exit 0
+fi
+if [ "$status" != "0" ]; then
+  # The release could not be read, for a reason other than it not being there. The script must not
+  # publish in that case: the release may exist, and publishing again is what this script exists
+  # to prevent.
+  exit "$status"
 fi
 
 # A release with no assets, or with no notes, has none of the lines the greps look for, and a grep
@@ -100,7 +129,10 @@ if [ -z "$published_body" ]; then
 fi
 
 # Confirm what the release carries now.
-if ! state="$(published)"; then
+state=""
+status=0
+state="$(published)" || status=$?
+if [ "$status" != "0" ]; then
   echo "release-create: cannot read the release $tag after completing it" >&2
   exit 1
 fi

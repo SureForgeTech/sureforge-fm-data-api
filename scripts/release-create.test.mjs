@@ -20,7 +20,7 @@ const scriptPath = fileURLToPath(new URL('../tools/release-create.sh', import.me
  * visible to the next call the way the real CLI behaves. `existing` says what a published
  * release already carries: its asset names and whether it has notes.
  */
-function writeFakeGh(directory, { existing = null, uploadFails = false } = {}) {
+function writeFakeGh(directory, { existing = null, uploadFails = false, viewError = '', uploadDoesNotAdd = false } = {}) {
   const log = path.join(directory, 'gh-calls.log');
   const state = path.join(directory, 'gh-state.json');
   const binary = path.join(directory, 'gh');
@@ -41,6 +41,10 @@ const read = () => {
 const write = (value) => writeFileSync(statePath, JSON.stringify(value));
 
 if (args[0] === 'release' && args[1] === 'view') {
+  if (process.env.FAKE_GH_VIEW_ERROR) {
+    process.stderr.write(process.env.FAKE_GH_VIEW_ERROR + '\\n');
+    process.exit(1);
+  }
   const release = read();
   if (!release) {
     process.stderr.write('release not found\\n');
@@ -58,6 +62,10 @@ if (args[0] === 'release' && args[1] === 'view') {
   }
   const release = read() ?? { body: '', assets: [] };
   const names = args.slice(3).filter((value) => !value.startsWith('--'));
+  if (process.env.FAKE_GH_UPLOAD_DOES_NOT_ADD) {
+    process.stdout.write('uploaded\\n');
+    process.exit(0);
+  }
   for (const name of names) {
     const asset = name.split('/').pop();
     if (!release.assets.some((entry) => entry.name === asset)) release.assets.push({ name: asset });
@@ -83,22 +91,24 @@ if (args[0] === 'release' && args[1] === 'view') {
     env: {
       FAKE_GH_LOG: log,
       FAKE_GH_STATE: state,
-      FAKE_GH_UPLOAD_FAILS: uploadFails ? '1' : ''
+      FAKE_GH_UPLOAD_FAILS: uploadFails ? '1' : '',
+      FAKE_GH_VIEW_ERROR: viewError,
+      FAKE_GH_UPLOAD_DOES_NOT_ADD: uploadDoesNotAdd ? '1' : ''
     }
   };
 }
 
 /** Run the script with a fake GitHub CLI and report what it did. */
-function runReleaseCreate({ existing = null, uploadFails = false, assets = ['extension.vsix'], notes = 'notes here' } = {}) {
+function runReleaseCreate({ existing = null, uploadFails = false, viewError = '', uploadDoesNotAdd = false, assets = ['extension.vsix'], notes = 'notes here', missingAsset = false } = {}) {
   const directory = mkdtempSync(path.join(tmpdir(), 'release-create-'));
   const notesFile = path.join(directory, 'notes.md');
   writeFileSync(notesFile, notes, 'utf8');
   const assetPaths = assets.map((name) => {
     const full = path.join(directory, name);
-    writeFileSync(full, 'asset', 'utf8');
+    if (!missingAsset) writeFileSync(full, 'asset', 'utf8');
     return full;
   });
-  const fake = writeFakeGh(directory, { existing, uploadFails });
+  const fake = writeFakeGh(directory, { existing, uploadFails, viewError, uploadDoesNotAdd });
   const result = spawnSync('bash', [scriptPath, 'v1.9.1', notesFile, ...assetPaths], {
     encoding: 'utf8',
     env: { ...process.env, ...fake.env, GH_CLI: fake.binary }
@@ -158,5 +168,32 @@ test('refuses to publish a release with no notes', () => {
   const { result, calls } = runReleaseCreate({ notes: '' });
   assert.notEqual(result.status, 0);
   assert.match(result.stderr, /no release notes/);
+  assert.equal(calls.length, 0);
+});
+
+test('does not publish when the release cannot be read for a reason other than being absent', () => {
+  // The GitHub CLI exits non-zero for a missing release and for an authentication error alike.
+  // Treating the second as the first would make the script try to publish a release that is
+  // already there, which is the failure this script exists to prevent.
+  const existing = { body: 'notes here', assets: [{ name: 'extension.vsix' }] };
+  const { result, calls } = runReleaseCreate({ existing, viewError: 'HTTP 401: Bad credentials' });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /401/);
+  assert.ok(!calls.some((call) => call[0] === 'release' && call[1] === 'create'), 'it published a second release');
+});
+
+test('fails when the release still does not carry an expected asset', () => {
+  // The upload reports success but the release does not carry the asset: the script has to say so
+  // rather than call the release complete.
+  const existing = { body: 'notes here', assets: [] };
+  const { result } = runReleaseCreate({ existing, uploadDoesNotAdd: true });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /still missing/);
+});
+
+test('refuses to publish an asset that is not there', () => {
+  const { result, calls } = runReleaseCreate({ missingAsset: true });
+  assert.notEqual(result.status, 0);
+  assert.match(result.stderr, /asset not found/);
   assert.equal(calls.length, 0);
 });
