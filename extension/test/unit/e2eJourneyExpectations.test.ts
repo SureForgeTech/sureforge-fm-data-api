@@ -4,6 +4,9 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 
 import { FMClientError } from '../../src/services/errors';
+import { SCRIPTS_PATH } from '../../src/services/fmClient/metadata';
+// @ts-expect-error The mock server is JavaScript; it is loaded here as the server the journeys run against.
+import { createEngine } from '../../test/mock-server/lib/engine.mjs';
 import {
   EXPLORER_FAILURE_LABELS,
   explorerFailureText,
@@ -17,7 +20,8 @@ const {
   EXPLORER_FAILURE_REASON,
   explorerFailureReason,
   isFieldRow,
-  isScriptRunRequest
+  isScriptRunRequest,
+  SCRIPT_LIST_REQUEST
 } = journeyFacts;
 const { WALKTHROUGH_STEPS } = journeyFacts;
 
@@ -29,6 +33,41 @@ const manifest = JSON.parse(fs.readFileSync(path.join(EXTENSION, 'package.json')
  * These cases hold the journeys' expectations against the code, so a product change that moves
  * one of them fails here rather than on the machine that runs the suite.
  */
+/**
+ * The fields the mock's Customers layout carries, as the server reports them. The journeys run
+ * against that mock, so the field types they meet are the ones this returns.
+ */
+async function mockLayoutFields(): Promise<Array<{ name: string; result?: string; type?: string; global?: boolean; repetitions?: number }>> {
+  const engine = createEngine();
+  const request = async (method: string, pathname: string, body: string, authorization: string) =>
+    engine.dispatch({
+      method,
+      pathname,
+      query: new URLSearchParams(),
+      headers: { host: 'localhost', 'content-type': 'application/json', authorization },
+      body: Buffer.from(body)
+    });
+  const session = await request(
+    'POST',
+    '/fmi/data/vLatest/databases/Quality/sessions',
+    '{}',
+    'Basic ' + Buffer.from('tester:testpass1').toString('base64')
+  );
+  assert(session.status === 200, `the mock refused the sign-in: ${session.status}`);
+  const token = (session.json as { response?: { token?: string } }).response?.token;
+  assert(token, 'the mock issued no session token');
+  const metadata = await request(
+    'GET',
+    '/fmi/data/vLatest/databases/Quality/layouts/Customers',
+    '',
+    'Bearer ' + token
+  );
+  assert(metadata.status === 200, `the mock refused the layout metadata: ${metadata.status}`);
+  const fields = (metadata.json as { response?: { fieldMetaData?: unknown } }).response?.fieldMetaData;
+  assert(Array.isArray(fields) && fields.length > 0, 'the mock returned no field metadata');
+  return fields as Array<{ name: string; result?: string; type?: string; global?: boolean; repetitions?: number }>;
+}
+
 describe('the desktop journeys expect what the product does', () => {
   it('names every step of the walkthrough the manifest declares', () => {
     const declared = (manifest.contributes.walkthroughs ?? []).flatMap((walkthrough: { steps?: { title: string }[] }) =>
@@ -38,17 +77,12 @@ describe('the desktop journeys expect what the product does', () => {
     expect(WALKTHROUGH_STEPS).toEqual(declared);
   });
 
-  it('counts a field row the way the Explorer writes it', () => {
+  it('counts a field row the way the Explorer writes it', async () => {
     // The Explorer writes the type, the kind when it is not the type's own name, and the
-    // repetition count.
-    const rows = [
-      { name: 'FirstName', result: 'text', type: 'normal', repetitions: 1 },
-      { name: 'FullName', result: 'text', type: 'calculation', repetitions: 1 },
-      { name: 'TotalOrdered', result: 'number', type: 'summary', repetitions: 1 },
-      { name: 'gFilter', result: 'text', type: 'normal', global: true, repetitions: 1 },
-      { name: 'Avatar', result: 'container', type: 'normal', repetitions: 1 },
-      { name: 'Phones', result: 'text', type: 'normal', repetitions: 3 }
-    ];
+    // repetition count. The fields are the ones the mock's own layout carries, so a field type the
+    // mock adds fails here rather than quietly dropping rows from the journey's count.
+    const rows = await mockLayoutFields();
+    expect(rows.length).toBeGreaterThan(0);
     for (const field of rows) {
       const description = fieldRowDescription(field);
       expect(description).toBeTruthy();
@@ -108,5 +142,14 @@ describe('the desktop journeys expect what the product does', () => {
     // A record read and a find are what the check exists to catch, so they have to survive it.
     expect(isScriptRunRequest('GET /layouts/Customers/records/1 -> 200/0')).toBe(true);
     expect(isScriptRunRequest('POST /layouts/Customers/_find -> 200/0')).toBe(true);
+  });
+
+  it('recognises the script list request the product sends', () => {
+    // The journey leaves the script list out of the requests a script run made. The path comes
+    // from the product, so a rename here breaks this case rather than the journey.
+    expect(SCRIPT_LIST_REQUEST.test(SCRIPTS_PATH)).toBe(true);
+    expect(SCRIPT_LIST_REQUEST.test('/sessions')).toBe(false);
+    expect(isScriptRunRequest('GET /sessions')).toBe(false);
+    expect(isScriptRunRequest(`GET ${SCRIPTS_PATH}`)).toBe(false);
   });
 });
