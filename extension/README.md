@@ -8,7 +8,7 @@ Create an FM Web app from FileMaker fields, customize an event-registration, fee
 
 ![Connect to a FileMaker server and run a find request in under 10 seconds.](docs/marketplace/connection-wizard.gif)
 
-**Built by [ABD Enterprises](https://abdenterprises.com).** Free, open source (Apache-2.0), no telemetry, no cloud account.
+**Free and open source under Apache-2.0.** The extension collects no telemetry and requires no separate account. See the [SureForge FM Data API product page](https://sureforgetech.com/products/sureforge-fm-data-api/).
 
 Version **1.9.0** adds new related portal rows to Create Record on direct connections. It mostly improves safety: batch updates follow write rules, old saved addresses lose embedded credentials safely, and server responses and the source-checkout FM Web preview have tighter limits. Read the [upgrade notes](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/UPGRADE.md) for the new prompts and settings rules.
 
@@ -182,25 +182,15 @@ Read the [security overview](https://github.com/SureForgeTech/sureforge-fm-data-
 | Report a problem | [Report a bug or request a feature](https://github.com/SureForgeTech/sureforge-fm-data-api/issues) |
 | Help with the project | [Contributing](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/CONTRIBUTING.md) and [architecture](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/ARCHITECTURE.md) |
 
-## Need help with FileMaker integration?
+## Optional FileMaker consulting
 
-This extension is free and Apache-2.0-licensed. The team behind it, [ABD Enterprises](https://abdenterprises.com), has been delivering FileMaker integration, migration, and modernization work since 2005.
+The extension is free to use. If you want help adding AI to FileMaker, moving off Claris Studio, or refreshing an existing FileMaker system, [ABD Enterprises](https://abdenterprises.com) offers a $500 consultation with a written proposal covering scope, plan, timeline, and cost. Custom development is $125 per hour after the scope is agreed.
 
-If you need a hand with the work behind the tool:
-
-| Engagement                 | Price            | What you get                                                |
-| -------------------------- | ---------------- | ----------------------------------------------------------- |
-| **Discovery Sprint**       | $3,000 / 1 week  | Documented requirements + effort estimate                   |
-| **Integration Audit**      | $4,500 / 1 week  | Architecture review, gap analysis, prioritized remediation  |
-| **Migration Assessment**   | $9,000 / 2 weeks | Honest evaluation: modernize within FileMaker, or move on   |
-| **Platform Modernization** | $25k – $150k     | Execute the chosen path in measured phases                  |
-| **Retainer**               | $5,000 / month   | Ongoing maintenance, feature work, FM Server administration |
-
-**Contact:** [registrar@abdenterprises.com](mailto:registrar@abdenterprises.com?subject=From%20VS%20Code%20Extension) · [abdenterprises.com](https://abdenterprises.com)
+[See the current offer](https://abdenterprises.com/index.html#consultation) or [contact Alan](https://abdenterprises.com/index.html#contact).
 
 ## License
 
-MIT. The licences of the third-party packages bundled into the extension are in [THIRD_PARTY_NOTICES.txt](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/THIRD_PARTY_NOTICES.txt).
+[Apache-2.0](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/LICENSE). The licenses of third-party packages bundled into the extension are in [THIRD_PARTY_NOTICES.txt](https://github.com/SureForgeTech/sureforge-fm-data-api/blob/main/extension/THIRD_PARTY_NOTICES.txt).
 
 ## Trademarks
 
