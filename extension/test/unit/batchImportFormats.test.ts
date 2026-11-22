@@ -83,6 +83,30 @@ describe('the shapes a batch update file can be in', () => {
     expect(entries[0]!.fieldData).toEqual({ Notes: 'one; two' });
   });
 
+  it('reads a comma-delimited file when its first line names a recordId either way', () => {
+    // The first line names a recordId when it is split on commas and when it is split on
+    // semicolons, so the comma reading wins and the file is not offered as a semicolon file.
+    const csv = 'recordId;Notes,recordId\n1,x\n';
+
+    const entries = parseBatchUpdateInput(csv, 'csv');
+
+    expect(entries).toHaveLength(1);
+    expect(entries[0]!.fieldData['recordId;Notes']).toBe('1');
+  });
+
+  it('reads a JSONL file that ends with a newline', () => {
+    // Every JSONL file ends with a newline, so the empty last line is not an entry.
+    const jsonl = [
+      JSON.stringify({ recordId: '1', fieldData: { Name: 'Ada' } }),
+      JSON.stringify({ recordId: '2', fieldData: { Name: 'Grace' } })
+    ].join('\n');
+
+    const entries = parseBatchUpdateInput(`${jsonl}\n`, 'jsonl');
+
+    expect(entries).toHaveLength(2);
+    expect(entries[1]!.recordId).toBe('2');
+  });
+
   it('names the line of a JSONL file that is not JSON', () => {
     const jsonl = [
       JSON.stringify({ recordId: '1', fieldData: { Name: 'Ada' } }),
