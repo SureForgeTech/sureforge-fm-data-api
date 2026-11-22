@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The generated TypeScript client can open and close its own session: sign in with the Data API's Basic account sign-in, and check the token when you need to.
+
 - The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
 
 - Batch update now reads a file that is one record per line or a spreadsheet's semicolon-delimited columns, when you say so, and the import says which date order the server will read the dates in.
