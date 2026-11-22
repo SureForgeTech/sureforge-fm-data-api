@@ -251,18 +251,18 @@ while this inventory was being written; the fifth is still open.
   commands were run and which options were picked — goes to `measurements.json` and to a
   **Measurements** section of `report.md`, and every step's duration goes to `report.json`. **The path
   to a first sample receipt is a journey now** (`j17-first-sample-receipt.mjs`): it chooses a starter
-  and the invented data, starts the preview, submits the form and reads the receipt, and it records
-  the five deliberate choices — the starter, where the fields come from, the workspace folder, the
-  save-and-preview action and the submission — with the preview's cold dependency setup as a separate
-  figure. The measurement is produced where the desktop suite runs, so the number is in that run's
-  artefact rather than here. Two things keep it from being one: the preview opens an external browser
-  (`vscode.env.openExternal`), and a CI runner has no browser to open; and the submission needs the
-  preview session token from the URL that browser was given. What the code says today is that the
-  path has **five deliberate choices** — the starter, where the fields come from, the workspace
-  folder, the save-and-preview action, and the submission in the browser — and that the cold
-  dependency setup, the generated app's `npm install`, is a separate cost, which is how the tracker
-  asks for it to be recorded. To reproduce the measurement once the journey exists: run the
-  harness, and read `measurements.json` in the run's artefact.
+  and the invented data, starts the preview, submits the form and reads the receipt. It records the
+  deliberate choices on the way — the starter, where the fields come from, the workspace folder, the
+  save-and-preview action and, when the form is submitted, the submission — and the preview's own
+  start as a separate figure. The measurement is produced where the desktop suite runs, so the number
+  is in that run's artefact rather than here. The path has **five deliberate choices** — the starter,
+  where the fields come from, the workspace folder, the save-and-preview action, and the submission
+  in the browser — and the preview's own start, which installs the shipped template, is a separate
+  cost, which is how the tracker asks for it to be recorded. The journey reads the preview's private
+  launch link from the preview's own folder, so it does not need a browser to reach the form; when
+  the browser the preview opened redeemed that one-time link first, the journey records that rather
+  than submitting. To reproduce the measurement: run the harness, and read `measurements.json` in
+  the run's artefact.
 - Whether representative FileMaker developers agree with the everyday set. The set in proposal 3 is
   derived from documents this repository already writes, not from watching users.
 - Claris Studio's current feature list. The capability map above is written from what this extension

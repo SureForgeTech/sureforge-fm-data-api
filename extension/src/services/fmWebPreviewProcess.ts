@@ -173,7 +173,14 @@ export class FmWebPreviewProcess implements vscode.Disposable {
     // The launch code is a credential, so it is never logged. It is written to the preview's own
     // owner-only folder, so a run whose browser could not be opened - a CI runner, a remote
     // session - can still reach the preview, and so a test can drive the form.
-    await writeFile(path.join(directory, 'launch-url'), `${launchUrl}\n`, { mode: 0o600, flag: 'wx' });
+    const linkFile = path.join(directory, 'launch-url');
+    await writeFile(linkFile, `${launchUrl}\n`, { mode: 0o600, flag: 'wx' });
+    // The launch code is redeemed once, and only within two minutes of the server start. The file
+    // has no reason to outlive that window.
+    const expiry = setTimeout(() => {
+      void rm(linkFile, { force: true }).catch(() => undefined);
+    }, 120_000);
+    expiry.unref?.();
     const session = randomBytes(32).toString('hex');
     if (!files.has(PREVIEW_SERVER_FILE)) throw new Error('This installation does not carry the private preview server.');
     // Not `next dev`: its hot-reload and /_next, /__nextjs endpoints answer before the cookie gate.

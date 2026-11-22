@@ -2,9 +2,9 @@
 //
 // The path is the one the UX inventory names: choose a starter, choose where the fields come
 // from, save and preview, and submit the form. The measurement records the elapsed time and the
-// deliberate choices the user had to make, so a run says how long a first-time user needed. The cold
-// dependency setup - the preview installing the shipped template - is a separate cost and is
-// recorded separately, the way the tracker asks for it.
+// deliberate choices the user had to make, so a run says how long a first-time user needed. The
+// preview's own start - copying the template, installing its dependencies and starting Next - is a
+// separate figure, the way the tracker asks for it.
 import { randomUUID } from 'node:crypto';
 import fs from 'node:fs';
 import os from 'node:os';
@@ -54,7 +54,7 @@ export async function run(ctx) {
     }
   );
 
-  let installMs = 0;
+  let previewMs = 0;
   await s.step(
     J,
     'the preview starts from the editor',
@@ -72,53 +72,61 @@ export async function run(ctx) {
       await s.modal('Run');
       const started = Date.now();
       const ready = await s.waitToast(/preview is ready in your browser/i, { timeout: 900000 });
-      installMs = Date.now() - started;
-      return `${ready} (the preview took ${Math.round(installMs / 1000)}s to become ready)`;
+      previewMs = Date.now() - started;
+      return `${ready} (the preview took ${Math.round(previewMs / 1000)}s to become ready)`;
     }
   );
 
-  await s.step(
-    J,
-    'the invented form is submitted and accepted',
-    'the private link opens the form, and the submission comes back with a receipt',
-    async () => {
-      const folder = [...previewFolders()].find((name) => !before.has(name));
-      assert(folder, 'the preview wrote no private folder');
-      const linkFile = path.join(os.tmpdir(), folder, 'launch-url');
-      assert(fs.existsSync(linkFile), 'the preview wrote no private launch link');
-      const link = fs.readFileSync(linkFile, 'utf8').trim();
-      // The link is redeemed once; the file has no reason to keep it afterwards.
-      fs.rmSync(linkFile, { force: true });
-      // The link is single use: the browser that the preview opened may have redeemed it already.
-      const opened = await fetch(link, { redirect: 'manual' });
-      const cookie = opened.headers
-        .getSetCookie()
-        .map((value) => value.split(';')[0])
-        .join('; ');
-      if (!cookie) {
-        measurement.note(
-          'The private link was already redeemed - the browser the preview opened took it - so the submission was not made here.'
-        );
-        return 'the link was redeemed by the browser that the preview opened';
+  // The launch code is single use, and the browser the preview opened may have redeemed it first.
+  const folder = [...previewFolders()].find((name) => !before.has(name));
+  assert(folder, 'the preview wrote no private folder');
+  const linkFile = path.join(os.tmpdir(), folder, 'launch-url');
+  assert(fs.existsSync(linkFile), 'the preview wrote no private launch link');
+  const link = fs.readFileSync(linkFile, 'utf8').trim();
+  const opened = await fetch(link, { redirect: 'manual' });
+  const cookie = opened.headers
+    .getSetCookie()
+    .map((value) => value.split(';')[0])
+    .join('; ');
+
+  if (!cookie) {
+    measurement.note(
+      'The private link came back without a session cookie, so the form was not submitted here: the browser the preview opened may have redeemed the one-time link, or the link may have expired.'
+    );
+    s.notTestable(
+      J,
+      'the invented form is submitted and accepted',
+      'the one-time link was already redeemed, so the session cookie was not issued'
+    );
+  } else {
+    await s.step(
+      J,
+      'the invented form is submitted and accepted',
+      'the private link opens the form, and the submission comes back with a receipt',
+      async () => {
+        const response = await fetch(`${ORIGIN}/api/intake/${INTAKE}`, {
+          method: 'POST',
+          redirect: 'manual',
+          headers: { 'Content-Type': 'application/json', origin: ORIGIN, cookie },
+          body: JSON.stringify({ submissionId: randomUUID(), values: VALUES })
+        });
+        const outcome = await response.json();
+        assert(response.ok, `the submission was refused: ${JSON.stringify(outcome)}`);
+        assert(outcome.status === 'accepted', `the submission was not accepted: ${JSON.stringify(outcome)}`);
+        assert(outcome.receipt, 'the receipt was empty');
+        s.choice('submission: the invented form');
+        return `receipt ${outcome.receipt}`;
       }
-      const response = await fetch(`${ORIGIN}/api/intake/${INTAKE}`, {
-        method: 'POST',
-        redirect: 'manual',
-        headers: { 'Content-Type': 'application/json', origin: ORIGIN, cookie },
-        body: JSON.stringify({ submissionId: randomUUID(), values: VALUES })
-      });
-      const outcome = await response.json();
-      assert(response.ok, `the submission was refused: ${JSON.stringify(outcome)}`);
-      assert(outcome.status === 'accepted', `the submission was not accepted: ${JSON.stringify(outcome)}`);
-      assert(outcome.receipt, 'the receipt was empty');
-      s.choice('submission: the invented form');
-      return `receipt ${outcome.receipt}`;
-    }
-  );
+    );
+    // The link is redeemed once; the file has no reason to keep it afterwards.
+    fs.rmSync(linkFile, { force: true });
+  }
 
-  measurement.note(
-    `The preview's cold dependency setup took ${Math.round(installMs / 1000)}s of the elapsed time.`
-  );
+  if (previewMs > 0) {
+    measurement.note(
+      `The preview's own start - copying the template, installing its dependencies and starting Next - took ${Math.round(previewMs / 1000)}s of the elapsed time.`
+    );
+  }
   report.measure(measurement.end());
   clearCurrentMeasurement();
 }
