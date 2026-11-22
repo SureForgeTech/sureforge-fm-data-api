@@ -24,6 +24,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FEATURE]
 
+- The generated TypeScript client can open and close its own session: sign in with the Data API's Basic account sign-in, and check the token when you need to.
+
 - The generated TypeScript client's edit now takes the record's `modId`, so a write can refuse to overwrite a record that changed since it was read.
 
 - Batch update now reads a file that is one record per line or a spreadsheet's semicolon-delimited columns, when you say so, and the import says which date order the server will read the dates in.
@@ -72,6 +74,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
+
 - Align the Marketplace overview with the product page and the current ABD Enterprises consulting offer.
 
 - A request that waits for a session is now ended by its own deadline, and says so: the message names the deadline that was in force, in the same words as the other timeout messages.
@@ -103,6 +107,7 @@ PR title prefix matches the highest-tier label added:
 
 - A desktop journey now covers the Command Palette's two sides: the everyday commands without the power-user setting, and the power-user commands with it.
 
+- Align the Marketplace overview with the product page and the current ABD Enterprises consulting offer.
 - The maintainer inventory now states the criterion for the commands visible on a fresh install: a command belongs there when the repository's own launcher offers it. Every one of the thirteen is named in the FileMaker home, and a unit test holds that.
 
 - The desktop journeys now expect what the product does: the walkthrough's sixth step, the kind a field row carries, the reason an Explorer failure row names, and the script list the Script Runner asks for when it opens. The facts they rest on are held by a unit test, so a product change that moves one fails in a pull request.

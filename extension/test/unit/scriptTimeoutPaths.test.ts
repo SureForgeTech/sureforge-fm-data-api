@@ -106,9 +106,14 @@ describe('a run\'s deadline reaches every request the run makes', () => {
   it('tells the user to raise the run\'s own deadline when the sign-in gives up', async () => {
     // The sign-in the run needs is under the run's own deadline, so the advice must name that
     // deadline and not the shared setting.
-    const url = await listen((_request, response) => {
+    const url = await listen((request, response) => {
+      const path = new URL(request.url ?? '/', 'http://x').pathname;
       response.setHeader('Content-Type', 'application/json');
-      setTimeout(() => response.end(ok({ token: 'tok' })), 400);
+      if (path.endsWith('/sessions')) {
+        setTimeout(() => response.end(ok({ token: 'tok' })), 400);
+        return;
+      }
+      response.end(ok({ scriptResult: 'done', scriptError: '0' }));
     });
     const secrets = new SecretStore(new InMemorySecretStorage() as never);
     await secrets.setPassword('p1', 'pw');
@@ -121,6 +126,79 @@ describe('a run\'s deadline reaches every request the run makes', () => {
 
     expect(failure?.message).toContain("raise this request's timeout");
     expect(failure?.message).not.toContain('filemaker.requestTimeoutMs');
+  });
+
+  it('names the shared setting when the run\'s own deadline could not be used', async () => {
+    // A deadline of zero is not a deadline: the request falls back to the shared timeout, and the
+    // advice must name the shared setting rather than a deadline that was never in force.
+    const url = await listen((request, response) => {
+      const path = new URL(request.url ?? '/', 'http://x').pathname;
+      response.setHeader('Content-Type', 'application/json');
+      if (path.endsWith('/sessions')) {
+        setTimeout(() => response.end(ok({ token: 'tok' })), 400);
+        return;
+      }
+      response.end(ok({ scriptResult: 'done', scriptError: '0' }));
+    });
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    await secrets.setPassword('p1', 'pw');
+    const profile: ConnectionProfile = { id: 'p1', name: 'T', authMode: 'direct', serverUrl: url, database: 'Sales Db', username: 'u' };
+    const fm = new FMClient(secrets, logger, 150);
+
+    const failure = await fm
+      .runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }, { timeoutMs: 0 })
+      .then(() => undefined, (error: unknown) => error as { message: string });
+
+    expect(failure?.message).toContain('filemaker.requestTimeoutMs');
+    expect(failure?.message).not.toContain("raise this request's timeout");
+  });
+
+  it('names the run\'s own deadline even when it equals the shared one', async () => {
+    // The run asked for 200 ms and the shared timeout is 200 ms. The run's deadline is what governs
+    // it, so the advice names that, not the setting.
+    const url = await listen((_request, response) => {
+      response.setHeader('Content-Type', 'application/json');
+      setTimeout(() => response.end(ok({ scriptResult: 'done', scriptError: '0' })), 400);
+    });
+    const { fm, profile } = await client(url, 200);
+
+    const failure = await fm
+      .runScript(profile, { layout: 'Contacts', scriptName: 'Slow' }, { timeoutMs: 200 })
+      .then(() => undefined, (error: unknown) => error as { message: string });
+
+    expect(failure?.message).toContain("raise this request's timeout");
+    expect(failure?.message).not.toContain('filemaker.requestTimeoutMs');
+  });
+
+  it('gives up waiting for another request\'s sign-in at its own deadline', async () => {
+    // The sign-in is shared. A request with a short deadline must not wait for a long run's sign-in,
+    // and giving up must not say the connection is unreachable.
+    const url = await listen((request, response) => {
+      const path = new URL(request.url ?? '/', 'http://x').pathname;
+      response.setHeader('Content-Type', 'application/json');
+      if (path.endsWith('/sessions')) {
+        setTimeout(() => response.end(ok({ token: 'tok' })), 400);
+        return;
+      }
+      response.end(ok({ scriptResult: 'done', scriptError: '0' }));
+    });
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    await secrets.setPassword('p1', 'pw');
+    const profile: ConnectionProfile = { id: 'p1', name: 'T', authMode: 'direct', serverUrl: url, database: 'Sales Db', username: 'u' };
+    const fm = new FMClient(secrets, logger, 30_000);
+
+    const long = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Slow' }, { timeoutMs: 5000 });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const started = Date.now();
+    const failure = await fm
+      .runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }, { timeoutMs: 100 })
+      .then(() => undefined, (error: unknown) => error as { message: string });
+
+    expect(failure?.message).toContain('timed out waiting for the connection to sign in');
+    expect(Date.now() - started).toBeLessThan(1000);
+    expect(fm.getHealth('p1')?.state).not.toBe('unreachable');
+    // The long run is not held up or killed by the other request's deadline.
+    await expect(long).resolves.toBeDefined();
   });
 
   it('gives the renewal after a rejected token the run\'s deadline', async () => {
@@ -179,6 +257,45 @@ describe('a run\'s deadline reaches every request the run makes', () => {
       .then(() => undefined, (error: unknown) => error as { message: string });
 
     expect(failure?.message).toContain('too long');
+  });
+
+  it('gives up waiting for another request\'s renewal at its own deadline', async () => {
+    // The server rejects the token, so both requests try to renew. One renewal is shared, and a
+    // request with a short deadline must not wait for the other's slow sign-in.
+    // The first script request is refused, so the run renews; the retry is answered.
+    let scriptRequests = 0;
+    const url = await listen((request, response) => {
+      const path = new URL(request.url ?? '/', 'http://x').pathname;
+      response.setHeader('Content-Type', 'application/json');
+      if (path.endsWith('/sessions')) {
+        setTimeout(() => response.end(ok({ token: 'tok' })), 400);
+        return;
+      }
+      scriptRequests += 1;
+      if (scriptRequests === 1) {
+        response.statusCode = 401;
+        response.end(JSON.stringify({ response: {}, messages: [{ code: '952', message: 'invalid' }] }));
+        return;
+      }
+      response.end(ok({ scriptResult: 'done', scriptError: '0' }));
+    });
+    const secrets = new SecretStore(new InMemorySecretStorage() as never);
+    await secrets.setPassword('p1', 'pw');
+    await secrets.setSessionToken('p1', 'stale');
+    const profile: ConnectionProfile = { id: 'p1', name: 'T', authMode: 'direct', serverUrl: url, database: 'Sales Db', username: 'u' };
+    const fm = new FMClient(secrets, logger, 30_000);
+
+    const long = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Slow' }, { timeoutMs: 5000 });
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    const started = Date.now();
+    const failure = await fm
+      .runScript(profile, { layout: 'Contacts', scriptName: 'Quick' }, { timeoutMs: 100 })
+      .then(() => undefined, (error: unknown) => error as { message: string });
+
+    expect(failure?.message).toContain('timed out waiting for the connection to sign in');
+    expect(Date.now() - started).toBeLessThan(1000);
+    // The long run finishes: the other request's deadline does not cancel the shared sign-in.
+    await expect(long).resolves.toBeDefined();
   });
 
   it('gives a record write the deadline the control carries', async () => {

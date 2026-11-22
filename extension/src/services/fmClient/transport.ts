@@ -1,4 +1,4 @@
-import { effectiveTimeout, withRequestLimits } from '../requestLimits';
+import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from '../requestLimits';
 import { noteRequestTimeout } from '../tlsAgent';
 import { type AxiosError, type AxiosRequestConfig } from 'axios';
 import type { ConnectionProfile } from '../../types/fm';
@@ -30,7 +30,7 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
   // The deadline in force: the request's own when it asked for a usable one, the shared timeout
   // otherwise. The advice names it when it is not the shared one.
   const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
-  const ownDeadline = timeoutMs !== client.timeoutMs;
+  const ownDeadline = hasOwnDeadline(request.timeoutMs);
 
   try {
     const config: AxiosRequestConfig = {
@@ -105,7 +105,7 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
 
   const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: request.timeoutMs });
   const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
-  const ownDeadline = timeoutMs !== client.timeoutMs;
+  const ownDeadline = hasOwnDeadline(request.timeoutMs);
 
   try {
     const config: AxiosRequestConfig = {

@@ -1,4 +1,4 @@
-import { effectiveTimeout, withRequestLimits } from './requestLimits';
+import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from './requestLimits';
 import { CertificateAdvice } from './fmClient/certificates';
 import { randomUUID } from 'crypto';
 import axios, { type AxiosInstance } from 'axios';
@@ -255,7 +255,7 @@ export class FMClient {
               requestId: trace.requestId,
               endpoint: 'POST /sessions',
               // A sign-in under the run's own deadline is not governed by the shared setting.
-              timeoutOverride: effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
+              timeoutOverride: hasOwnDeadline(control?.timeoutMs)
             })
           );
           if (control?.proactive !== true) {
@@ -550,6 +550,10 @@ export class FMClient {
     if (error.kind === 'cancellation') {
       return undefined;
     }
+    if (error.code === 'SESSION_WAIT_TIMEOUT') {
+      // Another request's sign-in was still running. Nothing is known about the connection.
+      return undefined;
+    }
     if (error.kind === 'certificate') {
       return { state: 'certificate', message: error.message, at };
     }
@@ -648,7 +652,9 @@ export class FMClient {
    * that asked for its own deadline is told to raise that deadline.
    */
   private timeoutAdvice(control?: ClientRequestControl): string {
-    return effectiveTimeout(control?.timeoutMs, this.timeoutMs) !== this.timeoutMs
+    // A run whose deadline is the shared one still carries its own deadline, so it is told to raise
+    // that one: the shared setting would not change it.
+    return hasOwnDeadline(control?.timeoutMs)
       ? 'If the server is slow, raise this request\'s timeout.'
       : 'If the server is slow, raise the setting filemaker.requestTimeoutMs.';
   }

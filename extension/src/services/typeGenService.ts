@@ -583,6 +583,7 @@ export class FileMakerDataApiError extends Error {
 export class FileMakerDataApiClient {
   private readonly fetchImpl: typeof fetch;
   private readonly baseUrl: string;
+  private readonly rootUrl: string;
 
   public constructor(private readonly config: FileMakerClientConfig) {
     this.fetchImpl = config.fetch ?? globalThis.fetch;
@@ -593,17 +594,58 @@ export class FileMakerDataApiClient {
     const serverUrl = trimSlashes(config.serverUrl);
     const apiBasePath = trimSlashes(config.apiBasePath ?? 'fmi/data');
     const apiVersionPath = trimSlashes(config.apiVersionPath ?? 'vLatest');
-    this.baseUrl = \`\${serverUrl}/\${apiBasePath}/\${apiVersionPath}/databases/\${encodeURIComponent(config.database)}\`;
+    this.rootUrl = \`\${serverUrl}/\${apiBasePath}/\${apiVersionPath}\`;
+    this.baseUrl = \`\${this.rootUrl}/databases/\${encodeURIComponent(config.database)}\`;
   }
 
 ${indent(methods, 2)}
 
+  public async createSession(username: string, password: string): Promise<string> {
+    const envelope = await this.request<{ token?: string }>(
+      '/sessions',
+      {
+        method: 'POST',
+        headers: { Authorization: basicAuthHeader(username, password) },
+        body: JSON.stringify({})
+      }
+    );
+    const token = envelope.response.token;
+    if (!token) {
+      throw new Error('FileMaker create session response did not include a session token.');
+    }
+    // The calls that follow are signed in with the new token: it is kept on the config passed to
+    // the client.
+    this.config.token = token;
+    return token;
+  }
+
+  public async deleteSession(): Promise<void> {
+    const token = this.config.token;
+    if (!token) {
+      throw new Error('There is no session token to delete. Call createSession first.');
+    }
+    await this.request<Record<string, never>>(
+      \`/sessions/\${encodeURIComponent(token)}\`,
+      { method: 'DELETE' }
+    );
+  }
+
+  public async validateSession(): Promise<void> {
+    await this.request<Record<string, never>>(
+      '/validateSession',
+      { method: 'GET' },
+      false,
+      this.rootUrl
+    );
+  }
+
   private async request<TResponse>(
     path: string,
     init: RequestInit,
-    allowNoRecords = false
+    allowNoRecords = false,
+    base: string = this.baseUrl
   ): Promise<DataApiEnvelope<TResponse>> {
-    const response = await this.fetchImpl(\`\${this.baseUrl}\${path}\`, {
+    const response = await this.fetchImpl(\`\${base}\${path}\`, {
       ...init,
       headers: {
         'Content-Type': 'application/json',
@@ -645,6 +687,17 @@ ${indent(methods, 2)}
 
 function trimSlashes(value: string): string {
   return value.replace(/^\\/+|\\/+$/g, '');
+}
+
+function basicAuthHeader(username: string, password: string): string {
+  // Base64 of the UTF-8 "username:password": the Data API's Basic sign-in. TextEncoder and btoa
+  // exist in a browser and in Node 18 alike.
+  const bytes = new TextEncoder().encode(username + ':' + password);
+  let binary = '';
+  for (let i = 0; i < bytes.length; i += 1) {
+    binary += String.fromCharCode(bytes[i]!);
+  }
+  return 'Basic ' + btoa(binary);
 }
 `;
 }
@@ -743,7 +796,7 @@ Generated at ${generatedAt} for profile ${readmeName(profile.name)}.
 ## Files
 
 - \`types.ts\` contains interfaces for the selected layout fields and records.
-- \`client.ts\` contains typed fetch wrappers for find, get, create, edit, and delete operations.
+- \`client.ts\` contains typed fetch wrappers for find, get, create, edit, delete and session operations.
 
 ## Usage
 
@@ -777,6 +830,8 @@ Start request fields with \`Object.create(null)\` as above, especially when a fi
 Numbers are typed as \`number\`. Values beyond JavaScript's safe integer range (2^53 - 1), or with many decimal digits, may lose precision. Keep exact large identifiers or amounts in FileMaker text fields when needed.
 Dates, times and timestamps are strings in FileMaker's locale format; they are not JavaScript Date objects. Containers are URL strings. Repeating fields use optional keys such as \`Name(1)\` through the maximum repetition.
 An edit can carry the record's \`modId\`: \`await client.edit${firstMethod}('1', { "REPLACE_WITH_A_FIELD_NAME": "REPLACE_WITH_A_VALUE" }, { modId: '7' })\`. FileMaker then refuses the write with error 306 if the record changed since that \`modId\` was read, so a write cannot overwrite someone else's work. The \`modId\` of a record you read is on the record itself, as \`record.modId\`. A create has no such option: a new record has no earlier version.
+
+Sign in with \`createSession\` and out with \`deleteSession\`: \`await client.createSession(process.env.FM_USERNAME ?? '', process.env.FM_PASSWORD ?? '')\` signs the client in and keeps the token on the config you passed, so the calls that follow carry it. \`deleteSession()\` logs out (the route answers 200 even for a token that is already gone), and \`validateSession()\` resolves while the token is good and throws \`FileMakerDataApiError\` when it is not. The sign-in is the Data API's Basic account sign-in: a Claris ID (FMID) tenant is not covered by the generated client.
 A find with FileMaker code 401 returns an empty array, whatever the HTTP status. Other failures throw \`FileMakerDataApiError\` with \`code\`, \`status\` and \`messages\`. A web page instead of JSON gives an address/proxy check message.
 
 Regenerating this client overwrites these files with a new timestamp.

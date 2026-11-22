@@ -40,8 +40,8 @@ export function waitForSession<T>(
     const expire = () => {
       cleanup();
       reject(new FMClientError(
-        `The session did not arrive: the request timed out after ${((timeoutMs ?? 0) / 1000).toFixed(1)} s. ${advice}`,
-        { kind: 'timeout', isRetryable: true }
+        `The request timed out waiting for the connection to sign in after ${((timeoutMs ?? 0) / 1000).toFixed(1)} s. The sign-in may still be running; try again. ${advice}`,
+        { kind: 'timeout', code: 'SESSION_WAIT_TIMEOUT', isRetryable: true }
       ));
     };
     if (signal?.aborted) abort();

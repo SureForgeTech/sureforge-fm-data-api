@@ -4,7 +4,7 @@ import vm from 'vm';
 
 import { describe, expect, it, vi } from 'vitest';
 
-import { effectiveTimeout } from '../../src/services/requestLimits';
+import { effectiveTimeout, hasOwnDeadline } from '../../src/services/requestLimits';
 
 /**
  * The deadline a request uses, and the two rules around it: a value that is not a usable deadline
@@ -86,6 +86,16 @@ describe('the deadline a request uses', () => {
   it('is the request\'s own when it asked for a usable one', () => {
     expect(effectiveTimeout(600_000, 15_000)).toBe(600_000);
     expect(effectiveTimeout(1_000, 15_000)).toBe(1_000);
+  });
+
+  it('knows whether a request carried a deadline it can use', () => {
+    expect(hasOwnDeadline(600_000)).toBe(true);
+    expect(hasOwnDeadline(1)).toBe(true);
+    expect(hasOwnDeadline(undefined)).toBe(false);
+    expect(hasOwnDeadline(0)).toBe(false);
+    expect(hasOwnDeadline(-1)).toBe(false);
+    expect(hasOwnDeadline(Number.NaN)).toBe(false);
+    expect(hasOwnDeadline(Number.POSITIVE_INFINITY)).toBe(false);
   });
 
   it('is the shared timeout when the request asked for nothing usable', () => {
