@@ -113,7 +113,7 @@ describe('extension manifest UX contract', () => {
     }
   });
 
-  it('binds the five default shortcuts with palette-matching when clauses', () => {
+  it('binds the five default shortcuts with palette-matching when clauses, except where a shipped key predates the trim', () => {
     const expected: Array<[string, string, string, string]> = [
       ['openQueryBuilder', 'ctrl+alt+q', 'cmd+alt+q', 'filemaker.hasProfiles'],
       ['openRecordViewer', 'ctrl+alt+v', 'cmd+alt+v', 'filemaker.hasProfiles'],
