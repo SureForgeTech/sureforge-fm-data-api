@@ -27,6 +27,9 @@ recorded below.
 | #609 | the packaged journey expects what the VSIX ships | `fa6914b` | `d9e152e` | MERGEABLE, no P0/P1/P2 (5 rounds, MiniMax M3) |
 | #613 | `filemaker.dateFormats` — the developer chooses how the server reads and writes dates | `8a05890` | `0b81b21` | MERGEABLE, no P0/P1/P2/P3 (4 rounds, MiniMax M3) |
 | #617 | a journey that measures the path to a first sample receipt | `fcdf02e` | `a24deb0` | MERGEABLE, no P0/P1 (6 rounds, MiniMax M3) |
+| #621 | the desktop journeys expect what the product does | `3aae6b5` | `66dea41` | MERGEABLE, no P0/P1/P2 (3 rounds, Kimi K2.8) |
+| #623 | the batch import takes the file's shape, and says the date order | `18e6ebf` | `5402ef0` | MERGEABLE, no P0/P1/P2 (10 rounds, Kimi K2.8) |
+| #627 | the generated client can carry the record version with an edit | pending | pending | pending |
 
 The four merge commits are `5d96a11`, `0c58d7c`, `46c90e5` and `3c3a931`, and each contains exactly the tree its reviewed head had. `main` has since moved on with another session's work (#597, #598); #592 closes issue #573: an exclusion that follows the field now applies to it
 ("include email, phone excluded" no longer suggests phone), "everything but X" and "all of them but X"
@@ -98,12 +101,15 @@ of the palette on purpose, because they only work on a sidebar item.
    Web Preview Server" and "Open FM Web Layout Mode" are not in the everyday set, because none of the
    three documents the derivation reads names them. The home carries all three, one click away. If the
    palette should keep them, that is one line in the everyday set and one in the test.
-7. **The failure-mode catalogue's AD10 row is only partly fixed.** The packaging half is done; the
-   generated client still lacks the session, script, modId and container calls, and the row says so.
-8. **AD09's other half is still open.** #613 fixed the client's side — the server now reads and writes
-   dates in the order the developer chose — but the import still reads dates in the server's default,
-   the format is not shown beside the import preview, and the import still refuses semicolon CSV and
-   JSONL. The row's next step is unchanged.
+7. **The failure-mode catalogue's AD10 row is still only partly fixed.** The packaging half is done,
+   and #627 gives the generated client the `modId` option on an edit, so a write cannot overwrite a
+   record that changed since it was read. What is left is the session, script and container calls in
+   the generated client, and the row says so.
+8. **AD09's import half is closed by #623.** #613 fixed the client's side — the server now reads and
+   writes dates in the order the developer chose — and #623 makes the import say which order that is
+   beside the mode choice and in the dry-run preview, and reads a JSONL or semicolon-delimited file
+   when the developer says so. The row's next step is now "keep the date format beside the import
+   preview as the setting changes".
 9. **The desktop journey suite cannot be run from here.** The token the forge uses for this session
    is refused for a workflow dispatch (`HTTP 403: Resource not accessible by integration`), and the
    sandbox cannot download VS Code, so the weekly `e2e-ui` job is the only thing that runs the full
@@ -120,7 +126,10 @@ of the palette on purpose, because they only work on a sidebar item.
    set and of the labels. If it moves a command into or out of the set, the change is a one-liner in
    `extension/package.json` and the matching line in the new test.
 2. **Add the journey that toggles the palette**, so the default palette is covered end to end again.
-3. Close the three open readings of #573, or fold them into the issue.
+3. **Add the session, script and container calls to the generated client** — what is left of AD10's row
+   now that #627 gave it the `modId` option.
+4. **Run the desktop suite.** #621 made the journeys honest against the code and pinned the facts they
+   rest on, but no journey has executed since 2026-11-16: the weekly `e2e-ui` job is the only runner.
 
 ## Branch, latest commit, pull request
 
@@ -128,14 +137,17 @@ of the palette on purpose, because they only work on a sidebar item.
   `feat/prompt-drafting-exclusions` (#592), `feat/home-complete` (#593), `fix/portal-starters` (#594),
   `feat/home-filter` (#595), `feat/palette-everyday` (#596), `fix/prompt-exclusion-readings` (#599),
   `feat/fmweb-sample-source` (#602), `fix/journey-preview-availability` (#609), `feat/date-formats`
-  (#613) and `feat/first-sample-receipt` (#617). All are pushed and merged. #609 was merged by another
-  session's account after it merged `main` into the branch.
+  (#613), `feat/first-sample-receipt` (#617), `fix/journey-expectations` (#621),
+  `feat/batch-import-formats` (#623) and `feat/typegen-modid` (#627). All are pushed. #609, #617 and
+  #621 were merged by another session's account after it merged `main` into the branch.
 - The worktrees are `/workspace/sureforge-fm-data-api-wt-starters`, `-wt-ux`, `-wt-parser`, `-wt-invented`,
   `-wt-journey`, `-wt-dates` and `-wt-receipt`; all hold merged work and can be deleted.
 - The main checkout `/workspace/sureforge-fm-data-api` is on `wip/fm-data-api-home`, which also holds
   the handover files.
-- Open pull requests after this session: none from this session. #588 and #589 belonged to another
-  session and were merged by it.
+- Open pull requests after this session: #627 from this session, if it is not merged by the time this
+  is read. #588 and #589 belonged to another session and were merged by it.
+- The worktrees for this batch are `/workspace/sureforge-fm-data-api-wt-journeys` (#621),
+  `-wt-import` (#623) and `-wt-modid` (#627).
 
 ## Decisions made, and why
 
@@ -165,10 +177,17 @@ of the palette on purpose, because they only work on a sidebar item.
   receipt, but the figure itself comes from a run of the desktop suite, so it is still unmeasured
   until that job runs. The
   journey itself runs in CI, and it is how #596's break was found.
-- **The Kimi reviewer allowance ran out during this batch.** `kimi-code-plan-cn/kimi-for-coding` worked
-  for the reviews of #599 and #602 and then returned "You've reached your 5-hour usage limit". The
-  reviews of #609 were done with `minimax-coding-plan/MiniMax-M3` in a fresh context, which the
-  session rules accept as an independent review. No review in this batch found a P0 or a P1.
+- **The Kimi reviewer allowance ran out during the earlier batch, came back, and ran out again.**
+  `kimi-code-plan-cn/kimi-for-coding` worked for the reviews of #599 and #602 and then returned "You've
+  reached your 5-hour usage limit". The reviews of #609 were done with `minimax-coding-plan/MiniMax-M3`
+  in a fresh context, which the session rules accept as an independent review. The reviews of #621 and
+  #623 are on Kimi K2.8; Kimi's allowance ran out again during #623's last rounds, so #627's last two
+  rounds are on MiniMax M3. No review in this batch found a P0 or a P1.
+- **The forge's API credential was unavailable for about half of this session.** `/usr/local/bin/gh`
+  returned "Sandbox GitHub credential is unavailable. See oss-lane check." and "HTTP 401: Bad
+  credentials" for every API read, while `git push` and `git ls-remote` kept working. The CI watcher
+  failed 43 times in a row on that credential alone. It recovered on its own; the work was done while
+  it was down.
 - **The extension's `.github/workflows/codeql.yml` is live at `disabled_manually`** while
   `docs/operations/deployment.md` says the workflow "is enabled". That is a settings change and is
   deliberately not touched.
