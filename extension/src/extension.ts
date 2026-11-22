@@ -265,7 +265,8 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
           () => ({
             maxAgeMs: settingsService.getSessionMaxAgeMs(),
             refreshLeadMs: settingsService.getSessionRefreshLeadMs()
-          })
+          }),
+          () => settingsService.getDateFormats()
         );
         loadedFmClient.onProfileInvalidated((profileId) => {
           for (const listener of invalidationListeners) {

@@ -88,7 +88,8 @@ export class FMClient {
     proxyClient?: ProxyClient,
     private readonly historyRecorder?: RequestHistoryRecorder,
     private readonly metricsRecorder?: RequestMetricsRecorder,
-    sessionOptions?: FMClientSessionOptions | (() => FMClientSessionOptions)
+    sessionOptions?: FMClientSessionOptions | (() => FMClientSessionOptions),
+    private readonly getDateFormats?: () => number
   ) {
     this.logger = logger;
     this.timeoutMs = timeoutMs ?? DEFAULT_TIMEOUT_MS;
@@ -121,6 +122,16 @@ export class FMClient {
    * declaration below; only visibility changes. The receiver stays this client, so prototype
    * callers and overrides keep working without copied state or bound callbacks.
    */
+  /**
+   * How the server should read and write dates: 0 leaves it to the server, 1 uses the file's
+   * locale, 2 uses ISO 8601. Zero sends nothing, so a server that does not know the option is
+   * never asked about it.
+   */
+  public dateFormats(): number {
+    const value = this.getDateFormats?.() ?? 0;
+    return value === 1 || value === 2 ? value : 0;
+  }
+
   private get context(): ClientContext {
     // eslint-disable-next-line @typescript-eslint/no-this-alias -- Local type queries verify private members in the view.
     const client = this;
@@ -141,6 +152,7 @@ export class FMClient {
       refineCertificateError: typeof client.refineCertificateError;
       getLayoutMetadata: typeof client.getLayoutMetadata;
       listRecords: typeof client.listRecords;
+      dateFormats: typeof client.dateFormats;
     };
   }
 
