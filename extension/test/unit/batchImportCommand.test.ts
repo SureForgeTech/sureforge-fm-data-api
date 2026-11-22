@@ -113,6 +113,26 @@ describe('the batch update import', () => {
     );
   });
 
+  it('can pick a file named .jsonl', async () => {
+    const d = deps();
+    registerBatchCommands(d as never);
+    vi.mocked(vscode.window.showQuickPick).mockImplementation(async (items) => {
+      const choices = items as unknown as Array<{ label: string }>;
+      if (choices.some((choice) => /JSONL/.test(choice.label))) return choices[0] as never;
+      return choices[0] as never;
+    });
+
+    await handlerFor('filemakerDataApiTools.batchUpdateFromFile')({
+      profileId: profile.id,
+      layout: 'Contacts'
+    });
+
+    const options = vi.mocked(vscode.window.showOpenDialog).mock.calls[0]![0] as
+      | { filters?: Record<string, string[]> }
+      | undefined;
+    expect(Object.keys(options?.filters ?? {})).toContain('JSONL');
+  });
+
   it('says which date order the server will read the dates in, beside the preview', async () => {
     const d = deps();
     registerBatchCommands(d as never);

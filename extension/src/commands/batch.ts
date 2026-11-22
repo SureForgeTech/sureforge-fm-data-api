@@ -188,6 +188,7 @@ export function registerBatchCommands(deps: RegisterBatchCommandsDeps): vscode.D
           canSelectMany: false,
           filters: {
             JSON: ['json'],
+            JSONL: ['jsonl'],
             CSV: ['csv']
           }
         });

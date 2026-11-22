@@ -62,6 +62,19 @@ describe('the shapes a batch update file can be in', () => {
     expect((refusal as Error).message).toMatch(/semicolon-delimited/i);
   });
 
+  it('offers the semicolon shape for a file named .json that holds semicolons', () => {
+    // The file's name says JSON and its contents say otherwise; the developer is asked.
+    let refusal: unknown;
+    try {
+      parseBatchUpdateInput('recordId;Name\n1;Ada\n', 'json');
+    } catch (error) {
+      refusal = error;
+    }
+
+    expect(refusal).toBeInstanceOf(BatchUpdateFormatRefusal);
+    expect((refusal as BatchUpdateFormatRefusal).alternative).toBe('semicolon-csv');
+  });
+
   it('keeps a semicolon inside a comma-delimited file as the value it is', () => {
     const csv = 'recordId,Notes\n1,"one; two"\n';
 

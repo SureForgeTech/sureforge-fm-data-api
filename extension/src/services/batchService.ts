@@ -629,6 +629,12 @@ export function parseBatchUpdateInput(
         'jsonl'
       );
     }
+    if (looksLikeSemicolonCsv(content)) {
+      throw new BatchUpdateFormatRefusal(
+        'This looks like a semicolon-delimited file.',
+        'semicolon-csv'
+      );
+    }
   }
   if (format === 'json') {
     const parsed = JSON.parse(content) as unknown;
@@ -671,18 +677,6 @@ export function parseBatchUpdateInput(
 }
 
 function parseCsvBatchUpdates(content: string, delimiter: ',' | ';'): BatchUpdateEntry[] {
-  const firstLine = content.replace(/^\uFEFF/, '').split(/\r?\n/)[0] ?? '';
-  if (
-    delimiter === ',' &&
-    !parseCsv(firstLine)[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header)) &&
-    firstLine.includes(';') &&
-    parseCsv(firstLine, ';')[0]?.some((header) => /^(?:_{2,})?recordId$/.test(header))
-  ) {
-    throw new BatchUpdateFormatRefusal(
-      'This looks like a semicolon-delimited file.',
-      'semicolon-csv'
-    );
-  }
   const rows = parseCsv(content.replace(/^\uFEFF/, ''), delimiter);
   if (rows.length === 0) {
     return [];
@@ -735,6 +729,26 @@ function parseCsvBatchUpdates(content: string, delimiter: ',' | ';'): BatchUpdat
   }
 
   return entries;
+}
+
+/**
+ * The file looks like a spreadsheet's semicolon-delimited columns.
+ *
+ * The first line has to name a `recordId` column when it is split on semicolons, and must not
+ * name one when it is split on commas: a comma-delimited file that holds a semicolon in a value
+ * is a comma-delimited file.
+ */
+function looksLikeSemicolonCsv(content: string): boolean {
+  const firstLine = content.replace(/^\uFEFF/, '').split(/\r?\n/)[0] ?? '';
+  if (!firstLine.includes(';')) {
+    return false;
+  }
+  const semicolonHeaders = parseCsv(firstLine, ';')[0] ?? [];
+  if (!semicolonHeaders.some((header) => /^(?:_{2,})?recordId$/.test(header))) {
+    return false;
+  }
+  const commaHeaders = parseCsv(firstLine)[0] ?? [];
+  return !commaHeaders.some((header) => /^(?:_{2,})?recordId$/.test(header));
 }
 
 function looksLikeJsonl(content: string, requireMultipleLines: boolean): boolean {
