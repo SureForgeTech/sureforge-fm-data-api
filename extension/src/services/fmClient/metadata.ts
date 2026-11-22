@@ -61,6 +61,14 @@ export async function listLayouts(client: ClientContext, profile: ConnectionProf
   );
 }
 
+/**
+ * The path the script list is read from. The desktop journeys recognise this request so that a
+ * script list is not counted as a script run, and the unit test holds that recognition against
+ * this constant: a rename here breaks the test rather than the journey on a machine nobody
+ * looks at.
+ */
+export const SCRIPTS_PATH = '/scripts';
+
 export async function listScripts(client: ClientContext, profile: ConnectionProfile, control?: ClientRequestControl): Promise<string[]> {
   return client.withHistory(
     {
@@ -77,7 +85,7 @@ export async function listScripts(client: ClientContext, profile: ConnectionProf
         profile,
         {
           method: 'GET',
-          path: '/scripts',
+          path: SCRIPTS_PATH,
           signal: control?.signal,
           timeoutMs: control?.timeoutMs,
           maxResponseBytes: control?.maxResponseBytes
