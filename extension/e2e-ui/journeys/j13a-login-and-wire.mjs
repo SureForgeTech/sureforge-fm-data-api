@@ -7,6 +7,7 @@ import {
   answerPickers,
   createProfile,
   ensureProfileCommands,
+  expandTreeRow,
   openQueryBuilder
 } from '../lib/flows.mjs';
 import {
@@ -18,7 +19,8 @@ import {
 import { assert } from '../lib/session.mjs';
 
 const J = 'J13a login+wire';
-const RAW_JS = /Cannot read properties|undefined|TypeError|is not a function/i;
+const RAW_JS =
+  /Cannot read properties|undefined|TypeError|ReferenceError|SyntaxError|RangeError|is not a function/i;
 
 export async function run(ctx) {
   const { s, mock } = ctx;
@@ -316,6 +318,9 @@ export async function run(ctx) {
         .catch(() =>
           s.helper('executeCommand', { command: 'filemakerDataApiTools.refreshExplorer' })
         );
+      // The layout list, and its failure row, load only under an expanded connection; an earlier
+      // step may have left every connection collapsed.
+      await expandTreeRow(s, 'Mock Quality');
       await s.page.waitForTimeout(3500);
       const rows = await s.allTreeRows();
       const toasts = await toastInfo(s);
@@ -332,6 +337,8 @@ export async function run(ctx) {
       );
       const tooltip = await readTreeTooltip(s, EXPLORER_FAILURE_LABEL);
       const cause = `${placeholder} ${tooltip} ${JSON.stringify(toasts)}`;
+      const seen = [placeholder, tooltip, ...toasts.map((t) => t.text)].join(' | ');
+      assert(!RAW_JS.test(seen), `a raw JavaScript error reached the user: ${seen.slice(0, 300)}`);
       if (!/web page|not the Data API|HTML|proxy/i.test(cause)) {
         // The cause is in the row's tooltip. When no tooltip can be read - the hover did not
         // open - the row still has to name the failure rather than show the generic advice.
