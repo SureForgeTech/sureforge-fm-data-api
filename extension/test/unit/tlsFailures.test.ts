@@ -14,6 +14,10 @@ import { startPlainServer, startTlsServer, type TestTlsServer } from '../helpers
 import { DAY, makeCertificate, newKeyPair } from '../helpers/x509';
 import { InMemorySecretStorage } from './mocks';
 
+// Generating keys and the TLS handshake can take seconds when the whole suite runs at once; these
+// tests expect a certificate refusal, never a timeout, so the client and each test get room for that.
+const TLS_CLIENT_TIMEOUT_MS = 20_000;
+
 const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } as never;
 const PASSWORD = 'pa55-secret-value';
 
@@ -39,7 +43,7 @@ function leaf(options: { notBefore?: Date; notAfter?: Date; altNames?: string[];
   };
 }
 
-describe('TLS and network failures reach the user as actionable messages', () => {
+describe('TLS and network failures reach the user as actionable messages', { timeout: 30_000 }, () => {
   const servers: Array<{ close(): Promise<void> }> = [];
   let dir: string;
   let caFile: string;
@@ -65,7 +69,7 @@ describe('TLS and network failures reach the user as actionable messages', () =>
   async function connect(port: number, extra: Partial<ConnectionProfile> = {}, host = 'localhost', scheme = 'https'): Promise<FMClientError> {
     const secrets = new SecretStore(new InMemorySecretStorage() as never);
     await secrets.setPassword('p1', PASSWORD);
-    const client = new FMClient(secrets, logger, 3000);
+    const client = new FMClient(secrets, logger, TLS_CLIENT_TIMEOUT_MS);
     const profile: ConnectionProfile = {
       id: 'p1', name: 'Test', authMode: 'direct', serverUrl: `${scheme}://${host}:${port}`, database: 'Sales', username: 'tester', ...extra
     };
@@ -135,7 +139,7 @@ describe('TLS and network failures reach the user as actionable messages', () =>
     const server = await serve(key, [cert, inter]);
     const secrets = new SecretStore(new InMemorySecretStorage() as never);
     await secrets.setPassword('p1', PASSWORD);
-    const token = await new FMClient(secrets, logger, 3000).createSession({
+    const token = await new FMClient(secrets, logger, TLS_CLIENT_TIMEOUT_MS).createSession({
       id: 'p1', name: 'T', authMode: 'direct', serverUrl: `https://localhost:${server.port}`, database: 'Sales', username: 'tester', caBundlePath: caFile
     });
     expect(token).toBe('test-token');
