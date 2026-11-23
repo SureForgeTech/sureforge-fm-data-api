@@ -110,6 +110,8 @@ export interface EditRecordOptions {
 
 /** Optional extras for a create. */
 export interface CreateRecordOptions {
+  /** Date order of the supplied values: 0 = US, 1 = file locale, 2 = ISO; overrides the setting. */
+  dateFormats?: 0 | 1 | 2;
   /**
    * Related (portal) rows to create with the parent record, keyed by portal name.
    * Each row is a new related record; rows naming a recordId/modId are refused.
