@@ -336,6 +336,8 @@ export async function run(ctx) {
       );
       const tooltip = await readTreeTooltip(s, EXPLORER_FAILURE_LABEL);
       const cause = `${placeholder} ${tooltip} ${JSON.stringify(toasts)}`;
+      const seen = [placeholder, tooltip, ...toasts.map((t) => t.text)].join(' | ');
+      assert(!RAW_JS.test(seen), `a raw JavaScript error reached the user: ${seen.slice(0, 300)}`);
       if (!/web page|not the Data API|HTML|proxy/i.test(cause)) {
         // The cause is in the row's tooltip. When no tooltip can be read - the hover did not
         // open - the row still has to name the failure rather than show the generic advice.
