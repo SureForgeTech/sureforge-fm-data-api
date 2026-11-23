@@ -29,7 +29,7 @@
     "postinstall": "node tools/patch-typedoc-glob.mjs"
   },
   "devDependencies": {
-    "@vitest/coverage-v8": "^5.1.0",
+    "@vitest/coverage-v8": "^5.1.1",
     "markdown-it": "^15.0.3",
     "yaml": "2.9.1"
   },
