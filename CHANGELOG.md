@@ -75,6 +75,8 @@ PR title prefix matches the highest-tier label added:
 
 ### [FIX]
 
+- A live registration's date now reaches FileMaker as the day the person entered. The form's year-month-day date is sent in FileMaker's month-first order, whatever date order the developer chose for the connection. A direct connection states that order in the request; a proxy connection uses it already.
+
 - A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
 
 - Align the Marketplace overview with the product page and the current ABD Enterprises consulting offer.

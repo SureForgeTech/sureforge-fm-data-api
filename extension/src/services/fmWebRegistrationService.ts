@@ -60,13 +60,27 @@ export class FmWebRegistrationService {
       try { await this.target.assertAllowed(); }
       catch { await this.finish(file, { fingerprint, status: 'rejected' });return { status: 'rejected' }; }
       // Once dispatched, every failure (including missing response or failed ledger completion) is uncertain.
-      const result = await this.target.createRecord(this.target.profile, this.target.layout.fmLayoutName!, checked.fieldData, { signal: AbortSignal.timeout(15000) });
+      const result = await this.target.createRecord(this.target.profile, this.target.layout.fmLayoutName!, this.withUsDates(checked.fieldData), { signal: AbortSignal.timeout(15000) }, { dateFormats: 0 });
       if (!result.recordId || !/^\d{1,80}$/.test(result.recordId)) return { status: 'uncertain' };
       const receipt = `fm-${result.recordId}`;
       await this.finish(file, { fingerprint, status: 'accepted', receipt });
       return { status: 'accepted', receipt };
     } catch { return { status: 'uncertain' }; }
     finally { this.running.delete(id); }
+  }
+
+  /**
+   * The form takes dates as YYYY-MM-DD. They are sent in FileMaker's US order with dateformats 0 stated,
+   * which a direct connection and a proxy both honour, whatever the developer's own date setting is.
+   */
+  private withUsDates(fieldData: Record<string, string | number>): Record<string, string | number> {
+    const sent = Object.assign(Object.create(null) as Record<string, string | number>, fieldData);
+    for (const field of this.target.definition.fields) {
+      const value = sent[field.fmFieldName];
+      const iso = field.kind === 'date' && typeof value === 'string' ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(value) : null;
+      if (iso) sent[field.fmFieldName] = `${iso[2]}/${iso[3]}/${iso[1]}`;
+    }
+    return sent;
   }
 
   private prior(id: string, fingerprint: string, attempt: Attempt): Record<string, unknown> {

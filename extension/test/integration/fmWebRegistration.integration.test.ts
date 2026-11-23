@@ -57,7 +57,7 @@ describe('registration service through the production FileMaker transport', () =
     expect(writes).toBe(1);
     expect(session.isDone()).toBe(true);expect(records.isDone()).toBe(true);
     expect(sent).toEqual([{ fieldData: { ' Full Name ': ' Synthetic Attendee ',
-      'Email Address': 'attendee@example.invalid', Session: 'Morning', Notes: 'Invented registration' } }]);
+      'Email Address': 'attendee@example.invalid', Session: 'Morning', Notes: 'Invented registration' }, dateformats: 0 }]);
     const ledger = await readFile(path.join(target.ledgerRoot, `${request.submissionId}.json`), 'utf8');
     expect(JSON.parse(ledger)).toMatchObject({ status: 'accepted', receipt: 'fm-123456' });
     expect(ledger).not.toContain('attendee@example.invalid');expect(ledger).not.toContain('synthetic-test-password');
