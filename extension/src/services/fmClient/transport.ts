@@ -1,9 +1,9 @@
 import { effectiveTimeout, hasOwnDeadline, withRequestLimits } from '../requestLimits';
 import { noteRequestTimeout } from '../tlsAgent';
-import { type AxiosError, type AxiosRequestConfig } from 'axios';
+import { AxiosError, type AxiosRequestConfig } from 'axios';
 import type { ConnectionProfile } from '../../types/fm';
 import type { DataApiEnvelope } from '../../types/dataApi';
-import { toFMClientError } from '../errors';
+import { FMClientError, toFMClientError } from '../errors';
 import { normalizeError } from '../../utils/normalizeError';
 import { redactString } from '../../utils/redact';
 import { httpsTransportFor } from '../tlsAgent';
@@ -12,13 +12,33 @@ import type { RequestOptions, RequestTrace } from './types';
 import type { ClientContext } from './context';
 import { normalizeHeaders } from './response';
 
+/** Each step spends the same per-request budget; unusable overrides keep the shared behaviour. */
+export function requestTimeoutBudget(timeoutMs: number | undefined): () => number | undefined {
+  const deadline = hasOwnDeadline(timeoutMs) ? Date.now() + timeoutMs : undefined;
+  return () => {
+    if (deadline === undefined) return timeoutMs;
+    const remaining = deadline - Date.now();
+    if (remaining > 0) return remaining;
+    throw toFMClientError(normalizeError(new AxiosError('FileMaker request timed out.', 'ECONNABORTED'), {
+      timeoutOverride: true
+    }));
+  };
+}
+
+function checkCancellation(signal?: AbortSignal): void {
+  if (signal?.aborted) {
+    throw new FMClientError('Request cancelled.', { kind: 'cancellation', isRetryable: false });
+  }
+}
+
 export async function requestWithAuth<TResponse extends Record<string, unknown>>(
   client: ClientContext,
   profile: ConnectionProfile,
   request: RequestOptions,
   retryOn401 = true,
   trace?: RequestTrace,
-  authOptions?: { skipProactiveRefresh?: boolean }
+  authOptions?: { skipProactiveRefresh?: boolean },
+  remainingTimeout = requestTimeoutBudget(request.timeoutMs)
 ): Promise<DataApiEnvelope<TResponse>> {
   if (trace) {
     trace.endpoint = redactString(`${request.method} ${request.path}`);
@@ -26,13 +46,15 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
 
   // The session work a request needs shares its deadline: a sign-in that the server takes longer
   // than the shared timeout to answer must not end a run that asked for longer.
-  const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: request.timeoutMs }, authOptions);
+  checkCancellation(request.signal);
+  const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: remainingTimeout() }, authOptions);
   // The deadline in force: the request's own when it asked for a usable one, the shared timeout
   // otherwise. The advice names it when it is not the shared one.
-  const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
   const ownDeadline = hasOwnDeadline(request.timeoutMs);
 
   try {
+    checkCancellation(request.signal);
+    const timeoutMs = effectiveTimeout(remainingTimeout(), client.timeoutMs);
     const config: AxiosRequestConfig = {
       method: request.method,
       url: buildEndpoint(profile, request.path),
@@ -51,10 +73,12 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
       ...httpsTransportFor(profile, buildEndpoint(profile, request.path))
     };
 
-    // A run that may last longer than the shared timeout needs its retired agent to outlive it.
-    noteRequestTimeout(timeoutMs);
+    // A run that may last longer than the shared timeout needs its retired agent to outlive it. This is
+    // the deadline the request was given; a script run also notes its whole deadline when it starts.
+    noteRequestTimeout(effectiveTimeout(request.timeoutMs, client.timeoutMs));
     const response = await withRequestLimits(timeoutMs, request.signal,
-      (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes, request.transfer, config.transport, request.uploadBytes);
+      (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes,
+      ownDeadline && request.transfer === true ? false : request.transfer, config.transport, request.uploadBytes);
     return parseDataApiEnvelope<TResponse>(response);
   } catch (error) {
     const axiosError = error as AxiosError;
@@ -66,9 +90,10 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
         profileId: profile.id,
         requestId: trace?.requestId
       });
-      await client.renewRejectedSession(profile, token, { signal: request.signal, timeoutMs: request.timeoutMs });
+      checkCancellation(request.signal);
+      await client.renewRejectedSession(profile, token, { signal: request.signal, timeoutMs: remainingTimeout() });
 
-      return requestWithAuth(client, profile, request, false, trace);
+      return requestWithAuth(client, profile, request, false, trace, undefined, remainingTimeout);
     }
 
     throw client.explainPinnedFailure(
@@ -93,7 +118,8 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
   profile: ConnectionProfile,
   request: RequestOptions,
   retryOn401 = true,
-  trace?: RequestTrace
+  trace?: RequestTrace,
+  remainingTimeout = requestTimeoutBudget(request.timeoutMs)
 ): Promise<{
   status: number;
   headers: Record<string, string | undefined>;
@@ -103,11 +129,13 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
     trace.endpoint = redactString(`${request.method} ${request.path}`);
   }
 
-  const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: request.timeoutMs });
-  const timeoutMs = effectiveTimeout(request.timeoutMs, client.timeoutMs);
+  checkCancellation(request.signal);
+  const token = await client.ensureSessionToken(profile, { signal: request.signal, timeoutMs: remainingTimeout() });
   const ownDeadline = hasOwnDeadline(request.timeoutMs);
 
   try {
+    checkCancellation(request.signal);
+    const timeoutMs = effectiveTimeout(remainingTimeout(), client.timeoutMs);
     const config: AxiosRequestConfig = {
       method: request.method,
       url: buildEndpoint(profile, request.path),
@@ -125,9 +153,10 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
       validateStatus: (status) => (status >= 200 && status < 300) || status === 304
     };
 
-    noteRequestTimeout(timeoutMs);
+    noteRequestTimeout(effectiveTimeout(request.timeoutMs, client.timeoutMs));
     const response = await withRequestLimits(timeoutMs, request.signal,
-      (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes, request.transfer, config.transport, request.uploadBytes);
+      (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes,
+      ownDeadline && request.transfer === true ? false : request.transfer, config.transport, request.uploadBytes);
     const headers = normalizeHeaders(response.headers as Record<string, unknown>);
     if (response.status === 304) {
       return {
@@ -151,9 +180,10 @@ export async function requestWithAuthRaw<TResponse extends Record<string, unknow
         profileId: profile.id,
         requestId: trace?.requestId
       });
-      await client.renewRejectedSession(profile, token, { signal: request.signal, timeoutMs: request.timeoutMs });
+      checkCancellation(request.signal);
+      await client.renewRejectedSession(profile, token, { signal: request.signal, timeoutMs: remainingTimeout() });
 
-      return requestWithAuthRaw(client, profile, request, false, trace);
+      return requestWithAuthRaw(client, profile, request, false, trace, remainingTimeout);
     }
 
     throw client.explainPinnedFailure(

@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Closing the Script Runner now stops a run that has not reached the server yet, and a run's own deadline covers its sign-in and the script together.
+
 - A live registration's date now reaches FileMaker as the day the person entered. The form's year-month-day date is sent in FileMaker's month-first order, whatever date order the developer chose for the connection. A direct connection states that order in the request; a proxy connection uses it already.
 
 - A desktop journey now covers the Command Palette's two sides: the everyday commands without the power-user setting, and the power-user commands with it.

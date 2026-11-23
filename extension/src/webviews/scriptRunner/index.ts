@@ -58,6 +58,8 @@ type IncomingMessage =
 
 export class ScriptRunnerPanel {
   private requestInFlight = false;
+  private disposed = false;
+  private runController: AbortController | undefined;
   private static currentPanel: ScriptRunnerPanel | undefined;
 
   private pendingDefaults: ScriptRunnerOpenOptions | undefined;
@@ -74,6 +76,8 @@ export class ScriptRunnerPanel {
     this.panel.webview.html = this.getHtml(this.panel.webview);
 
     this.panel.onDidDispose(() => {
+      this.disposed = true;
+      this.runController?.abort();
       ScriptRunnerPanel.currentPanel = undefined;
     });
 
@@ -137,6 +141,7 @@ export class ScriptRunnerPanel {
   }
 
   private async handleMessage(rawMessage: unknown): Promise<void> {
+    if (this.disposed) return;
     const message = this.parseMessage(rawMessage);
     if (!message) {
       return;
@@ -144,7 +149,7 @@ export class ScriptRunnerPanel {
 
     // Defence in depth, as in the record editor: scripts run only in a trusted workspace.
     if (!vscode.workspace.isTrusted && message.type !== 'ready') {
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'unsupported',
         message: UNTRUSTED_RUNNER_MESSAGE
       });
@@ -165,9 +170,16 @@ export class ScriptRunnerPanel {
         case 'loadScripts':
           await this.loadScripts(message.profileId);
           break;
-        case 'runScript':
-          await this.runScript(message.payload);
+        case 'runScript': {
+          const controller = new AbortController();
+          this.runController = controller;
+          try {
+            await this.runScript(message.payload, controller.signal);
+          } finally {
+            this.runController = undefined;
+          }
           break;
+        }
         case 'copyCurl':
         case 'copyFetch':
         case 'copyRequest':
@@ -188,7 +200,7 @@ export class ScriptRunnerPanel {
     const includeAuthByDefault = configuration.get<boolean>('snippets.includeAuthByDefault', false);
     const parameterBuilderEnabled = configuration.get<boolean>('scripts.parameterBuilder.enabled', true);
 
-    await this.panel.webview.postMessage({
+    await this.postMessage({
       type: 'init',
       payload: {
         profiles: profiles.map((profile) => ({
@@ -218,7 +230,7 @@ export class ScriptRunnerPanel {
     if (!isFeatureEnabled(configuration, 'features.scriptRunner.enabled') || isOfflineModeOn(configuration)) {
       // Nothing can be run and nothing should be read, so no list is fetched. The name can
       // still be typed.
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'scriptsLoaded',
         payload: {
           profileId,
@@ -237,7 +249,7 @@ export class ScriptRunnerPanel {
 
     try {
       const scripts = await this.fmClient.listScripts(profile);
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'scriptsLoaded',
         payload: {
           profileId,
@@ -263,7 +275,7 @@ export class ScriptRunnerPanel {
 
     try {
       const layouts = await this.fmClient.listLayouts(profile);
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'layoutsLoaded',
         payload: {
           profileId,
@@ -275,20 +287,20 @@ export class ScriptRunnerPanel {
     }
   }
 
-  private async runScript(payload: RunScriptPayload): Promise<void> {
+  private async runScript(payload: RunScriptPayload, signal: AbortSignal): Promise<void> {
     const configuration = vscode.workspace.getConfiguration('filemaker');
     const scriptRunnerEnabled = isFeatureEnabled(configuration, 'features.scriptRunner.enabled');
     const offlineMode = isOfflineModeOn(configuration);
 
     if (!scriptRunnerEnabled) {
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'unsupported',
         message: 'Script runner is disabled by setting filemaker.features.scriptRunner.enabled.'
       });
       return;
     }
     if (offlineMode) {
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'unsupported',
         message: 'Offline mode is enabled; script execution is disabled.'
       });
@@ -304,6 +316,7 @@ export class ScriptRunnerPanel {
     }
 
     const profile = await this.profileStore.getProfile(payload.profileId);
+    if (signal.aborted) return;
     if (!profile) {
       await this.postError('Connection profile not found.');
       return;
@@ -311,17 +324,17 @@ export class ScriptRunnerPanel {
 
     try {
       const { request, timeoutMs } = validateRunScriptPayload(payload);
-      // A run without its own deadline keeps the shared timeout and asks for no control at all.
-      const result = timeoutMs === undefined
-        ? await this.fmClient.runScript(profile, request)
-        : await this.fmClient.runScript(profile, request, { timeoutMs });
+      const result = await this.fmClient.runScript(profile, request, {
+        signal,
+        ...(timeoutMs === undefined ? {} : { timeoutMs })
+      });
 
       const payloadForPage = { profileId: payload.profileId, request, result };
 
       // A script that ran but reported a non-zero error (for example 3, "command is unavailable") is not a
       // success: the Data API answers 200 with `scriptError` in the response, so the page needs it spelled out.
       const scriptErrors = extractScriptErrors(result.response);
-      await this.panel.webview.postMessage({
+      await this.postMessage({
         type: 'scriptResult',
         payload: {
           ...payloadForPage,
@@ -331,7 +344,7 @@ export class ScriptRunnerPanel {
       });
     } catch (error) {
       if (error instanceof FMClientError && error.code === 'SCRIPT_UNSUPPORTED') {
-        await this.panel.webview.postMessage({
+        await this.postMessage({
           type: 'unsupported',
           message: error.message
         });
@@ -372,8 +385,12 @@ export class ScriptRunnerPanel {
     }
   }
 
+  private async postMessage(message: unknown): Promise<void> {
+    if (!this.disposed) await this.panel.webview.postMessage(message);
+  }
+
   private async postError(message: string): Promise<void> {
-    await this.panel.webview.postMessage({
+    await this.postMessage({
       type: 'error',
       message
     });

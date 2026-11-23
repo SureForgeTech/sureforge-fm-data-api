@@ -684,10 +684,10 @@ export class FMClient {
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
       const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
-      if (wanted <= inFlight.timeoutMs) {
-        // The sign-in in flight runs under a deadline at least as long as this request's own, so
-        // waiting for it cannot end this request earlier than this request allows. It can still
-        // end this request at this request's own deadline, which is what the wait is bounded by.
+      if (sharesSignIn(wanted, inFlight.timeoutMs)) {
+        // The sign-in in flight was given at least this request's length, less the few milliseconds
+        // a run's earlier steps spend (see sharesSignIn), so waiting for it cannot end this request
+        // meaningfully earlier than it allows. The wait is still bounded by this request's own deadline.
         return waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
       }
       // The sign-in in flight runs under a shorter deadline than this request asked for. Waiting
@@ -787,7 +787,7 @@ export class FMClient {
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
       const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
-      if (wanted <= inFlight.timeoutMs) {
+      if (sharesSignIn(wanted, inFlight.timeoutMs)) {
         await waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
         return;
       }
@@ -998,4 +998,15 @@ export class FMClient {
       this.logger.warn('Failed to persist request metrics entry.', { error });
     }
   }
+}
+
+/**
+ * A sign-in in flight can be shared when it was given at least the length this request asks for,
+ * as before. A run's later steps get only what is left of its deadline, so two runs with the same
+ * deadline ask for lengths a few milliseconds apart; SIGN_IN_SHARE_SLACK_MS absorbs that drift
+ * without letting a request share a sign-in given meaningfully less time than it asked for.
+ */
+const SIGN_IN_SHARE_SLACK_MS = 250;
+function sharesSignIn(requestedMs: number, signInMs: number): boolean {
+  return requestedMs <= signInMs + SIGN_IN_SHARE_SLACK_MS;
 }

@@ -125,6 +125,7 @@ describe('write policy at commands and open panels', () => {
     ScriptRunnerPanel.createOrShow(context, profileStore as never, fmClient as never, logger as never);
     const panel = (ScriptRunnerPanel as unknown as { currentPanel: { handleMessage(message: unknown): Promise<void> } }).currentPanel;
     await panel.handleMessage({ type: 'runScript', payload: { ...selection, scriptName: ' Exact Script ' } });
-    expect(fmClient.runScript).toHaveBeenCalledWith(profile, expect.objectContaining({ layout: ' Exact Layout ', scriptName: ' Exact Script ' }));
+    expect(fmClient.runScript).toHaveBeenCalledWith(profile, expect.objectContaining({ layout: ' Exact Layout ', scriptName: ' Exact Script ' }),
+      { signal: expect.any(AbortSignal) });
   });
 });

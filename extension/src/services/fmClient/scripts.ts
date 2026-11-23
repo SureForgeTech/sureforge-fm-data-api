@@ -8,9 +8,11 @@ import { NOT_DATA_API_CODE } from '../responseGuard';
 import type { ClientRequestControl } from './types';
 import type { ClientContext } from './context';
 import { MAX_SCRIPT_URL_LENGTH } from './types';
-import { strictQuerySerializer, buildEndpoint } from './transport';
+import { strictQuerySerializer, buildEndpoint, requestTimeoutBudget } from './transport';
 import { isNoRecordsFound } from './records';
 import { getErrorStatus } from './response';
+import { hasOwnDeadline } from '../requestLimits';
+import { noteRequestTimeout } from '../tlsAgent';
 
 /**
  * Runs a FileMaker script the way the Claris Data API Guide documents it ("Run a script",
@@ -32,6 +34,13 @@ export async function runScript(
   request: RunScriptRequest,
   control?: ClientRequestControl
 ): Promise<RunScriptResult> {
+  const remainingTimeout = requestTimeoutBudget(control?.timeoutMs);
+  // Each step gets only what is left of the run's deadline, so the retired TLS agent is told the
+  // whole deadline once, here, before any step has spent part of it.
+  if (hasOwnDeadline(control?.timeoutMs)) noteRequestTimeout(control.timeoutMs);
+  const remainingControl = (): ClientRequestControl | undefined => control === undefined
+    ? undefined
+    : { ...control, timeoutMs: remainingTimeout() };
   return client.withHistory(
     {
       profileId: profile.id,
@@ -43,7 +52,7 @@ export async function runScript(
       assertUsableUrlName(request.scriptName, 'script');
       assertUsableUrlName(request.layout, 'layout');
       if (isProxyProfile(profile)) {
-        const result = await client.proxyClient.runScript(profile, request, control?.signal, control?.timeoutMs);
+        const result = await client.proxyClient.runScript(profile, request, control?.signal, remainingTimeout());
         return { ...result, response: scriptResponse(result.response) };
       }
 
@@ -75,7 +84,7 @@ export async function runScript(
           if (dateFormats) query.dateformats = dateFormats;
           const envelope = await client.requestWithAuth<Record<string, unknown>>(
             profile,
-            { method: 'GET', path: recordPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs },
+            { method: 'GET', path: recordPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: remainingTimeout() },
             true,
             trace
           );
@@ -91,7 +100,7 @@ export async function runScript(
         }
         try {
           const envelope = await client.requestWithAuth<Record<string, unknown>>(profile,
-            { method: 'GET', path, params, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs }, true, trace);
+            { method: 'GET', path, params, strictQuery: true, signal: control?.signal, timeoutMs: remainingTimeout() }, true, trace);
           return { response: scriptResponse(envelope.response), messages: envelope.messages };
         } catch (error) {
           if (isNoRecordsFound(error)) throw scriptLayoutEmpty();
@@ -132,7 +141,7 @@ export async function runScript(
 
       if (ifTooLong(scriptPath, query)) {
         const metadata = client.layoutMetadataCache.get(buildProfileCacheKey(profile, layout))
-          ?? await client.getLayoutMetadata(profile, layout, { signal: control?.signal, timeoutMs: control?.timeoutMs, recordHistory: false });
+          ?? await client.getLayoutMetadata(profile, layout, { signal: control?.signal, timeoutMs: remainingTimeout(), recordHistory: false });
         const fields = Array.isArray(metadata.fieldMetaData) ? metadata.fieldMetaData : [];
         const textFields = fields.filter((field): field is { name: string; result: string; type?: string } =>
           field !== null && typeof field === 'object' && typeof field.name === 'string'
@@ -143,7 +152,7 @@ export async function runScript(
         const textField = textFields.find((field) => field.type?.toLowerCase() === 'normal') ?? textFields[0];
         if (!textField) {
           // Establish whether the layout is empty even when the parameter cannot fit a GET.
-          const records = await client.listRecords(profile, layout, { limit: 1 }, control);
+          const records = await client.listRecords(profile, layout, { limit: 1 }, remainingControl());
           if (!records.data.length) throw scriptLayoutEmpty();
           return attach();
         }
@@ -161,7 +170,7 @@ export async function runScript(
                 ...(dateFormats ? { dateformats: dateFormats } : {})
               },
               signal: control?.signal,
-              timeoutMs: control?.timeoutMs
+              timeoutMs: remainingTimeout()
             },
             true,
             trace
@@ -171,7 +180,7 @@ export async function runScript(
           if (isNoRecordsFound(error)) {
             // '*' matches non-empty text, not every record. A read without a script distinguishes
             // an empty layout from one whose chosen field is empty in every visible record.
-            const records = await client.listRecords(profile, layout, { limit: 1 }, control);
+            const records = await client.listRecords(profile, layout, { limit: 1 }, remainingControl());
             if (!records.data.length) throw scriptLayoutEmpty();
             return attach();
           }
@@ -182,7 +191,7 @@ export async function runScript(
       try {
         const envelope = await client.requestWithAuth<Record<string, unknown>>(
           profile,
-          { method: 'GET', path: scriptPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: control?.timeoutMs },
+          { method: 'GET', path: scriptPath, params: query, strictQuery: true, signal: control?.signal, timeoutMs: remainingTimeout() },
           true,
           trace
         );
