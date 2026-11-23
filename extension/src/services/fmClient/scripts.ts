@@ -11,6 +11,8 @@ import { MAX_SCRIPT_URL_LENGTH } from './types';
 import { strictQuerySerializer, buildEndpoint, requestTimeoutBudget } from './transport';
 import { isNoRecordsFound } from './records';
 import { getErrorStatus } from './response';
+import { hasOwnDeadline } from '../requestLimits';
+import { noteRequestTimeout } from '../tlsAgent';
 
 /**
  * Runs a FileMaker script the way the Claris Data API Guide documents it ("Run a script",
@@ -33,6 +35,9 @@ export async function runScript(
   control?: ClientRequestControl
 ): Promise<RunScriptResult> {
   const remainingTimeout = requestTimeoutBudget(control?.timeoutMs);
+  // Each step gets only what is left of the run's deadline, so the retired TLS agent is told the
+  // whole deadline once, here, before any step has spent part of it.
+  if (hasOwnDeadline(control?.timeoutMs)) noteRequestTimeout(control.timeoutMs);
   const remainingControl = (): ClientRequestControl | undefined => control === undefined
     ? undefined
     : { ...control, timeoutMs: remainingTimeout() };

@@ -73,8 +73,8 @@ export async function requestWithAuth<TResponse extends Record<string, unknown>>
       ...httpsTransportFor(profile, buildEndpoint(profile, request.path))
     };
 
-    // A run that may last longer than the shared timeout needs its retired agent to outlive it. The whole
-    // deadline, not what is left of it, so the agent never retires before the run's last step.
+    // A run that may last longer than the shared timeout needs its retired agent to outlive it. This is
+    // the deadline the request was given; a script run also notes its whole deadline when it starts.
     noteRequestTimeout(effectiveTimeout(request.timeoutMs, client.timeoutMs));
     const response = await withRequestLimits(timeoutMs, request.signal,
       (limits) => client.httpClient.request<unknown>({ ...config, ...limits }), request.maxResponseBytes,
