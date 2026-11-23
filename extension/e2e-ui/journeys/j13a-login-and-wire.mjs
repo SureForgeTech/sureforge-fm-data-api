@@ -7,6 +7,7 @@ import {
   answerPickers,
   createProfile,
   ensureProfileCommands,
+  expandTreeRow,
   openQueryBuilder
 } from '../lib/flows.mjs';
 import {
@@ -316,6 +317,9 @@ export async function run(ctx) {
         .catch(() =>
           s.helper('executeCommand', { command: 'filemakerDataApiTools.refreshExplorer' })
         );
+      // The layout list, and its failure row, load only under an expanded connection; an earlier
+      // step may have left every connection collapsed.
+      await expandTreeRow(s, 'Mock Quality');
       await s.page.waitForTimeout(3500);
       const rows = await s.allTreeRows();
       const toasts = await toastInfo(s);
