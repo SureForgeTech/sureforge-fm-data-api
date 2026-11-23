@@ -12,6 +12,10 @@ import { startTlsServer, type TestTlsServer } from '../helpers/tlsServer';
 import { DAY, makeCertificate, newKeyPair } from '../helpers/x509';
 import { InMemoryMemento, InMemorySecretStorage } from './mocks';
 
+// Generating keys and the TLS handshake can take seconds when the whole suite runs at once; these
+// tests expect a certificate refusal, never a timeout, so the client and each test get room for that.
+const TLS_CLIENT_TIMEOUT_MS = 20_000;
+
 const logger = { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() } as never;
 const now = Date.now();
 
@@ -27,7 +31,7 @@ function selfSigned(options: { altNames?: string[]; notBefore?: Date; notAfter?:
   return { key, cert };
 }
 
-describe('pinning one server certificate', () => {
+describe('pinning one server certificate', { timeout: 30_000 }, () => {
   const servers: TestTlsServer[] = [];
   beforeAll(() => nock.restore());
   afterAll(() => {
@@ -47,7 +51,7 @@ describe('pinning one server certificate', () => {
   async function login(server: TestTlsServer, extra: Partial<ConnectionProfile>): Promise<FMClientError | string> {
     const secrets = new SecretStore(new InMemorySecretStorage() as never);
     await secrets.setPassword('p1', 'the-password');
-    const fm = new FMClient(secrets, logger, 3000);
+    const fm = new FMClient(secrets, logger, TLS_CLIENT_TIMEOUT_MS);
     try {
       return await fm.createSession({
         id: 'p1', name: 'T', authMode: 'direct', serverUrl: `https://localhost:${server.port}`, database: 'Sales', username: 'u', ...extra

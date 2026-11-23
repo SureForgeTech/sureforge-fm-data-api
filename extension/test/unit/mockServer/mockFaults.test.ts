@@ -192,7 +192,7 @@ describe('accounts and record faults', () => {
   });
 });
 
-describe.skipIf(!hasOpenssl)('TLS modes produce the Node errors the catalogue lists', () => {
+describe.skipIf(!hasOpenssl)('TLS modes produce the Node errors the catalogue lists', { timeout: 30_000 }, () => {
   const get = (url: string, options: https.RequestOptions) =>
     new Promise<string>((resolve) => {
       https
