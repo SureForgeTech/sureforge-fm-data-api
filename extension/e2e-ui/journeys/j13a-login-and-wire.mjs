@@ -19,7 +19,8 @@ import {
 import { assert } from '../lib/session.mjs';
 
 const J = 'J13a login+wire';
-const RAW_JS = /Cannot read properties|undefined|TypeError|is not a function/i;
+const RAW_JS =
+  /Cannot read properties|undefined|TypeError|ReferenceError|SyntaxError|RangeError|is not a function/i;
 
 export async function run(ctx) {
   const { s, mock } = ctx;
