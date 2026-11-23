@@ -3,6 +3,7 @@ import path from 'path';
 import { describe, expect, it, vi } from 'vitest';
 
 import { FMClient } from '../../src/services/fmClient';
+import { FMClientError } from '../../src/services/errors';
 import { SecretStore } from '../../src/services/secretStore';
 import { SettingsService } from '../../src/services/settingsService';
 import type { ConnectionProfile } from '../../src/types/fm';
@@ -25,7 +26,7 @@ function createProfile(): ConnectionProfile {
   };
 }
 
-async function clientWith(dateFormats: () => number): Promise<{ client: FMClient; http: FakeAxios; profile: ConnectionProfile; secrets: SecretStore }> {
+async function clientWith(dateFormats: () => number, proxy?: ConstructorParameters<typeof FMClient>[4]): Promise<{ client: FMClient; http: FakeAxios; profile: ConnectionProfile; secrets: SecretStore }> {
   const secrets = new SecretStore(new InMemorySecretStorage() as never);
   const profile = createProfile();
   await secrets.setSessionToken(profile.id, 'token');
@@ -43,7 +44,7 @@ async function clientWith(dateFormats: () => number): Promise<{ client: FMClient
     { debug: vi.fn(), info: vi.fn(), warn: vi.fn(), error: vi.fn() },
     1500,
     http as never,
-    undefined,
+    proxy,
     undefined,
     undefined,
     undefined,
@@ -53,6 +54,45 @@ async function clientWith(dateFormats: () => number): Promise<{ client: FMClient
 }
 
 describe('the date formats the developer chose', () => {
+  it.each([0, 1, 2])('uses the caller’s create date order instead of setting %s', async (setting) => {
+    const { client, http, profile } = await clientWith(() => setting);
+    const fieldData = { Created: '2026-03-04' };
+
+    for (const dateFormats of [0, 1, 2] as const) {
+      await client.createRecord(profile, 'Contacts', fieldData, undefined, { dateFormats });
+      expect(http.request.mock.calls.at(-1)![0].data).toEqual({ fieldData, dateformats: dateFormats });
+    }
+  });
+
+  it.each([0, 1, 2])('preserves the create body for setting %s without a caller override', async (setting) => {
+    const { client, http, profile } = await clientWith(() => setting);
+    const fieldData = { Name: 'Ada' };
+
+    await client.createRecord(profile, 'Contacts', fieldData);
+
+    expect(http.request.mock.calls[0]![0].data).toEqual({ fieldData, ...(setting ? { dateformats: setting } : {}) });
+  });
+
+  it.each([0, 1, 2])('only allows the proxy’s default date order regardless of setting %s', async (setting) => {
+    const createRecord = vi.fn().mockResolvedValue({ recordId: '1' });
+    const { client, http, profile } = await clientWith(() => setting, { createRecord } as never);
+    const proxyProfile = { ...profile, authMode: 'proxy' as const, proxyEndpoint: 'https://proxy.example/api' };
+    const fieldData = { Created: '03/04/2026' };
+    const signal = new AbortController().signal;
+
+    await client.createRecord(proxyProfile, 'Contacts', fieldData, { signal });
+    await client.createRecord(proxyProfile, 'Contacts', fieldData, { signal }, { dateFormats: 0 });
+    expect(createRecord).toHaveBeenCalledTimes(2);
+    expect(createRecord).toHaveBeenLastCalledWith(proxyProfile, 'Contacts', fieldData, signal);
+
+    for (const dateFormats of [1, 2] as const) {
+      await expect(client.createRecord(proxyProfile, 'Contacts', fieldData, undefined, { dateFormats }))
+        .rejects.toThrow(FMClientError);
+    }
+    expect(createRecord).toHaveBeenCalledTimes(2);
+    expect(http.request).not.toHaveBeenCalled();
+  });
+
   it('sends the option on a find, a list and a record', async () => {
     const { client, http, profile } = await clientWith(() => 2);
 

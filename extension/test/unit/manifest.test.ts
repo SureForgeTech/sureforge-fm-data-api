@@ -113,14 +113,21 @@ describe('extension manifest UX contract', () => {
     }
   });
 
-  it('binds the five default shortcuts with palette-matching when clauses', () => {
+  it('binds the five default shortcuts with palette-matching when clauses, except where a shipped key predates the trim', () => {
     const expected: Array<[string, string, string, string]> = [
       ['openQueryBuilder', 'ctrl+alt+q', 'cmd+alt+q', 'filemaker.hasProfiles'],
       ['openRecordViewer', 'ctrl+alt+v', 'cmd+alt+v', 'filemaker.hasProfiles'],
       ['openScriptRunner', 'ctrl+alt+e', 'cmd+alt+e', 'filemaker.hasProfiles'],
       ['showRequestHistory', 'ctrl+alt+h', 'ctrl+alt+h', 'filemaker.powerUserMode'],
-      ['openLayoutMode', 'ctrl+alt+l', 'cmd+alt+l', 'filemaker.fmWebProjectInitialized && filemaker.powerUserMode']
+      ['openLayoutMode', 'ctrl+alt+l', 'cmd+alt+l', 'filemaker.fmWebProjectInitialized']
     ];
+    // Shortcuts that shipped before the palette was trimmed to the everyday set keep working without the
+    // power-user setting, so a learned key does not stop working; only the palette entry moved behind it.
+    const shippedBeforeTrim = new Set(['openLayoutMode']);
+    const paletteWhen = (name: string): string | undefined => {
+      const when = palette.get(id(name));
+      return shippedBeforeTrim.has(name) ? when?.replace(' && filemaker.powerUserMode', '') : when;
+    };
     const bindings = new Map((keybindings ?? []).map((binding) => [binding.command, binding]));
     expect(bindings.size, 'exactly five default keybindings').toBe(expected.length);
     // A sixth entry that reuses one of the five command IDs (with a different key) would collapse in the
@@ -133,7 +140,7 @@ describe('extension manifest UX contract', () => {
       expect(binding?.key, name).toBe(key);
       expect(binding?.mac, name).toBe(mac);
       expect(binding?.when, name).toBe(when);
-      expect(binding?.when, name).toBe(palette.get(id(name)));
+      expect(binding?.when, name).toBe(paletteWhen(name));
       for (const combo of binding?.key === binding?.mac ? [binding?.key ?? ''] : [binding?.key ?? '', binding?.mac ?? '']) {
         expect(seen.has(combo), `duplicate binding ${combo}`).toBe(false);
         seen.add(combo);

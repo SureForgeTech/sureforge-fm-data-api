@@ -39,7 +39,7 @@ PR title prefix matches the highest-tier label added:
 
 - Drafting a form from a prompt now reads three more ways of leaving a field out: a quantifier that counts the fields ("all of the fields but phone"), an exclusion that follows a comma ("include email, phone, excluded"), and an exclusion whose particle follows the field ("leaving phone out").
 
-- The Command Palette now shows the everyday commands by default: the home's four journeys, the extension README's common commands and the walkthrough's steps. The other commands appear when **filemaker.advanced.powerUserMode** is on, and every one of them stays in the FileMaker home, where you can find it by name. Nothing was removed.
+- The Command Palette now shows the everyday commands by default: the home's four journeys, the extension README's common commands and the walkthrough's steps. The other commands appear when **filemaker.advanced.powerUserMode** is on, and every one of them stays in the FileMaker home, where you can find it by name. Nothing was removed, and the default keyboard shortcuts work as before: `Ctrl+Alt+L` (`Cmd+Alt+L` on macOS) still opens Layout Mode in an FM Web project without the setting.
 
 - The FileMaker home now has a **Find a command** box. It hides the commands that do not mention what you type, and the section they sit in when nothing is left in it, so the full list of commands is usable.
 
@@ -76,6 +76,8 @@ PR title prefix matches the highest-tier label added:
 ### [FIX]
 
 - Closing the Script Runner now stops a run that has not reached the server yet, and a run's own deadline covers its sign-in and the script together.
+
+- A live registration's date now reaches FileMaker as the day the person entered. The form's year-month-day date is sent in FileMaker's month-first order, whatever date order the developer chose for the connection. A direct connection states that order in the request; a proxy connection uses it already.
 
 - A timeout that happened under a script run's own deadline now names that deadline instead of the shared setting. A request that gives up waiting for a connection that is signing in no longer marks the connection unreachable, and it can now give up at its own deadline instead of waiting for a long run. The Script Runner names its Timeout field, and a script that may still be running, only when a script gave up.
 
