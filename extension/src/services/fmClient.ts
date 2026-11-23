@@ -53,7 +53,7 @@ export class FMClient {
    * asked for a longer deadline than that has to start its own sign-in: waiting for the shorter
    * one would end its request at a deadline it never asked for.
    */
-  private readonly inFlightRefresh = new Map<string, { promise: Promise<string>; timeoutMs: number; endsAt: number }>();
+  private readonly inFlightRefresh = new Map<string, { promise: Promise<string>; timeoutMs: number }>();
   private readonly health = new Map<string, SessionHealth>();
   private readonly invalidationListeners = new Set<(profileId: string) => void>();
   private readonly healthListeners = new Set<(profileId: string, health: SessionHealth | undefined) => void>();
@@ -684,10 +684,10 @@ export class FMClient {
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
       const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
-      if (sharesSignIn(Date.now() + wanted, inFlight.endsAt)) {
-        // The sign-in in flight runs under a deadline at least as long as this request's own, so
-        // waiting for it cannot end this request earlier than this request allows. It can still
-        // end this request at this request's own deadline, which is what the wait is bounded by.
+      if (sharesSignIn(wanted, inFlight.timeoutMs)) {
+        // The sign-in in flight was given at least this request's length, less the few milliseconds
+        // a run's earlier steps spend (see sharesSignIn), so waiting for it cannot end this request
+        // meaningfully earlier than it allows. The wait is still bounded by this request's own deadline.
         return waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
       }
       // The sign-in in flight runs under a shorter deadline than this request asked for. Waiting
@@ -742,8 +742,7 @@ export class FMClient {
 
     this.inFlightRefresh.set(profile.id, {
       promise: refreshPromise,
-      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs),
-      endsAt: Date.now() + effectiveTimeout(control?.timeoutMs, this.timeoutMs)
+      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
     });
 
     return waitForSession(
@@ -788,7 +787,7 @@ export class FMClient {
     const inFlight = this.inFlightRefresh.get(profile.id);
     if (inFlight) {
       const wanted = effectiveTimeout(control?.timeoutMs, this.timeoutMs);
-      if (sharesSignIn(Date.now() + wanted, inFlight.endsAt)) {
+      if (sharesSignIn(wanted, inFlight.timeoutMs)) {
         await waitForSession(inFlight.promise, control?.signal, wanted, this.timeoutAdvice(control));
         return;
       }
@@ -821,8 +820,7 @@ export class FMClient {
     });
     this.inFlightRefresh.set(profile.id, {
       promise: renewal,
-      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs),
-      endsAt: Date.now() + effectiveTimeout(control?.timeoutMs, this.timeoutMs)
+      timeoutMs: effectiveTimeout(control?.timeoutMs, this.timeoutMs)
     });
     await waitForSession(
       renewal,
@@ -1003,12 +1001,12 @@ export class FMClient {
 }
 
 /**
- * A sign-in in flight can be shared when it runs until at least this request's own deadline. The
- * ends are compared, not the lengths: a run's later steps get only what is left of its deadline, so
- * two runs with the same deadline ask for slightly different lengths. A sign-in that ends within
- * SIGN_IN_SHARE_SLACK_MS of this request's deadline is shared rather than opening a second session.
+ * A sign-in in flight can be shared when it was given at least the length this request asks for,
+ * as before. A run's later steps get only what is left of its deadline, so two runs with the same
+ * deadline ask for lengths a few milliseconds apart; SIGN_IN_SHARE_SLACK_MS absorbs that drift
+ * without letting a request share a sign-in given meaningfully less time than it asked for.
  */
-const SIGN_IN_SHARE_SLACK_MS = 1000;
-function sharesSignIn(requestEndsAt: number, signInEndsAt: number): boolean {
-  return requestEndsAt <= signInEndsAt + SIGN_IN_SHARE_SLACK_MS;
+const SIGN_IN_SHARE_SLACK_MS = 250;
+function sharesSignIn(requestedMs: number, signInMs: number): boolean {
+  return requestedMs <= signInMs + SIGN_IN_SHARE_SLACK_MS;
 }

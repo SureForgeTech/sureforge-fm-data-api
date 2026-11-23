@@ -196,6 +196,31 @@ describe("a request's deadline is not shortened by a sign-in in flight", () => {
     expect(deleted).toEqual([]);
   });
 
+  it('shares a sign-in in flight with an ordinary request that arrives partway through it', async () => {
+    // Two requests on the shared timeout, the second arriving well into the first one's sign-in:
+    // they must share it, or the connection is left with a second, orphaned session.
+    let sessions = 0;
+    const url = await listen((request, response) => {
+      const path = new URL(request.url ?? '/', 'http://x').pathname;
+      response.setHeader('Content-Type', 'application/json');
+      if (path.endsWith('/sessions')) {
+        sessions += 1;
+        setTimeout(() => response.end(ok({ token: `tok${sessions}` })), 1500);
+        return;
+      }
+      response.end(ok({ scriptResult: 'done', scriptError: '0' }));
+    });
+    const { fm, profile } = await client(url, 3000);
+
+    const first = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' });
+    await new Promise((resolve) => setTimeout(resolve, 1200));
+    const second = await fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' });
+
+    expect((await first).response).toEqual({ scriptResult: 'done', scriptError: '0' });
+    expect(second.response).toEqual({ scriptResult: 'done', scriptError: '0' });
+    expect(sessions).toBe(1);
+  });
+
   it('waits for a sign-in in flight that runs under a deadline at least as long as its own', async () => {
     // Both requests ask for the same longer deadline, so the second waits for the sign-in the
     // first started instead of signing in again: the connection gets one session, not two.
