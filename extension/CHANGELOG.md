@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Closing the Script Runner now stops a run that has not reached the server yet, and a run's own deadline covers its sign-in and the script together.
+
 - A desktop journey now covers the Command Palette's two sides: the everyday commands without the power-user setting, and the power-user commands with it.
 
 - The generated TypeScript client's calls can now run a FileMaker script alongside them and read its result, and it can run one on its own.

@@ -64,9 +64,9 @@ function open() {
   );
 
   const send = async (message: unknown): Promise<void> => {
+    const runner = (ScriptRunnerPanel as unknown as { currentPanel: { requestInFlight: boolean } }).currentPanel;
     handler?.(message);
     await new Promise((resolve) => setTimeout(resolve, 0));
-    const runner = (ScriptRunnerPanel as unknown as { currentPanel: { requestInFlight: boolean } }).currentPanel;
     await vi.waitFor(() => expect(runner.requestInFlight).toBe(false));
   };
 
@@ -161,7 +161,7 @@ describe('Script Runner: message routing', () => {
 
     it('answers "runScript" with the result of the script', async () => {
       await panel.send({ type: 'runScript', payload: script });
-      expect(panel.fmClient.runScript).toHaveBeenCalledWith(profile, expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' }));
+      expect(panel.fmClient.runScript).toHaveBeenCalledWith(profile, expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' }), { signal: expect.any(AbortSignal) });
       expect(panel.posted).toContainEqual(
         expect.objectContaining({ type: 'scriptResult', payload: expect.objectContaining({ profileId: 'p1' }) })
       );
@@ -172,14 +172,46 @@ describe('Script Runner: message routing', () => {
       expect(panel.fmClient.runScript).toHaveBeenCalledWith(
         profile,
         expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' }),
-        { timeoutMs: 120_000 }
+        { timeoutMs: 120_000, signal: expect.any(AbortSignal) }
       );
 
       await panel.send({ type: 'runScript', payload: script });
       expect(panel.fmClient.runScript).toHaveBeenLastCalledWith(
         profile,
-        expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' })
+        expect.objectContaining({ layout: 'Contacts', scriptName: 'Send Welcome' }),
+        { signal: expect.any(AbortSignal) }
       );
+    });
+
+    it('does not dispatch a run when the panel closes during profile lookup', async () => {
+      let finishLookup!: (value: typeof profile) => void;
+      panel.profileStore.getProfile.mockImplementationOnce(() => new Promise((resolve) => { finishLookup = resolve; }));
+      const pending = panel.send({ type: 'runScript', payload: script });
+      await vi.waitFor(() => expect(finishLookup).toBeTypeOf('function'));
+      panel.close();
+      finishLookup(profile);
+      await pending;
+      expect(panel.fmClient.runScript).not.toHaveBeenCalled();
+      expect(panel.posted).toEqual([]);
+    });
+
+    it.each(['success', 'failure', 'unsupported'] as const)('aborts a dispatched run and posts nothing after disposal (%s)', async (outcome) => {
+      let finishRun!: () => void;
+      panel.fmClient.runScript.mockImplementationOnce(() => new Promise((resolve, reject) => {
+        finishRun = () => {
+          if (outcome === 'success') resolve({ response: { scriptResult: 'done' }, messages: [] });
+          else reject(new FMClientError('Run failed.', { code: outcome === 'unsupported' ? 'SCRIPT_UNSUPPORTED' : undefined }));
+        };
+      }));
+      const pending = panel.send({ type: 'runScript', payload: script });
+      await vi.waitFor(() => expect(panel.fmClient.runScript).toHaveBeenCalledOnce());
+      const signal = (panel.fmClient.runScript.mock.calls[0] as unknown as [unknown, unknown, { signal: AbortSignal }])[2].signal;
+      expect(signal.aborted).toBe(false);
+      panel.close();
+      expect(signal.aborted).toBe(true);
+      finishRun();
+      await pending;
+      expect(panel.posted).toEqual([]);
     });
 
     it('names the Timeout field when a run gives up waiting', async () => {
