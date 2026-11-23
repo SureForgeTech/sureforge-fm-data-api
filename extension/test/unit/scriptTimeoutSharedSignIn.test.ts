@@ -198,14 +198,17 @@ describe("a request's deadline is not shortened by a sign-in in flight", () => {
 
   it('shares a sign-in in flight with an ordinary request that arrives partway through it', async () => {
     // Two requests on the shared timeout, the second arriving well into the first one's sign-in:
-    // they must share it, or the connection is left with a second, orphaned session.
+    // they must share it, or the connection is left with a second, orphaned session. The server
+    // holds every sign-in until the second request has arrived, so it cannot reuse a stored token.
     let sessions = 0;
+    const held: Array<() => void> = [];
     const url = await listen((request, response) => {
       const path = new URL(request.url ?? '/', 'http://x').pathname;
       response.setHeader('Content-Type', 'application/json');
       if (path.endsWith('/sessions')) {
         sessions += 1;
-        setTimeout(() => response.end(ok({ token: `tok${sessions}` })), 1500);
+        const token = `tok${sessions}`;
+        held.push(() => response.end(ok({ token })));
         return;
       }
       response.end(ok({ scriptResult: 'done', scriptError: '0' }));
@@ -214,10 +217,14 @@ describe("a request's deadline is not shortened by a sign-in in flight", () => {
 
     const first = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' });
     await new Promise((resolve) => setTimeout(resolve, 1200));
-    const second = await fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' });
+    const second = fm.runScript(profile, { layout: 'Contacts', scriptName: 'Quick' });
+    // Give a second sign-in, if one were started, time to reach the server before any is released.
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(sessions).toBe(1);
+    for (const release of held.splice(0)) release();
 
     expect((await first).response).toEqual({ scriptResult: 'done', scriptError: '0' });
-    expect(second.response).toEqual({ scriptResult: 'done', scriptError: '0' });
+    expect((await second).response).toEqual({ scriptResult: 'done', scriptError: '0' });
     expect(sessions).toBe(1);
   });
 
